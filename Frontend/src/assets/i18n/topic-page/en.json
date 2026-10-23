@@ -520,6 +520,7 @@
       "SUCCESS_MESSAGE": "The global template was deleted."
     },
     "VARIANT_PREVIEW": {
+      "TITLE": "Preview: \"{{title}}\"",
       "INFO": "Preview: \"{{title}}\" ({{position}} of {{total}})",
       "PREVIOUS": "Previous preview",
       "NEXT": "Next preview",
@@ -532,6 +533,7 @@
       "UNFINISHED": "{{count}} sections unfinished",
       "PARTIAL_ONE": "1 section incomplete",
       "PARTIAL": "{{count}} sections incomplete",
+      "CHIP_ONE": "section needs action",
       "CHIP": "sections need action",
       "LABEL_UNFINISHED": "Unfinished – hidden from readers",
       "LABEL_PARTIAL": "Incomplete – empty columns stay blank for readers"

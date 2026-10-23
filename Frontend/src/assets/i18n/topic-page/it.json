@@ -474,7 +474,8 @@
       "UNFINISHED": "{{count}} sezioni non completate",
       "PARTIAL_ONE": "1 sezione incompleta",
       "PARTIAL": "{{count}} sezioni incomplete",
-      "CHIP": "sezione/i che richiedono un intervento",
+      "CHIP_ONE": "sezione che richiede un intervento",
+      "CHIP": "sezioni che richiedono un intervento",
       "LABEL_UNFINISHED": "Non completata – nascosta ai lettori",
       "LABEL_PARTIAL": "Incompleta – le colonne vuote restano vuote per i lettori"
     }

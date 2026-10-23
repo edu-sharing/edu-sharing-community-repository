@@ -4,23 +4,14 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    column-gap: 16px;
+    // the only distance between the bar's items; related buttons form one status-bar-group
+    column-gap: 24px;
     row-gap: 4px;
     min-height: 64px;
     padding: 8px 16px;
     box-sizing: border-box;
     background-color: var(--primaryBackground50);
     color: var(--textMain);
-    border-left: 4px solid transparent;
-
-    // states shown in place of the collection's own page
-    &.status-bar-highlighted {
-        border-left-color: var(--primary);
-
-        .status-bar-title {
-            color: var(--primary);
-        }
-    }
 
     button {
         --mat-button-text-label-text-color: var(--textMain);
@@ -43,6 +34,13 @@
     font-weight: 600;
 }
 
+.status-bar-title-text {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .status-bar-status {
     flex: 1;
     min-width: 0;
@@ -52,16 +50,9 @@
 }
 
 button.status-bar-completion {
-    --mat-button-text-label-text-color: color-mix(
-        in srgb,
-        var(--colorStatusWarning),
-        var(--textBlack) 55%
-    );
-    background-color: color-mix(in srgb, var(--colorStatusWarning), var(--textWhite) 75%);
-    border-radius: 16px;
-    // sets the chip apart from the undo and redo buttons
-    margin-right: 16px;
-
+    --mat-button-filled-container-color: var(--warningSurfaceBackgroundColor);
+    --mat-button-filled-label-text-color: var(--warningSurfaceTextColor);
+    border: 1px solid var(--warningSurfaceBorderColor);
     .status-bar-completion-content {
         display: inline-flex;
         align-items: center;
@@ -74,17 +65,10 @@ button.status-bar-completion {
     }
 }
 
-.status-bar-actions {
+.status-bar-group {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
-    justify-content: flex-end;
     gap: 8px;
-    margin-left: auto;
-
-    &:empty {
-        display: none;
-    }
 }
 
 @media screen and (max-width: (topicPageVars.$mobileWidth + topicPageVars.$mobileStage * 1)) {

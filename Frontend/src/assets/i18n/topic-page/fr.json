@@ -474,7 +474,8 @@
       "UNFINISHED": "{{count}} sections non terminées",
       "PARTIAL_ONE": "1 section incomplète",
       "PARTIAL": "{{count}} sections incomplètes",
-      "CHIP": "section(s) nécessitant une action",
+      "CHIP_ONE": "section nécessitant une action",
+      "CHIP": "sections nécessitant une action",
       "LABEL_UNFINISHED": "Non terminée – masquée pour les lecteurs",
       "LABEL_PARTIAL": "Incomplète – les colonnes vides restent vides pour les lecteurs"
     }

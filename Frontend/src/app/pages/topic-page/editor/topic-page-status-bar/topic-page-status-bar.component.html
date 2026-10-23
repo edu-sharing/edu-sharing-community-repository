@@ -1,15 +1,23 @@
 <div
   class="status-bar"
   role="toolbar"
-  [class.status-bar-highlighted]="mode() === 'preview' || mode() === 'globalTemplate'"
   [attr.aria-label]="i18nPrefix + 'STATUS_BAR.LABEL' | translate"
 >
   <span class="status-bar-title">
     <i [esIcon]="editing() ? 'edit' : 'visibility'" [aria]="false"></i>
     @switch (mode()) { @case ('preview') {
-    <span>
+    <span
+      #previewTitle
+      class="status-bar-title-text"
+      esCheckTextOverflow
+      #previewTitleOverflow="esCheckTextOverflow"
+      [matTooltip]="
+        previewTitleOverflow.hasTextOverflow() ? previewTitle.textContent?.trim() : null
+      "
+    >
       {{
-        i18nPrefix + 'VARIANT_PREVIEW.INFO'
+        i18nPrefix +
+          ((preview()?.nodes.length ?? 0) > 1 ? 'VARIANT_PREVIEW.INFO' : 'VARIANT_PREVIEW.TITLE')
           | translate
             : {
                 title: (previewNode() | nodeTitle),
@@ -19,7 +27,9 @@
       }}
     </span>
     } @case ('globalTemplate') {
+    <!-- the tooltip explains the mode and names the full title -->
     <span
+      class="status-bar-title-text"
       [matTooltip]="
         i18nPrefix +
           (editing() ? 'GLOBAL_TEMPLATE_MODE_ACTIVE.EDIT' : 'GLOBAL_TEMPLATE_MODE_ACTIVE.VIEW')
@@ -32,18 +42,33 @@
       }}
     </span>
     } @case ('template') {
-    <span>
+    <span
+      #templateTitle
+      class="status-bar-title-text"
+      esCheckTextOverflow
+      #templateTitleOverflow="esCheckTextOverflow"
+      [matTooltip]="
+        templateTitleOverflow.hasTextOverflow() ? templateTitle.textContent?.trim() : null
+      "
+    >
       {{
         i18nPrefix + (editing() ? 'TEMPLATE_MODE_ACTIVE.EDIT' : 'TEMPLATE_MODE_ACTIVE.VIEW')
           | translate
       }}
     </span>
     } @default {
-    <span>{{ i18nPrefix + 'HISTORY.BAR.TITLE' | translate }}</span>
+    <span class="status-bar-title-text">{{ i18nPrefix + 'HISTORY.BAR.TITLE' | translate }}</span>
     } }
   </span>
 
-  <span class="status-bar-status" aria-live="polite">
+  <span
+    #statusText
+    class="status-bar-status"
+    aria-live="polite"
+    esCheckTextOverflow
+    #statusOverflow="esCheckTextOverflow"
+    [matTooltip]="statusOverflow.hasTextOverflow() ? statusText.textContent?.trim() : null"
+  >
     @if (showHistory()) { @if (history.nextUndoStep(); as step) {
     {{ i18nPrefix + 'HISTORY.BAR.LAST_CHANGE' | translate : { step: stepLabel()(step) } }}
     } @else {
@@ -53,7 +78,7 @@
 
   @if (completion(); as counts) {
   <button
-    mat-button
+    mat-flat-button
     class="mat-button-no-uppercase status-bar-completion"
     [matTooltip]="
       (counts.unfinished
@@ -76,45 +101,49 @@
       <i esIcon="warning" [aria]="false"></i>
       <span>{{ completionTotal() }}</span>
       <span class="topic-page-btn-label">{{
-        i18nPrefix + 'SWIMLANE_COMPLETION.CHIP' | translate
+        i18nPrefix +
+          (completionTotal() === 1 ? 'SWIMLANE_COMPLETION.CHIP_ONE' : 'SWIMLANE_COMPLETION.CHIP')
+          | translate
       }}</span>
     </span>
   </button>
   } @if (showHistory()) {
-  <button
-    mat-button
-    class="mat-button-no-uppercase"
-    [disabled]="!history.canUndo() || busy()"
-    [matTooltip]="
-      history.nextUndoStep()
-        ? (i18nPrefix + 'HISTORY.BAR.UNDO_TOOLTIP'
-          | translate : { step: stepLabel()(history.nextUndoStep()) })
-        : ''
-    "
-    (click)="history.undo()"
-  >
-    <i esIcon="undo" [aria]="false"></i>
-    <span class="topic-page-btn-label">{{ i18nPrefix + 'HISTORY.UNDO' | translate }}</span>
-  </button>
-  <button
-    mat-button
-    class="mat-button-no-uppercase"
-    [disabled]="!history.canRedo() || busy()"
-    [matTooltip]="
-      history.nextRedoStep()
-        ? (i18nPrefix + 'HISTORY.BAR.REDO_TOOLTIP'
-          | translate : { step: stepLabel()(history.nextRedoStep()) })
-        : ''
-    "
-    (click)="history.redo()"
-  >
-    <i esIcon="redo" [aria]="false"></i>
-    <span class="topic-page-btn-label">{{ i18nPrefix + 'HISTORY.REDO' | translate }}</span>
-  </button>
-  }
-
-  <div class="status-bar-actions">
-    @switch (mode()) { @case ('preview') { @if (preview(); as current) {
+  <div class="status-bar-group">
+    <button
+      mat-button
+      class="mat-button-no-uppercase"
+      [disabled]="!history.canUndo() || busy()"
+      [matTooltip]="
+        history.nextUndoStep()
+          ? (i18nPrefix + 'HISTORY.BAR.UNDO_TOOLTIP'
+            | translate : { step: stepLabel()(history.nextUndoStep()) })
+          : ''
+      "
+      (click)="history.undo()"
+    >
+      <i esIcon="undo" [aria]="false"></i>
+      <span class="topic-page-btn-label">{{ i18nPrefix + 'HISTORY.UNDO' | translate }}</span>
+    </button>
+    <button
+      mat-button
+      class="mat-button-no-uppercase"
+      [disabled]="!history.canRedo() || busy()"
+      [matTooltip]="
+        history.nextRedoStep()
+          ? (i18nPrefix + 'HISTORY.BAR.REDO_TOOLTIP'
+            | translate : { step: stepLabel()(history.nextRedoStep()) })
+          : ''
+      "
+      (click)="history.redo()"
+    >
+      <i esIcon="redo" [aria]="false"></i>
+      <span class="topic-page-btn-label">{{ i18nPrefix + 'HISTORY.REDO' | translate }}</span>
+    </button>
+  </div>
+  } @switch (mode()) { @case ('preview') { @if (preview(); as current) {
+  <!-- paging only makes sense with more than one listed node -->
+  @if (current.nodes.length > 1) {
+  <div class="status-bar-group">
     <button
       mat-icon-button
       [disabled]="current.index === 0"
@@ -133,23 +162,26 @@
     >
       <i esIcon="chevron_right"></i>
     </button>
+  </div>
+  }
+  <div class="status-bar-group">
     <button mat-stroked-button color="primary" (click)="backToSelection.emit(current.kind)">
       {{ i18nPrefix + 'VARIANT_PREVIEW.BACK_TO_SELECTION' | translate }}
     </button>
     <button mat-flat-button color="primary" (click)="usePreview()">
       {{ 'USE' | translate }}
     </button>
-    <button mat-button color="primary" (click)="endPreview()">
-      {{ i18nPrefix + 'VARIANT_PREVIEW.END' | translate }}
-    </button>
-    } } @case ('globalTemplate') {
-    <button mat-flat-button color="primary" (click)="leave.emit()">
-      {{ i18nPrefix + 'GLOBAL_TEMPLATE_MODE_ACTIVE.END' | translate }}
-    </button>
-    } @case ('template') {
-    <button mat-flat-button color="primary" (click)="leave.emit()">
-      {{ i18nPrefix + 'TEMPLATE_MODE_ACTIVE.END' | translate }}
-    </button>
-    } }
   </div>
+  <button mat-button (click)="endPreview()">
+    {{ i18nPrefix + 'VARIANT_PREVIEW.END' | translate }}
+  </button>
+  } } @case ('globalTemplate') {
+  <button mat-flat-button color="primary" (click)="leave.emit()">
+    {{ i18nPrefix + 'GLOBAL_TEMPLATE_MODE_ACTIVE.END' | translate }}
+  </button>
+  } @case ('template') {
+  <button mat-flat-button color="primary" (click)="leave.emit()">
+    {{ i18nPrefix + 'TEMPLATE_MODE_ACTIVE.END' | translate }}
+  </button>
+  } }
 </div>

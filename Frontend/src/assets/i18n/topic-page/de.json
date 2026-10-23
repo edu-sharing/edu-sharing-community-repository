@@ -520,6 +520,7 @@
       "SUCCESS_MESSAGE": "Die globale Vorlage wurde gelöscht."
     },
     "VARIANT_PREVIEW": {
+      "TITLE": "Vorschau: „{{title}}“",
       "INFO": "Vorschau: „{{title}}“ ({{position}} von {{total}})",
       "PREVIOUS": "Vorherige Vorschau",
       "NEXT": "Nächste Vorschau",
@@ -532,6 +533,7 @@
       "UNFINISHED": "{{count}} Abschnitte nicht fertiggestellt",
       "PARTIAL_ONE": "1 Abschnitt unvollständig",
       "PARTIAL": "{{count}} Abschnitte unvollständig",
+      "CHIP_ONE": "Abschnitt mit Handlungsbedarf",
       "CHIP": "Abschnitte mit Handlungsbedarf",
       "LABEL_UNFINISHED": "Nicht fertiggestellt – für Leser ausgeblendet",
       "LABEL_PARTIAL": "Unvollständig – leere Spalten bleiben für Leser frei"
