@@ -167,6 +167,7 @@ public class ApiAuthenticationFilter implements jakarta.servlet.Filter {
         List<String> AUTHLESS_ENDPOINTS = Arrays.asList(
                 "/authentication",
                 "/_about",
+                "/altcha",
                 "/config",
                 "/register",
                 "/sharing/v1/sharing",
