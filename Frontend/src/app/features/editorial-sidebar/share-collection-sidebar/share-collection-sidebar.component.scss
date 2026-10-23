@@ -1,0 +1,31 @@
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
+
+:host {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 100%;
+}
+
+.content {
+    flex: 1;
+    padding: 20px;
+}
+
+.title {
+    padding-bottom: 8px;
+    font-size: 140%;
+    font-weight: bold;
+}
+
+.description {
+    padding-bottom: 20px;
+    color: var(--textLight);
+}
+
+.footer-buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}

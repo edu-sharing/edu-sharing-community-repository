@@ -93,7 +93,6 @@
         "TYPE_DEFAULT": "Allgemeine Sammlung",
         "NO_METADATA": "Keine Metadaten verfügbar",
         "TYPE_INFO": "Informationen zu {{type}}",
-        "DONE": "Fertig",
         "SAVED": "Die Sammlung wurde gespeichert."
       }
     },
@@ -207,7 +206,11 @@
       "ADD_COLLECTION": "Sammlung hinzufügen",
       "ADD_COLLECTION_DESCRIPTION": "Eine neue Sammlung erstellen oder eine bestehende Sammlung hierher kopieren",
       "COLLECTION_INFO": "Sammlungsinformationen",
-      "COLLECTION_INFO_DESCRIPTION": "Allgemeine Informationen zu dieser Sammlung anzeigen"
+      "COLLECTION_INFO_DESCRIPTION": "Allgemeine Informationen zu dieser Sammlung anzeigen",
+      "COLLECTION_EDIT": "Sammlung bearbeiten",
+      "COLLECTION_EDIT_DESCRIPTION": "Titel, Aussehen, Metadaten und Sortierung der Sammlung ändern",
+      "COLLECTION_SHARE": "Freigeben",
+      "COLLECTION_SHARE_DESCRIPTION": "Zugriffsrechte verwalten"
     },
     "TITLE": "Verwalten",
     "TITLE_ASSIGNMENT": "Aufgaben",

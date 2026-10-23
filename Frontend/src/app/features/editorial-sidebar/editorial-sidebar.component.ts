@@ -18,6 +18,7 @@ import {
     ViewChild,
 } from '@angular/core';
 import { Node, RestConstants, ROOT } from 'ngx-edu-sharing-api';
+import { RestHelper } from '../../core-module/rest/rest-helper';
 import {
     Constrain,
     CustomOptions,
@@ -86,6 +87,10 @@ export const EDITORIAL_SIDEBAR_OPTIONS = {
     CREATE_COLLECTION: { selectionMode: 'none' },
     /** the same form for a collection that exists; it is about that collection, not the selection */
     EDIT_COLLECTION: { selectionMode: 'any' },
+    /** the views and usages of the collection that is shown as `parent` */
+    COLLECTION_USAGE: { selectionMode: 'any' },
+    /** gives others access to the collection that is shown as `parent` */
+    SHARE_COLLECTION: { selectionMode: 'any' },
     /** general information about the collection that is shown as `parent` */
     COLLECTION_INFO: { selectionMode: 'any' },
     MANAGE_SUBMISSION: { selectionMode: 'single' },
@@ -271,6 +276,15 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         void this.initOptions();
     }
 
+    /** the collections root has no collection of its own */
+    private isRealCollection(collection: Node | undefined): boolean {
+        return (
+            !!collection &&
+            collection.ref?.id !== ROOT &&
+            this.nodeHelperService.isNodeCollection(collection)
+        );
+    }
+
     private async initOptions() {
         // mark as "loading" (options() === null) so the template shows neither a stale list nor
         // the "no options" message while the new options are (asynchronously) computed
@@ -356,7 +370,8 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
                 option: 'ADD_COLLECTION',
             }),
         );
-        addCollection.group = DefaultGroups.Create;
+        addCollection.group = DefaultGroups.Primary;
+        addCollection.priority = 3;
         addCollection.elementType = [ElementType.NoneOrUnknown];
         addCollection.scopes = ['collections'];
         addCollection.toolpermissions = [RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS];
@@ -381,6 +396,7 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
             }),
         );
         collectionInfo.group = DefaultGroups.Primary;
+        collectionInfo.priority = 1;
         collectionInfo.elementType = [ElementType.NoneOrUnknown];
         collectionInfo.scopes = ['collections'];
         // the root of the collections has no collection to describe
@@ -393,6 +409,63 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
             );
         };
         options.push(collectionInfo);
+
+        const collectionUsage = new OptionItem(
+            'EDITORIAL.OPTIONS.VIEWS_AND_USAGE',
+            'bar_chart',
+            () => this.enabledOption.set({ trap: false, option: 'COLLECTION_USAGE' }),
+        );
+        collectionUsage.group = DefaultGroups.Primary;
+        collectionUsage.priority = 2;
+        collectionUsage.elementType = [ElementType.NoneOrUnknown];
+        collectionUsage.scopes = ['collections'];
+        collectionUsage.toolpermissions = [RestConstants.TOOLPERMISSION_SELECTIVE_STATISTICS_NODES];
+        collectionUsage.toolpermissionsMode = HideMode.Hide;
+        collectionUsage.customShowCallback = async () =>
+            this.isRealCollection(this.collectionInfoTarget());
+        options.push(collectionUsage);
+
+        const editCollection = new OptionItem('EDITORIAL.OPTIONS.COLLECTION_EDIT', 'edit', () =>
+            this.enabledOption.set({
+                trap: false,
+                option: 'EDIT_COLLECTION',
+                optionConfig: { collectionId: this.collectionInfoTarget().ref.id },
+            }),
+        );
+        editCollection.group = DefaultGroups.Primary;
+        editCollection.priority = 5;
+        editCollection.elementType = [ElementType.NoneOrUnknown];
+        editCollection.scopes = ['collections'];
+        editCollection.customShowCallback = async () => {
+            const collection = this.collectionInfoTarget();
+            return (
+                this.isRealCollection(collection) &&
+                RestHelper.hasAccessPermission(collection, RestConstants.PERMISSION_WRITE)
+            );
+        };
+        options.push(editCollection);
+
+        const shareCollection = new OptionItem(
+            'EDITORIAL.OPTIONS.COLLECTION_SHARE',
+            'group_add',
+            () => this.enabledOption.set({ trap: false, option: 'SHARE_COLLECTION' }),
+        );
+        shareCollection.group = DefaultGroups.Primary;
+        shareCollection.priority = 6;
+        shareCollection.elementType = [ElementType.NoneOrUnknown];
+        shareCollection.scopes = ['collections'];
+        shareCollection.toolpermissions = [RestConstants.TOOLPERMISSION_INVITE];
+        shareCollection.toolpermissionsMode = HideMode.Hide;
+        // a collection of type editorial is given to groups when it is edited
+        shareCollection.customShowCallback = async () => {
+            const collection = this.collectionInfoTarget();
+            return (
+                this.isRealCollection(collection) &&
+                collection.collection?.type !== RestConstants.COLLECTIONTYPE_EDITORIAL &&
+                RestHelper.hasAccessPermission(collection, RestConstants.ACCESS_CHANGE_PERMISSIONS)
+            );
+        };
+        options.push(shareCollection);
 
         const sortInto = new OptionItem(
             'EDITORIAL.OPTIONS.SORT_INTO',
@@ -422,6 +495,8 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         sortInto.permissions = [RestConstants.ACCESS_ADD_CHILDREN];
         sortInto.permissionsMode = HideMode.Hide;
         sortInto.elementType = [ElementType.NoneOrUnknown];
+        sortInto.group = DefaultGroups.Primary;
+        sortInto.priority = 4;
         sortInto.scopes = ['collections', 'workspace'];
         options.push(sortInto);
 

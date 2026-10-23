@@ -106,7 +106,10 @@
     {{ 'COLLECTIONS.EDIT_PERMISSIONS_DESCRIPTION' | translate }}
   </div>
   @if (shareConfig) {
-  <es-share-dialog [dataInput]="shareConfig"></es-share-dialog>
+  <es-share-dialog
+    [dataInput]="shareConfig"
+    (permissionsChange)="onSharePermissionsChange($event)"
+  ></es-share-dialog>
   } } @else {
   <es-collection-editorial-groups-form
     [shareToAll]="shareToAll()"
@@ -118,44 +121,32 @@
 } }
 <es-sidebar-sticky-footer>
   <div class="footer-buttons">
-    @if (step() === 'PERMISSIONS') {
-    <button
-      mat-flat-button
-      color="primary"
-      class="finish"
-      data-test="create-collection-finish"
-      [disabled]="saving()"
-      (click)="finish()"
-    >
-      {{ i18nPrefix + 'DONE' | translate }}
-    </button>
-    } @else {
     <button mat-button color="primary" data-test="create-collection-back" (click)="back()">
       <i esIcon="arrow_back"></i>
       {{ 'BACK' | translate }}
     </button>
-    @if (isDesignStep()) {
-    <button
-      mat-flat-button
-      color="primary"
-      data-test="create-collection-next"
-      [disabled]="!hasTitle()"
-      (click)="next()"
-    >
-      {{ i18nPrefix + 'NEXT' | translate }}
-      <i esIcon="arrow_forward"></i>
-    </button>
-    } @else {
+    @if (isLastStep()) {
     <button
       mat-flat-button
       color="primary"
       data-test="create-collection-create"
       [disabled]="saving()"
-      (click)="create()"
+      (click)="save()"
     >
       {{ (isEdit() ? 'SAVE' : i18nPrefix + 'CREATE') | translate }}
     </button>
-    } }
+    } @else {
+    <button
+      mat-flat-button
+      color="primary"
+      data-test="create-collection-next"
+      [disabled]="isDesignStep() && !hasTitle()"
+      (click)="next()"
+    >
+      {{ i18nPrefix + 'NEXT' | translate }}
+      <i esIcon="arrow_forward"></i>
+    </button>
+    }
   </div>
 </es-sidebar-sticky-footer>
 } @else {

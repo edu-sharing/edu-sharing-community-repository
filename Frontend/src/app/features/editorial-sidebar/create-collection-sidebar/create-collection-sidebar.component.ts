@@ -16,12 +16,13 @@ import {
     MdsService,
     MediacenterService,
     Node,
+    NodeRef,
     NodeService,
     ROOT,
 } from 'ngx-edu-sharing-api';
 import { firstValueFrom } from 'rxjs';
 import { AuthorityNamePipe, LocalEventsService } from 'ngx-edu-sharing-ui';
-import { RestConstants, RestHelper } from '../../../core-module/core.module';
+import { RestConnectorService, RestConstants, RestHelper } from '../../../core-module/core.module';
 import { Toast } from '../../../services/toast';
 import { SharedModule } from '../../../shared/shared.module';
 import {
@@ -29,8 +30,14 @@ import {
     CollectionPreviewChange,
 } from '../../collection-info/collection-design-form/collection-design-form.component';
 import { CollectionEditorialGroupsFormComponent } from '../../collection-info/collection-editorial-groups-form/collection-editorial-groups-form.component';
-import { ShareDialogData } from '../../dialogs/dialog-modules/share-dialog/share-dialog-data';
-import { ShareDialogComponent } from '../../dialogs/dialog-modules/share-dialog/share-dialog.component';
+import {
+    ShareDialogData,
+    ShareDialogResult,
+} from '../../dialogs/dialog-modules/share-dialog/share-dialog-data';
+import {
+    ExtendedAcl,
+    ShareDialogComponent,
+} from '../../dialogs/dialog-modules/share-dialog/share-dialog.component';
 import { ShareDialogModule } from '../../dialogs/dialog-modules/share-dialog/share-dialog.module';
 import { MdsEditorWrapperComponent } from '../../mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { MdsModule } from '../../mds/mds.module';
@@ -76,9 +83,9 @@ const SORTS: { [kind in 'subcollections' | 'references']: { [id in SortId]?: New
     };
 
 /**
- * Creates or edits a collection in two steps: first its look (title, description, colour, image),
- * then its type, metadata and default sorting. Once it is stored, a third step gives others access
- * to it.
+ * Creates or edits a collection in up to three steps: first its look (title, description, colour,
+ * image), then its type, metadata and default sorting, and finally who it is given to. Nothing is
+ * stored before the last step is confirmed.
  */
 @Component({
     selector: 'es-create-collection-sidebar',
@@ -97,6 +104,7 @@ export class CreateCollectionSidebarComponent {
     private readonly authenticationService = inject(AuthenticationService);
     private readonly authorityNamePipe = inject(AuthorityNamePipe);
     private readonly configService = inject(ConfigService);
+    private readonly connector = inject(RestConnectorService);
     private readonly createCollectionService = inject(CreateCollectionService);
     private readonly editorialSidebarService = inject(EditorialSidebarService);
     private readonly localEvents = inject(LocalEventsService);
@@ -124,8 +132,6 @@ export class CreateCollectionSidebarComponent {
     /** whether the collection opens as a topic page; no collection property backs it yet */
     protected readonly openAsTopicPage = signal(false);
     protected readonly saving = signal(false);
-    /** the collection once it was created, which the access is given to */
-    private readonly created = signal<Node | null>(null);
     private readonly canInvite = signal(false);
     protected readonly shareToAll = signal(false);
     /** whether the user may change who the collection is given to */
@@ -150,7 +156,12 @@ export class CreateCollectionSidebarComponent {
     };
     /** the ids of the metadata groups the metadata set offers */
     private readonly mdsGroupIds = signal<string[]>([]);
+    /** the metadata the editor starts from */
     protected metadata: Values = {};
+    /** the metadata values that are stored with the collection */
+    private values: Values = {};
+    /** what the share dialog handed over last, which is applied once the collection exists */
+    private sharePermissions: ShareDialogResult | null = null;
     /** the collection as it is edited; the design form writes into it */
     protected draft: Node;
 
@@ -182,6 +193,11 @@ export class CreateCollectionSidebarComponent {
         this.mdsGroupIds().includes(this.metadataGroupId()),
     );
     protected readonly isDesignStep = computed(() => this.step() === 'DESIGN');
+    /** the steps in the order they are shown; access is only asked for if it can be given */
+    private readonly steps = computed<Step[]>(() =>
+        this.permissionsKind() ? ['DESIGN', 'CONFIGURE', 'PERMISSIONS'] : ['DESIGN', 'CONFIGURE'],
+    );
+    protected readonly isLastStep = computed(() => this.step() === this.steps().at(-1));
     /** how access is given after the creation; none if the user cannot invite or the type has no such step */
     protected readonly permissionsKind = computed<PermissionsKind | null>(() => {
         if (!this.canInvite() || !this.canChangePermissions() || this.type() === 'MEDIA_CENTER') {
@@ -217,22 +233,46 @@ export class CreateCollectionSidebarComponent {
         return !!this.draft?.title?.trim();
     }
 
-    protected back(): void {
-        if (this.step() === 'CONFIGURE') {
-            this.step.set('DESIGN');
-        } else if (this.entry() === 'add' && !this.isEdit()) {
-            this.editorialSidebarService.showOption({ option: 'ADD_COLLECTION', trap: false });
-        } else {
-            this.editorialSidebarService.close();
+    protected async back(): Promise<void> {
+        switch (this.step()) {
+            case 'PERMISSIONS':
+                await this.rememberPermissions();
+                this.metadata = this.values;
+                this.step.set('CONFIGURE');
+                break;
+            case 'CONFIGURE':
+                this.step.set('DESIGN');
+                break;
+            default:
+                if (this.entry() === 'add' && !this.isEdit()) {
+                    this.editorialSidebarService.showOption({
+                        option: 'ADD_COLLECTION',
+                        trap: false,
+                    });
+                } else {
+                    this.editorialSidebarService.close();
+                }
         }
     }
 
-    protected next(): void {
-        if (!this.hasTitle()) {
-            this.toast.error(null, 'COLLECTIONS.ENTER_NAME');
+    protected async next(): Promise<void> {
+        if (this.step() === 'DESIGN') {
+            if (!this.hasTitle()) {
+                this.toast.error(null, 'COLLECTIONS.ENTER_NAME');
+                return;
+            }
+            this.step.set('CONFIGURE');
             return;
         }
-        this.step.set('CONFIGURE');
+        const values = this.hasMetadata() ? await this.mds()?.getValues() : {};
+        if (values === null) {
+            // a required metadata value is missing; the editor shows which one
+            return;
+        }
+        this.values = values ?? {};
+        this.metadata = this.values;
+        this.preparePermissions();
+        this.step.set('PERMISSIONS');
     }
 
     protected toggleInfo(type: NewCollectionType): void {
@@ -245,24 +285,41 @@ export class CreateCollectionSidebarComponent {
             type === 'MEDIA_CENTER' ? this.mediacenterName : null;
         // the metadata of the previous type is not part of the new one
         this.metadata = {};
+        this.values = {};
         setTimeout(() => this.mds()?.loadMds(true));
     }
 
-    protected async create(): Promise<void> {
-        const values = this.hasMetadata() ? await this.mds()?.getValues() : {};
-        if (values === null) {
-            // a required metadata value is missing; the editor shows which one
+    /** stores the collection together with who it is given to */
+    protected async save(): Promise<void> {
+        if (this.step() === 'CONFIGURE') {
+            const values = this.hasMetadata() ? await this.mds()?.getValues() : {};
+            if (values === null) {
+                // a required metadata value is missing; the editor shows which one
+                return;
+            }
+            this.values = values ?? {};
+        } else if (this.step() === 'PERMISSIONS' && !(await this.rememberPermissions(true))) {
             return;
         }
         this.saving.set(true);
         this.editorialSidebarService.sidebarLoading.set(true);
         try {
-            const stored = this.isEdit() ? await this.update(values) : await this.createNew(values);
-            if (this.permissionsKind()) {
-                await this.showPermissions(stored);
+            if (this.isEdit()) {
+                await this.update(this.values);
+                if (!(await this.applyPermissionsToEdited())) {
+                    return;
+                }
             } else {
-                this.editorialSidebarService.close();
+                const created = await this.createNew(this.values);
+                try {
+                    await this.applyPermissionsToCreated(created);
+                } catch (error) {
+                    // the collection exists by now, so a retry would only run into its name
+                    this.toast.error(error);
+                }
+                this.refreshParent();
             }
+            this.editorialSidebarService.close();
         } catch (error) {
             this.handleError(error);
         } finally {
@@ -281,7 +338,6 @@ export class CreateCollectionSidebarComponent {
             referenceSort: SORTS.references[this.referenceSort()],
             image: this.image,
         });
-        this.refreshParent();
         this.toast.toast(this.i18nPrefix + 'CREATED');
         return created;
     }
@@ -313,64 +369,119 @@ export class CreateCollectionSidebarComponent {
         return selected && selected !== this.initialSorts[kind] ? SORTS[kind][selected] : null;
     }
 
-    /** saves who the collection is given to and ends the creation */
-    protected async finish(): Promise<void> {
-        const created = this.created();
-        this.saving.set(true);
-        this.editorialSidebarService.sidebarLoading.set(true);
-        try {
-            const saved =
-                this.permissionsKind() === 'EDITORIAL_GROUPS'
-                    ? await this.saveEditorialGroups(created)
-                    : await this.saveShare(created);
-            if (saved) {
-                this.refreshParent();
-                this.editorialSidebarService.close();
+    /** shows the access of the collection; a collection that does not exist yet is stood in for */
+    private preparePermissions(): void {
+        if (this.permissionsKind() !== 'SHARE') {
+            return;
+        }
+        const node = this.isEdit() ? this.draft : this.getPlaceholderNode();
+        this.shareConfig = {
+            nodes: [node],
+            sendMessages: true,
+            sendToApi: this.isEdit(),
+            currentPermissions: this.isEdit()
+                ? null
+                : this.sharePermissions?.permissions ??
+                  ({ inherited: false, permissions: [] } as ExtendedAcl),
+        };
+    }
+
+    /** the share dialog needs a node to show, while the collection is only stored at the end */
+    private getPlaceholderNode(): Node {
+        return {
+            title: this.draft.title,
+            ref: {} as NodeRef,
+            icon: { url: this.connector.getThemeMimeIconSvg('collection.svg') },
+            aspects: [RestConstants.CCM_ASPECT_COLLECTION],
+            properties: {},
+            isDirectory: true,
+        } as Node;
+    }
+
+    protected onSharePermissionsChange(result: ShareDialogResult): void {
+        this.sharePermissions = result;
+    }
+
+    /**
+     * Takes over what the user chose in the access step, so it survives a step back.
+     * @returns whether the choice is valid
+     */
+    private async rememberPermissions(validate = false): Promise<boolean> {
+        if (this.permissionsKind() === 'EDITORIAL_GROUPS') {
+            const acl = this.editorialGroupsForm()?.getAcl();
+            if (acl) {
+                this.editorialInitialPermissions.set(acl.permissions as Ace[]);
+                this.editorialPublic.set(
+                    acl.permissions.some(
+                        (ace) => ace.authority.authorityName === RestConstants.AUTHORITY_EVERYONE,
+                    ),
+                );
             }
-        } catch (error) {
-            this.toast.error(error);
-        } finally {
-            this.saving.set(false);
-            this.editorialSidebarService.sidebarLoading.set(false);
+            return true;
         }
+        if (this.isEdit()) {
+            // the share dialog of an existing collection stores its choice itself
+            return true;
+        }
+        // the dialog only reports back if its choice is valid
+        this.sharePermissions = null;
+        await this.shareDialog()?.save();
+        return !!this.sharePermissions || !validate;
     }
 
-    private async showPermissions(created: Node): Promise<void> {
-        // the share dialog needs everything the node carries, e.g. its aspects and access
-        const node = await firstValueFrom(this.nodeApi.getNode(created.ref.id));
-        this.created.set(node);
-        if (this.permissionsKind() === 'EDITORIAL_GROUPS' && this.isEdit()) {
-            const permissions = await firstValueFrom(this.nodeApi.getPermissions(node.ref.id));
-            const local = (permissions.localPermissions?.permissions ?? []) as Ace[];
-            this.editorialInitialPermissions.set(local);
-            this.editorialPublic.set(
-                local.some(
-                    (ace) => ace.authority.authorityName === RestConstants.AUTHORITY_EVERYONE,
-                ),
-            );
+    private async applyPermissionsToCreated(created: Node): Promise<void> {
+        if (this.permissionsKind() === 'EDITORIAL_GROUPS') {
+            await this.saveEditorialGroups(created.ref.id);
+            return;
         }
-        this.shareConfig = { nodes: [node], sendMessages: true, sendToApi: true };
-        this.step.set('PERMISSIONS');
-    }
-
-    private async saveEditorialGroups(created: Node): Promise<boolean> {
-        const acl = this.editorialGroupsForm().getAcl();
+        const acl = this.sharePermissions?.permissions;
+        if (this.permissionsKind() !== 'SHARE' || !acl?.permissions?.length) {
+            return;
+        }
         await firstValueFrom(
             this.nodeApi.setPermissions(
                 created.ref.id,
+                RestHelper.copyAndCleanPermissions(acl.permissions as Ace[], false),
+                {
+                    sendMail: this.sharePermissions.notify,
+                    mailText: this.sharePermissions.notifyMessage,
+                    sendCopy: false,
+                },
+            ),
+        );
+    }
+
+    /** @returns whether the access was stored, which is also the case if there is none to store */
+    private async applyPermissionsToEdited(): Promise<boolean> {
+        if (this.step() !== 'PERMISSIONS') {
+            return true;
+        }
+        let saved = true;
+        if (this.permissionsKind() === 'EDITORIAL_GROUPS') {
+            await this.saveEditorialGroups(this.draft.ref.id);
+        } else {
+            saved = await this.saveShare(this.draft);
+        }
+        this.refreshEdited();
+        return saved;
+    }
+
+    private async saveEditorialGroups(id: string): Promise<void> {
+        const acl = this.editorialGroupsForm()?.getAcl();
+        await firstValueFrom(
+            this.nodeApi.setPermissions(
+                id,
                 RestHelper.copyAndCleanPermissions(acl.permissions, false),
                 { sendMail: false, sendCopy: false },
             ),
         );
-        this.toast.toast('WORKSPACE.PERMISSIONS_UPDATED');
-        return true;
     }
 
     /** the share dialog stores the permissions itself and announces the node it stored them for */
-    private async saveShare(created: Node): Promise<boolean> {
+    private async saveShare(node: Node): Promise<boolean> {
         let saved = false;
         const subscription = this.localEvents.nodesChanged.subscribe((nodes) => {
-            saved ||= nodes.some((node) => node?.ref?.id === created.ref.id);
+            saved ||= nodes.some((changed) => changed?.ref?.id === node.ref.id);
         });
         try {
             await this.shareDialog().save();
@@ -479,6 +590,16 @@ export class CreateCollectionSidebarComponent {
         this.canChangePermissions.set(
             RestHelper.hasAccessPermission(node, RestConstants.ACCESS_CHANGE_PERMISSIONS),
         );
+        if (this.permissionsKind() === 'EDITORIAL_GROUPS') {
+            const permissions = await firstValueFrom(this.nodeApi.getPermissions(node.ref.id));
+            const local = (permissions.localPermissions?.permissions ?? []) as Ace[];
+            this.editorialInitialPermissions.set(local);
+            this.editorialPublic.set(
+                local.some(
+                    (ace) => ace.authority.authorityName === RestConstants.AUTHORITY_EVERYONE,
+                ),
+            );
+        }
     }
 
     /** the sorting a collection stores as property; a collection that has none is sorted by change */

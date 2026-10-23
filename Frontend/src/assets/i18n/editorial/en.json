@@ -93,7 +93,6 @@
         "TYPE_DEFAULT": "General collection",
         "NO_METADATA": "No metadata available",
         "TYPE_INFO": "Information about {{type}}",
-        "DONE": "Done",
         "SAVED": "The collection was saved."
       }
     },
@@ -207,7 +206,11 @@
       "ADD_COLLECTION": "Add collection",
       "ADD_COLLECTION_DESCRIPTION": "Create a new collection or copy an existing collection to this location",
       "COLLECTION_INFO": "Collection information",
-      "COLLECTION_INFO_DESCRIPTION": "Show general information about this collection"
+      "COLLECTION_INFO_DESCRIPTION": "Show general information about this collection",
+      "COLLECTION_EDIT": "Edit collection",
+      "COLLECTION_EDIT_DESCRIPTION": "Change the title, look, metadata and sorting of the collection",
+      "COLLECTION_SHARE": "Share",
+      "COLLECTION_SHARE_DESCRIPTION": "Manage access rights"
     },
     "TITLE": "Manage",
     "TITLE_ASSIGNMENT": "Assignments",

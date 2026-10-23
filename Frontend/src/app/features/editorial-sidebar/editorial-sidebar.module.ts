@@ -20,6 +20,7 @@ import { AssignmentSidebarComponent } from '../../pages/editorial-page/assignmen
 import { ResizableSidenavDirective } from '../../pages/editorial-page/resizable-sidenav.directive';
 import { AddCollectionSidebarComponent } from './add-collection-sidebar/add-collection-sidebar.component';
 import { CreateCollectionSidebarComponent } from './create-collection-sidebar/create-collection-sidebar.component';
+import { ShareCollectionSidebarComponent } from './share-collection-sidebar/share-collection-sidebar.component';
 import { CollectionInfoSidebarComponent } from '../collection-info/collection-info-sidebar/collection-info-sidebar.component';
 
 @NgModule({
@@ -50,6 +51,7 @@ import { CollectionInfoSidebarComponent } from '../collection-info/collection-in
         AddCollectionSidebarComponent,
         CreateCollectionSidebarComponent,
         CollectionInfoSidebarComponent,
+        ShareCollectionSidebarComponent,
     ],
     exports: [EditorialSidebarComponent, PreviewSidebarComponent, PreviewSidebarWrapperComponent],
 })

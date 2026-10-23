@@ -1,0 +1,22 @@
+<div class="content">
+  <div class="title">{{ 'COLLECTIONS.EDIT_PERMISSIONS_SUBTEXT' | translate }}</div>
+  <div class="description">{{ 'COLLECTIONS.EDIT_PERMISSIONS_DESCRIPTION' | translate }}</div>
+  <es-share-dialog [dataInput]="shareConfig()"></es-share-dialog>
+</div>
+<es-sidebar-sticky-footer>
+  <div class="footer-buttons">
+    <button mat-button color="primary" data-test="share-collection-back" (click)="back()">
+      <i esIcon="arrow_back"></i>
+      {{ 'BACK' | translate }}
+    </button>
+    <button
+      mat-flat-button
+      color="primary"
+      data-test="share-collection-save"
+      [disabled]="saving()"
+      (click)="save()"
+    >
+      {{ 'SAVE' | translate }}
+    </button>
+  </div>
+</es-sidebar-sticky-footer>

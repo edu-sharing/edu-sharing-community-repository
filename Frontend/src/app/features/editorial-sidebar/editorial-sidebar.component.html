@@ -79,7 +79,11 @@
           [parent]="parent()"
           [option]="$any(enabledOption())"
         ></es-create-collection-sidebar>
-        } } @if (option === 'COLLECTION_INFO') {
+        } } @if (option === 'SHARE_COLLECTION') {
+        <es-share-collection-sidebar
+          [collection]="collectionInfoTarget()!"
+        ></es-share-collection-sidebar>
+        } @if (option === 'COLLECTION_INFO') {
         <es-collection-info-sidebar
           [collection]="collectionInfoTarget()!"
         ></es-collection-info-sidebar>
@@ -89,6 +93,8 @@
         ></es-metadata-sidebar>
         } @if (option === 'VIEWS_AND_USAGE') {
         <es-usages-preview [nodes]="$any(editorialSidebarService.nodes())"></es-usages-preview>
+        } @if (option === 'COLLECTION_USAGE') {
+        <es-usages-preview [nodes]="[collectionInfoTarget()]"></es-usages-preview>
         } @if (option === 'MANAGE_SUBMISSION') {
         <es-submission-sidebar
           [data]="$any(enabledOption().optionConfig)"
