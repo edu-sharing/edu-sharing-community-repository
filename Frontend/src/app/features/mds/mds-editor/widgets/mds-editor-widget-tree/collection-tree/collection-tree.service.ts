@@ -20,6 +20,18 @@ export interface CollectionPage {
     total: number;
 }
 
+/** Options of a name search for collections. */
+export interface CollectionSearchOptions {
+    /** Limits the search to the descendants of this collection. */
+    rootId: string | null;
+    mdsId: string;
+    maxItems: number;
+    /** Properties to load with each hit, the ones the tree needs by default. */
+    propertyFilter?: string[];
+    sortProperties?: string[];
+    sortAscending?: boolean[];
+}
+
 /** A collection with the id of the collection above it, `null` for a top-level collection. */
 export interface PlacedCollection {
     node: Node;
@@ -235,6 +247,17 @@ export class CollectionTreeService {
         term: string,
         options: { rootId: string | null; mdsId: string; maxItems: number },
     ): Observable<Node[]> {
+        return this.searchCollectionsPage(term, options).pipe(map((page) => page.nodes));
+    }
+
+    /**
+     * Like `searchCollections`, but also tells how many collections match in total and allows
+     * choosing the requested properties and the sort order.
+     */
+    searchCollectionsPage(
+        term: string,
+        options: CollectionSearchOptions,
+    ): Observable<CollectionPage> {
         const mdsId = options.mdsId || DEFAULT;
         const unrestricted = { ...options, rootId: null as string | null, mdsId: DEFAULT };
         if (
@@ -287,8 +310,8 @@ export class CollectionTreeService {
 
     private requestSearch(
         term: string,
-        options: { rootId: string | null; mdsId: string; maxItems: number },
-    ): Observable<Node[]> {
+        options: CollectionSearchOptions,
+    ): Observable<CollectionPage> {
         const criteria = [{ property: RestConstants.PRIMARY_SEARCH_CRITERIA, values: [term] }];
         if (options.rootId) {
             criteria.push({ property: PARENT_RECURSIVE_PARAMETER, values: [options.rootId] });
@@ -300,11 +323,18 @@ export class CollectionTreeService {
                 metadataset: options.mdsId,
                 query: RestConstants.QUERY_NAME_COLLECTIONS,
                 contentType: 'COLLECTIONS',
-                propertyFilter: PROPERTY_FILTER,
+                propertyFilter: options.propertyFilter ?? PROPERTY_FILTER,
+                sortProperties: options.sortProperties,
+                sortAscending: options.sortAscending,
                 skipCount: 0,
                 maxItems: options.maxItems,
                 body: { criteria },
             })
-            .pipe(map((result) => (result.nodes ?? []) as Node[]));
+            .pipe(
+                map((result) => {
+                    const nodes = (result.nodes ?? []) as Node[];
+                    return { nodes, total: result.pagination?.total ?? nodes.length };
+                }),
+            );
     }
 }

@@ -61,6 +61,12 @@ import { OptionsHelperService } from 'src/app/services/options-helper.service';
 import { EditorialSidebarService } from '../../features/editorial-sidebar/editorial-sidebar.service';
 import { CollectionScope, CollectionScopesService } from '../../services/collection-scopes.service';
 import { CollectionDetailsService } from '../../features/collection-info/collection-details.service';
+import {
+    SearchFieldInstance,
+    SearchFieldService,
+} from '../../main/navigation/search-field/search-field.service';
+import { CollectionSearchService } from './collection-search.service';
+import { CollectionSearchStateService } from './collection-search-state.service';
 
 // component class
 @Component({
@@ -73,6 +79,8 @@ import { CollectionDetailsService } from '../../features/collection-info/collect
         OptionsHelperService,
         CollectionDetailsService,
         CollectionViewStateService,
+        CollectionSearchStateService,
+        CollectionSearchService,
     ],
     standalone: false,
 })
@@ -80,6 +88,8 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
     private breadcrumbsService = inject(BreadcrumbsService);
     readonly details = inject(CollectionDetailsService);
     readonly viewState = inject(CollectionViewStateService);
+    readonly searchState = inject(CollectionSearchStateService);
+    private readonly searchField = inject(SearchFieldService);
     /** the ways the user can present the content of a collection */
     readonly displayTypeItems: ViewToggleItem<CollectionViewType>[] = [
         {
@@ -306,6 +316,10 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
     navigate(id = '', addToOther = '', feedback = false) {
         UIHelper.getCommonParameters(this.route).subscribe((params) => {
             params.scope = this.tabSelected;
+            const query = this.searchState.query();
+            if (query) {
+                params.query = query;
+            }
             if (id && id !== '-root-') {
                 params.id = id;
             }
@@ -449,6 +463,26 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
         this.isRootLevel = !id;
     }
 
+    private searchFieldInstance: SearchFieldInstance;
+
+    /** Shows the search field of the main navigation and applies what is searched for. */
+    private setupSearchField() {
+        this.searchFieldInstance = this.searchField.enable(
+            { placeholder: 'COLLECTIONS.SEARCH' },
+            this.destroyed,
+        );
+        this.searchFieldInstance.onSearchTriggered().subscribe((event) => {
+            void this.router.navigate([], {
+                relativeTo: this.route,
+                queryParams: { query: event.searchString?.trim() || null },
+                queryParamsHandling: 'merge',
+            });
+            if (!event.cleared) {
+                this.uiService.hideKeyboardIfMobile();
+            }
+        });
+    }
+
     closeDialog() {
         this.dialogTitle = null;
     }
@@ -514,9 +548,18 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
                 // set app to ready state
                 this.isReady = true;
                 // subscribe to parameters of url
+                this.setupSearchField();
                 this.route.queryParams.subscribe(async (params) => {
+                    this.searchState.query.set(params.query || null);
+                    this.searchFieldInstance?.setSearchString(params.query ?? '');
                     const diffs = Helper.getDifferentKeys(this.params, params);
-                    if (Object.keys(diffs).length === 1 && diffs.viewType) {
+                    // view type and search term are applied by the lists, the page stays as it is
+                    const changed = Object.keys(diffs);
+                    if (
+                        this.params &&
+                        changed.length > 0 &&
+                        changed.every((key) => key === 'viewType' || key === 'query')
+                    ) {
                         this.params = params;
                         return;
                     }

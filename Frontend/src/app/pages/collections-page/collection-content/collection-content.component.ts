@@ -82,6 +82,8 @@ import { LoadingScreenService } from '../../../main/loading-screen/loading-scree
 import { MainNavService } from '../../../main/navigation/main-nav.service';
 import { BridgeService } from '../../../services/bridge.service';
 import { CollectionViewStateService, CollectionViewType } from '../collection-view-state.service';
+import { CollectionSearchService } from '../collection-search.service';
+import { CollectionSearchStateService } from '../collection-search-state.service';
 import { InfobarService } from '../infobar/infobar.service';
 import { SelectionChange } from '@angular/cdk/collections';
 import { ConnectedPosition } from '@angular/cdk/overlay';
@@ -91,6 +93,9 @@ import {
     NodesSelectorConfig,
     TabType,
 } from '../../editorial-page/nodes-selector/nodes-selector.component';
+
+/** Client-side property holding the title of the collection a search hit is placed in. */
+const SEARCH_PARENT_TITLE_PROPERTY = 'virtual:es_search_parent_title';
 
 @Component({
     selector: 'es-collection-content',
@@ -133,6 +138,8 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         sortAscending: [false, true, false],
     };
     readonly viewState = inject(CollectionViewStateService);
+    readonly searchState = inject(CollectionSearchStateService);
+    private readonly collectionSearch = inject(CollectionSearchService);
     private readonly destroyed$ = new Subject<void>();
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
@@ -258,7 +265,12 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
      */
     readonly treeReady = signal(false);
     private shownViewType = this.viewState.viewType();
+    private shownQuery = this.searchState.query();
+    /** Whether more collections match the search than are listed. */
+    readonly searchTruncated = signal(false);
     collectionsColumns: ColumnType;
+    /** columns of the search hits in the list view, which tell where each hit is placed */
+    collectionsSearchTableColumns: ColumnType;
     /** columns of the sub-collections in the list view, which cannot render the card columns */
     readonly collectionsTableColumns: ColumnType = {
         Default: [new ListItem('NODE', 'cm:title'), new ListItem('NODE', 'cm:modified')],
@@ -275,6 +287,10 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             const viewType = this.viewState.viewType();
             untracked(() => this.onViewTypeChange(viewType));
         });
+        effect(() => {
+            const query = this.searchState.query();
+            untracked(() => this.onQueryChange(query));
+        });
         this.sortCollectionColumns[this.sortCollectionColumns.length - 1].mode = 'ascending';
         // this.collectionSortEmitter.subscribe((sort: SortEvent) => this.setCollectionSort(sort));
         // this.collectionCustomSortEmitter.subscribe((state: boolean) => state ? this.toggleCollectionsOrder() : this.changeCollectionsOrder());
@@ -282,6 +298,17 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         // this.referenceCustomSortEmitter.subscribe((state: boolean) => state ? this.toggleReferencesOrder() : this.changeReferencesOrder());
         this.collectionsColumns = {
             Default: ListItem.getCollectionDefaults(),
+        };
+        const parentColumn = new ListItem('NODE', SEARCH_PARENT_TITLE_PROPERTY);
+        this.translation
+            .get('COLLECTIONS.SEARCH_PARENT_COLUMN')
+            .subscribe((label) => (parentColumn.label = label));
+        this.collectionsSearchTableColumns = {
+            Default: [
+                new ListItem('NODE', 'cm:title'),
+                parentColumn,
+                new ListItem('NODE', 'cm:modified'),
+            ],
         };
         this.mainNavService.getDialogs().eventTriggered.subscribe((event: ManagementEvent) => {
             if (event.event === ManagementEventType.AddCollectionNodes) {
@@ -815,12 +842,70 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         });
     }
 
+    /** Reloads the content when the search term changed, e.g. when it was typed or cleared. */
+    private onQueryChange(query: string | null) {
+        if (query === this.shownQuery) {
+            return;
+        }
+        this.shownQuery = query;
+        if (this.collection) {
+            this.refreshContent();
+        }
+    }
+
+    /** Lists the collections matching the search instead of the content of the collection. */
+    private searchContent() {
+        this.dataSourceCollections.isLoading = true;
+        this.dataSourceReferences.isLoading = false;
+        const query = this.searchState.query().trim();
+        this.collectionSearch
+            .search(query, {
+                scope: this.isRootLevel ? this.scope : undefined,
+                parentId: this.isRootLevel ? undefined : this.collection.ref.id,
+            })
+            .subscribe({
+                next: (result) => {
+                    // a stale answer must not replace the one of a newer search
+                    if (query !== this.searchState.query()?.trim()) {
+                        return;
+                    }
+                    this.searchTruncated.set(result.truncated);
+                    this.dataSourceCollections.setData(
+                        result.hits.map((hit) => this.withParentTitle(hit, result.parents)),
+                    );
+                    this.dataSourceCollections.isLoading = false;
+                    this.finishCollectionLoading();
+                },
+                error: (error: unknown) => {
+                    this.dataSourceCollections.isLoading = false;
+                    this.toast.error(error);
+                },
+            });
+    }
+
+    /** Adds the title of the collection a hit is placed in, which the list shows as a column. */
+    private withParentTitle(hit: Node, parents: Map<string, Node>): Node {
+        const parent = parents.get(hit.ref.id);
+        return {
+            ...hit,
+            properties: {
+                ...hit.properties,
+                [SEARCH_PARENT_TITLE_PROPERTY]: [parent ? parent.title || parent.name : ''],
+            },
+        };
+    }
+
     private refreshContent() {
         this.dataSourceCollections.reset();
         this.dataSourceReferences.reset();
         this.listReferences?.getSelection().clear();
         this.selection = [];
         this.selectionOverlayOpen = false;
+        this.searchTruncated.set(false);
+        if (this.searchState.active()) {
+            this.searchContent();
+            return;
+        }
         this.dataSourceCollections.isLoading = true;
         this.dataSourceReferences.isLoading = true;
 
@@ -903,9 +988,12 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     }
 
     getCollectionsColumns(): ColumnType {
-        return this.viewState.collectionsDisplayType() === NodeEntriesDisplayType.Table
-            ? this.collectionsTableColumns
-            : this.collectionsColumns;
+        if (this.viewState.collectionsDisplayType() !== NodeEntriesDisplayType.Table) {
+            return this.collectionsColumns;
+        }
+        return this.searchState.active()
+            ? this.collectionsSearchTableColumns
+            : this.collectionsTableColumns;
     }
 
     isMobile() {
@@ -985,6 +1073,10 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     }
 
     async loadMoreCollections() {
+        // all hits of a search are loaded at once
+        if (this.searchState.active()) {
+            return;
+        }
         if (!(await this.dataSourceCollections.hasMore()) || this.dataSourceCollections.isLoading) {
             return;
         }
@@ -1076,7 +1168,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     /** (Re-)creates the tree from the sub-collections and materials that are currently loaded. */
     private async buildTree() {
         this.treeReady.set(false);
-        if (this.isRootLevel) {
+        if (this.isRootLevel && !this.searchState.active()) {
             // the tree cannot page, so it needs every collection of the scope
             await this.loadRemainingCollections();
         }
@@ -1089,7 +1181,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             [
                 this.treeRoot(),
                 ...(this.dataSourceCollections.getData() ?? []).map((node) =>
-                    this.isRootLevel
+                    this.isRootLevel || this.searchState.active()
                         ? { ...node, parent: { ...node.parent, id: this.collection.ref.id } }
                         : node,
                 ),
@@ -1116,7 +1208,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
 
     /** Loads the pages of the root collections that have not been requested yet. */
     private async loadRemainingCollections() {
-        if (!(await this.dataSourceCollections.hasMore())) {
+        if (this.searchState.active() || !(await this.dataSourceCollections.hasMore())) {
             return;
         }
         const request: RequestObject = Helper.deepCopy(CollectionContentComponent.DEFAULT_REQUEST);

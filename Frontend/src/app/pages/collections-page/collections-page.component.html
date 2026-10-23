@@ -141,11 +141,30 @@
                   [(value)]="viewState.viewType"
                 ></es-view-toggle-group>
               </div>
+              @if (searchState.active()) {
+              <h2 class="root-bar-title mat-heading-3 search-in-collection">
+                {{
+                  'COLLECTIONS.SEARCH_RESULTS_IN_COLLECTION'
+                    | translate : { query: searchState.query() }
+                }}
+              </h2>
+              }
               <es-collection-header-bar [collection]="collection"></es-collection-header-bar>
               } @if (isRootLevelCollection() && !isLoading) {
               <div class="breadcrumb-space root-bar" data-test="collections-root-bar">
                 <h2 class="root-bar-title mat-heading-3">
+                  @if (searchState.active()) {
+                  {{
+                    'COLLECTIONS.SEARCH_RESULTS'
+                      | translate
+                        : {
+                            query: searchState.query(),
+                            scope: ('COLLECTIONS.TAB.' + tabSelected | translate)
+                          }
+                  }}
+                  } @else {
                   {{ 'COLLECTIONS.TAB.' + tabSelected + '_LONG' | translate }}
+                  }
                 </h2>
                 <es-view-toggle-group
                   class="display-type-toggle"
@@ -168,13 +187,15 @@
                   [class.collections-master-div-notabs]="!showTabs()"
                 >
                   <ng-template #empty>
-                    @if (isRootLevelCollection()) { @if (tabSelected === 'EDU_GROUPS') {
+                    @if (searchState.active()) {
+                    {{ 'COLLECTIONS.EMPTY.SEARCH' | translate }}
+                    } @else { @if (isRootLevelCollection()) { @if (tabSelected === 'EDU_GROUPS') {
                     {{ 'COLLECTIONS.EMPTY.SHARED' | translate }}
                     } @if (tabSelected === 'EDU_ALL') {
                     {{ 'COLLECTIONS.EMPTY.PUBLIC' | translate }}
                     } } @if (!isRootLevelCollection()) {
                     {{ 'COLLECTIONS.EMPTY.SUBCOLLECTIONS' | translate }}
-                    }
+                    } }
                   </ng-template>
                 </es-collection-content>
               </div>

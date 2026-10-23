@@ -17,7 +17,9 @@
         [infiniteScrollWindow]="false"
         [checkbox]="false"
         [displayType]="viewState.collectionsDisplayType()"
-        [globalOptions]="createAllowed() ? [createSubCollectionOptionItem] : []"
+        [globalOptions]="
+          createAllowed() && !searchState.active() ? [createSubCollectionOptionItem] : []
+        "
         [dragDrop]="{
           dragAllowed: isAllowedToEditCollection(),
           dropAllowed: canDropOnCollection,
@@ -30,6 +32,7 @@
           columns: sortCollections.columns,
           allowed:
             !isMobile() &&
+            !searchState.active() &&
             dataSourceCollections.getData()?.length > 1 &&
             isUserAllowedToEdit(collection) &&
             !sortReferences?.customSortingInProgress,
@@ -38,8 +41,8 @@
       >
         <ng-template #title>
           <div class="heading-group">
-            @if (!isRootLevel && (isAllowedToEditCollection() || !dataSourceCollections.isEmpty()))
-            {
+            @if (!isRootLevel && !searchState.active() && (isAllowedToEditCollection() ||
+            !dataSourceCollections.isEmpty())) {
             <h2 class="mat-heading-3">
               {{ 'COLLECTION.INFO_REFERENCES_MULTI' | translate }}
             </h2>
@@ -47,7 +50,7 @@
           </div>
         </ng-template>
         <ng-template #empty>
-          @if (!createAllowed()) {
+          @if (!createAllowed() || searchState.active()) {
           <div class="collection-nocontent-container collection-nocontent-big">
             <ng-container *ngTemplateOutlet="emptyRef"></ng-container>
           </div>
@@ -56,7 +59,9 @@
       </es-node-entries-wrapper>
     </div>
   </section>
-  } @if (!isRootLevel) {
+  } @if (searchTruncated()) {
+  <p class="search-truncated" role="status">{{ 'COLLECTIONS.SEARCH_TRUNCATED' | translate }}</p>
+  } @if (!isRootLevel && !searchState.active()) {
   <es-collection-proposals
     [collection]="collection"
     [canEdit]="isAllowedToEditCollection()"
@@ -181,7 +186,8 @@
       [checkbox]="false"
       (selectionChange)="onTreeSelectionChange($event)"
     ></es-node-entries-wrapper>
-    @if (isRootLevel && dataSourceCollections.isEmpty() && !createAllowed()) {
+    @if ( (isRootLevel || searchState.active()) && dataSourceCollections.isEmpty() &&
+    (!createAllowed() || searchState.active()) ) {
     <div class="collection-nocontent-container collection-nocontent-big">
       <ng-container *ngTemplateOutlet="emptyRef"></ng-container>
     </div>

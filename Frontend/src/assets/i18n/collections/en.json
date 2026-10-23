@@ -46,7 +46,13 @@
       "EDITORIAL_GROUPS": "Editors groups in charge",
       "DONE": "Done"
     },
+    "SEARCH": "Search collections",
+    "SEARCH_RESULTS": "Results for “{{query}}” in “{{scope}}”",
+    "SEARCH_RESULTS_IN_COLLECTION": "Results for “{{query}}” in this collection",
+    "SEARCH_TRUNCATED": "Only the first results are shown. Please refine your search.",
+    "SEARCH_PARENT_COLUMN": "In collection",
     "EMPTY": {
+      "SEARCH": "No collections found.",
       "SHARED": "You have not been invited to any collections yet.",
       "PUBLIC": "There are no public collections available yet.",
       "SUBCOLLECTIONS": "There are no sub-collections available yet."

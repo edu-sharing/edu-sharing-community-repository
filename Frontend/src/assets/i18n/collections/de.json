@@ -30,7 +30,13 @@
       "EDITORIAL_GROUPS": "Zuständige Redaktionsgruppe",
       "DONE": "Fertig"
     },
+    "SEARCH": "Sammlungen durchsuchen",
+    "SEARCH_RESULTS": "Treffer für „{{query}}“ in „{{scope}}“",
+    "SEARCH_RESULTS_IN_COLLECTION": "Treffer für „{{query}}“ in dieser Sammlung",
+    "SEARCH_TRUNCATED": "Es werden nur die ersten Treffer angezeigt. Bitte verfeinern Sie die Suche.",
+    "SEARCH_PARENT_COLUMN": "In Sammlung",
     "EMPTY": {
+      "SEARCH": "Keine Sammlungen gefunden.",
       "SHARED": "Sie wurden bisher zu keiner Sammlung eingeladen.",
       "PUBLIC": "Es sind keine öffentlichen Sammlungen verfügbar.",
       "SUBCOLLECTIONS": "Es sind keine Untersammlungen verfügbar."

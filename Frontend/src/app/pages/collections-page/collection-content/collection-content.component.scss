@@ -116,3 +116,8 @@ es-collection-proposals {
         flex-grow: 0 !important;
     }
 }
+
+.search-truncated {
+    margin: 0 0 8px;
+    color: var(--textLight);
+}
