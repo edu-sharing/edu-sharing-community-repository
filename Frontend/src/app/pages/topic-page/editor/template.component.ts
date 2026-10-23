@@ -139,7 +139,6 @@ import {
     SEARCH_FILTERS_QUERY_PARAM,
     SEARCH_INPUT_QUERY_PARAM,
     SWIMLANE_TYPE_OPTIONS,
-    WIDGET_TYPE_OPTIONS,
     WIDGETS,
 } from '../shared/types/custom-definitions';
 import { BapiConfigObject } from '../shared/types/bapi-config-object';
@@ -180,6 +179,7 @@ import {
     retrieveSwimlaneCompletion,
     SwimlaneCompletion,
 } from '../shared/utils/swimlane-completion-util';
+import { canRenderWidgetType } from '../shared/utils/widget-type-util';
 import {
     convertNodeRefIntoNodeId,
     keepOwnHeaderBreadcrumbAndColors,
@@ -2202,21 +2202,15 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
 
     // SWIMLANE COMPLETION
     /**
-     * Whether the page can render the given widget type; es-swimlane leaves tiles of other types
-     * empty, so the same rules apply.
+     * Whether this page can render the given widget type, by the rule es-swimlane renders with.
      */
-    readonly isRenderableWidgetType = (widgetType: string): boolean => {
-        if (widgetType === WIDGETS.AI_TEXT_WIDGET && !this.aiSupported()) {
-            return false;
-        }
-        if (widgetType === WIDGETS.MEDIA_RENDERING && !this.rendering2Supported()) {
-            return false;
-        }
-        return (
-            WIDGET_TYPE_OPTIONS.some((option) => option.value === widgetType) ||
-            this.genericWidgetGlobalService.hasCustomWidget(widgetType)
-        );
-    };
+    readonly isRenderableWidgetType = (widgetType: string): boolean =>
+        canRenderWidgetType(widgetType, {
+            aiSupported: this.aiSupported(),
+            rendering2Supported: this.rendering2Supported(),
+            hasCustomWidget: (type: string) =>
+                this.genericWidgetGlobalService.hasCustomWidget(type),
+        });
 
     /**
      * Rates how far the grid of the given swimlane is filled with renderable widgets.
