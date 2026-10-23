@@ -11,6 +11,7 @@ import {
     SelectionMode,
 } from './editorial-sidebar.component';
 import {
+    CustomOptions,
     ElementType,
     NodeClickEvent,
     OptionGroup,
@@ -162,6 +163,15 @@ export class EditorialSidebarService {
      * for none. Reset on close, so it only applies to the preview that set it.
      */
     private previewList: NodeEntriesWrapperComponent<NodeEntriesDataType> | null | undefined;
+    /**
+     * Actionbar options a page sets for the previews of its scope; a preview whose own config
+     * brings no `customOptions` falls back to them.
+     */
+    readonly previewCustomOptions = signal<{ [key in Scope]?: CustomOptions }>({});
+
+    setPreviewCustomOptions(scope: Scope, options: CustomOptions | null) {
+        this.previewCustomOptions.update((all) => ({ ...all, [scope]: options ?? undefined }));
+    }
 
     toggleFullscreen() {
         this.fullscreenActive.update((v) => !v);

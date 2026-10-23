@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class AuthByAppConfigProvider {
     public static final String SECURITY_SSO_AUTH_BY_APP_MAPPING = "security.sso.authByApp.mapping";
+    public static final String SECURITY_SSO_AUTH_BY_APP_CHECK_CLIENT_IP = "security.sso.authByApp.checkClientIp";
 
     private final LightbendConfigLoader configLoader;
 
@@ -24,8 +25,9 @@ public class AuthByAppConfigProvider {
     public AuthByAppProperties getConfig() {
         Config rootConfig = configLoader.getConfig();
         AuthByAppProperties authByAppProperties = new AuthByAppProperties();
-        if(rootConfig.hasPath(SECURITY_SSO_AUTH_BY_APP_MAPPING)){
-            authByAppProperties.setMapping(MappingBeanFactory.getMapping(rootConfig.getConfig(SECURITY_SSO_AUTH_BY_APP_MAPPING)));
+        authByAppProperties.setMapping(MappingBeanFactory.getMapping(rootConfig, SECURITY_SSO_AUTH_BY_APP_MAPPING));
+        if(rootConfig.hasPath(SECURITY_SSO_AUTH_BY_APP_CHECK_CLIENT_IP)){
+            authByAppProperties.setCheckClientIp(rootConfig.getBoolean(SECURITY_SSO_AUTH_BY_APP_CHECK_CLIENT_IP));
         }
 
         return authByAppProperties;

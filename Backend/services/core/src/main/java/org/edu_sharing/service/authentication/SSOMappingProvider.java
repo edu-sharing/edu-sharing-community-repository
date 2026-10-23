@@ -1,10 +1,13 @@
 package org.edu_sharing.service.authentication;
 
 import com.drew.lang.annotations.NotNull;
+import com.typesafe.config.ConfigFactory;
 import lombok.RequiredArgsConstructor;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.service.authentication.authByApp.config.AuthByAppConfigProvider;
 import org.edu_sharing.service.authentication.sso.config.ExternalConfigProvider;
 import org.edu_sharing.service.authentication.sso.mapping.Mapping;
+import org.edu_sharing.service.authentication.sso.mapping.MappingBeanFactory;
 import org.edu_sharing.service.lti13.sso.config.LTIConfigProvider;
 import org.edu_sharing.spring.security.oauth2.config.OAuth2ClientProperties;
 import org.edu_sharing.spring.security.oauth2.config.OAuth2ConfigProvider;
@@ -22,6 +25,7 @@ public class SSOMappingProvider {
     private final LTIConfigProvider ltiConfigProvider;
     private final ExternalConfigProvider externalConfigProvider;
     private final AuthByAppConfigProvider authByAppConfigProvider;
+    private final LightbendConfigLoader configLoader;
 
 
     @NotNull
@@ -38,7 +42,8 @@ public class SSOMappingProvider {
         };
 
         if (mapping == null) {
-            return new Mapping();
+            // e.g. oauth registration without mapping: no attribute mapping, but the security.sso.settings defaults
+            return MappingBeanFactory.getMapping(ConfigFactory.empty(), configLoader.getConfig().getConfig(SSOAuthorityMapper.CONFIG_PATH));
         }
 
         return mapping;

@@ -23,9 +23,7 @@ public class ExternalConfigProvider {
     public ExternalProperties getConfig() {
         Config rootConfig = configLoader.getConfig();
         ExternalProperties externalProperties = new ExternalProperties();
-        if(rootConfig.hasPath(SECURITY_SSO_EXTERNAL_MAPPING)){
-            externalProperties.setMapping(MappingBeanFactory.getMapping(rootConfig.getConfig(SECURITY_SSO_EXTERNAL_MAPPING)));
-        }
+        externalProperties.setMapping(MappingBeanFactory.getMapping(rootConfig, SECURITY_SSO_EXTERNAL_MAPPING));
 
         return externalProperties;
 

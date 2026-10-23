@@ -1,11 +1,11 @@
-import { Component, inject, Input, OnDestroy, signal, ViewChild } from '@angular/core';
+import { Component, inject, Input, OnDestroy, signal, ViewChild, DestroyRef } from '@angular/core';
 import { LocalEventsService } from 'ngx-edu-sharing-ui';
 import { ActivatedRoute, Router } from '@angular/router';
 import { combineLatest, Subject } from 'rxjs';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { Location, PlatformLocation } from '@angular/common';
 import { RenderWrapperComponent } from './render-wrapper-component/render-wrapper.component';
-import { RestConstants } from 'ngx-edu-sharing-api';
+import { Node, RestConstants } from 'ngx-edu-sharing-api';
 import { takeUntil } from 'rxjs/operators';
 import { MatSidenav, MatSidenavContainer, MatSidenavContent } from '@angular/material/sidenav';
 import { ResizableSidenavDirective } from '../editorial-page/resizable-sidenav.directive';
@@ -16,6 +16,7 @@ import { UIHelper } from '../../core-ui-module/ui-helper';
 import { RouterHelper } from '../../util/router.helper';
 import { ConfigurationService } from '../../core-module/rest/services/configuration.service';
 import { ImprintPrivacyComponent } from '../../shared/components/imprint-privacy-footer/imprint-privacy.component';
+import { ImprintPrivacyService } from '../../shared/components/imprint-privacy-footer/imprint-privacy-service';
 
 @Component({
     selector: 'es-render2-page',
@@ -45,6 +46,8 @@ export class Render2PageComponent implements OnDestroy {
     private localEvents = inject(LocalEventsService);
     private platformLocation = inject(PlatformLocation);
     private configService = inject(ConfigurationService);
+    private imprintPrivacy = inject(ImprintPrivacyService);
+    private destroyRef = inject(DestroyRef);
     editorialSidebarService = inject(EditorialSidebarService);
 
     private readonly destroyed$ = new Subject<void>();
@@ -86,6 +89,12 @@ export class Render2PageComponent implements OnDestroy {
         this.destroyed$.next();
         this.destroyed$.complete();
     }
+
+    onNodeChange(node: Node) {
+        this.editorialSidebarService.nodes.set(node ? [node] : null);
+        this.imprintPrivacy.setContextNode(node, this.destroyRef);
+    }
+
     setChildId(childobject_id: string) {
         void this.router.navigate([], {
             relativeTo: this.route,

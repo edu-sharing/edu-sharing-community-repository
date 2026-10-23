@@ -18,6 +18,9 @@ $rowHeight: vars.$nodeEntriesTableRowHeight;
             }
             mat-header-cell,
             mat-cell {
+                // cell content must not widen the fit-content table, so a cell contributes only
+                // its min-width or contain-intrinsic-inline-size (set it next to a custom flex basis)
+                contain: inline-size;
                 &:not(.mat-mdc-table-sticky) {
                     min-width: 150px;
                 }

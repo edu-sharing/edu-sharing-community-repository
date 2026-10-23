@@ -90,7 +90,6 @@ export class BreadcrumbComponent implements OnChanges, OnInit, OnDestroy {
     pageTemplateExists: InputSignal<boolean> = input<boolean>(false);
     pageVariantConfigNodes: InputSignal<Node[]> = input<Node[]>([]);
     parentEntries: InputSignal<ParentEntries> = input<ParentEntries>(null);
-    @Input() rootName?: string;
     templateMode: InputSignal<boolean> = input<boolean>(false);
     @Output() navigateToTemplate: EventEmitter<void> = new EventEmitter<void>();
     @Output() variantSelected: EventEmitter<string> = new EventEmitter<string>();
@@ -107,7 +106,6 @@ export class BreadcrumbComponent implements OnChanges, OnInit, OnDestroy {
     processedNodes: Signal<Node[]> = computed((): Node[] => {
         return this.parentEntries()?.nodes?.slice()?.reverse() || [];
     });
-    rootLink: WritableSignal<string> = signal('');
     widgetConfig: BreadcrumbConfig;
     // own config node, empty if none exists or it was deleted, so saving creates a new one
     private availableNodeId: string = '';
@@ -133,9 +131,6 @@ export class BreadcrumbComponent implements OnChanges, OnInit, OnDestroy {
             this.isAdmin.set(this.connector.getCurrentLogin()?.isAdmin ?? false);
         });
         this.hasBreadcrumbExtension.set(this.topicPageGlobalService.hasCustomBreadcrumbExtension());
-        if (this.topicPageGlobalService.getCustomBreadcrumbRootLink()) {
-            this.rootLink.set(this.topicPageGlobalService.getCustomBreadcrumbRootLink());
-        }
         if (this.topicPageGlobalService.getCustomUrlFunction()) {
             this.customUrl = this.topicPageGlobalService.getCustomUrlFunction();
         }

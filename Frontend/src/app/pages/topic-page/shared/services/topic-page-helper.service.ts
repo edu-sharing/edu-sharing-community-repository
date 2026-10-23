@@ -31,7 +31,6 @@ import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { Closable } from '../../../../features/dialogs/card-dialog/card-dialog-config';
 import { DELETE_OR_CANCEL } from '../../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { DialogsService } from '../../../../features/dialogs/dialogs.service';
-import type { PreviewConfig } from '../../../../features/editorial-sidebar/editorial-sidebar.component';
 import { EditorialSidebarService } from '../../../../features/editorial-sidebar/editorial-sidebar.service';
 import { PreviewSidebarService } from '../../../../features/editorial-sidebar/preview-sidebar/preview-sidebar.service';
 import { Toast, ToastType } from '../../../../services/toast';
@@ -79,8 +78,6 @@ export class TopicPageHelperService {
     private translate = inject(TranslateService);
 
     blobToUpload: Blob;
-    /** Custom options for the actionbar of the preview in the editorial sidebar. */
-    previewCustomOptions: CustomOptions = null;
     private readonly standalonePreviewNode = toSignal(this.previewSidebarService.getCurrentNode(), {
         initialValue: null,
     });
@@ -119,7 +116,6 @@ export class TopicPageHelperService {
             this.previewSidebarService.handleNodeClick(node);
             return;
         }
-        const previewConfig = { customOptions: this.previewCustomOptions } as PreviewConfig;
         // the preview steps through the list it was opened from; a single node has no neighbours
         this.previewSourceList = list ?? null;
         this.editorialSidebarService.setPreviewList(this.previewSourceList);
@@ -128,7 +124,6 @@ export class TopicPageHelperService {
                 list,
                 { element: node, source: ClickSource.Preview },
                 Scope.TopicPage,
-                previewConfig,
             );
             return;
         }
@@ -141,8 +136,15 @@ export class TopicPageHelperService {
         this.editorialSidebarService.showOption({
             option: 'PREVIEW',
             trap: false,
-            optionConfig: previewConfig,
         });
+    }
+
+    /**
+     * Sets the actionbar options of the topic page's previews in the editorial sidebar;
+     * `null` removes them.
+     */
+    setPreviewCustomOptions(options: CustomOptions | null): void {
+        this.editorialSidebarService.setPreviewCustomOptions(Scope.TopicPage, options);
     }
 
     /** Whether the current preview was opened from the given node list. */

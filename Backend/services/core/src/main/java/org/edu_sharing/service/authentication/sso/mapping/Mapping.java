@@ -4,6 +4,7 @@ import com.typesafe.config.Optional;
 import lombok.Data;
 import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
+import org.edu_sharing.service.authentication.SSOAuthorityMapper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,6 +19,11 @@ public class Mapping {
     private final BidiMap<String, String> person = new DualHashBidiMap<>();
     private final BidiMap<String, Group> group = new DualHashBidiMap<>();
     private final Map<String, String> additionalKeyValues = new HashMap<>();
+
+    /**
+     * security.sso.settings merged with the optional "settings" block of this mapping
+     */
+    private SSOAuthorityMapper.Configuration settings;
 
     /**
      * used by external auth (i.e. shibboleth serviceprovider) where attributes are provided over ajp.

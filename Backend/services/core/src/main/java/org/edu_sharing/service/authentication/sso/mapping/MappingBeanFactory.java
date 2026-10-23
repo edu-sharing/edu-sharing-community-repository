@@ -1,11 +1,28 @@
 package org.edu_sharing.service.authentication.sso.mapping;
 
 import com.typesafe.config.*;
+import org.edu_sharing.service.authentication.SSOAuthorityMapper;
 
 public class MappingBeanFactory {
 
-    public static Mapping getMapping(Config config) {
+    public static final String SETTINGS = "settings";
+
+    /**
+     * creates the mapping found at path, falls back to an empty mapping when the path is not configured
+     */
+    public static Mapping getMapping(Config rootConfig, String path) {
+        Config config = rootConfig.hasPath(path) ? rootConfig.getConfig(path) : ConfigFactory.empty();
+        return getMapping(config, rootConfig.getConfig(SSOAuthorityMapper.CONFIG_PATH));
+    }
+
+    /**
+     * @param defaultSettings the security.sso.settings block. settings configured on the mapping are merged on top of it
+     */
+    public static Mapping getMapping(Config config, Config defaultSettings) {
         Mapping mapping = new Mapping();
+        Config settings = config.hasPath(SETTINGS) ? config.getConfig(SETTINGS).withFallback(defaultSettings) : defaultSettings;
+        mapping.setSettings(ConfigBeanFactory.create(settings, SSOAuthorityMapper.Configuration.class));
+
         if(config.hasPath("preferRemoteUser")) {
             mapping.setPreferRemoteUser(config.getBoolean("preferRemoteUser"));
         }

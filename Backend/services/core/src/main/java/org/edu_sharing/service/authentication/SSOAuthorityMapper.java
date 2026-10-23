@@ -25,7 +25,6 @@ import org.edu_sharing.alfresco.policy.OnUpdatePersonPropertiesPolicy;
 import org.edu_sharing.alfresco.service.OrganisationService;
 import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.lightbend.ConfigurationProperties;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -93,8 +92,12 @@ public class SSOAuthorityMapper {
         return shibbolethAuthTypes.contains(authType);
     }
 
+    /**
+     * default settings for all sso types. can be overridden per mapping via its "settings" block
+     */
+    public static final String CONFIG_PATH = "security.sso.settings";
+
     @Data
-    @ConfigurationProperties(prefix = "security.sso.common")
     public static class Configuration {
         private boolean createUser = true;
         private boolean updateUser = true;
@@ -104,7 +107,6 @@ public class SSOAuthorityMapper {
         private boolean updateMemberships = true;
         private boolean debug = false;
         boolean setupHomeDir = true;
-        private boolean authByAppCheckClientIp = true;
         private String organisationParam;
         private String globalGroupsParam;
     }
@@ -119,14 +121,9 @@ public class SSOAuthorityMapper {
     private final GuestService guestService;
     private final LightbendConfigLoader lightbendConfigLoader;
     private final SSOMappingProvider ssoMappingProvider;
-    private final Configuration mappingConfig;
     private final Optional<CustomGroupMapping> customGroupMapping;
     private final Optional<UserNameMapping> userNameMapping;
 
-
-    public boolean isAuthByAppCheckClientIp() {
-        return mappingConfig.isAuthByAppCheckClientIp();
-    }
 
     public static String mapAdminAuthority(String authority, String appId) {
         // when coming from the native app, do not scope
@@ -173,7 +170,8 @@ public class SSOAuthorityMapper {
     @RetryingTransaction
     public String mapAuthority(final Map<String, String> ssoAttributes) {
         final Mapping mapping = ssoMappingProvider.getMapping(ssoAttributes);
-        if (mappingConfig.isDebug()) {
+        final Configuration settings = mapping.getSettings();
+        if (settings.isDebug()) {
             for (Map.Entry<String, String> ssoAttribute : ssoAttributes.entrySet()) {
                 log.debug("sso attribute: {} value: {}", ssoAttribute.getKey(), ssoAttribute.getValue());
             }
@@ -253,17 +251,17 @@ public class SSOAuthorityMapper {
         final String originalUsername = tmpUserName;
 
         // moodle hashes the username
-        final String userName = (mappingConfig.isHashUserName() && !ssoType.equals(SSO_TYPE_AuthByApp)) ? digest(tmpUserName) : tmpUserName;
+        final String userName = (settings.isHashUserName() && !ssoType.equals(SSO_TYPE_AuthByApp)) ? digest(tmpUserName) : tmpUserName;
 
 
         try {
-            boolean createUser = mappingConfig.isCreateUser();
-            boolean updateUser = mappingConfig.isUpdateUser();
+            boolean createUser = settings.isCreateUser();
+            boolean updateUser = settings.isUpdateUser();
 
-            boolean createGroups = mappingConfig.isCreateGroups();
-            boolean hashGroupNames = mappingConfig.isHashGroupNames();
-            boolean updateMemberships = mappingConfig.isUpdateMemberships();
-            boolean setupHomeDir = mappingConfig.isSetupHomeDir();
+            boolean createGroups = settings.isCreateGroups();
+            boolean hashGroupNames = settings.isHashGroupNames();
+            boolean updateMemberships = settings.isUpdateMemberships();
+            boolean setupHomeDir = settings.isSetupHomeDir();
 
             if (whitelistedUser) {
                 createUser = false;
@@ -361,7 +359,7 @@ public class SSOAuthorityMapper {
 
                     personProperties.put(QName.createQName(CCConstants.PROP_USER_ESSSOTYPE), ssoType);
 
-                    if (mappingConfig.isHashUserName()) {
+                    if (settings.isHashUserName()) {
                         personProperties.put(QName.createQName(CCConstants.CM_PROP_PERSON_ESORIGINALUID), originalUsername);
                     }
 
@@ -412,10 +410,10 @@ public class SSOAuthorityMapper {
             List<Mapping.Group> mappingGroups = new ArrayList<>(mapping.getGroup().values());
 
             // * add moodle global groups
-            String lmsGlobalGroups = (mappingConfig.getGlobalGroupsParam() != null) ? ssoAttributes.get(mappingConfig.getGlobalGroupsParam()) : null;
+            String lmsGlobalGroups = (settings.getGlobalGroupsParam() != null) ? ssoAttributes.get(settings.getGlobalGroupsParam()) : null;
 
             //only if organisationparam is configured
-            String organisationName = (mappingConfig.getOrganisationParam() != null) ? ssoAttributes.get(mappingConfig.getOrganisationParam()) : null;
+            String organisationName = (settings.getOrganisationParam() != null) ? ssoAttributes.get(settings.getOrganisationParam()) : null;
             String organisationDisplayName = null;
 
             String existingOrganisationName = null;
@@ -428,7 +426,7 @@ public class SSOAuthorityMapper {
             // * create eduGroup for affiliation
             if (StringUtils.isNotBlank(organisationName)) {
 
-                organisationDisplayName = ssoAttributes.get(mappingConfig.getOrganisationParam() + "name");
+                organisationDisplayName = ssoAttributes.get(settings.getOrganisationParam() + "name");
 
                 if (organisationDisplayName == null) {
                     organisationDisplayName = organisationName;
