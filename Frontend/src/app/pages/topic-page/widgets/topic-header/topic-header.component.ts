@@ -451,11 +451,13 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
     }
 
     /**
-     * Resolves the header text background color to paint. In dark mode a bright custom color is
-     * adapted to a dark surface (so the light text stays readable); already-dark colors and light
-     * mode are left as configured.
+     * Resolves the header text background color to paint. The default color leaves the themed
+     * surface shared with the image; a custom color is adapted to a dark surface in dark mode.
      */
-    headerBackgroundColor(color: string): string {
+    headerBackgroundColor(color: string): string | null {
+        if (!color || color.toUpperCase() === this.DEFAULT_HEADER_TEXT_BG_COLOR) {
+            return null;
+        }
         return this.themeService.isDarkMode() ? this.themeService.toDarkSurfaceColor(color) : color;
     }
 

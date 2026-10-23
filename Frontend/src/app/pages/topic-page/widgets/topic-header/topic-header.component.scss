@@ -15,6 +15,8 @@
     .topic-text-wrapper {
         padding: 40px;
         position: relative;
+        // same surface as the image beside it; a custom color is set inline on top
+        background: topicPageVars.$surface-container-lowest;
         flex: 5;
         // use flex again for text wrapper
         display: flex;
