@@ -15,7 +15,7 @@
 ></es-topic-page-filters-sidebar>
 }
 <main>
-  <!-- status bar and breadcrumbs stay below the navigation while scrolling -->
+  <!-- status bar and variant selection stay below the navigation while scrolling -->
   <div class="template-fixed-top">
     @if (statusBarMode(); as mode) {
     <es-topic-page-status-bar
@@ -29,32 +29,11 @@
       (leave)="mode === 'globalTemplate' ? leaveGlobalTemplateMode() : leaveTemplateMode()"
       (backToSelection)="openVariantOrTemplateSelection($event)"
     ></es-topic-page-status-bar>
-    }
-    <!-- a global template or a previewed node is no variant of the collection's page, so the
-      variant selection is hidden -->
-    @if (initialLoadSuccessfully() && showBreadcrumb() && !globalTemplateNode() &&
-    !variantPreview()) {
-    <!-- BREADCRUMBS -->
-    @if (parentEntries()) {
-    <div class="template-breadcrumb">
-      <div class="template-breadcrumb-wrapper">
-        <es-topic-page-breadcrumb
-          [contextNodeId]="topicCollectionId()"
-          [editMode]="editMode()"
-          [isProcessing]="requestInProgress()"
-          [nodeId]="convertedBreadcrumbNodeId()"
-          [propagatedNodeId]="convertedPropagatedBreadcrumbNodeId()"
-          [pageTemplateExists]="!!collectionNodePagePropagateConfigRef"
-          [pageVariantNode]="pageVariantNode()"
-          [pageVariantConfigNodes]="pageVariantConfigs?.nodes || []"
-          [parentEntries]="parentEntries()"
-          [templateMode]="templateMode()"
-          (navigateToTemplate)="switchIntoTemplateMode()"
-          (variantSelected)="navigateToVariant($event)"
-        ></es-topic-page-breadcrumb>
-      </div>
+    } @if (showVariantSelect()) {
+    <div class="template-variant-bar">
+      <ng-container [ngTemplateOutlet]="variantSelect"></ng-container>
     </div>
-    } }
+    }
   </div>
   @if (!pageConfigCheckFailed()) {
   <div class="topic-page-outer-wrapper">
@@ -97,6 +76,8 @@
               [propagatedNodeId]="convertedPropagatedHeaderNodeId()"
               [parentEntries]="parentEntries()"
               [pageVariantNode]="pageVariantNode()"
+              [legacyMembersNodeId]="convertedBreadcrumbNodeId()"
+              [legacyPropagatedMembersNodeId]="convertedPropagatedBreadcrumbNodeId()"
               [searchInput]="computedSearchInput()"
               [topic]="topic()"
             ></es-topic-header>
@@ -233,7 +214,7 @@
                 pageVariantNode()?.title &&
                 !pageVariantNode()?.title.includes(pageVariantConfigPrefix)
                   ? (pageVariantNode() | nodeTitle)
-                  : (i18nPrefix + 'WIDGET.BREADCRUMB.PAGE_VARIANT_LABEL' | translate) +
+                  : (i18nPrefix + 'WIDGET.VARIANT_SELECT.PAGE_VARIANT_LABEL' | translate) +
                     ' ' +
                     (pageVariantNodeIndex + 1)
               "
@@ -732,5 +713,20 @@
     </span>
     }
   </button>
+  }
+</ng-template>
+<!-- also rendered by a host page in its own bar, e.g. the breadcrumb row of the collections page -->
+<ng-template #variantSelect>
+  <!-- a global template or a previewed node is no variant of the collection's page -->
+  @if (initialLoadSuccessfully() && !globalTemplateNode() && !variantPreview()) {
+  <es-topic-page-variant-select
+    [isProcessing]="requestInProgress()"
+    [pageTemplateExists]="!!collectionNodePagePropagateConfigRef"
+    [pageVariantNode]="pageVariantNode()"
+    [pageVariantConfigNodes]="pageVariantConfigs?.nodes || []"
+    [templateMode]="templateMode()"
+    (navigateToTemplate)="switchIntoTemplateMode()"
+    (variantSelected)="navigateToVariant($event)"
+  ></es-topic-page-variant-select>
   }
 </ng-template>

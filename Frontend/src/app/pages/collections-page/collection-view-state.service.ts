@@ -1,8 +1,8 @@
 import { computed, Injectable, signal } from '@angular/core';
 import { NodeEntriesDisplayType } from 'ngx-edu-sharing-ui';
 
-/** The ways the content of a collection can be presented. */
-export type CollectionViewType = 'grid' | 'list' | 'tree';
+/** The ways the content of a collection can be presented; `topic` shows its topic page. */
+export type CollectionViewType = 'grid' | 'list' | 'tree' | 'topic';
 
 /**
  * View settings of the collection that is currently shown. Provided by the collections page so

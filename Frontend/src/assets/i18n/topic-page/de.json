@@ -37,7 +37,7 @@
         "CURRENT_SELECTION_ANSWER_LABEL": "Antwort für die aktuelle Auswahl",
         "NO_ANSWER_DEFINED": "Bisher wurde für die Auswahl noch kein Text hinterlegt."
       },
-      "BREADCRUMB": {
+      "VARIANT_SELECT": {
         "PAGE_VARIANT_LABEL": "Seiten-Variante",
         "NAVIGATE_TO_PAGE_TEMPLATE": "Zur Seiten-Vorlage"
       },

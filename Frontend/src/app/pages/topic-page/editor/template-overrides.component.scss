@@ -83,18 +83,6 @@
     }
 }
 
-.template-breadcrumb {
-    background: topicPageVars.$primary-dark;
-
-    &::ng-deep {
-        a,
-        i,
-        p {
-            color: topicPageVars.$on-primary !important;
-        }
-    }
-}
-
 .template-header-container,
 .topic-page-content-wrapper {
     color: topicPageVars.$on-surface;

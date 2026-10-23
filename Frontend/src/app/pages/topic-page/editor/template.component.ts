@@ -208,7 +208,6 @@ import {
     retrievePromptFromAiConfig,
     retrieveTopicColor,
 } from '../shared/utils/template-util';
-import { BreadcrumbComponent } from '../widgets/breadcrumb/breadcrumb.component';
 import { GenericWidgetComponent } from '../widgets/generic-widget/generic-widget.component';
 import { GenericWidgetGlobalService } from '../widgets/generic-widget/generic-widget-global.service';
 import { ProfilingComponent } from '../widgets/profiling/profiling.component';
@@ -235,6 +234,16 @@ import {
     TopicPageStatusBarComponent,
     TopicPageStatusBarMode,
 } from './topic-page-status-bar/topic-page-status-bar.component';
+import { VariantSelectComponent } from '../widgets/variant-select/variant-select.component';
+import { TOPIC_VIEW_TYPE as TOPIC_VIEW_TYPE_PARAM_VALUE } from '../../../shared/topic-page-availability';
+
+// side menu items an `openMenu` query param can open, by the label they are identified with
+const OPEN_MENU_LABEL_KEYS: Record<string, string> = {
+    profiling: 'TOPIC_PAGE.SIDE_MENU.PROFILING.LABEL',
+    topicTree: 'TOPIC_PAGE.SIDE_MENU.TOPIC_TREE.LABEL',
+    statistics: 'TOPIC_PAGE.SIDE_MENU.STATISTICS.LABEL',
+    settings: 'TOPIC_PAGE.SIDE_MENU.CONFIG_PAGE_VARIANT.LABEL',
+};
 
 // the app-wide shortcuts only skip text inputs; textareas and rich text keep their own undo too
 const isEditableTarget = (target: EventTarget | null): boolean =>
@@ -246,7 +255,6 @@ const isEditableTarget = (target: EventTarget | null): boolean =>
         AddPageVariantOrTemplateDialogComponent,
         AddSwimlaneBorderButtonComponent,
         AiTextPromptPipe,
-        BreadcrumbComponent,
         CdkAccordionModule,
         ColorPickerComponent,
         ConfigurePageVariantOrTemplateComponent,
@@ -272,6 +280,7 @@ const isEditableTarget = (target: EventTarget | null): boolean =>
         TopicPageStatusBarComponent,
         TranslateModule,
         VarDirective,
+        VariantSelectComponent,
     ],
     providers: [
         OptionsHelperDataService,
@@ -437,8 +446,11 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 return (
                     this.topicPageHelperService.getBaseHref() +
                     this.router.serializeUrl(
-                        this.router.createUrlTree([UIConstants.ROUTER_PREFIX, 'topic-pages'], {
-                            queryParams: { collectionId: retrieveNodeId(node) },
+                        this.router.createUrlTree([UIConstants.ROUTER_PREFIX, 'collections'], {
+                            queryParams: {
+                                id: retrieveNodeId(node),
+                                viewType: TOPIC_VIEW_TYPE_PARAM_VALUE,
+                            },
                         }),
                     )
                 );
@@ -482,8 +494,15 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     @Input() collectionId: string;
     @Input() customUrl?: (node: Node) => string;
     @Input() customUrlTarget?: '_self' | '_blank';
-    showBreadcrumb: InputSignal<boolean> = input(true);
+    // a host page can render the variant selection in a bar of its own via `variantSelectTemplate`
+    showVariantSelect: InputSignal<boolean> = input(true);
     showSidebar: InputSignal<boolean> = input(true);
+    /** Fills the card of a host page instead of framing the page as a card of its own. */
+    readonly unframed = input(false, { transform: booleanAttribute });
+    @HostBinding('class.unframed') get unframedClass(): boolean {
+        return this.unframed();
+    }
+    readonly variantSelectTemplate = viewChild.required<TemplateRef<unknown>>('variantSelect');
     @Input() variantId: string;
     /**
      * Loads topics linked inside the page (topic tree, collection chips, breadcrumb) in this
@@ -521,6 +540,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     private customEventListenersInitialized: boolean = false;
     private switchedTopic: { collectionId: string; variantId?: string } | null = null;
     private readonly destroyed$ = new Subject<void>();
+    private isDestroyed: boolean = false;
 
     userHasEditRights: WritableSignal<boolean> = signal(false);
     isAdmin: WritableSignal<boolean> = signal(false);
@@ -814,12 +834,15 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         this.route.queryParams
             .pipe(take(1), takeUntil(this.destroyed$))
             .subscribe((params: Params): void => this.restoreSearchStateFromParams(params));
-        // set the topic based on the query param "collectionID"
+        // set the topic based on the query param "collectionID"; a host page passes it as input
         this.route.queryParams
-            .pipe(filter((params: Params) => params.collectionId))
+            .pipe(takeUntil(this.destroyed$))
             .subscribe(async (params: Params): Promise<void> => {
                 this.latestParams = params;
                 this.variantPinned.set(!!params.variantId);
+                if (this.initialLoadSuccessfully()) {
+                    void this.openMenuFromParams(params);
+                }
                 // due to reload with queryParams, this might be called twice, thus, initializedWithParams is important
                 if (params.collectionId && !this.initializedWithParams) {
                     // set the topicCollectionID
@@ -942,6 +965,10 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 metadataSet: this.genericWidgetGlobalService.getDefaultMds(),
             }),
         );
+        // a page left meanwhile leaves the search field to the page shown instead
+        if (this.isDestroyed) {
+            return;
+        }
         this.searchFieldService.enable(
             {
                 enableFiltersAndSuggestions: false,
@@ -1014,6 +1041,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * On destruction, complete the subjects.
      */
     ngOnDestroy(): void {
+        this.isDestroyed = true;
         void this.history.reset();
         this.destroyed$.next();
         this.destroyed$.complete();
@@ -1866,9 +1894,16 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * Reloads the page without parameters.
      */
     private async reloadWithoutParameters(): Promise<void> {
-        // navigate to default variant
+        // navigate to default variant; the params of a host page, e.g. the collection id, stay
         await this.router.navigate([], {
-            queryParams: { collectionId: this.latestParams.collectionId },
+            relativeTo: this.route,
+            queryParams: {
+                variantId: null,
+                openMenu: null,
+                [SEARCH_INPUT_QUERY_PARAM]: null,
+                [SEARCH_FILTERS_QUERY_PARAM]: null,
+            },
+            queryParamsHandling: 'merge',
             replaceUrl: true,
         });
         // TODO: remove, if a solution without page reload is found
@@ -2497,6 +2532,22 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     /**
      * Called by right es-side-menu-item itemClicked output event.
      */
+    /**
+     * Opens the side menu item an `openMenu` query param asks for and removes the param again.
+     */
+    private async openMenuFromParams(params: Params): Promise<void> {
+        const labelKey: string | undefined = OPEN_MENU_LABEL_KEYS[params.openMenu];
+        if (!labelKey) {
+            return;
+        }
+        this.collapsibleItemClicked(this.translate.instant(labelKey));
+        await this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { openMenu: null },
+            queryParamsHandling: 'merge',
+        });
+    }
+
     collapsibleItemClicked(item: string): void {
         if (this.selectedMenuItem === item) {
             this.closeSideMenus();

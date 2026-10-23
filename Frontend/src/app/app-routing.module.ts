@@ -1,9 +1,10 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { inject, NgModule } from '@angular/core';
+import { Router, RouterModule, Routes } from '@angular/router';
 import { UIConstants } from './core-module/core.module';
 import { extensionRoutes } from './extension/extension-routes';
 import { DialogsNavigationGuard } from './features/dialogs/dialogs-navigation.guard';
 import { StartupComponent } from './main/startup.component';
+import { getTopicPageQueryParams } from './shared/topic-page-availability';
 
 const routes: Routes = [
     // Overrides and additional routes
@@ -73,11 +74,15 @@ const routes: Routes = [
             ),
     },
 
-    // Topic pages
+    // Topic pages are a view of the collections page; links to their former route keep working
     {
         path: UIConstants.ROUTER_PREFIX + 'topic-pages',
-        loadChildren: () =>
-            import('./pages/topic-page/topic-page.module').then((m) => m.TopicPageModule),
+        redirectTo: ({ queryParams }) => {
+            const { collectionId, ...topicParams } = queryParams;
+            return inject(Router).createUrlTree([UIConstants.ROUTER_PREFIX + 'collections'], {
+                queryParams: { ...topicParams, ...getTopicPageQueryParams(collectionId) },
+            });
+        },
     },
 
     // Login

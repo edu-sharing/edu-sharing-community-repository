@@ -39,7 +39,20 @@
     }
 }
 
-// Rounded card of fixed height: the breadcrumb and hints stay on top while .template-scroll
+// Hosted inside another page's card, the page fills the space it is given without a frame.
+:host(.unframed) {
+    flex: 1;
+    min-height: 0;
+    height: auto;
+    margin-bottom: 0;
+}
+:host(.unframed) main {
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+// Rounded card of fixed height: the status bar stays on top while .template-scroll
 // scrolls the page content internally.
 main {
     flex: 1;
@@ -128,7 +141,7 @@ es-side-menu-wrapper {
     }
 }
 
-// BREADCRUMB NAVIGATION
+// FIXED BARS ABOVE THE PAGE CONTENT
 .template-fixed-top {
     flex-shrink: 0;
     position: relative;
@@ -136,19 +149,10 @@ es-side-menu-wrapper {
     z-index: 12;
 }
 
-.template-breadcrumb {
-    flex-shrink: 0;
-    box-sizing: border-box;
-    width: 100%;
-
-    .template-breadcrumb-wrapper {
-        margin: 0 auto;
-        display: flex;
-        justify-content: flex-start;
-        position: relative;
-        box-sizing: border-box;
-        max-width: var(--content-max-width);
-    }
+.template-variant-bar {
+    display: flex;
+    justify-content: flex-end;
+    padding: 8px 16px;
 }
 
 // TOPIC HEADER

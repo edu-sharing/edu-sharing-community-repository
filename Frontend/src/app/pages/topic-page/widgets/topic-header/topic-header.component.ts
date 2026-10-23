@@ -1,6 +1,10 @@
 import {
     Component,
+    ComponentRef,
     CUSTOM_ELEMENTS_SCHEMA,
+    DestroyRef,
+    effect,
+    ElementRef,
     input,
     Input,
     InputSignal,
@@ -8,6 +12,9 @@ import {
     OnInit,
     signal,
     SimpleChanges,
+    untracked,
+    viewChild,
+    ViewContainerRef,
     ViewEncapsulation,
     WritableSignal,
     inject,
@@ -22,6 +29,7 @@ import {
     PreferredColor,
     SpinnerComponent,
     UIConstants,
+    UIService,
 } from 'ngx-edu-sharing-ui';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
 import { ThemeService } from '../../../../services/theme.service';
@@ -35,10 +43,16 @@ import { TopicPageGlobalService } from '../../shared/services/topic-page-global.
 import { TopicPageHelperService } from '../../shared/services/topic-page-helper.service';
 import { TopicPageHistoryService } from '../../shared/services/topic-page-history.service';
 import { DEFAULT_WIDGET_CONFIG_PROP } from '../../shared/types/custom-definitions';
+import { HeaderExtensionInterface } from '../../shared/types/header-extension';
+import { BreadcrumbConfig } from '../../shared/types/widget-config/breadcrumb-config';
 import { TopicHeaderConfig } from '../../shared/types/widget-config/topic-header-config';
 import { retrieveResultString } from '../../shared/utils/ai-util';
 import { getNodeOrDefaultNodeId } from '../../shared/utils/node-util';
-import { convertNodeRefIntoNodeId, retrieveNodeId } from '../../shared/utils/template-util';
+import {
+    convertNodeRefIntoNodeId,
+    retrieveNodeId,
+    retrieveWidgetConfigFromNode,
+} from '../../shared/utils/template-util';
 import { ColorPickerComponent } from '../shared/color-picker/color-picker.component';
 import { EditableTextComponent } from '../shared/editable-text/editable-text.component';
 import { ImageWrapperComponent } from '../shared/image-wrapper/image-wrapper.component';
@@ -69,6 +83,8 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
     private topicPageHelperService = inject(TopicPageHelperService);
     private topicPageHistoryService = inject(TopicPageHistoryService, { optional: true });
     private themeService = inject(ThemeService);
+    private uiService = inject(UIService);
+    private destroyRef = inject(DestroyRef);
 
     // CONSTANTS
     private readonly DEFAULT_DESCRIPTION: string = '';
@@ -92,12 +108,23 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
     @Input() defaultDescriptionNodeId?: string = '';
     @Input() defaultImageNodeId?: string = '';
     @Input() defaultTextNodeId?: string = '';
-    @Input() editMode: boolean = false;
+    private readonly editModeSignal: WritableSignal<boolean> = signal(false);
+    private _editMode: boolean = false;
+    @Input() set editMode(value: boolean) {
+        this._editMode = value;
+        this.editModeSignal.set(value);
+    }
+    get editMode(): boolean {
+        return this._editMode;
+    }
     @Input() nodeId: string = '';
     // propagated header node: only its text background color is taken over,
     // other parameters fall back to defaults
     @Input() propagatedNodeId: string = '';
     @Input() pageVariantNode: Node;
+    // breadcrumb widget nodes of pages stored before the header held the editorial members
+    @Input() legacyMembersNodeId: string = '';
+    @Input() legacyPropagatedMembersNodeId: string = '';
     parentEntries: InputSignal<ParentEntries> = input<ParentEntries>(null);
     searchInput: InputSignal<string> = input<string>(null);
     @Input() topic: string;
@@ -110,6 +137,15 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
     aiSupported: WritableSignal<boolean> = signal(false);
     backToCollectionButtonVisible: WritableSignal<boolean> = signal(false);
     collectionDescription: string;
+    // members of this page's own config; undefined while the inherited ones are shown
+    private ownEditorialMemberNodeIds: string[] | undefined;
+    private editorialMemberNodeIds: string[] = [];
+    readonly hasHeaderExtension: boolean = this.topicPageGlobalService.hasCustomHeaderExtension();
+    private readonly customExtensionContainer = viewChild('customExtension', {
+        read: ViewContainerRef,
+    });
+    private readonly customExtensionElement = viewChild<ElementRef<HTMLElement>>('customExtension');
+    private customExtensionRef: ComponentRef<HeaderExtensionInterface> | null = null;
     // description is used for the "description" of importance (stored in a "header" widget node)
     description: string = this.DEFAULT_DESCRIPTION;
     initialized: WritableSignal<boolean> = signal(false);
@@ -124,6 +160,19 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
     widgetNodeId: string = null;
 
     constructor() {
+        effect((): void => {
+            const container: ViewContainerRef | undefined = this.customExtensionContainer();
+            const element: ElementRef<HTMLElement> | undefined = this.customExtensionElement();
+            if (container && element) {
+                untracked((): void => void this.mountCustomExtension(container, element));
+            } else {
+                this.customExtensionRef = null;
+            }
+        });
+        effect((): void => {
+            const editMode: boolean = this.editModeSignal();
+            this.customExtensionRef?.setInput('editMode', editMode);
+        });
         this.backToCollectionButtonVisible.set(
             this.topicPageGlobalService.getBackToCollectionButtonVisible(),
         );
@@ -204,6 +253,67 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
         this.description = this.DEFAULT_DESCRIPTION;
         this.textBackgroundColor = this.DEFAULT_HEADER_TEXT_BG_COLOR;
         this.userUploadedNodeId = null;
+        this.ownEditorialMemberNodeIds = undefined;
+        this.editorialMemberNodeIds = [];
+    }
+
+    /**
+     * Resolves the editorial members: the own header config, then the legacy breadcrumb config of
+     * this page, which both count as own, then the inherited header and breadcrumb configs.
+     */
+    private async loadEditorialMembers(ownConfig: TopicHeaderConfig | undefined): Promise<void> {
+        this.ownEditorialMemberNodeIds =
+            ownConfig?.editorialMemberNodeIds ??
+            (await this.readEditorialMembers(this.legacyMembersNodeId));
+        this.editorialMemberNodeIds =
+            this.ownEditorialMemberNodeIds ??
+            (await this.readEditorialMembers(this.propagatedNodeId)) ??
+            (await this.readEditorialMembers(this.legacyPropagatedMembersNodeId)) ??
+            [];
+        this.customExtensionRef?.setInput('editorialMemberNodeIds', this.editorialMemberNodeIds);
+    }
+
+    private async readEditorialMembers(nodeId: string): Promise<string[] | undefined> {
+        if (!nodeId) {
+            return undefined;
+        }
+        const node: Node | null = await this.topicPageHelperService.getNodeIfAvailable(nodeId);
+        const config = node
+            ? (retrieveWidgetConfigFromNode(node) as TopicHeaderConfig | BreadcrumbConfig)
+            : undefined;
+        return config?.editorialMemberNodeIds;
+    }
+
+    /**
+     * Mounts the registered header extension and stores the members it changes in this header.
+     */
+    private async mountCustomExtension(
+        container: ViewContainerRef,
+        element: ElementRef<HTMLElement>,
+    ): Promise<void> {
+        const componentClass = await this.topicPageGlobalService.getCustomHeaderExtension();
+        if (!componentClass || this.customExtensionContainer() !== container) {
+            return;
+        }
+        const ref: ComponentRef<HeaderExtensionInterface> = this.uiService.injectAngularComponent(
+            container,
+            componentClass,
+            element.nativeElement,
+            {
+                editorialMemberNodeIds: this.editorialMemberNodeIds,
+            } as unknown as Partial<HeaderExtensionInterface>,
+            { replace: false },
+        );
+        // editMode is an input signal, which only setInput reaches
+        ref.setInput('editMode', this.editMode);
+        ref.instance.editorialMemberNodeIdsChanged
+            ?.pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe((memberNodeIds: string[]): void => {
+                this.ownEditorialMemberNodeIds = memberNodeIds;
+                this.editorialMemberNodeIds = memberNodeIds;
+                void this.persistConfig();
+            });
+        this.customExtensionRef = ref;
     }
 
     /**
@@ -230,6 +340,7 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
             this.globalWidgetConfigService.defaultTopicHeaderTextWidgetNodeId,
         );
         await this.readConfigFromJson(configJson, aiNodeId, colorOnly);
+        await this.loadEditorialMembers(colorOnly ? undefined : JSON.parse(configJson));
         this.storedConfig = JSON.stringify(this.retrieveWidgetConfig());
         // set the component to be initialized (further processing is done in the child component)
         this.initialized.set(true);
@@ -475,6 +586,9 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
             description: this.description,
             userUploadedNodeId: this.userUploadedNodeId,
         };
+        if (this.ownEditorialMemberNodeIds) {
+            headerConfig.editorialMemberNodeIds = this.ownEditorialMemberNodeIds;
+        }
         if (this.textBackgroundColor) {
             headerConfig.textBackgroundColor = this.textBackgroundColor;
         }

@@ -4,6 +4,7 @@ import {
     Component,
     computed,
     ContentChild,
+    effect,
     ElementRef,
     EventEmitter,
     inject,
@@ -11,6 +12,8 @@ import {
     OnDestroy,
     signal,
     TemplateRef,
+    Type,
+    untracked,
     viewChild,
     ViewChild,
     DestroyRef,
@@ -70,6 +73,15 @@ import {
 } from '../../main/navigation/search-field/search-field.service';
 import { CollectionSearchService } from './collection-search.service';
 import { CollectionSearchStateService } from './collection-search-state.service';
+import { CollectionViewSlotsService } from './collection-view-slots.service';
+import {
+    hasTopicPage,
+    TOPIC_VIEW_TYPE,
+    VIEW_TYPE_QUERY_PARAM,
+} from '../../shared/topic-page-availability';
+
+// query params only the topic view reads; they are dropped when another view is selected
+const TOPIC_VIEW_QUERY_PARAMS = ['variantId', 'openMenu', 'q', 'filters'];
 
 // component class
 @Component({
@@ -84,6 +96,7 @@ import { CollectionSearchStateService } from './collection-search-state.service'
         CollectionViewStateService,
         CollectionSearchStateService,
         CollectionSearchService,
+        CollectionViewSlotsService,
     ],
     standalone: false,
 })
@@ -111,6 +124,30 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
             label: 'EDITORIAL.OPTIONS.NODES_SELECTOR.COLLECTIONS.DISPLAY_TYPE.TREE',
         },
     ];
+    /** whether a topic page is configured for the open collection */
+    private readonly topicPageConfigured = signal(false);
+    private readonly collectionWritable = signal(false);
+    /** viewers only get a configured topic page, writers can also set one up */
+    readonly topicViewAvailable = computed(
+        () => this.topicPageConfigured() || this.collectionWritable(),
+    );
+    /** the view types of a collection below the root level, which also offer its topic page */
+    readonly collectionDisplayTypeItems = computed((): ViewToggleItem<CollectionViewType>[] => [
+        ...this.displayTypeItems,
+        {
+            id: 'topic',
+            icon: 'menu_book',
+            label: this.topicViewAvailable()
+                ? 'EDITORIAL.OPTIONS.NODES_SELECTOR.COLLECTIONS.DISPLAY_TYPE.TOPIC'
+                : 'EDITORIAL.OPTIONS.NODES_SELECTOR.COLLECTIONS.DISPLAY_TYPE.TOPIC_UNAVAILABLE',
+            disabled: !this.topicViewAvailable(),
+        },
+    ]);
+    /** the topic view, loaded the first time it is shown */
+    readonly topicViewComponent = signal<Type<unknown> | null>(null);
+    readonly breadcrumbEndSlot = inject(CollectionViewSlotsService).breadcrumbEnd;
+    private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+    private readonly rightSidenav = viewChild('rightSidenav', { read: ElementRef });
     private collectionService = inject(RestCollectionService);
     private collectionScopesService = inject(CollectionScopesService);
     private config = inject(ConfigurationService);
@@ -196,6 +233,9 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
     set collection(collection: Node) {
         this.currentCollection = collection;
         this.details.collection.set(collection);
+        this.collectionWritable.set(
+            RestHelper.hasAccessPermission(collection, RestConstants.PERMISSION_WRITE),
+        );
     }
     ngAfterContentInit(): void {
         // a host template receives the permissions of the collection, so they are requested
@@ -244,6 +284,7 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
     /** Categories of collections listed as tabs, empty until they are known. */
     readonly scopes = signal<CollectionScope[]>([]);
     constructor() {
+        this.registerTopicView();
         this.translations.waitForInit().subscribe(() => {
             combineLatest([
                 this.connector.isLoggedIn(),
@@ -547,7 +588,9 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
 
     private renderBreadcrumbs() {
         this.breadcrumbsService.setNodePath([]);
+        this.topicPageConfigured.set(false);
         if (this.collection.ref.id === RestConstants.ROOT) {
+            this.settleViewType();
             return;
         }
         this.nodeService
@@ -561,7 +604,108 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
                     );
                 }
                 this.breadcrumbsService.setNodePath(path);
+                this.topicPageConfigured.set(hasTopicPage(this.collection, path));
+                this.settleViewType();
             });
+    }
+
+    /** Applies a view type the user selected and keeps the URL in line with it. */
+    selectViewType(viewType: CollectionViewType): void {
+        const leavesTopicView = this.viewState.viewType() === 'topic' && viewType !== 'topic';
+        this.viewState.viewType.set(viewType);
+        if (viewType === 'topic') {
+            this.setTopicViewParam(true, false);
+        } else if (leavesTopicView) {
+            this.setTopicViewParam(false, false);
+        }
+    }
+
+    /**
+     * Only the topic view is kept in the URL, so a copied link opens it, while every other view
+     * falls back to the default. The view stays when another collection is opened from it.
+     */
+    private applyViewTypeParam(params: Params): void {
+        if (params[VIEW_TYPE_QUERY_PARAM] === TOPIC_VIEW_TYPE) {
+            this.viewState.viewType.set('topic');
+        } else if (this.viewState.viewType() === 'topic' && params.id === this.params?.id) {
+            this.viewState.viewType.set('grid');
+        }
+    }
+
+    /**
+     * Once the collection is known, falls back from a topic view it does not offer and stores a
+     * topic view that was kept while navigating.
+     */
+    private settleViewType(): void {
+        if (this.viewState.viewType() !== 'topic') {
+            return;
+        }
+        const available =
+            this.collection?.ref?.id !== RestConstants.ROOT && this.topicViewAvailable();
+        if (!available) {
+            this.viewState.viewType.set('grid');
+        }
+        if (available !== (this.params?.[VIEW_TYPE_QUERY_PARAM] === TOPIC_VIEW_TYPE)) {
+            this.setTopicViewParam(available, true);
+        }
+    }
+
+    private setTopicViewParam(topicView: boolean, replaceUrl: boolean): void {
+        const queryParams: Params = topicView
+            ? { [VIEW_TYPE_QUERY_PARAM]: TOPIC_VIEW_TYPE }
+            : Object.fromEntries(
+                  [VIEW_TYPE_QUERY_PARAM, ...TOPIC_VIEW_QUERY_PARAMS].map((key): [string, null] => [
+                      key,
+                      null,
+                  ]),
+              );
+        void this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams,
+            queryParamsHandling: 'merge',
+            replaceUrl,
+        });
+    }
+
+    /**
+     * Loads the topic view when it is shown first and hands the search field back to the
+     * collection search once the topic view, which brings its own, is left.
+     */
+    private registerTopicView(): void {
+        // the topic page's side menu is fixed to the viewport and has to clear the open sidebar
+        effect((onCleanup) => {
+            const sidenav: HTMLElement | undefined = this.rightSidenav()?.nativeElement;
+            if (!sidenav || !this.editorialSidebarService.sidebarOpened()) {
+                return;
+            }
+            const updateInset = () =>
+                this.host.nativeElement.style.setProperty(
+                    '--sideMenuRightInset',
+                    `${sidenav.offsetWidth}px`,
+                );
+            const observer = new ResizeObserver(updateInset);
+            observer.observe(sidenav);
+            updateInset();
+            onCleanup(() => {
+                observer.disconnect();
+                this.host.nativeElement.style.removeProperty('--sideMenuRightInset');
+            });
+        });
+        let topicViewShown = false;
+        effect(() => {
+            const shown = this.viewState.viewType() === 'topic';
+            untracked(() => {
+                if (shown && !this.topicViewComponent()) {
+                    void import('./topic-view/collection-topic-view.component').then((m) =>
+                        this.topicViewComponent.set(m.CollectionTopicViewComponent),
+                    );
+                }
+                if (topicViewShown && !shown && this.isReady) {
+                    afterNextRender(() => this.setupSearchField(), { injector: this.injector });
+                }
+                topicViewShown = shown;
+            });
+        });
     }
 
     private initialize() {
@@ -577,18 +721,23 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
                 // subscribe to parameters of url
                 this.setupSearchField();
                 this.route.queryParams.subscribe(async (params) => {
+                    this.applyViewTypeParam(params);
                     this.searchState.query.set(params.query || null);
                     this.searchFieldInstance?.setSearchString(params.query ?? '');
                     const diffs = Helper.getDifferentKeys(this.params, params);
-                    // view type and search term are applied by the lists, the page stays as it is
+                    // view type, search term and the topic view's state are applied by the views, the
+                    // page stays as it is
                     const changed = Object.keys(diffs);
+                    const keptKeys = [
+                        VIEW_TYPE_QUERY_PARAM,
+                        'query',
+                        'createCollection',
+                        ...TOPIC_VIEW_QUERY_PARAMS,
+                    ];
                     if (
                         this.params &&
                         changed.length > 0 &&
-                        changed.every(
-                            (key) =>
-                                key === 'viewType' || key === 'query' || key === 'createCollection',
-                        )
+                        changed.every((key) => keptKeys.includes(key))
                     ) {
                         this.params = params;
                         return;

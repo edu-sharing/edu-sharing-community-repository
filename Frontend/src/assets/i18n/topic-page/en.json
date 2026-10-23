@@ -37,7 +37,7 @@
         "CURRENT_SELECTION_ANSWER_LABEL": "Answer for the current selection",
         "NO_ANSWER_DEFINED": "No text has been defined for the selection yet."
       },
-      "BREADCRUMB": {
+      "VARIANT_SELECT": {
         "PAGE_VARIANT_LABEL": "Page variant",
         "NAVIGATE_TO_PAGE_TEMPLATE": "Navigate to page template"
       },

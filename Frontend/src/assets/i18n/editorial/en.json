@@ -160,7 +160,9 @@
             "LABEL": "Display type",
             "GRID": "Display as tiles",
             "TABLE": "Display as list",
-            "TREE": "Display as tree"
+            "TREE": "Display as tree",
+            "TOPIC": "Display as topic page",
+            "TOPIC_UNAVAILABLE": "No topic page has been set up for this collection yet"
           }
         },
         "WORKSPACE": {

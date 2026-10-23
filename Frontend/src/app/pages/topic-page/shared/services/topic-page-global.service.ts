@@ -3,11 +3,11 @@ import { NavigationExtras } from '@angular/router';
 import { NgxColorsColor } from 'ngx-colors';
 import { Node } from 'ngx-edu-sharing-api';
 import { Observable, Subject } from 'rxjs';
-import { BreadcrumbExtensionInterface } from '../../widgets/breadcrumb/breadcrumb.component';
+import { HeaderExtensionInterface } from '../types/header-extension';
 
-export type CustomBreadcrumbExtension = {
+export type CustomHeaderExtension = {
     id: string;
-    component: () => Promise<Type<BreadcrumbExtensionInterface>>;
+    component: () => Promise<Type<HeaderExtensionInterface>>;
 };
 export type CustomSideMenuItem = {
     id: string;
@@ -28,7 +28,7 @@ export type TopicNavigation = (collectionId: string, url: string | null) => bool
 })
 export class TopicPageGlobalService {
     private backToCollectionButtonVisible: boolean = true;
-    private customBreadcrumbExtension: CustomBreadcrumbExtension = null;
+    private customHeaderExtension: CustomHeaderExtension = null;
     private customReurlComponent: string = '';
     private customReurlExtras: NavigationExtras;
     private customApplyFilterComponent: string = '';
@@ -55,10 +55,10 @@ export class TopicPageGlobalService {
     }
 
     /**
-     * Registers a custom breadcrumb extension.
+     * Registers a custom extension rendered in the topic header, below the importance text.
      */
-    registerCustomBreadcrumbExtension(customBreadcrumbExtension: CustomBreadcrumbExtension) {
-        this.customBreadcrumbExtension = customBreadcrumbExtension;
+    registerCustomHeaderExtension(customHeaderExtension: CustomHeaderExtension) {
+        this.customHeaderExtension = customHeaderExtension;
     }
 
     /**
@@ -132,7 +132,7 @@ export class TopicPageGlobalService {
     }
 
     /**
-     * Registers a custom breadcrumb extension.
+     * Registers a custom side menu item.
      */
     registerCustomSideMenuItem(
         id: string,
@@ -283,11 +283,11 @@ export class TopicPageGlobalService {
     }
 
     /**
-     * Retrieves the custom breadcrumb extension, if available.
+     * Retrieves the custom header extension, if available.
      */
-    async getCustomBreadcrumbExtension() {
-        if (this.customBreadcrumbExtension != null) {
-            return this.customBreadcrumbExtension.component();
+    async getCustomHeaderExtension() {
+        if (this.customHeaderExtension != null) {
+            return this.customHeaderExtension.component();
         }
         return null;
     }
@@ -307,10 +307,10 @@ export class TopicPageGlobalService {
     }
 
     /**
-     * Checks if a custom breadcrumb extension is registered.
+     * Checks if a custom header extension is registered.
      */
-    hasCustomBreadcrumbExtension() {
-        return !!this.customBreadcrumbExtension;
+    hasCustomHeaderExtension() {
+        return !!this.customHeaderExtension;
     }
 
     /**

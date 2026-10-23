@@ -14,6 +14,7 @@ import { ConfigurationService } from '../core-module/rest/services/configuration
 import { RestConnectorService } from '../core-module/rest/services/rest-connector.service';
 import { RestNodeService } from '../core-module/rest/services/rest-node.service';
 import { RouterHelper } from '../util/router.helper';
+import { getTopicPageQueryParams } from '../shared/topic-page-availability';
 import { ExtendedAce } from '../features/dialogs/dialog-modules/share-dialog/share-dialog.component';
 
 export class UIHelper {
@@ -179,8 +180,8 @@ export class UIHelper {
     }
 
     public static goToTopicPage(router: Router, node: Node) {
-        void router.navigate([UIConstants.ROUTER_PREFIX, 'topic-pages'], {
-            queryParams: { collectionId: node.ref.id },
+        void router.navigate([UIConstants.ROUTER_PREFIX, 'collections'], {
+            queryParams: getTopicPageQueryParams(node.ref.id),
         });
     }
 

@@ -1,0 +1,19 @@
+:host {
+    display: block;
+}
+
+// fits the select into the height of the bar it is placed in
+.select-config-field {
+    --mat-form-field-container-height: 40px;
+    --mat-form-field-container-vertical-padding: 8px;
+    min-width: 160px;
+
+    &.mat-form-field-disabled {
+        cursor: not-allowed;
+    }
+}
+
+// separates the template option from the variants
+::ng-deep .navigate-to-template {
+    border-top: 1px solid var(--borderLight);
+}

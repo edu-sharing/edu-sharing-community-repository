@@ -128,20 +128,23 @@
                   }"
                   preferredName="title"
                   [invisibleDescription]="true"
-                  [canDropNodes]="collectionContentComponent.canDropOnCollectionBreadcrumbs"
+                  [canDropNodes]="collectionContentRef?.canDropOnCollectionBreadcrumbs"
                   (dropElement)="
-                    collectionContentComponent.dropOnCollection($event.target, $event.source)
+                    collectionContentRef?.dropOnCollection($event.target, $event.source)
                   "
                 ></es-breadcrumbs>
                 }
+                <!-- content the current view adds to the breadcrumb row, e.g. a variant selection -->
+                <ng-container [ngTemplateOutlet]="breadcrumbEndSlot()"></ng-container>
                 <es-view-toggle-group
                   class="display-type-toggle"
                   groupLabel="EDITORIAL.OPTIONS.NODES_SELECTOR.COLLECTIONS.DISPLAY_TYPE.LABEL"
-                  [items]="displayTypeItems"
-                  [(value)]="viewState.viewType"
+                  [items]="collectionDisplayTypeItems()"
+                  [value]="viewState.viewType()"
+                  (valueChange)="selectViewType($event)"
                 ></es-view-toggle-group>
               </div>
-              @if (searchState.active()) {
+              @if (viewState.viewType() !== 'topic') { @if (searchState.active()) {
               <h2 class="root-bar-title mat-heading-3 search-in-collection">
                 {{
                   'COLLECTIONS.SEARCH_RESULTS_IN_COLLECTION'
@@ -150,7 +153,7 @@
               </h2>
               }
               <es-collection-header-bar [collection]="collection"></es-collection-header-bar>
-              } @if (isRootLevelCollection() && !isLoading) {
+              } } @if (isRootLevelCollection() && !isLoading) {
               <div class="breadcrumb-space root-bar" data-test="collections-root-bar">
                 <h2 class="root-bar-title mat-heading-3">
                   @if (searchState.active()) {
@@ -170,10 +173,18 @@
                   class="display-type-toggle"
                   groupLabel="EDITORIAL.OPTIONS.NODES_SELECTOR.COLLECTIONS.DISPLAY_TYPE.LABEL"
                   [items]="displayTypeItems"
-                  [(value)]="viewState.viewType"
+                  [value]="viewState.viewType()"
+                  (valueChange)="selectViewType($event)"
                 ></es-view-toggle-group>
               </div>
               }
+              <!-- the topic view replaces everything below the breadcrumb and scrolls itself -->
+              @if (viewState.viewType() === 'topic') { @if (topicViewAvailable() &&
+              topicViewComponent(); as topicView) {
+              <ng-container
+                *ngComponentOutlet="topicView; inputs: { collectionId: collection.ref.id }"
+              ></ng-container>
+              } } @else {
               <!-- Only this region scrolls; the breadcrumb header above stays fixed. -->
               <div class="collections-scroll">
                 <es-collection-content
@@ -199,7 +210,7 @@
                   </ng-template>
                 </es-collection-content>
               </div>
-              }
+              } }
             </div>
           </div>
         </div>

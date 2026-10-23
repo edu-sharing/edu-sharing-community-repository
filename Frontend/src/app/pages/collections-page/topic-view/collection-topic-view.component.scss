@@ -1,0 +1,7 @@
+// fills the space below the breadcrumb; the topic page scrolls its content internally
+:host {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}

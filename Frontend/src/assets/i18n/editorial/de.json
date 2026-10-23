@@ -160,7 +160,9 @@
             "LABEL": "Anzeigeart",
             "GRID": "Anzeige als Kacheln",
             "TABLE": "Anzeige als Liste",
-            "TREE": "Anzeige als Baum"
+            "TREE": "Anzeige als Baum",
+            "TOPIC": "Anzeige als Themenseite",
+            "TOPIC_UNAVAILABLE": "Für diese Sammlung wurde noch keine Themenseite eingerichtet"
           }
         },
         "WORKSPACE": {

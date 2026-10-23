@@ -81,6 +81,8 @@
         [(text)]="description"
         (textChange)="onDescriptionChanged()"
       ></es-editable-text>
+      } @if (hasHeaderExtension) {
+      <div #customExtension class="topic-header-extension"></div>
       }
     </div>
     <es-image-wrapper
