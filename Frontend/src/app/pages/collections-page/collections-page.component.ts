@@ -734,7 +734,15 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
                     );
                 }
                 if (topicViewShown && !shown && this.isReady) {
-                    afterNextRender(() => this.setupSearchField(), { injector: this.injector });
+                    afterNextRender(
+                        () => {
+                            this.setupSearchField();
+                            this.searchFieldInstance.setSearchString(
+                                this.searchState.query() ?? '',
+                            );
+                        },
+                        { injector: this.injector },
+                    );
                 }
                 topicViewShown = shown;
             });
@@ -756,7 +764,10 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
                 this.route.queryParams.subscribe(async (params) => {
                     this.applyViewTypeParam(params);
                     this.searchState.query.set(params.query || null);
-                    this.searchFieldInstance?.setSearchString(params.query ?? '');
+                    // the topic view keeps its own search term in the shared search field
+                    if (this.viewState.viewType() !== 'topic') {
+                        this.searchFieldInstance?.setSearchString(params.query ?? '');
+                    }
                     const diffs = Helper.getDifferentKeys(this.params, params);
                     // view type, search term and the topic view's state are applied by the views, the
                     // page stays as it is
