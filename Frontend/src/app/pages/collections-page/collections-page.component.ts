@@ -76,9 +76,9 @@ import { CollectionSearchStateService } from './collection-search-state.service'
 import { CollectionViewSlotsService } from './collection-view-slots.service';
 import {
     hasTopicPage,
-    TOPIC_VIEW_TYPE,
+    TOPIC_PAGE_VIEW_TYPE,
     VIEW_TYPE_QUERY_PARAM,
-} from '../../shared/topic-page-availability';
+} from '../../features/topic-page/shared/utils/collection-topic-page-util';
 
 // query params only the topic view reads; they are dropped when another view is selected
 const TOPIC_VIEW_QUERY_PARAMS = ['variantId', 'openMenu', 'q', 'filters'];
@@ -137,7 +137,7 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
     readonly collectionDisplayTypeItems = computed((): ViewToggleItem<CollectionViewType>[] => [
         ...this.displayTypeItems,
         {
-            id: 'topic',
+            id: 'topicPage',
             icon: 'menu_book',
             label: this.topicViewAvailable()
                 ? 'EDITORIAL.OPTIONS.NODES_SELECTOR.COLLECTIONS.DISPLAY_TYPE.TOPIC'
@@ -622,9 +622,10 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
 
     /** Applies a view type the user selected and keeps the URL in line with it. */
     selectViewType(viewType: CollectionViewType): void {
-        const leavesTopicView = this.viewState.viewType() === 'topic' && viewType !== 'topic';
+        const leavesTopicView =
+            this.viewState.viewType() === 'topicPage' && viewType !== 'topicPage';
         this.viewState.viewType.set(viewType);
-        if (viewType === 'topic') {
+        if (viewType === 'topicPage') {
             this.setTopicViewParam(true, false);
         } else if (leavesTopicView) {
             this.setTopicViewParam(false, false);
@@ -636,9 +637,9 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
      * falls back to the default. The view stays when another collection is opened from it.
      */
     private applyViewTypeParam(params: Params): void {
-        if (params[VIEW_TYPE_QUERY_PARAM] === TOPIC_VIEW_TYPE) {
-            this.viewState.viewType.set('topic');
-        } else if (this.viewState.viewType() === 'topic' && params.id === this.params?.id) {
+        if (params[VIEW_TYPE_QUERY_PARAM] === TOPIC_PAGE_VIEW_TYPE) {
+            this.viewState.viewType.set('topicPage');
+        } else if (this.viewState.viewType() === 'topicPage' && params.id === this.params?.id) {
             this.viewState.viewType.set('grid');
         }
     }
@@ -649,7 +650,7 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
      */
     private settleViewType(): void {
         this.applyCollectionDefaultView();
-        if (this.viewState.viewType() !== 'topic') {
+        if (this.viewState.viewType() !== 'topicPage') {
             return;
         }
         const available =
@@ -657,7 +658,7 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
         if (!available) {
             this.viewState.viewType.set('grid');
         }
-        if (available !== (this.params?.[VIEW_TYPE_QUERY_PARAM] === TOPIC_VIEW_TYPE)) {
+        if (available !== (this.params?.[VIEW_TYPE_QUERY_PARAM] === TOPIC_PAGE_VIEW_TYPE)) {
             this.setTopicViewParam(available, true);
         }
     }
@@ -677,17 +678,17 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
         }
         this.defaultViewAppliedFor = id;
         if (
-            this.collection.collection?.viewtype === TOPIC_VIEW_TYPE &&
+            this.collection.collection?.viewtype === TOPIC_PAGE_VIEW_TYPE &&
             this.topicViewAvailable() &&
-            this.viewState.viewType() !== 'topic'
+            this.viewState.viewType() !== 'topicPage'
         ) {
-            this.viewState.viewType.set('topic');
+            this.viewState.viewType.set('topicPage');
         }
     }
 
     private setTopicViewParam(topicView: boolean, replaceUrl: boolean): void {
         const queryParams: Params = topicView
-            ? { [VIEW_TYPE_QUERY_PARAM]: TOPIC_VIEW_TYPE }
+            ? { [VIEW_TYPE_QUERY_PARAM]: TOPIC_PAGE_VIEW_TYPE }
             : Object.fromEntries(
                   [VIEW_TYPE_QUERY_PARAM, ...TOPIC_VIEW_QUERY_PARAMS].map((key): [string, null] => [
                       key,
@@ -735,7 +736,7 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
         });
         let topicViewShown = false;
         effect(() => {
-            const shown = this.viewState.viewType() === 'topic';
+            const shown = this.viewState.viewType() === 'topicPage';
             untracked(() => {
                 if (shown && !this.topicViewComponent()) {
                     void import('./collection-topic-view/collection-topic-view.component').then(
@@ -774,7 +775,7 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
                     this.applyViewTypeParam(params);
                     this.searchState.query.set(params.query || null);
                     // the topic view keeps its own search term in the shared search field
-                    if (this.viewState.viewType() !== 'topic') {
+                    if (this.viewState.viewType() !== 'topicPage') {
                         this.searchFieldInstance?.setSearchString(params.query ?? '');
                     }
                     const diffs = Helper.getDifferentKeys(this.params, params);

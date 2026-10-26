@@ -3,11 +3,11 @@ import { Node, RestConstants } from 'ngx-edu-sharing-api';
 /** Query param of the collections page naming its view type; only the topic view is stored. */
 export const VIEW_TYPE_QUERY_PARAM = 'viewType';
 /** Value of {@link VIEW_TYPE_QUERY_PARAM} that opens the topic page of a collection. */
-export const TOPIC_VIEW_TYPE = 'topic';
+export const TOPIC_PAGE_VIEW_TYPE = 'topicPage';
 
 /** Query params that open the topic page of the collection with the given id. */
 export function getTopicPageQueryParams(collectionId: string): Record<string, string> {
-    return { id: collectionId, [VIEW_TYPE_QUERY_PARAM]: TOPIC_VIEW_TYPE };
+    return { id: collectionId, [VIEW_TYPE_QUERY_PARAM]: TOPIC_PAGE_VIEW_TYPE };
 }
 
 /**

@@ -1,4 +1,4 @@
-import { TOPIC_VIEW_TYPE } from '../../../shared/topic-page-availability';
+import { TOPIC_PAGE_VIEW_TYPE } from '../../topic-page/shared/utils/collection-topic-page-util';
 import {
     Component,
     DestroyRef,
@@ -339,7 +339,7 @@ export class CreateCollectionSidebarComponent {
 
     /** stores the chosen default view in the collection data that is sent */
     private applyViewType(): void {
-        this.draft.collection.viewtype = this.openAsTopicPage() ? TOPIC_VIEW_TYPE : undefined;
+        this.draft.collection.viewtype = this.openAsTopicPage() ? TOPIC_PAGE_VIEW_TYPE : undefined;
     }
 
     private async createNew(values: Values): Promise<Node> {
@@ -591,7 +591,7 @@ export class CreateCollectionSidebarComponent {
                 : 'default',
         );
         this.metadata = node.properties as Values;
-        this.openAsTopicPage.set(node.collection.viewtype === TOPIC_VIEW_TYPE);
+        this.openAsTopicPage.set(node.collection.viewtype === TOPIC_PAGE_VIEW_TYPE);
         this.initialSorts = {
             subcollections: this.getSortId(
                 'subcollections',

@@ -4,7 +4,7 @@ import { UIConstants } from './core-module/core.module';
 import { extensionRoutes } from './extension/extension-routes';
 import { DialogsNavigationGuard } from './features/dialogs/dialogs-navigation.guard';
 import { StartupComponent } from './main/startup.component';
-import { getTopicPageQueryParams } from './shared/topic-page-availability';
+import { getTopicPageQueryParams } from './features/topic-page/shared/utils/collection-topic-page-util';
 
 const routes: Routes = [
     // Overrides and additional routes

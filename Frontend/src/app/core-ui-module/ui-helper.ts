@@ -14,7 +14,7 @@ import { ConfigurationService } from '../core-module/rest/services/configuration
 import { RestConnectorService } from '../core-module/rest/services/rest-connector.service';
 import { RestNodeService } from '../core-module/rest/services/rest-node.service';
 import { RouterHelper } from '../util/router.helper';
-import { getTopicPageQueryParams } from '../shared/topic-page-availability';
+import { getTopicPageQueryParams } from '../features/topic-page/shared/utils/collection-topic-page-util';
 import { ExtendedAce } from '../features/dialogs/dialog-modules/share-dialog/share-dialog.component';
 
 export class UIHelper {

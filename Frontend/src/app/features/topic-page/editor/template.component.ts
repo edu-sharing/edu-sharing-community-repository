@@ -235,7 +235,7 @@ import {
     TopicPageStatusBarMode,
 } from './topic-page-status-bar/topic-page-status-bar.component';
 import { VariantSelectComponent } from '../widgets/variant-select/variant-select.component';
-import { TOPIC_VIEW_TYPE as TOPIC_VIEW_TYPE_PARAM_VALUE } from '../../../shared/topic-page-availability';
+import { TOPIC_PAGE_VIEW_TYPE } from '../shared/utils/collection-topic-page-util';
 
 // side menu items an `openMenu` query param can open, by the label they are identified with
 const OPEN_MENU_LABEL_KEYS: Record<string, string> = {
@@ -449,7 +449,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                         this.router.createUrlTree([UIConstants.ROUTER_PREFIX, 'collections'], {
                             queryParams: {
                                 id: retrieveNodeId(node),
-                                viewType: TOPIC_VIEW_TYPE_PARAM_VALUE,
+                                viewType: TOPIC_PAGE_VIEW_TYPE,
                             },
                         }),
                     )

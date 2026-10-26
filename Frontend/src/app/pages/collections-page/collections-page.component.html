@@ -144,7 +144,7 @@
                   (valueChange)="selectViewType($event)"
                 ></es-view-toggle-group>
               </div>
-              @if (viewState.viewType() !== 'topic') { @if (searchState.active()) {
+              @if (viewState.viewType() !== 'topicPage') { @if (searchState.active()) {
               <h2 class="root-bar-title mat-heading-3 search-in-collection">
                 {{
                   'COLLECTIONS.SEARCH_RESULTS_IN_COLLECTION'
@@ -179,7 +179,7 @@
               </div>
               }
               <!-- the topic view replaces everything below the breadcrumb and scrolls itself -->
-              @if (viewState.viewType() === 'topic') { @if (topicViewAvailable() &&
+              @if (viewState.viewType() === 'topicPage') { @if (topicViewAvailable() &&
               collectionParents() && topicViewComponent(); as topicView) {
               <ng-container
                 *ngComponentOutlet="

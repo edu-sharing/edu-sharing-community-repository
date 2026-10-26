@@ -16,7 +16,7 @@ import { RestHelper } from '../../core-module/rest/rest-helper';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { Closable } from '../../features/dialogs/card-dialog/card-dialog-config';
 import { OptionsContext } from './options-context';
-import { hasTopicPage } from '../../shared/topic-page-availability';
+import { hasTopicPage } from '../../features/topic-page/shared/utils/collection-topic-page-util';
 import { firstValueFrom, forkJoin } from 'rxjs';
 
 export function createViewOptions({
