@@ -1,5 +1,6 @@
 <ng-template #gridTop>
-  @if (entriesService.sort?.allowed && (hasHiddenSortColumns$ | async)) {
+  @if (entriesService.sort?.allowed && !entriesService.sort.hideSortSelection &&
+  (hasHiddenSortColumns$ | async)) {
   <es-sort-select-panel
     class="order-panel"
     [active]="entriesService.sort.active"
@@ -136,7 +137,13 @@
       <mat-header-cell
         *matHeaderCellDef
         mat-sort-header
-        [disabled]="!(entriesService.sort?.allowed && isSortable(column))"
+        [disabled]="
+          !(
+            entriesService.sort?.allowed &&
+            !entriesService.sort.hideSortSelection &&
+            isSortable(column)
+          )
+        "
         [class.mat-column-primary]="first"
         [style.min-width]="first ? (containerWidth$ | async) / 3 + 'px' : null"
         >{{ column | esListItemLabel | async }}</mat-header-cell

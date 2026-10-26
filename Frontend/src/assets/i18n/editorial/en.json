@@ -88,7 +88,8 @@
         "SORT": {
           "TITLE": "Title",
           "MODIFIED": "Last modified",
-          "CREATED": "Created"
+          "CREATED": "Created",
+          "MANUAL": "Manual"
         },
         "TYPE_DEFAULT": "General collection",
         "NO_METADATA": "No metadata available",

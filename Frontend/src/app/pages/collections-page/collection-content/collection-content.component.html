@@ -30,6 +30,7 @@
           direction: sortCollections.direction,
           customSortingInProgress: sortCollections.customSortingInProgress,
           columns: sortCollections.columns,
+          hideSortSelection: true,
           allowed:
             !isMobile() &&
             !searchState.active() &&
@@ -100,6 +101,7 @@
             direction: sortReferences.direction,
             customSortingInProgress: sortReferences.customSortingInProgress,
             columns: sortReferences.columns,
+            hideSortSelection: true,
             allowed:
               !isMobile() &&
               dataSourceReferences.getData()?.length > 1 &&

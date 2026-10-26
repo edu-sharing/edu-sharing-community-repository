@@ -999,44 +999,18 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     isMobile() {
         return this.uiService.isMobile();
     }
+    /** Enters or leaves the mode in which the materials are arranged by hand. */
     async setReferenceSort(sort: ListSortConfig) {
-        const diff = Helper.getKeysWithDifferentValues(this.sortReferences, sort);
         this.sortReferences = sort;
-        // auto activate the custom sorting when the users switch to "custom order"
-        if (diff.includes('active')) {
-            this.sortReferences.customSortingInProgress =
-                this.sortReferences.active === RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION;
-        }
-        void this.toggleReferencesOrder();
-        if (this.sortReferences.customSortingInProgress) {
+        if (sort.customSortingInProgress) {
+            // all materials have to be present to arrange them
             await this.loadMoreReferences({
                 reset: true,
                 amount: RestConstants.COUNT_UNLIMITED,
                 offset: 0,
             });
         }
-        if (diff.includes('customSortingInProgress') && sort.customSortingInProgress) {
-            return;
-        }
-
-        try {
-            await this.nodeServiceApi
-                .setProperty(
-                    this.collection.ref.repo,
-                    this.collection.ref.id,
-                    RestConstants.CCM_PROP_COLLECTION_ORDER_MODE,
-                    [sort.active, (sort.direction === 'asc') + ''],
-                )
-                .toPromise();
-            if (sort.active !== RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION) {
-                this.toast.toast('COLLECTIONS.TOAST.SORT_SAVED_TYPE', {
-                    type: this.translation.instant('NODE.' + sort.active),
-                });
-            }
-        } catch (e) {
-            this.toast.error(e);
-        }
-        this.refreshContent();
+        await this.toggleReferencesOrder();
     }
 
     private getReferencesRequest(): RequestObject {
@@ -1270,31 +1244,10 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         this.deleteFromCollection();
     }
 
+    /** Enters or leaves the mode in which the sub-collections are arranged by hand. */
     async setCollectionSort(sort: ListSortConfig) {
         this.sortCollections = sort;
-        try {
-            await this.nodeServiceApi
-                .setProperty(
-                    this.collection.ref.repo,
-                    this.collection.ref.id,
-                    RestConstants.CCM_PROP_COLLECTION_SUBCOLLECTION_ORDER_MODE,
-                    [this.sortCollections.active, (this.sortCollections.direction === 'asc') + ''],
-                )
-                .toPromise();
-        } catch (e) {
-            this.toast.error(e);
-        }
-        this.refreshContent();
-        if (sort.active !== RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION) {
-            this.toast.toast('COLLECTIONS.TOAST.SORT_SAVED_TYPE', {
-                type: this.translation.instant('NODE.' + sort.active),
-            });
-        }
-        if (this.sortCollections.active === RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION) {
-            void this.toggleCollectionsOrder();
-        } else {
-            this.infobar.close();
-        }
+        await this.toggleCollectionsOrder();
     }
 
     private setOptionsCollection() {
@@ -1311,7 +1264,10 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             const response = await this.infobar.open({
                 title: 'COLLECTIONS.ORDER_COLLECTIONS',
                 message: 'COLLECTIONS.ORDER_COLLECTIONS_INFO',
-                buttons: [{ label: 'SAVE', config: { color: 'primary' } }],
+                buttons: [
+                    { label: 'CANCEL', config: { color: 'standard' } },
+                    { label: 'SAVE', config: { color: 'primary' } },
+                ],
             });
             if (response === 'SAVE') {
                 return this.changeCollectionsOrder();
@@ -1329,7 +1285,10 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             const response = await this.infobar.open({
                 title: 'COLLECTIONS.ORDER_ELEMENTS',
                 message: 'COLLECTIONS.ORDER_ELEMENTS_INFO',
-                buttons: [{ label: 'SAVE', config: { color: 'primary' } }],
+                buttons: [
+                    { label: 'CANCEL', config: { color: 'standard' } },
+                    { label: 'SAVE', config: { color: 'primary' } },
+                ],
             });
             this.sortReferences.customSortingInProgress = false;
             if (response === 'SAVE') {
@@ -1359,41 +1318,61 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
 
     private async changeReferencesOrder() {
         this.toast.showProgressSpinner();
-        this.collectionService
-            .setOrder(
-                this.collection.ref.id,
-                RestHelper.getNodeIds(await this.dataSourceReferences.getData()),
-            )
-            .subscribe(
-                () => {
-                    this.toast.toast('COLLECTIONS.TOAST.SORT_SAVED_CUSTOM');
-                    this.toast.closeProgressSpinner();
-                },
-                (error: any) => {
-                    this.toast.closeProgressSpinner();
-                    this.toast.error(error);
-                },
+        try {
+            await firstValueFrom(
+                this.collectionService.setOrder(
+                    this.collection.ref.id,
+                    RestHelper.getNodeIds(await this.dataSourceReferences.getData()),
+                ),
             );
+            await this.storeCustomOrderMode(RestConstants.CCM_PROP_COLLECTION_ORDER_MODE);
+            this.sortReferences = {
+                ...this.sortReferences,
+                active: RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION,
+                direction: 'asc',
+            };
+            this.toast.toast('COLLECTIONS.TOAST.SORT_SAVED_CUSTOM');
+        } catch (error) {
+            this.toast.error(error);
+        } finally {
+            this.toast.closeProgressSpinner();
+        }
     }
 
     private async changeCollectionsOrder() {
         this.toast.showProgressSpinner();
-        this.collectionService
-            .setOrder(
-                this.collection.ref.id,
-                RestHelper.getNodeIds(await this.dataSourceCollections.getData()),
-            )
-            .subscribe(
-                () => {
-                    this.sortCollections.customSortingInProgress = false;
-                    this.toast.toast('COLLECTIONS.TOAST.SORT_SAVED_CUSTOM');
-                    this.toast.closeProgressSpinner();
-                },
-                (error: any) => {
-                    this.toast.closeProgressSpinner();
-                    this.toast.error(error);
-                },
+        try {
+            await firstValueFrom(
+                this.collectionService.setOrder(
+                    this.collection.ref.id,
+                    RestHelper.getNodeIds(await this.dataSourceCollections.getData()),
+                ),
             );
+            await this.storeCustomOrderMode(
+                RestConstants.CCM_PROP_COLLECTION_SUBCOLLECTION_ORDER_MODE,
+            );
+            this.sortCollections = {
+                ...this.sortCollections,
+                active: RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION,
+                direction: 'asc',
+                customSortingInProgress: false,
+            };
+            this.toast.toast('COLLECTIONS.TOAST.SORT_SAVED_CUSTOM');
+        } catch (error) {
+            this.toast.error(error);
+        } finally {
+            this.toast.closeProgressSpinner();
+        }
+    }
+
+    /** Makes the arrangement set by hand the order in which the children of the collection show. */
+    private async storeCustomOrderMode(property: string): Promise<void> {
+        await this.nodeServiceApi
+            .setProperty(this.collection.ref.repo, this.collection.ref.id, property, [
+                RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION,
+                'true',
+            ])
+            .toPromise();
     }
 
     openItem(event: NodeClickEvent<CollectionReference>) {

@@ -47,6 +47,11 @@ export type ListOptionsConfig = {
 export interface ListSortConfig extends Sort {
     columns: ListItemSort[];
     allowed?: boolean;
+    /**
+     * Offers no choice of the sort criterion: the order is set elsewhere and only the toggle for
+     * arranging the entries by hand is shown.
+     */
+    hideSortSelection?: boolean;
     customSortingInProgress?: boolean;
 }
 

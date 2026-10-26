@@ -66,7 +66,7 @@ export type EditCollectionConfig = {
 type Step = 'DESIGN' | 'CONFIGURE' | 'PERMISSIONS';
 /** who the collection can be given to after it was created */
 type PermissionsKind = 'SHARE' | 'EDITORIAL_GROUPS';
-type SortId = 'TITLE' | 'MODIFIED' | 'CREATED';
+type SortId = 'TITLE' | 'MODIFIED' | 'CREATED' | 'MANUAL';
 
 /** the ways children can be sorted by default, with the property each one stands for */
 const SORTS: { [kind in 'subcollections' | 'references']: { [id in SortId]?: NewCollectionSort } } =
@@ -75,11 +75,19 @@ const SORTS: { [kind in 'subcollections' | 'references']: { [id in SortId]?: New
             TITLE: { property: RestConstants.CM_PROP_TITLE, ascending: true },
             MODIFIED: { property: RestConstants.CM_MODIFIED_DATE, ascending: false },
             CREATED: { property: RestConstants.CM_PROP_C_CREATED, ascending: false },
+            MANUAL: {
+                property: RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION,
+                ascending: true,
+            },
         },
         references: {
             TITLE: { property: RestConstants.LOM_PROP_TITLE, ascending: true },
             MODIFIED: { property: RestConstants.CM_MODIFIED_DATE, ascending: false },
             CREATED: { property: RestConstants.CM_PROP_C_CREATED, ascending: false },
+            MANUAL: {
+                property: RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION,
+                ascending: true,
+            },
         },
     };
 

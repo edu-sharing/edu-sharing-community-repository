@@ -10,7 +10,7 @@
     "ORDER_ELEMENTS_INFO": "Betrachter der Sammlung sehen die enthaltenen Materialien in der festgelegten Reihenfolge.",
     "ORDER_COLLECTIONS": "Reihenfolge der Sammlungen manuell festlegen",
     "ORDER_COLLECTIONS_INFO": "Betrachter{{GENDER_SEPARATOR}} der Sammlung sehen die enthaltenen Untersammlungen in der festgelegten Reihenfolge.",
-    "SORT_SLIDER": "Umsortieren",
+    "SORT_SLIDER": "Bearbeitungsmodus",
     "CUSTOM_ORDER": "Festgelegte Reihenfolge",
     "PERMISSIONS": "Eingeladen",
     "DETAILS": "Sammlungsdetails",
