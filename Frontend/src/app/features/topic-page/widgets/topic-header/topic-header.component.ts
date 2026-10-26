@@ -28,13 +28,11 @@ import {
     EduSharingUiCommonModule,
     PreferredColor,
     SpinnerComponent,
-    UIConstants,
     UIService,
 } from 'ngx-edu-sharing-ui';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
 import { ThemeService } from '../../../../services/theme.service';
 import { SharedModule } from '../../../../shared/shared.module';
-import { TooltipAriaLabelDirective } from '../../shared/directives/tooltip-aria-label.directive';
 import { HighlightSearchPipe } from '../../shared/pipes/highlight-search.pipe';
 import { AiHelperService } from '../../shared/services/ai-helper.service';
 import { GlobalWidgetConfigService } from '../../shared/services/global-widget-config.service';
@@ -68,7 +66,6 @@ import { ImageWrapperComponent } from '../shared/image-wrapper/image-wrapper.com
         ImageWrapperComponent,
         SharedModule,
         SpinnerComponent,
-        TooltipAriaLabelDirective,
         TranslateModule,
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA],
@@ -135,7 +132,6 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
     aiGeneratedImage: boolean;
     aiGeneratedText: WritableSignal<boolean> = signal(false);
     aiSupported: WritableSignal<boolean> = signal(false);
-    backToCollectionButtonVisible: WritableSignal<boolean> = signal(false);
     collectionDescription: string;
     // members of this page's own config; undefined while the inherited ones are shown
     private ownEditorialMemberNodeIds: string[] | undefined;
@@ -173,9 +169,6 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
             const editMode: boolean = this.editModeSignal();
             this.customExtensionRef?.setInput('editMode', editMode);
         });
-        this.backToCollectionButtonVisible.set(
-            this.topicPageGlobalService.getBackToCollectionButtonVisible(),
-        );
         this.topicPageEventsService.widgetNodeRestored
             .pipe(takeUntilDestroyed())
             .subscribe(async (nodeId: string): Promise<void> => {
@@ -615,6 +608,4 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
         }
         return this.themeService.isDarkMode() ? this.themeService.toDarkSurfaceColor(color) : color;
     }
-
-    protected readonly ROUTER_PREFIX: string = UIConstants.ROUTER_PREFIX;
 }

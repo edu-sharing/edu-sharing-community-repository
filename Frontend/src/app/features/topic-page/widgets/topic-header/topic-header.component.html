@@ -29,21 +29,9 @@
         {{ parentEntries().nodes[parentEntries().nodes.length - 2].title }}
       </div>
       }
-      <!-- the explicit title leaves out the search highlighting and the button's icon text -->
+      <!-- the explicit title leaves out the search highlighting -->
       <h1 class="mat-heading-1 topic-header-title" [esTitle]="topic || null">
         <span [innerHTML]="topic | highlightSearch : searchInput()"></span>
-        @if (backToCollectionButtonVisible()) {
-        <button
-          mat-flat-button
-          color="primary"
-          [routerLink]="['/' + ROUTER_PREFIX + 'collections']"
-          [queryParams]="{ id: contextNodeId }"
-          [matTooltip]="'TOPIC_PAGE.NAVIGATE_TO_COLLECTION_PAGE' | translate"
-          tooltipAriaLabel
-        >
-          <i esIcon="layers"></i>
-        </button>
-        }
       </h1>
       @if (collectionDescription || editMode) {
       <es-editable-text

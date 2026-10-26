@@ -602,21 +602,8 @@
   } @else {
   <!-- failed to load page config -> currently, no further action possible -->
   <div class="missing-page-config template-scroll" #scrollContainerRef>
-    <!-- the explicit title leaves out the button's icon text -->
     <h1 class="mat-heading-1 topic-header-title" [esTitle]="topic() || null">
       <span [innerHTML]="topic()"></span>
-      @if (backToCollectionButtonVisible()) {
-      <button
-        mat-flat-button
-        color="primary"
-        [routerLink]="['/' + ROUTER_PREFIX + 'collections']"
-        [queryParams]="{ id: topicCollectionId() }"
-        [matTooltip]="i18nPrefix + 'NAVIGATE_TO_COLLECTION_PAGE' | translate"
-        tooltipAriaLabel
-      >
-        <i esIcon="layers"></i>
-      </button>
-      }
     </h1>
     <es-info-message mode="info">
       {{ i18nPrefix + 'NO_PAGE_CONFIG.DEFAULT_MESSAGE' | translate }}

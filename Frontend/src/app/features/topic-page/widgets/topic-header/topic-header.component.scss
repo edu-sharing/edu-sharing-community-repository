@@ -82,15 +82,6 @@
             gap: 8px;
         }
 
-        .topic-header-title {
-            display: flex;
-            gap: 16px;
-
-            span {
-                flex: unset;
-            }
-        }
-
         // remove padding-right to use the width of the topic-header more efficiently
         ::ng-deep es-editable-text .text-container {
             padding-right: 0;

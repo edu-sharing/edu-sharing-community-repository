@@ -448,7 +448,6 @@
       "SUCCESS_MESSAGE": "The page template was created successfully"
     },
     "DEFAULT_PAGE_VARIANT_NAME": "Page variant",
-    "NAVIGATE_TO_COLLECTION_PAGE": "Navigate to collection page",
     "COPY_SUFFIX": "Copy",
     "ADD_TO_GLOBAL": {
       "PENDING_MESSAGE": "The page is being added to the global templates.",

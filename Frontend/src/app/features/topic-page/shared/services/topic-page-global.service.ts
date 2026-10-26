@@ -27,7 +27,6 @@ export type TopicNavigation = (collectionId: string, url: string | null) => bool
     providedIn: 'root',
 })
 export class TopicPageGlobalService {
-    private backToCollectionButtonVisible: boolean = true;
     private customHeaderExtension: CustomHeaderExtension = null;
     private customReurlComponent: string = '';
     private customReurlExtras: NavigationExtras;
@@ -46,13 +45,6 @@ export class TopicPageGlobalService {
     private sidebarMobileHidden: boolean = false;
     private visibleNodesMap: Map<string, Node[]> = new Map<string, Node[]>();
     private visibleNodesUpdated = new Subject<void>();
-
-    /**
-     * Updates the visibility of the back to collection button.
-     */
-    setBackToCollectionButtonVisible(visible: boolean) {
-        this.backToCollectionButtonVisible = visible;
-    }
 
     /**
      * Registers a custom extension rendered in the topic header, below the importance text.
@@ -196,13 +188,6 @@ export class TopicPageGlobalService {
      */
     setNodeSelectionValidator(validator: NodeSelectionValidator | null): void {
         this.nodeSelectionValidator = validator;
-    }
-
-    /**
-     * Retrieves the visibility state of the back to collection button.
-     */
-    getBackToCollectionButtonVisible(): boolean {
-        return this.backToCollectionButtonVisible;
     }
 
     /**

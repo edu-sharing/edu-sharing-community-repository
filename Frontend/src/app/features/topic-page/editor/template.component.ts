@@ -99,7 +99,6 @@ import {
 } from '../../../main/navigation/search-field/search-field.service';
 import { SharedModule } from '../../../shared/shared.module';
 import { VarDirective } from '../shared/directives/ng-var.directive';
-import { TooltipAriaLabelDirective } from '../shared/directives/tooltip-aria-label.directive';
 import { FilterSwimlaneTypePipe } from '../shared/pipes/filter-swimlane-type.pipe';
 import { FilterUnfinishedSwimlanesPipe } from '../shared/pipes/filter-unfinished-swimlanes.pipe';
 import { AiTextPromptPipe } from '../shared/pipes/ai-text-prompt.pipe';
@@ -273,7 +272,6 @@ const isEditableTarget = (target: EventTarget | null): boolean =>
         SwimlaneConfigurationButtonsComponent,
         SwimlaneSearchCountPipe,
         SwimlaneSettingsDialogComponent,
-        TooltipAriaLabelDirective,
         TopicHeaderComponent,
         TopicPageFiltersSidebarComponent,
         TopicPageStatusBarComponent,
@@ -455,9 +453,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         if (this.topicPageGlobalService.getCustomSideMenuItems()) {
             this.customSideMenuItems.set(this.topicPageGlobalService.getCustomSideMenuItems());
         }
-        this.backToCollectionButtonVisible.set(
-            this.topicPageGlobalService.getBackToCollectionButtonVisible(),
-        );
         // the sidebar should be hidden when it is configured and a touch event is detected
         // TODO: this only works if a touch event is detected
         // if (this.topicPageGlobalService.getSidebarMobileHidden()) {
@@ -742,7 +737,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     variantPinned: WritableSignal<boolean> = signal(false);
     selectDimensions: Map<string, MdsWidget> = new Map<string, MdsWidget>();
 
-    backToCollectionButtonVisible: WritableSignal<boolean> = signal(false);
     customSideMenuItems = signal<CustomSideMenuItem[]>([]);
     customSideMenuItemsBefore = computed(() =>
         this.customSideMenuItems().filter((item) => item.position === 'before'),
@@ -4014,7 +4008,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     }
 
     protected readonly pageVariantConfigPrefix = DEFAULT_PAGE_VARIANT_NAME_PREFIX;
-    protected readonly ROUTER_PREFIX: string = UIConstants.ROUTER_PREFIX;
     protected readonly SwimlaneBackgroundShape = SwimlaneBackgroundShape;
     protected readonly WIDGETS = WIDGETS;
 }
