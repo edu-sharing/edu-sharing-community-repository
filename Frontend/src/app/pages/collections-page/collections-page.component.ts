@@ -127,6 +127,8 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
     /** whether a topic page is configured for the open collection */
     private readonly topicPageConfigured = signal(false);
     private readonly collectionWritable = signal(false);
+    /** the collection whose default view was applied last */
+    private defaultViewAppliedFor: string | null = null;
     /** viewers only get a configured topic page, writers can also set one up */
     readonly topicViewAvailable = computed(
         () => this.topicPageConfigured() || this.collectionWritable(),
@@ -637,6 +639,7 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
      * topic view that was kept while navigating.
      */
     private settleViewType(): void {
+        this.applyCollectionDefaultView();
         if (this.viewState.viewType() !== 'topic') {
             return;
         }
@@ -647,6 +650,29 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
         }
         if (available !== (this.params?.[VIEW_TYPE_QUERY_PARAM] === TOPIC_VIEW_TYPE)) {
             this.setTopicViewParam(available, true);
+        }
+    }
+
+    /**
+     * Opens the topic view of a collection that is set to open as a topic page, the first time
+     * the collection is shown after another one. A view the user picks afterwards is kept.
+     */
+    private applyCollectionDefaultView(): void {
+        const id = this.collection?.ref?.id;
+        if (!id || id === RestConstants.ROOT) {
+            this.defaultViewAppliedFor = null;
+            return;
+        }
+        if (id === this.defaultViewAppliedFor) {
+            return;
+        }
+        this.defaultViewAppliedFor = id;
+        if (
+            this.collection.collection?.viewtype === TOPIC_VIEW_TYPE &&
+            this.topicViewAvailable() &&
+            this.viewState.viewType() !== 'topic'
+        ) {
+            this.viewState.viewType.set('topic');
         }
     }
 

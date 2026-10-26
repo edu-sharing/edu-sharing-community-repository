@@ -1,3 +1,4 @@
+import { TOPIC_VIEW_TYPE } from '../../../shared/topic-page-availability';
 import {
     Component,
     DestroyRef,
@@ -129,7 +130,7 @@ export class CreateCollectionSidebarComponent {
     protected readonly sortIds = Object.keys(SORTS.subcollections) as SortId[];
     protected readonly subcollectionSort = signal<SortId | null>('TITLE');
     protected readonly referenceSort = signal<SortId | null>('TITLE');
-    /** whether the collection opens as a topic page; no collection property backs it yet */
+    /** whether the collection opens in its topic view, stored as the view type of the collection */
     protected readonly openAsTopicPage = signal(false);
     protected readonly saving = signal(false);
     private readonly canInvite = signal(false);
@@ -328,7 +329,13 @@ export class CreateCollectionSidebarComponent {
         }
     }
 
+    /** stores the chosen default view in the collection data that is sent */
+    private applyViewType(): void {
+        this.draft.collection.viewtype = this.openAsTopicPage() ? TOPIC_VIEW_TYPE : undefined;
+    }
+
     private async createNew(values: Values): Promise<Node> {
+        this.applyViewType();
         const created = await this.createCollectionService.create({
             parent: this.parent() ?? null,
             draft: this.draft,
@@ -343,6 +350,7 @@ export class CreateCollectionSidebarComponent {
     }
 
     private async update(values: Values): Promise<Node> {
+        this.applyViewType();
         await this.createCollectionService.update({
             collection: this.draft,
             metadata: this.getMetadata(values),
@@ -575,6 +583,7 @@ export class CreateCollectionSidebarComponent {
                 : 'default',
         );
         this.metadata = node.properties as Values;
+        this.openAsTopicPage.set(node.collection.viewtype === TOPIC_VIEW_TYPE);
         this.initialSorts = {
             subcollections: this.getSortId(
                 'subcollections',
