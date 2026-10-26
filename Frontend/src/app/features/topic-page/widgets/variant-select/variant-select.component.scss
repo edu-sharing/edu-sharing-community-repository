@@ -8,9 +8,11 @@
     --mat-form-field-container-vertical-padding: 12px;
     max-width: 320px;
 
-    // outlined fields reserve extra space above the value for their label app-wide
+    // outlined fields reserve extra space above the value for their label app-wide; the field
+    // keeps the default width at least, which leaves its label room in the outline
     &.mat-mdc-form-field ::ng-deep .mdc-text-field--outlined .mat-mdc-form-field-infix {
         width: auto;
+        min-width: 180px;
         padding-top: var(--mat-form-field-container-vertical-padding);
         padding-bottom: var(--mat-form-field-container-vertical-padding);
     }
