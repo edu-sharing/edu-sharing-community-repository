@@ -400,6 +400,11 @@ section {
         top: 0;
         padding: 0 10px 0 0;
     }
+    // the content scrolling below the bar stacks underneath it as a whole
+    es-collection-header-bar,
+    .collections-scroll {
+        isolation: isolate;
+    }
     .collections-breadcrumb {
         flex: 1;
         min-width: 0;
