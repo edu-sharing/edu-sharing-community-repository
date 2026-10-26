@@ -595,7 +595,7 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
         this.topicPageConfigured.set(false);
         this.collectionParents.set(null);
         if (this.collection.ref.id === RestConstants.ROOT) {
-            void this.settleViewType();
+            void this.resolveCollectionViewType();
             return;
         }
         // the properties carry the page configs parents propagate to their sub-collections
@@ -617,7 +617,9 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
                 this.breadcrumbsService.setNodePath(path);
                 this.topicPageConfigured.set(hasTopicPage(this.collection, path));
                 // the topic view opens with the parents, once the URL holds this collection's state
-                void this.settleViewType().then(() => this.collectionParents.set(parents));
+                void this.resolveCollectionViewType().then(() =>
+                    this.collectionParents.set(parents),
+                );
             });
     }
 
@@ -652,7 +654,7 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
      * Once the collection is known, applies its default view, falls back from a topic view it does
      * not offer and keeps the URL in line with the view.
      */
-    private async settleViewType(): Promise<void> {
+    private async resolveCollectionViewType(): Promise<void> {
         const openedByDefault = this.applyCollectionDefaultView();
         const available =
             this.collection?.ref?.id !== RestConstants.ROOT && this.topicViewAvailable();
