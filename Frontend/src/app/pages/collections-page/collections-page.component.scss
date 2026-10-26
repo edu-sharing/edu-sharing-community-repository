@@ -373,7 +373,8 @@ section {
 }
 @media only screen and (max-width: vars.$mobileWidth) {
     .collectionsContainer {
-        grid-template-columns: auto;
+        // the single column keeps the card's width, however wide its content would be
+        grid-template-columns: minmax(0, 1fr);
         // Rows size to their content and the whole card body scrolls — not a stretched `1fr` row.
         grid-template-rows: auto;
         min-height: auto;
