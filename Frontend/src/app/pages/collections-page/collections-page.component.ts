@@ -50,7 +50,6 @@ import {
     TemporaryStorageService,
     UIService,
 } from '../../core-module/core.module';
-import { Helper } from '../../core-module/rest/helper';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { NodeHelperService } from '../../services/node-helper.service';
 import { Toast } from '../../services/toast';
@@ -612,10 +611,11 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
                     if (!this.topicView.selected()) {
                         this.searchFieldInstance?.setSearchString(params.query ?? '');
                     }
-                    const diffs = Helper.getDifferentKeys(this.params, params);
                     // view type, search term and the topic view's state are applied by the views, the
-                    // page stays as it is
-                    const changed = Object.keys(diffs);
+                    // page stays as it is; a removed param counts as changed as well
+                    const changed = Object.keys({ ...this.params, ...params }).filter(
+                        (key) => this.params?.[key] !== params[key],
+                    );
                     const keptKeys = [
                         'query',
                         'createCollection',
