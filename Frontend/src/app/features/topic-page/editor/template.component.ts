@@ -497,11 +497,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     // a host page can render the variant selection in a bar of its own via `variantSelectTemplate`
     showVariantSelect: InputSignal<boolean> = input(true);
     showSidebar: InputSignal<boolean> = input(true);
-    /** Fills the card of a host page instead of framing the page as a card of its own. */
-    readonly unframed = input(false, { transform: booleanAttribute });
-    @HostBinding('class.unframed') get unframedClass(): boolean {
-        return this.unframed();
-    }
     readonly variantSelectTemplate = viewChild.required<TemplateRef<unknown>>('variantSelect');
     /** The collection and its ancestors as a host page already loaded them, for the first load. */
     readonly hostCollection = input<Node | null>(null);
