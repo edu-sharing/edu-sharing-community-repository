@@ -722,8 +722,8 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
             const shown = this.viewState.viewType() === 'topic';
             untracked(() => {
                 if (shown && !this.topicViewComponent()) {
-                    void import('./topic-view/collection-topic-view.component').then((m) =>
-                        this.topicViewComponent.set(m.CollectionTopicViewComponent),
+                    void import('./collection-topic-view/collection-topic-view.component').then(
+                        (m) => this.topicViewComponent.set(m.CollectionTopicViewComponent),
                     );
                 }
                 if (topicViewShown && !shown && this.isReady) {

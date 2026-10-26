@@ -12,7 +12,7 @@ import { UIHelper } from '../../core-ui-module/ui-helper';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { MdsEditorWrapperComponent } from '../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { Subject } from 'rxjs';
-import { WIDGETS } from '../topic-page/shared/types/custom-definitions';
+import { WIDGETS } from '../../features/topic-page/shared/types/custom-definitions';
 
 @Component({
     selector: 'es-mds-embed',
