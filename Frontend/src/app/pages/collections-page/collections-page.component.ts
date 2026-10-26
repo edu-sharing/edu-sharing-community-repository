@@ -570,25 +570,29 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
     }
 
     private renderBreadcrumbs() {
-        this.breadcrumbsService.setNodePath([]);
         this.topicView.reset();
         if (this.collection.ref.id === RestConstants.ROOT) {
+            this.breadcrumbsService.setNodePath([]);
             void this.topicView.resolveCollectionViewType(this.collection, null);
             return;
         }
-        // the properties carry the page configs parents propagate to their sub-collections
+        // the path of the collection before stays until this one's arrives; the properties carry
+        // the page configs parents propagate to their sub-collections
         this.nodeService
             .getNodeParents(this.collection.ref.id, false, [RestConstants.ALL])
-            .subscribe((data: EduData.ParentList) => {
-                const path = [...data.nodes].reverse();
-                if (path.length > 1) {
-                    this.parentCollectionId = new EduData.Reference(
-                        path[path.length - 2].ref.repo,
-                        path[path.length - 2].ref.id,
-                    );
-                }
-                this.breadcrumbsService.setNodePath(path);
-                void this.topicView.resolveCollectionViewType(this.collection, data);
+            .subscribe({
+                next: (data: EduData.ParentList) => {
+                    const path = [...data.nodes].reverse();
+                    if (path.length > 1) {
+                        this.parentCollectionId = new EduData.Reference(
+                            path[path.length - 2].ref.repo,
+                            path[path.length - 2].ref.id,
+                        );
+                    }
+                    this.breadcrumbsService.setNodePath(path);
+                    void this.topicView.resolveCollectionViewType(this.collection, data);
+                },
+                error: () => this.breadcrumbsService.setNodePath([]),
             });
     }
 
