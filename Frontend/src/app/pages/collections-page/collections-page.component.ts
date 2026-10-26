@@ -348,6 +348,9 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
             if (query) {
                 params.query = query;
             }
+            if (!this.searchState.includeSubLevels()) {
+                params.subLevels = false;
+            }
             if (id && id !== '-root-') {
                 params.id = id;
             }
@@ -496,7 +499,11 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
     /** Shows the search field of the main navigation and applies what is searched for. */
     private setupSearchField() {
         this.searchFieldInstance = this.searchField.enable(
-            { placeholder: 'COLLECTIONS.SEARCH' },
+            {
+                placeholder: 'COLLECTIONS.SEARCH',
+                showFiltersButton: true,
+                filterBarVisibleStorageKey: 'collections-page-filters',
+            },
             this.destroyed,
         );
         this.searchFieldInstance.onSearchTriggered().subscribe((event) => {
@@ -611,6 +618,7 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
                 this.route.queryParams.subscribe(async (params) => {
                     this.topicView.applyParams(params);
                     this.searchState.query.set(params.query || null);
+                    this.searchState.includeSubLevels.set(params.subLevels !== 'false');
                     // the topic view keeps its own search term in the shared search field
                     if (!this.topicView.selected()) {
                         this.searchFieldInstance?.setSearchString(params.query ?? '');
@@ -622,6 +630,7 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
                     );
                     const keptKeys = [
                         'query',
+                        'subLevels',
                         'createCollection',
                         ...this.topicView.queryParamKeys,
                     ];

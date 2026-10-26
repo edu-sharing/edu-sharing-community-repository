@@ -268,6 +268,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     readonly treeReady = signal(false);
     private shownViewType = this.viewState.viewType();
     private shownQuery = this.searchState.query();
+    private shownIncludeSubLevels = this.searchState.includeSubLevels();
     /** Whether more collections match the search than are listed. */
     readonly searchTruncated = signal(false);
     collectionsColumns: ColumnType;
@@ -291,7 +292,8 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         });
         effect(() => {
             const query = this.searchState.query();
-            untracked(() => this.onQueryChange(query));
+            const includeSubLevels = this.searchState.includeSubLevels();
+            untracked(() => this.onQueryChange(query, includeSubLevels));
         });
         this.sortCollectionColumns[this.sortCollectionColumns.length - 1].mode = 'ascending';
         // this.collectionSortEmitter.subscribe((sort: SortEvent) => this.setCollectionSort(sort));
@@ -845,11 +847,12 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     }
 
     /** Reloads the content when the search term changed, e.g. when it was typed or cleared. */
-    private onQueryChange(query: string | null) {
-        if (query === this.shownQuery) {
+    private onQueryChange(query: string | null, includeSubLevels: boolean) {
+        if (query === this.shownQuery && includeSubLevels === this.shownIncludeSubLevels) {
             return;
         }
         this.shownQuery = query;
+        this.shownIncludeSubLevels = includeSubLevels;
         if (this.collection) {
             this.refreshContent();
         }
@@ -860,15 +863,20 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         this.dataSourceCollections.isLoading = true;
         this.dataSourceReferences.isLoading = false;
         const query = this.searchState.query().trim();
+        const includeSubLevels = this.searchState.includeSubLevels();
         this.collectionSearch
             .search(query, {
+                includeSubLevels,
                 scope: this.isRootLevel ? this.scope : undefined,
                 parentId: this.isRootLevel ? undefined : this.collection.ref.id,
             })
             .subscribe({
                 next: (result) => {
                     // a stale answer must not replace the one of a newer search
-                    if (query !== this.searchState.query()?.trim()) {
+                    if (
+                        query !== this.searchState.query()?.trim() ||
+                        includeSubLevels !== this.searchState.includeSubLevels()
+                    ) {
                         return;
                     }
                     this.searchTruncated.set(result.truncated);

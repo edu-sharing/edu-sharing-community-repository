@@ -60,8 +60,12 @@
     "SEARCH_RESULTS_IN_COLLECTION": "Results for “{{query}}” in this collection",
     "SEARCH_TRUNCATED": "Only the first results are shown. Please refine your search.",
     "SEARCH_PARENT_COLUMN": "In collection",
+    "SEARCH_FILTER_SUB_LEVELS": "Search sub-levels",
+    "SEARCH_FILTER_SUB_LEVELS_ON": "Search in sub-levels as well",
+    "SEARCH_FILTER_SUB_LEVELS_OFF": "Search in the shown level",
     "EMPTY": {
       "SEARCH": "No collections found.",
+      "SEARCH_LEVEL": "No hits on this level. Turn on “Search sub-levels” to search deeper levels as well.",
       "SHARED": "You have not been invited to any collections yet.",
       "PUBLIC": "There are no public collections available yet.",
       "SUBCOLLECTIONS": "There are no sub-collections available yet."

@@ -37,8 +37,12 @@
     "SEARCH_RESULTS_IN_COLLECTION": "Treffer für „{{query}}“ in dieser Sammlung",
     "SEARCH_TRUNCATED": "Es werden nur die ersten Treffer angezeigt. Bitte verfeinern Sie die Suche.",
     "SEARCH_PARENT_COLUMN": "In Sammlung",
+    "SEARCH_FILTER_SUB_LEVELS": "Unterebenen durchsuchen",
+    "SEARCH_FILTER_SUB_LEVELS_ON": "Suche auch in untergeordneten Ebenen",
+    "SEARCH_FILTER_SUB_LEVELS_OFF": "Suche in angezeigter Ebene",
     "EMPTY": {
       "SEARCH": "Keine Sammlungen gefunden.",
+      "SEARCH_LEVEL": "Auf dieser Ebene gibt es keine Treffer. Schalten Sie „Unterebenen durchsuchen“ ein, um auch tiefere Ebenen zu durchsuchen.",
       "SHARED": "Sie wurden bisher zu keiner Sammlung eingeladen.",
       "PUBLIC": "Es sind keine öffentlichen Sammlungen verfügbar.",
       "SUBCOLLECTIONS": "Es sind keine Untersammlungen verfügbar."

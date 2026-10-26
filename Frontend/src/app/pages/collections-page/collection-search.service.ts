@@ -24,6 +24,8 @@ export interface CollectionSearchRequest {
     scope?: string;
     /** Collection whose descendants are searched; takes the place of the category. */
     parentId?: string;
+    /** Whether collections below the searched level are hits as well; defaults to `true`. */
+    includeSubLevels?: boolean;
     sortProperties?: string[];
     sortAscending?: boolean[];
 }
@@ -114,6 +116,17 @@ export class CollectionSearchService {
                 }
                 return false;
             });
+        }
+        if (request.includeSubLevels === false) {
+            const topLevel =
+                !request.parentId && request.scope
+                    ? await this.getTopLevelIds(request.scope)
+                    : null;
+            filtered = filtered.filter((hit) =>
+                request.parentId
+                    ? getParentId(hit.ref.id) === request.parentId
+                    : !topLevel || topLevel.has(hit.ref.id),
+            );
         }
         return { hits: filtered, parents, truncated: page.total > page.nodes.length };
     }

@@ -16,6 +16,7 @@ import { ViewToggleGroupComponent } from '../../shared/components/view-toggle-gr
 import { ScrollStartOverflowDirective } from '../../shared/directives/scroll-start-overflow.directive';
 import { CollectionDesignFormComponent } from '../../features/collection-info/collection-design-form/collection-design-form.component';
 import { CollectionEditorialGroupsFormComponent } from '../../features/collection-info/collection-editorial-groups-form/collection-editorial-groups-form.component';
+import { CollectionSearchFiltersComponent } from './collection-search-filters/collection-search-filters.component';
 import { EditorialSidebarModule } from '../../features/editorial-sidebar/editorial-sidebar.module';
 
 @NgModule({
@@ -40,6 +41,7 @@ import { EditorialSidebarModule } from '../../features/editorial-sidebar/editori
         CollectionEditorialGroupsFormComponent,
         ViewToggleGroupComponent,
         ScrollStartOverflowDirective,
+        CollectionSearchFiltersComponent,
     ],
     exports: [CollectionContentComponent],
 })

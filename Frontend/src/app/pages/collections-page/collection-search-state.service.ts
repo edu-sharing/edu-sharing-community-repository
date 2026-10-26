@@ -9,6 +9,12 @@ export class CollectionSearchStateService {
     /** The term the collections are searched for, `null` while no search is active. */
     readonly query = signal<string | null>(null);
 
+    /**
+     * Whether collections below the shown level are searched as well; otherwise only the
+     * collections placed directly in the shown level are.
+     */
+    readonly includeSubLevels = signal(true);
+
     /** Whether the lists show search hits instead of the content of the collection. */
     readonly active = computed(() => !!this.query()?.trim());
 }

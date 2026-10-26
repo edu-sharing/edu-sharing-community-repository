@@ -26,6 +26,9 @@
   </mat-sidenav>
 
   <mat-sidenav-content>
+    @if (!topicView.selected()) {
+    <es-collection-search-filters></es-collection-search-filters>
+    }
     <div class="main-content">
       @if (showTabs()) {
       <mat-tab-group
@@ -206,7 +209,9 @@
                   <ng-template #empty>
                     @if (searchState.active()) {
                     {{ 'COLLECTIONS.EMPTY.SEARCH' | translate }}
-                    } @else { @if (isRootLevelCollection()) { @if (tabSelected === 'EDU_GROUPS') {
+                    @if (!searchState.includeSubLevels()) {
+                    {{ 'COLLECTIONS.EMPTY.SEARCH_LEVEL' | translate }}
+                    } } @else { @if (isRootLevelCollection()) { @if (tabSelected === 'EDU_GROUPS') {
                     {{ 'COLLECTIONS.EMPTY.SHARED' | translate }}
                     } @if (tabSelected === 'EDU_ALL') {
                     {{ 'COLLECTIONS.EMPTY.PUBLIC' | translate }}
