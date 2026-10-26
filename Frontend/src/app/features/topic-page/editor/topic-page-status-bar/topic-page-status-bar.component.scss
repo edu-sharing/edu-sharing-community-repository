@@ -49,10 +49,10 @@
     white-space: nowrap;
 }
 
+// the warning colors inverted, so the hint reads as the button it is and not as a notice
 button.status-bar-completion {
-    --mat-button-filled-container-color: var(--warningSurfaceBackgroundColor);
-    --mat-button-filled-label-text-color: var(--warningSurfaceTextColor);
-    border: 1px solid var(--warningSurfaceBorderColor);
+    --mat-button-filled-container-color: var(--warningSurfaceTextColor);
+    --mat-button-filled-label-text-color: var(--warningSurfaceBackgroundColor);
     .status-bar-completion-content {
         display: inline-flex;
         align-items: center;
