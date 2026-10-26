@@ -26,7 +26,7 @@
   </mat-sidenav>
 
   <mat-sidenav-content>
-    <div #mainContentRef class="main-content">
+    <div class="main-content">
       @if (showTabs()) {
       <mat-tab-group
         class="mat-tab-group-shadow"
@@ -143,10 +143,10 @@
                   groupLabel="EDITORIAL.OPTIONS.NODES_SELECTOR.COLLECTIONS.DISPLAY_TYPE.LABEL"
                   [items]="collectionDisplayTypeItems()"
                   [value]="viewState.viewType()"
-                  (valueChange)="selectViewType($event)"
+                  (valueChange)="topicView.select($event)"
                 ></es-view-toggle-group>
               </div>
-              @if (viewState.viewType() !== 'topicPage') { @if (searchState.active()) {
+              @if (!topicView.selected()) { @if (searchState.active()) {
               <h2 class="root-bar-title mat-heading-3 search-in-collection">
                 {{
                   'COLLECTIONS.SEARCH_RESULTS_IN_COLLECTION'
@@ -176,17 +176,17 @@
                   groupLabel="EDITORIAL.OPTIONS.NODES_SELECTOR.COLLECTIONS.DISPLAY_TYPE.LABEL"
                   [items]="displayTypeItems"
                   [value]="viewState.viewType()"
-                  (valueChange)="selectViewType($event)"
+                  (valueChange)="topicView.select($event)"
                 ></es-view-toggle-group>
               </div>
               }
               <!-- the topic view replaces everything below the breadcrumb and scrolls itself -->
-              @if (viewState.viewType() === 'topicPage') { @if (topicViewAvailable() &&
-              collectionParents() && topicViewComponent(); as topicView) {
+              @if (topicView.selected()) { @if (topicView.available() && topicView.parents() &&
+              topicView.component(); as topicViewComponent) {
               <ng-container
                 *ngComponentOutlet="
-                  topicView;
-                  inputs: { collection: collection, parents: collectionParents() }
+                  topicViewComponent;
+                  inputs: { collection: collection, parents: topicView.parents() }
                 "
               ></ng-container>
               } } @else {

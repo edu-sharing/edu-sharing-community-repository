@@ -12,8 +12,6 @@ import {
     OnDestroy,
     signal,
     TemplateRef,
-    Type,
-    untracked,
     viewChild,
     ViewChild,
     DestroyRef,
@@ -35,7 +33,7 @@ import { ViewToggleItem } from '../../shared/components/view-toggle-group/view-t
 import { ConnectedPosition } from '@angular/cdk/overlay';
 import { combineLatest, Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
-import { ConfigService, Mediacenter, Node, ParentEntries } from 'ngx-edu-sharing-api';
+import { ConfigService, Mediacenter, Node } from 'ngx-edu-sharing-api';
 import * as EduData from '../../core-module/core.module';
 import {
     ConfigurationService,
@@ -74,14 +72,7 @@ import {
 import { CollectionSearchService } from './collection-search.service';
 import { CollectionSearchStateService } from './collection-search-state.service';
 import { CollectionViewSlotsService } from './collection-view-slots.service';
-import {
-    hasTopicPage,
-    TOPIC_PAGE_VIEW_TYPE,
-    VIEW_TYPE_QUERY_PARAM,
-} from '../../features/topic-page/shared/utils/collection-topic-page-util';
-
-// query params only the topic view reads; they are dropped when another view is selected
-const TOPIC_VIEW_QUERY_PARAMS = ['variantId', 'openMenu', 'q', 'filters'];
+import { CollectionTopicViewService } from './collection-topic-view/collection-topic-view.service';
 
 // component class
 @Component({
@@ -97,6 +88,7 @@ const TOPIC_VIEW_QUERY_PARAMS = ['variantId', 'openMenu', 'q', 'filters'];
         CollectionSearchStateService,
         CollectionSearchService,
         CollectionViewSlotsService,
+        CollectionTopicViewService,
     ],
     standalone: false,
 })
@@ -124,34 +116,13 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
             label: 'EDITORIAL.OPTIONS.NODES_SELECTOR.COLLECTIONS.DISPLAY_TYPE.TREE',
         },
     ];
-    /** whether a topic page is configured for the open collection */
-    private readonly topicPageConfigured = signal(false);
-    private readonly collectionWritable = signal(false);
-    /** the collection whose default view was applied last */
-    private defaultViewAppliedFor: string | null = null;
-    /** viewers only get a configured topic page, writers can also set one up */
-    readonly topicViewAvailable = computed(
-        () => this.topicPageConfigured() || this.collectionWritable(),
-    );
+    readonly topicView = inject(CollectionTopicViewService);
     /** the view types of a collection below the root level, which also offer its topic page */
-    readonly collectionDisplayTypeItems = computed((): ViewToggleItem<CollectionViewType>[] => [
+    readonly collectionDisplayTypeItems = computed(() => [
         ...this.displayTypeItems,
-        {
-            id: 'topicPage',
-            icon: 'menu_book',
-            label: this.topicViewAvailable()
-                ? 'EDITORIAL.OPTIONS.NODES_SELECTOR.COLLECTIONS.DISPLAY_TYPE.TOPIC'
-                : 'EDITORIAL.OPTIONS.NODES_SELECTOR.COLLECTIONS.DISPLAY_TYPE.TOPIC_UNAVAILABLE',
-            disabled: !this.topicViewAvailable(),
-        },
+        this.topicView.toggleItem(),
     ]);
-    /** the topic view, loaded the first time it is shown */
-    readonly topicViewComponent = signal<Type<unknown> | null>(null);
-    /** ancestors of the open collection, the collection first, as the topic view reads them */
-    readonly collectionParents = signal<ParentEntries | null>(null);
     readonly breadcrumbEndSlot = inject(CollectionViewSlotsService).breadcrumbEnd;
-    private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
-    private readonly mainContent = viewChild('mainContentRef', { read: ElementRef });
     private collectionService = inject(RestCollectionService);
     private collectionScopesService = inject(CollectionScopesService);
     private config = inject(ConfigurationService);
@@ -237,9 +208,6 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
     set collection(collection: Node) {
         this.currentCollection = collection;
         this.details.collection.set(collection);
-        this.collectionWritable.set(
-            RestHelper.hasAccessPermission(collection, RestConstants.PERMISSION_WRITE),
-        );
     }
     ngAfterContentInit(): void {
         // a host template receives the permissions of the collection, so they are requested
@@ -288,7 +256,19 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
     /** Categories of collections listed as tabs, empty until they are known. */
     readonly scopes = signal<CollectionScope[]>([]);
     constructor() {
-        this.registerTopicView();
+        // the topic view brings its own search field, the collection search takes it back after
+        effect(() => {
+            if (this.topicView.selected() || !this.isReady) {
+                return;
+            }
+            afterNextRender(
+                () => {
+                    this.setupSearchField();
+                    this.searchFieldInstance.setSearchString(this.searchState.query() ?? '');
+                },
+                { injector: this.injector },
+            );
+        });
         this.translations.waitForInit().subscribe(() => {
             combineLatest([
                 this.connector.isLoggedIn(),
@@ -592,22 +572,16 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
 
     private renderBreadcrumbs() {
         this.breadcrumbsService.setNodePath([]);
-        this.topicPageConfigured.set(false);
-        this.collectionParents.set(null);
+        this.topicView.reset();
         if (this.collection.ref.id === RestConstants.ROOT) {
-            void this.resolveCollectionViewType();
+            void this.topicView.resolveCollectionViewType(this.collection, null);
             return;
         }
         // the properties carry the page configs parents propagate to their sub-collections
         this.nodeService
             .getNodeParents(this.collection.ref.id, false, [RestConstants.ALL])
             .subscribe((data: EduData.ParentList) => {
-                const parents = {
-                    nodes: [...data.nodes],
-                    pagination: data.pagination,
-                    scope: data.scope,
-                } as unknown as ParentEntries;
-                const path = data.nodes.reverse();
+                const path = [...data.nodes].reverse();
                 if (path.length > 1) {
                     this.parentCollectionId = new EduData.Reference(
                         path[path.length - 2].ref.repo,
@@ -615,160 +589,8 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
                     );
                 }
                 this.breadcrumbsService.setNodePath(path);
-                this.topicPageConfigured.set(hasTopicPage(this.collection, path));
-                // the topic view opens with the parents, once the URL holds this collection's state
-                void this.resolveCollectionViewType().then(() =>
-                    this.collectionParents.set(parents),
-                );
+                void this.topicView.resolveCollectionViewType(this.collection, data);
             });
-    }
-
-    /** Applies a view type the user selected and keeps the URL in line with it. */
-    selectViewType(viewType: CollectionViewType): void {
-        const leavesTopicView =
-            this.viewState.viewType() === 'topicPage' && viewType !== 'topicPage';
-        this.viewState.viewType.set(viewType);
-        if (viewType === 'topicPage') {
-            void this.setTopicViewParam(true, false);
-        } else if (leavesTopicView) {
-            void this.setTopicViewParam(false, false);
-        }
-    }
-
-    /**
-     * Only the topic view is kept in the URL, so a copied link opens it, while every other view
-     * falls back to the default. A collection opened from the topic view chooses its view itself.
-     */
-    private applyViewTypeParam(params: Params): void {
-        const openedFromTopicView =
-            params.id !== this.params?.id &&
-            this.params?.[VIEW_TYPE_QUERY_PARAM] === TOPIC_PAGE_VIEW_TYPE;
-        if (params[VIEW_TYPE_QUERY_PARAM] === TOPIC_PAGE_VIEW_TYPE && !openedFromTopicView) {
-            this.viewState.viewType.set('topicPage');
-        } else if (this.viewState.viewType() === 'topicPage') {
-            this.viewState.viewType.set('grid');
-        }
-    }
-
-    /**
-     * Once the collection is known, applies its default view, falls back from a topic view it does
-     * not offer and keeps the URL in line with the view.
-     */
-    private async resolveCollectionViewType(): Promise<void> {
-        const openedByDefault = this.applyCollectionDefaultView();
-        const available =
-            this.collection?.ref?.id !== RestConstants.ROOT && this.topicViewAvailable();
-        if (this.viewState.viewType() === 'topicPage' && !available) {
-            this.viewState.viewType.set('grid');
-        }
-        const shown = this.viewState.viewType() === 'topicPage';
-        if (
-            openedByDefault ||
-            shown !== (this.params?.[VIEW_TYPE_QUERY_PARAM] === TOPIC_PAGE_VIEW_TYPE)
-        ) {
-            await this.setTopicViewParam(shown, true, openedByDefault);
-        }
-    }
-
-    /**
-     * Opens the topic view of a collection that is set to open as a topic page, the first time
-     * the collection is shown after another one. Returns whether it opened the topic view.
-     */
-    private applyCollectionDefaultView(): boolean {
-        const id = this.collection?.ref?.id;
-        if (!id || id === RestConstants.ROOT) {
-            this.defaultViewAppliedFor = null;
-            return false;
-        }
-        if (id === this.defaultViewAppliedFor) {
-            return false;
-        }
-        this.defaultViewAppliedFor = id;
-        if (
-            this.collection.collection?.viewtype === TOPIC_PAGE_VIEW_TYPE &&
-            this.topicViewAvailable() &&
-            this.viewState.viewType() !== 'topicPage'
-        ) {
-            this.viewState.viewType.set('topicPage');
-            return true;
-        }
-        return false;
-    }
-
-    /** @param resetTopicState drops the topic view's state, e.g. one of a collection before */
-    private async setTopicViewParam(
-        topicView: boolean,
-        replaceUrl: boolean,
-        resetTopicState = false,
-    ): Promise<void> {
-        const queryParams: Params = {
-            [VIEW_TYPE_QUERY_PARAM]: topicView ? TOPIC_PAGE_VIEW_TYPE : null,
-        };
-        if (!topicView || resetTopicState) {
-            TOPIC_VIEW_QUERY_PARAMS.forEach((key) => (queryParams[key] = null));
-        }
-        await this.router.navigate([], {
-            relativeTo: this.route,
-            queryParams,
-            queryParamsHandling: 'merge',
-            replaceUrl,
-        });
-    }
-
-    /**
-     * Loads the topic view when it is shown first and hands the search field back to the
-     * collection search once the topic view, which brings its own, is left.
-     */
-    private registerTopicView(): void {
-        // the topic page's side menu is fixed to the viewport, beside the card's right edge, which
-        // moves with the open sidebar and its width
-        effect((onCleanup) => {
-            const card: HTMLElement | undefined = this.mainContent()?.nativeElement;
-            if (!card) {
-                return;
-            }
-            const host: HTMLElement = this.host.nativeElement;
-            const updateInset = () => {
-                const margin = parseFloat(
-                    getComputedStyle(host).getPropertyValue('--roundedContainerMargin'),
-                );
-                const inset =
-                    window.innerWidth - card.getBoundingClientRect().right - (margin || 0);
-                host.style.setProperty('--sideMenuRightInset', `${Math.max(0, inset)}px`);
-            };
-            const observer = new ResizeObserver(updateInset);
-            observer.observe(card);
-            window.addEventListener('resize', updateInset);
-            updateInset();
-            onCleanup(() => {
-                observer.disconnect();
-                window.removeEventListener('resize', updateInset);
-                host.style.removeProperty('--sideMenuRightInset');
-            });
-        });
-        let topicViewShown = false;
-        effect(() => {
-            const shown = this.viewState.viewType() === 'topicPage';
-            untracked(() => {
-                if (shown && !this.topicViewComponent()) {
-                    void import('./collection-topic-view/collection-topic-view.component').then(
-                        (m) => this.topicViewComponent.set(m.CollectionTopicViewComponent),
-                    );
-                }
-                if (topicViewShown && !shown && this.isReady) {
-                    afterNextRender(
-                        () => {
-                            this.setupSearchField();
-                            this.searchFieldInstance.setSearchString(
-                                this.searchState.query() ?? '',
-                            );
-                        },
-                        { injector: this.injector },
-                    );
-                }
-                topicViewShown = shown;
-            });
-        });
     }
 
     private initialize() {
@@ -784,10 +606,10 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
                 // subscribe to parameters of url
                 this.setupSearchField();
                 this.route.queryParams.subscribe(async (params) => {
-                    this.applyViewTypeParam(params);
+                    this.topicView.applyParams(params);
                     this.searchState.query.set(params.query || null);
                     // the topic view keeps its own search term in the shared search field
-                    if (this.viewState.viewType() !== 'topicPage') {
+                    if (!this.topicView.selected()) {
                         this.searchFieldInstance?.setSearchString(params.query ?? '');
                     }
                     const diffs = Helper.getDifferentKeys(this.params, params);
@@ -795,10 +617,9 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
                     // page stays as it is
                     const changed = Object.keys(diffs);
                     const keptKeys = [
-                        VIEW_TYPE_QUERY_PARAM,
                         'query',
                         'createCollection',
-                        ...TOPIC_VIEW_QUERY_PARAMS,
+                        ...this.topicView.queryParamKeys,
                     ];
                     if (
                         this.params &&
