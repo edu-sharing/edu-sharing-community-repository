@@ -72,6 +72,13 @@ export type EditorialSidebarOptionDescriptor = {
     selectionMode: SelectionMode;
 };
 
+/** options that are about the collection the sidebar currently belongs to */
+const COLLECTION_BOUND_OPTIONS: EditorialSidebarOption[] = [
+    'COLLECTION_INFO',
+    'COLLECTION_USAGE',
+    'SHARE_COLLECTION',
+];
+
 export const EDITORIAL_SIDEBAR_OPTIONS = {
     VERSION_MANAGEMENT: { selectionMode: 'single' },
     VIEWS_AND_USAGE: { selectionMode: 'multi' },
@@ -259,6 +266,17 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         // open starts at the option overview instead of the previously shown option
         effect(() => {
             if (!this.editorialSidebarService.sidebarOpened()) {
+                this.enabledOption.set(null);
+            }
+        });
+        // options that describe the current collection have nothing to show once it is gone, e.g.
+        // after navigating to the collections root
+        effect(() => {
+            const option = this.enabledOption()?.option;
+            if (
+                COLLECTION_BOUND_OPTIONS.includes(option) &&
+                !this.isRealCollection(this.collectionInfoTarget())
+            ) {
                 this.enabledOption.set(null);
             }
         });

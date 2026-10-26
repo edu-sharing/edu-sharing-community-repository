@@ -209,6 +209,8 @@
       "ADD_COLLECTION_DESCRIPTION": "Create a new collection or copy an existing collection to this location",
       "COLLECTION_INFO": "Collection information",
       "COLLECTION_INFO_DESCRIPTION": "Show general information about this collection",
+      "COLLECTION_USAGE": "Views & usage",
+      "COLLECTION_USAGE_DESCRIPTION": "Show the views, downloads and usages of the collection",
       "COLLECTION_EDIT": "Edit collection",
       "COLLECTION_EDIT_DESCRIPTION": "Change the title, look, metadata and sorting of the collection",
       "COLLECTION_SHARE": "Share",

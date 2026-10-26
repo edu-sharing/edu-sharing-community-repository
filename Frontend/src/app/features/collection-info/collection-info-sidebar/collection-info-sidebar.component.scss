@@ -9,6 +9,12 @@
     padding: 16px 20px 0;
 }
 
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 8px;
+}
+
 // the call to action in the footer is a pill, like the other buttons of the sidebars
 es-sidebar-sticky-footer button {
     border-radius: var(--borderRadiusButtons);

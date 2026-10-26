@@ -140,6 +140,8 @@
       },
       "SUBCOLLECTIONS": "Untersammlungen",
       "MATERIALS": "Materialien",
+      "CREATED_AT": "Erstellt am",
+      "MODIFIED_AT": "Zuletzt geändert",
       "ALL_DETAILS": "Alle Details"
     }
   },

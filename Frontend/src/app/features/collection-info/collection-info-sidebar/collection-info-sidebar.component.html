@@ -1,5 +1,13 @@
 <div class="content">
   <es-collection-info-hero [collection]="collection()"></es-collection-info-hero>
+  <div class="actions">
+    <es-actionbar
+      appearance="icon-button"
+      [numberOfAlwaysVisibleOptions]="3"
+      [numberOfAlwaysVisibleOptionsMobile]="3"
+      data-test="collection-info-actionbar"
+    ></es-actionbar>
+  </div>
   <es-collection-info-facts [collection]="collection()"></es-collection-info-facts>
   <es-collection-info-participants [collection]="collection()"></es-collection-info-participants>
   @if (collection()?.properties) {

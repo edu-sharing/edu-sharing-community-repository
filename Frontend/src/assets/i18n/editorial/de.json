@@ -209,6 +209,8 @@
       "ADD_COLLECTION_DESCRIPTION": "Eine neue Sammlung erstellen oder eine bestehende Sammlung hierher kopieren",
       "COLLECTION_INFO": "Sammlungsinformationen",
       "COLLECTION_INFO_DESCRIPTION": "Allgemeine Informationen zu dieser Sammlung anzeigen",
+      "COLLECTION_USAGE": "Aufrufe & Nutzung",
+      "COLLECTION_USAGE_DESCRIPTION": "Die Aufrufe, Downloads und Verwendungen der Sammlung anzeigen",
       "COLLECTION_EDIT": "Sammlung bearbeiten",
       "COLLECTION_EDIT_DESCRIPTION": "Titel, Aussehen, Metadaten und Sortierung der Sammlung ändern",
       "COLLECTION_SHARE": "Freigeben",
