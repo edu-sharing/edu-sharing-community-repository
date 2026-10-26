@@ -2,11 +2,22 @@
     display: block;
 }
 
-// fits the select into the height of the bar it is placed in
+// fits the bar it is placed in, the value centered and the field sized to its title
 .select-config-field {
-    --mat-form-field-container-height: 40px;
-    --mat-form-field-container-vertical-padding: 8px;
-    min-width: 160px;
+    --mat-form-field-container-height: 48px;
+    --mat-form-field-container-vertical-padding: 12px;
+    max-width: 320px;
+
+    // outlined fields reserve extra space above the value for their label app-wide
+    &.mat-mdc-form-field ::ng-deep .mdc-text-field--outlined .mat-mdc-form-field-infix {
+        width: auto;
+        padding-top: var(--mat-form-field-container-vertical-padding);
+        padding-bottom: var(--mat-form-field-container-vertical-padding);
+    }
+
+    ::ng-deep .mat-mdc-select-arrow-wrapper {
+        padding-left: 12px;
+    }
 
     &.mat-form-field-disabled {
         cursor: not-allowed;
