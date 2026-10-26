@@ -135,7 +135,9 @@
                 ></es-breadcrumbs>
                 }
                 <!-- content the current view adds to the breadcrumb row, e.g. a variant selection -->
-                <ng-container [ngTemplateOutlet]="breadcrumbEndSlot()"></ng-container>
+                <div class="breadcrumb-end">
+                  <ng-container [ngTemplateOutlet]="breadcrumbEndSlot()"></ng-container>
+                </div>
                 <es-view-toggle-group
                   class="display-type-toggle"
                   groupLabel="EDITORIAL.OPTIONS.NODES_SELECTOR.COLLECTIONS.DISPLAY_TYPE.LABEL"

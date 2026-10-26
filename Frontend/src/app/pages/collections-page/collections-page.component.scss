@@ -334,6 +334,16 @@ section {
     flex: none;
 }
 
+// content the current view adds to the breadcrumb row
+.breadcrumb-end {
+    display: flex;
+    min-width: 0;
+
+    &:empty {
+        display: none;
+    }
+}
+
 // the heading of the root level takes the place of the breadcrumb and gives way first
 .breadcrumb-space.root-bar {
     padding-left: 20px;
@@ -400,6 +410,18 @@ section {
         position: sticky;
         top: 0;
         padding: 0 10px 0 0;
+        flex-wrap: wrap;
+
+        // the first line keeps the spacing it has as the only one
+        &:has(.breadcrumb-end:not(:empty)) {
+            padding-top: 15px;
+        }
+    }
+    // takes a line of its own below the breadcrumb, which keeps the room for the trail
+    .breadcrumb-end {
+        order: 1;
+        flex-basis: 100%;
+        padding: 0 0 12px 10px;
     }
     // the content scrolling below the bar stacks underneath it as a whole
     es-collection-header-bar,
