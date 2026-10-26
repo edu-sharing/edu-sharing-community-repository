@@ -175,7 +175,7 @@ export class TopicPageHelperService {
     }
 
     /**
-     * Lets the surrounding topic page load the linked topic inside itself.
+     * Lets the surrounding topic page open the linked topic itself.
      * Returns false if the caller has to navigate to the link itself.
      *
      * @param url the link of the topic, as given by the custom URL function

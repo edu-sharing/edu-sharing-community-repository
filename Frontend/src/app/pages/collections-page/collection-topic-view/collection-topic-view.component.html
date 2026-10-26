@@ -1,9 +1,8 @@
 <es-template-page
-  navigateInPlace
   [collectionId]="collection().ref.id"
   [hostCollection]="collection()"
   [hostParents]="parents()"
   [variantId]="initialVariantId"
   [showVariantSelect]="false"
-  (topicChanged)="onTopicChanged($event)"
+  [openTopic]="openCollection"
 ></es-template-page>

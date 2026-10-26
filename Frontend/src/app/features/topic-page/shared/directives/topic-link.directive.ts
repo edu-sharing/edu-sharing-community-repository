@@ -5,7 +5,7 @@ import { TopicPageHelperService } from '../services/topic-page-helper.service';
 
 /**
  * Marks a link to the topic page of the given collection node. A plain click lets the
- * surrounding topic page load the topic in place; otherwise the link is followed as usual.
+ * surrounding topic page open the topic itself; otherwise the link is followed as usual.
  */
 @Directive({
     selector: 'a[esTopicLink]',

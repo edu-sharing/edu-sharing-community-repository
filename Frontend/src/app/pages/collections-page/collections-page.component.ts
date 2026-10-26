@@ -595,18 +595,18 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
         this.topicPageConfigured.set(false);
         this.collectionParents.set(null);
         if (this.collection.ref.id === RestConstants.ROOT) {
-            this.settleViewType();
+            void this.settleViewType();
             return;
         }
         // the properties carry the page configs parents propagate to their sub-collections
         this.nodeService
             .getNodeParents(this.collection.ref.id, false, [RestConstants.ALL])
             .subscribe((data: EduData.ParentList) => {
-                this.collectionParents.set({
+                const parents = {
                     nodes: [...data.nodes],
                     pagination: data.pagination,
                     scope: data.scope,
-                } as unknown as ParentEntries);
+                } as unknown as ParentEntries;
                 const path = data.nodes.reverse();
                 if (path.length > 1) {
                     this.parentCollectionId = new EduData.Reference(
@@ -616,7 +616,8 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
                 }
                 this.breadcrumbsService.setNodePath(path);
                 this.topicPageConfigured.set(hasTopicPage(this.collection, path));
-                this.settleViewType();
+                // the topic view opens with the parents, once the URL holds this collection's state
+                void this.settleViewType().then(() => this.collectionParents.set(parents));
             });
     }
 
@@ -626,55 +627,59 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
             this.viewState.viewType() === 'topicPage' && viewType !== 'topicPage';
         this.viewState.viewType.set(viewType);
         if (viewType === 'topicPage') {
-            this.setTopicViewParam(true, false);
+            void this.setTopicViewParam(true, false);
         } else if (leavesTopicView) {
-            this.setTopicViewParam(false, false);
+            void this.setTopicViewParam(false, false);
         }
     }
 
     /**
      * Only the topic view is kept in the URL, so a copied link opens it, while every other view
-     * falls back to the default. The view stays when another collection is opened from it.
+     * falls back to the default. A collection opened from the topic view chooses its view itself.
      */
     private applyViewTypeParam(params: Params): void {
-        if (params[VIEW_TYPE_QUERY_PARAM] === TOPIC_PAGE_VIEW_TYPE) {
+        const openedFromTopicView =
+            params.id !== this.params?.id &&
+            this.params?.[VIEW_TYPE_QUERY_PARAM] === TOPIC_PAGE_VIEW_TYPE;
+        if (params[VIEW_TYPE_QUERY_PARAM] === TOPIC_PAGE_VIEW_TYPE && !openedFromTopicView) {
             this.viewState.viewType.set('topicPage');
-        } else if (this.viewState.viewType() === 'topicPage' && params.id === this.params?.id) {
+        } else if (this.viewState.viewType() === 'topicPage') {
             this.viewState.viewType.set('grid');
         }
     }
 
     /**
-     * Once the collection is known, falls back from a topic view it does not offer and stores a
-     * topic view that was kept while navigating.
+     * Once the collection is known, applies its default view, falls back from a topic view it does
+     * not offer and keeps the URL in line with the view.
      */
-    private settleViewType(): void {
-        this.applyCollectionDefaultView();
-        if (this.viewState.viewType() !== 'topicPage') {
-            return;
-        }
+    private async settleViewType(): Promise<void> {
+        const openedByDefault = this.applyCollectionDefaultView();
         const available =
             this.collection?.ref?.id !== RestConstants.ROOT && this.topicViewAvailable();
-        if (!available) {
+        if (this.viewState.viewType() === 'topicPage' && !available) {
             this.viewState.viewType.set('grid');
         }
-        if (available !== (this.params?.[VIEW_TYPE_QUERY_PARAM] === TOPIC_PAGE_VIEW_TYPE)) {
-            this.setTopicViewParam(available, true);
+        const shown = this.viewState.viewType() === 'topicPage';
+        if (
+            openedByDefault ||
+            shown !== (this.params?.[VIEW_TYPE_QUERY_PARAM] === TOPIC_PAGE_VIEW_TYPE)
+        ) {
+            await this.setTopicViewParam(shown, true, openedByDefault);
         }
     }
 
     /**
      * Opens the topic view of a collection that is set to open as a topic page, the first time
-     * the collection is shown after another one. A view the user picks afterwards is kept.
+     * the collection is shown after another one. Returns whether it opened the topic view.
      */
-    private applyCollectionDefaultView(): void {
+    private applyCollectionDefaultView(): boolean {
         const id = this.collection?.ref?.id;
         if (!id || id === RestConstants.ROOT) {
             this.defaultViewAppliedFor = null;
-            return;
+            return false;
         }
         if (id === this.defaultViewAppliedFor) {
-            return;
+            return false;
         }
         this.defaultViewAppliedFor = id;
         if (
@@ -683,19 +688,24 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
             this.viewState.viewType() !== 'topicPage'
         ) {
             this.viewState.viewType.set('topicPage');
+            return true;
         }
+        return false;
     }
 
-    private setTopicViewParam(topicView: boolean, replaceUrl: boolean): void {
-        const queryParams: Params = topicView
-            ? { [VIEW_TYPE_QUERY_PARAM]: TOPIC_PAGE_VIEW_TYPE }
-            : Object.fromEntries(
-                  [VIEW_TYPE_QUERY_PARAM, ...TOPIC_VIEW_QUERY_PARAMS].map((key): [string, null] => [
-                      key,
-                      null,
-                  ]),
-              );
-        void this.router.navigate([], {
+    /** @param resetTopicState drops the topic view's state, e.g. one of a collection before */
+    private async setTopicViewParam(
+        topicView: boolean,
+        replaceUrl: boolean,
+        resetTopicState = false,
+    ): Promise<void> {
+        const queryParams: Params = {
+            [VIEW_TYPE_QUERY_PARAM]: topicView ? TOPIC_PAGE_VIEW_TYPE : null,
+        };
+        if (!topicView || resetTopicState) {
+            TOPIC_VIEW_QUERY_PARAMS.forEach((key) => (queryParams[key] = null));
+        }
+        await this.router.navigate([], {
             relativeTo: this.route,
             queryParams,
             queryParamsHandling: 'merge',

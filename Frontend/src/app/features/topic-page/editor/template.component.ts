@@ -235,7 +235,6 @@ import {
     TopicPageStatusBarMode,
 } from './topic-page-status-bar/topic-page-status-bar.component';
 import { VariantSelectComponent } from '../widgets/variant-select/variant-select.component';
-import { TOPIC_PAGE_VIEW_TYPE } from '../shared/utils/collection-topic-page-util';
 
 // side menu items an `openMenu` query param can open, by the label they are identified with
 const OPEN_MENU_LABEL_KEYS: Record<string, string> = {
@@ -447,10 +446,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                     this.topicPageHelperService.getBaseHref() +
                     this.router.serializeUrl(
                         this.router.createUrlTree([UIConstants.ROUTER_PREFIX, 'collections'], {
-                            queryParams: {
-                                id: retrieveNodeId(node),
-                                viewType: TOPIC_PAGE_VIEW_TYPE,
-                            },
+                            queryParams: { id: retrieveNodeId(node) },
                         }),
                     )
                 );
@@ -507,6 +503,8 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * component. The links keep the URLs of the custom URL function, e.g. for new tabs.
      */
     readonly navigateInPlace = input(false, { transform: booleanAttribute });
+    /** Hands topics linked inside the page to a host page that opens them itself. */
+    readonly openTopic = input<((collectionId: string) => void) | null>(null);
     /**
      * Shows the preview of clicked elements in a column of the page itself, e.g. as web component
      * without an `edu-sharing-preview-sidebar` of its own.
@@ -895,12 +893,19 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     }
 
     /**
-     * Loads the linked topic in this component instead of navigating to its link.
-     * Returns false if navigateInPlace is not set.
+     * Opens the linked topic through the host page or loads it in this component instead of
+     * navigating to its link. Returns false if neither openTopic nor navigateInPlace is set.
      *
      * @param url the link of the topic, passed on to the host with topicChanged
      */
     private openTopicInPlace(collectionId: string, url: string | null): boolean {
+        const openTopic = this.openTopic();
+        if (openTopic) {
+            if (collectionId !== this.topicCollectionId()) {
+                openTopic(collectionId);
+            }
+            return true;
+        }
         if (!this.navigateInPlace()) {
             return false;
         }

@@ -2,7 +2,6 @@ import { Component, DestroyRef, effect, inject, input, viewChild } from '@angula
 import { ActivatedRoute, Router } from '@angular/router';
 import { Node, ParentEntries } from 'ngx-edu-sharing-api';
 import { TemplateComponent } from '../../../features/topic-page/editor/template.component';
-import { TopicChangedEvent } from '../../../features/topic-page/shared/types/topic-changed-event';
 import { CollectionViewSlotsService } from '../collection-view-slots.service';
 
 /**
@@ -33,12 +32,12 @@ export class CollectionTopicViewComponent {
         inject(DestroyRef).onDestroy(() => this.slots.breadcrumbEnd.set(null));
     }
 
-    /** Opens the collection of a topic linked inside the page, staying in the topic view. */
-    onTopicChanged(event: TopicChangedEvent): void {
+    /** Opens the collection of a topic linked inside the page, which then chooses its view. */
+    readonly openCollection = (collectionId: string): void => {
         void this.router.navigate([], {
             relativeTo: this.route,
-            queryParams: { id: event.collectionId, variantId: null },
+            queryParams: { id: collectionId },
             queryParamsHandling: 'merge',
         });
-    }
+    };
 }
