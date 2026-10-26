@@ -490,9 +490,8 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     @Input() collectionId: string;
     @Input() customUrl?: (node: Node) => string;
     @Input() customUrlTarget?: '_self' | '_blank';
-    // a host page can render the variant selection in a bar of its own via `variantSelectTemplate`
-    showVariantSelect: InputSignal<boolean> = input(true);
     showSidebar: InputSignal<boolean> = input(true);
+    /** The variant selection, which the host page renders where it fits, e.g. in its breadcrumb row. */
     readonly variantSelectTemplate = viewChild.required<TemplateRef<unknown>>('variantSelect');
     /** The collection and its ancestors as a host page already loaded them, for the first load. */
     readonly hostCollection = input<Node | null>(null);

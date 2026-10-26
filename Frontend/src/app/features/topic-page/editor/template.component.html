@@ -15,7 +15,7 @@
 ></es-topic-page-filters-sidebar>
 }
 <main>
-  <!-- status bar and variant selection stay below the navigation while scrolling -->
+  <!-- the status bar stays below the navigation while scrolling -->
   <div class="template-fixed-top">
     @if (statusBarMode(); as mode) {
     <es-topic-page-status-bar
@@ -29,10 +29,6 @@
       (leave)="mode === 'globalTemplate' ? leaveGlobalTemplateMode() : leaveTemplateMode()"
       (backToSelection)="openVariantOrTemplateSelection($event)"
     ></es-topic-page-status-bar>
-    } @if (showVariantSelect()) {
-    <div class="template-variant-bar">
-      <ng-container [ngTemplateOutlet]="variantSelect"></ng-container>
-    </div>
     }
   </div>
   @if (!pageConfigCheckFailed()) {
