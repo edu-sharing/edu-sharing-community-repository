@@ -29,7 +29,7 @@
         {{ parentEntries().nodes[parentEntries().nodes.length - 2].title }}
       </div>
       }
-      <!-- the explicit title leaves out the search highlighting -->
+      <!-- the heading is set as HTML for the search highlighting, which the title can't follow -->
       <h1 class="mat-heading-1 topic-header-title" [esTitle]="topic || null">
         <span [innerHTML]="topic | highlightSearch : searchInput()"></span>
       </h1>
