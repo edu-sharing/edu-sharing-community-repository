@@ -502,16 +502,21 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         createAssignment.group = DefaultGroups.Primary;
         sortInto.customShowCallback = async () => {
             const validParent = this.parent() && ![ROOT].includes(this.parent().ref.id);
+            // the user home is handed over as a bare node without a type
             const isMapOrFolder =
-                this.parent()?.type &&
+                this.parent()?.ref.id === RestConstants.USERHOME ||
                 [RestConstants.CM_TYPE_FOLDER, RestConstants.CCM_TYPE_MAP].includes(
-                    this.parent().type,
+                    this.parent()?.type,
                 );
-            return validParent && isMapOrFolder;
+            // a selection-less option has no node the generic permission check could run on,
+            // so the right to add children is verified against the parent itself
+            // the option helper only hides on an explicit `false`, so the result is coerced
+            return !!(
+                validParent &&
+                isMapOrFolder &&
+                RestHelper.hasAccessPermission(this.parent(), RestConstants.ACCESS_ADD_CHILDREN)
+            );
         };
-        // selection-less option: the permissions are checked against `parent` (see setData below)
-        sortInto.permissions = [RestConstants.ACCESS_ADD_CHILDREN];
-        sortInto.permissionsMode = HideMode.Hide;
         sortInto.elementType = [ElementType.NoneOrUnknown];
         sortInto.group = DefaultGroups.Primary;
         sortInto.priority = 4;
