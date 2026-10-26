@@ -408,8 +408,8 @@
       },
       "COLLECTION_FILTER": {
         "LABEL": "Filtrato:",
-        "CHIP": "Raccolta corrente",
-        "TOOLTIP": "Mostra solo le pagine tematiche di questa raccolta"
+        "CHIP": "Raccolta corrente e sottoraccolte",
+        "TOOLTIP": "Mostra solo le pagine tematiche di questa raccolta e delle sue sottoraccolte"
       },
       "SEARCH_PLACEHOLDER": "Cerca modelli di pagina tematica",
       "SEARCH": "Ricerca",
