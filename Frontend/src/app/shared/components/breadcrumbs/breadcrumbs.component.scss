@@ -19,7 +19,7 @@
             display: none;
         }
     }
-    @media screen and (min-width: $mobileTabSwitchWidth) {
+    @media screen and (min-width: ($mobileTabSwitchWidth + 1px)) {
         .breadcrumb-short {
             display: none;
         }
@@ -44,7 +44,7 @@
 }
 
 .mobile-only {
-    @media screen and (min-width: $mobileTabSwitchWidth) {
+    @media screen and (min-width: ($mobileTabSwitchWidth + 1px)) {
         display: none !important;
     }
 }
