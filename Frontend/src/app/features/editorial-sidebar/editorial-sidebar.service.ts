@@ -309,7 +309,7 @@ export class EditorialSidebarService {
             nodeEntriesRef?.getSelection()?.toggle(event.element as Node);
         }
         if (nodeEntriesRef?.getSelection()?.selected.length === 0) {
-            this.sidebarOpened.set(false);
+            this.close();
         } else if (
             nodeEntriesRef?.getSelection()?.selected.length === 1 &&
             (event.element as Node).mediatype &&
