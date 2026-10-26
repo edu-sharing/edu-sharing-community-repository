@@ -503,6 +503,9 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         return this.unframed();
     }
     readonly variantSelectTemplate = viewChild.required<TemplateRef<unknown>>('variantSelect');
+    /** The collection and its ancestors as a host page already loaded them, for the first load. */
+    readonly hostCollection = input<Node | null>(null);
+    readonly hostParents = input<ParentEntries | null>(null);
     @Input() variantId: string;
     /**
      * Loads topics linked inside the page (topic tree, collection chips, breadcrumb) in this
@@ -1059,15 +1062,22 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         this.translationsService.initialize().subscribe(() => {});
         try {
             // fetch the collection node to set the topic name, color and check the user access
-            this.collectionNode = await this.topicPageHelperService.getNode(
-                this.topicCollectionId(),
-            );
+            const collectionId: string = this.topicCollectionId();
+            // a reload after changes or another topic does not match what the host loaded
+            const hostData: boolean = !this.initialLoadSuccessfully();
+            const hostCollection: Node | null = this.hostCollection();
+            this.collectionNode =
+                hostData && retrieveNodeId(hostCollection) === collectionId
+                    ? hostCollection
+                    : await this.topicPageHelperService.getNode(collectionId);
             this.topic.set(this.collectionNode.title ?? 'No topic defined');
             this.imprintPrivacy.setContextNode(this.collectionNode, this.destroyRef);
             // retrieve parent entries
-            const parentEntries: ParentEntries = await this.topicPageHelperService.getNodeParents(
-                this.topicCollectionId(),
-            );
+            const hostParents: ParentEntries | null = this.hostParents();
+            const parentEntries: ParentEntries =
+                hostData && retrieveNodeId(hostParents?.nodes?.[0]) === collectionId
+                    ? hostParents
+                    : await this.topicPageHelperService.getNodeParents(collectionId);
             this.parentEntries.set(parentEntries);
             // check the user privileges for the collection node and initialize custom listeners
             this.userHasEditRights.set(checkUserAccess(this.collectionNode));

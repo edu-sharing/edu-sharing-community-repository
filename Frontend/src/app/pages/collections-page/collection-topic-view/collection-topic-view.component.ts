@@ -1,5 +1,6 @@
 import { Component, DestroyRef, effect, inject, input, viewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Node, ParentEntries } from 'ngx-edu-sharing-api';
 import { TemplateComponent } from '../../../features/topic-page/editor/template.component';
 import { TopicChangedEvent } from '../../../features/topic-page/shared/types/topic-changed-event';
 import { CollectionViewSlotsService } from '../collection-view-slots.service';
@@ -19,7 +20,9 @@ export class CollectionTopicViewComponent {
     private readonly router = inject(Router);
     private readonly slots = inject(CollectionViewSlotsService);
 
-    readonly collectionId = input.required<string>();
+    readonly collection = input.required<Node>();
+    /** ancestors of the collection as the collections page loaded them, the collection first */
+    readonly parents = input<ParentEntries | null>(null);
     /** the variant the URL selects when the view opens; later selections are kept by the page */
     readonly initialVariantId: string | undefined =
         this.route.snapshot.queryParamMap.get('variantId') ?? undefined;

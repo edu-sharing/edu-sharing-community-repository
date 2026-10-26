@@ -35,7 +35,7 @@ import { ViewToggleItem } from '../../shared/components/view-toggle-group/view-t
 import { ConnectedPosition } from '@angular/cdk/overlay';
 import { combineLatest, Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
-import { ConfigService, Mediacenter, Node } from 'ngx-edu-sharing-api';
+import { ConfigService, Mediacenter, Node, ParentEntries } from 'ngx-edu-sharing-api';
 import * as EduData from '../../core-module/core.module';
 import {
     ConfigurationService,
@@ -147,6 +147,8 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
     ]);
     /** the topic view, loaded the first time it is shown */
     readonly topicViewComponent = signal<Type<unknown> | null>(null);
+    /** ancestors of the open collection, the collection first, as the topic view reads them */
+    readonly collectionParents = signal<ParentEntries | null>(null);
     readonly breadcrumbEndSlot = inject(CollectionViewSlotsService).breadcrumbEnd;
     private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
     private readonly mainContent = viewChild('mainContentRef', { read: ElementRef });
@@ -591,13 +593,20 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
     private renderBreadcrumbs() {
         this.breadcrumbsService.setNodePath([]);
         this.topicPageConfigured.set(false);
+        this.collectionParents.set(null);
         if (this.collection.ref.id === RestConstants.ROOT) {
             this.settleViewType();
             return;
         }
+        // the properties carry the page configs parents propagate to their sub-collections
         this.nodeService
-            .getNodeParents(this.collection.ref.id, false)
-            .subscribe((data: EduData.NodeList) => {
+            .getNodeParents(this.collection.ref.id, false, [RestConstants.ALL])
+            .subscribe((data: EduData.ParentList) => {
+                this.collectionParents.set({
+                    nodes: [...data.nodes],
+                    pagination: data.pagination,
+                    scope: data.scope,
+                } as unknown as ParentEntries);
                 const path = data.nodes.reverse();
                 if (path.length > 1) {
                     this.parentCollectionId = new EduData.Reference(

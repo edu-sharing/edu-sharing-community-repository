@@ -180,9 +180,12 @@
               }
               <!-- the topic view replaces everything below the breadcrumb and scrolls itself -->
               @if (viewState.viewType() === 'topic') { @if (topicViewAvailable() &&
-              topicViewComponent(); as topicView) {
+              collectionParents() && topicViewComponent(); as topicView) {
               <ng-container
-                *ngComponentOutlet="topicView; inputs: { collectionId: collection.ref.id }"
+                *ngComponentOutlet="
+                  topicView;
+                  inputs: { collection: collection, parents: collectionParents() }
+                "
               ></ng-container>
               } } @else {
               <!-- Only this region scrolls; the breadcrumb header above stays fixed. -->

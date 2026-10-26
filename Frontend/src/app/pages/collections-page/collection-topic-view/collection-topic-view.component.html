@@ -1,7 +1,9 @@
 <es-template-page
   unframed
   navigateInPlace
-  [collectionId]="collectionId()"
+  [collectionId]="collection().ref.id"
+  [hostCollection]="collection()"
+  [hostParents]="parents()"
   [variantId]="initialVariantId"
   [showVariantSelect]="false"
   (topicChanged)="onTopicChanged($event)"
