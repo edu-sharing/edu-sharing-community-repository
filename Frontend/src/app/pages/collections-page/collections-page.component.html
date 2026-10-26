@@ -26,7 +26,7 @@
   </mat-sidenav>
 
   <mat-sidenav-content>
-    <div class="main-content">
+    <div #mainContentRef class="main-content">
       @if (showTabs()) {
       <mat-tab-group
         class="mat-tab-group-shadow"

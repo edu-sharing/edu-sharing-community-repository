@@ -149,7 +149,7 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
     readonly topicViewComponent = signal<Type<unknown> | null>(null);
     readonly breadcrumbEndSlot = inject(CollectionViewSlotsService).breadcrumbEnd;
     private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
-    private readonly rightSidenav = viewChild('rightSidenav', { read: ElementRef });
+    private readonly mainContent = viewChild('mainContentRef', { read: ElementRef });
     private collectionService = inject(RestCollectionService);
     private collectionScopesService = inject(CollectionScopesService);
     private config = inject(ConfigurationService);
@@ -698,23 +698,30 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
      * collection search once the topic view, which brings its own, is left.
      */
     private registerTopicView(): void {
-        // the topic page's side menu is fixed to the viewport and has to clear the open sidebar
+        // the topic page's side menu is fixed to the viewport, beside the card's right edge, which
+        // moves with the open sidebar and its width
         effect((onCleanup) => {
-            const sidenav: HTMLElement | undefined = this.rightSidenav()?.nativeElement;
-            if (!sidenav || !this.editorialSidebarService.sidebarOpened()) {
+            const card: HTMLElement | undefined = this.mainContent()?.nativeElement;
+            if (!card) {
                 return;
             }
-            const updateInset = () =>
-                this.host.nativeElement.style.setProperty(
-                    '--sideMenuRightInset',
-                    `${sidenav.offsetWidth}px`,
+            const host: HTMLElement = this.host.nativeElement;
+            const updateInset = () => {
+                const margin = parseFloat(
+                    getComputedStyle(host).getPropertyValue('--roundedContainerMargin'),
                 );
+                const inset =
+                    window.innerWidth - card.getBoundingClientRect().right - (margin || 0);
+                host.style.setProperty('--sideMenuRightInset', `${Math.max(0, inset)}px`);
+            };
             const observer = new ResizeObserver(updateInset);
-            observer.observe(sidenav);
+            observer.observe(card);
+            window.addEventListener('resize', updateInset);
             updateInset();
             onCleanup(() => {
                 observer.disconnect();
-                this.host.nativeElement.style.removeProperty('--sideMenuRightInset');
+                window.removeEventListener('resize', updateInset);
+                host.style.removeProperty('--sideMenuRightInset');
             });
         });
         let topicViewShown = false;
