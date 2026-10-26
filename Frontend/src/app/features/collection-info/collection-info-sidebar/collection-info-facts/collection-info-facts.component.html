@@ -44,6 +44,30 @@
     >
       {{ collection().modifiedAt | formatDate : { time: true, relative: false } }}
     </es-collection-info-row>
-    }
+    } @if (showSettings()) {
+    <es-collection-info-row
+      icon="visibility"
+      label="COLLECTIONS.INFO.DEFAULT_VIEW"
+      data-test="collection-info-default-view"
+    >
+      {{ defaultViewKey() | translate }}
+    </es-collection-info-row>
+    @if (subcollectionSortKey()) {
+    <es-collection-info-row
+      icon="sort"
+      label="COLLECTIONS.INFO.SORT_SUBCOLLECTIONS"
+      data-test="collection-info-sort-subcollections"
+    >
+      {{ subcollectionSortKey() | translate }}
+    </es-collection-info-row>
+    } @if (referenceSortKey()) {
+    <es-collection-info-row
+      icon="sort"
+      label="COLLECTIONS.INFO.SORT_REFERENCES"
+      data-test="collection-info-sort-references"
+    >
+      {{ referenceSortKey() | translate }}
+    </es-collection-info-row>
+    } }
   </div>
 </es-collection-info-section>

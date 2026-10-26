@@ -17,7 +17,9 @@
   (keydown.ContextMenu)="openContextmenu($event)"
   [class.selected]="entriesService.selection.isSelected(node)"
 >
-  @if (entriesService.checkbox) {
+  @if (entriesService.sort?.customSortingInProgress) {
+  <div class="card-small-drag-handle" aria-hidden="true"><i esIcon="drag_indicator"></i></div>
+  } @if (entriesService.checkbox) {
   <div class="card-small-checkbox">
     <mat-checkbox
       [checked]="entriesService.selection.isSelected(node)"

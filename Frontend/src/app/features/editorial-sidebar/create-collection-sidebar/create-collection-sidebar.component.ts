@@ -1,4 +1,5 @@
 import { TOPIC_PAGE_VIEW_TYPE } from '../../topic-page/shared/utils/collection-topic-page-util';
+import { collectionSortIdOf, SORTS, SortId } from './collection-sorts';
 import {
     Component,
     DestroyRef,
@@ -66,31 +67,6 @@ export type EditCollectionConfig = {
 type Step = 'DESIGN' | 'CONFIGURE' | 'PERMISSIONS';
 /** who the collection can be given to after it was created */
 type PermissionsKind = 'SHARE' | 'EDITORIAL_GROUPS';
-type SortId = 'TITLE' | 'MODIFIED' | 'CREATED' | 'MANUAL';
-
-/** the ways children can be sorted by default, with the property each one stands for */
-const SORTS: { [kind in 'subcollections' | 'references']: { [id in SortId]?: NewCollectionSort } } =
-    {
-        subcollections: {
-            TITLE: { property: RestConstants.CM_PROP_TITLE, ascending: true },
-            MODIFIED: { property: RestConstants.CM_MODIFIED_DATE, ascending: false },
-            CREATED: { property: RestConstants.CM_PROP_C_CREATED, ascending: false },
-            MANUAL: {
-                property: RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION,
-                ascending: true,
-            },
-        },
-        references: {
-            TITLE: { property: RestConstants.LOM_PROP_TITLE, ascending: true },
-            MODIFIED: { property: RestConstants.CM_MODIFIED_DATE, ascending: false },
-            CREATED: { property: RestConstants.CM_PROP_C_CREATED, ascending: false },
-            MANUAL: {
-                property: RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION,
-                ascending: true,
-            },
-        },
-    };
-
 /**
  * Creates or edits a collection in up to three steps: first its look (title, description, colour,
  * image), then its type, metadata and default sorting, and finally who it is given to. Nothing is
@@ -593,11 +569,11 @@ export class CreateCollectionSidebarComponent {
         this.metadata = node.properties as Values;
         this.openAsTopicPage.set(node.collection.viewtype === TOPIC_PAGE_VIEW_TYPE);
         this.initialSorts = {
-            subcollections: this.getSortId(
+            subcollections: collectionSortIdOf(
                 'subcollections',
                 node.properties?.[RestConstants.CCM_PROP_COLLECTION_SUBCOLLECTION_ORDER_MODE],
             ),
-            references: this.getSortId(
+            references: collectionSortIdOf(
                 'references',
                 node.properties?.[RestConstants.CCM_PROP_COLLECTION_ORDER_MODE],
             ),
@@ -617,15 +593,6 @@ export class CreateCollectionSidebarComponent {
                 ),
             );
         }
-    }
-
-    /** the sorting a collection stores as property; a collection that has none is sorted by change */
-    private getSortId(kind: 'subcollections' | 'references', stored?: string[]): SortId | null {
-        if (!stored?.length) {
-            return 'MODIFIED';
-        }
-        const id = this.sortIds.find((sortId) => SORTS[kind][sortId].property === stored[0]);
-        return id ?? null;
     }
 
     private async loadToolpermissions(): Promise<{

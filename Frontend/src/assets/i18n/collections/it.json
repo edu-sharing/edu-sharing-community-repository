@@ -10,6 +10,8 @@
     "ORDER_ELEMENTS_INFO": "Gli spettatori della collezione vedono i materiali contenuti in un certo ordine.",
     "ORDER_COLLECTIONS": "Modificare manualmente l'ordine delle collezioni",
     "ORDER_COLLECTIONS_INFO": "Gli spettatori della collezione vedono le sottocollezioni contenute in un certo ordine.",
+    "ORDER_UNSAVED_TITLE": "Save changes to the order?",
+    "ORDER_UNSAVED_MESSAGE": "The order has been changed. Do you want to keep or discard the changes?",
     "SORT_SLIDER": "Umsortieren",
     "CUSTOM_ORDER": "cambiare l'ordine degli elementi",
     "PERMISSIONS": "Invitato",

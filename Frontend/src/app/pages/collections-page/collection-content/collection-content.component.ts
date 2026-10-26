@@ -113,6 +113,8 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     private sessionStorageService = inject(SessionStorageService);
     private dialogs = inject(DialogsService);
     private infobar = inject(InfobarService);
+    private collectionsOrderSnapshot: string[] = [];
+    private referencesOrderSnapshot: string[] = [];
     private loadingScreen = inject(LoadingScreenService);
     private mainNavService = inject(MainNavService);
     private mdsService = inject(MdsService);
@@ -1261,6 +1263,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
 
     async toggleCollectionsOrder() {
         if (this.sortCollections.customSortingInProgress) {
+            this.collectionsOrderSnapshot = await this.getOrderSnapshot(this.dataSourceCollections);
             const response = await this.infobar.open({
                 title: 'COLLECTIONS.ORDER_COLLECTIONS',
                 message: 'COLLECTIONS.ORDER_COLLECTIONS_INFO',
@@ -1271,17 +1274,32 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             });
             if (response === 'SAVE') {
                 return this.changeCollectionsOrder();
-            } else {
-                this.sortCollections.customSortingInProgress = false;
             }
+            if (response === null && !this.sortCollections.customSortingInProgress) {
+                // The mode was left via the toggle, which takes care of the pending changes.
+                return;
+            }
+            this.sortCollections.customSortingInProgress = false;
         } else {
+            const decision = await this.confirmLeavingOrderMode(
+                this.dataSourceCollections,
+                this.collectionsOrderSnapshot,
+            );
+            if (decision === 'CANCEL') {
+                this.sortCollections.customSortingInProgress = true;
+                return;
+            }
             this.infobar.close();
+            if (decision === 'SAVE') {
+                return this.changeCollectionsOrder();
+            }
         }
         this.refreshContent();
     }
 
     async toggleReferencesOrder() {
         if (this.sortReferences.customSortingInProgress) {
+            this.referencesOrderSnapshot = await this.getOrderSnapshot(this.dataSourceReferences);
             const response = await this.infobar.open({
                 title: 'COLLECTIONS.ORDER_ELEMENTS',
                 message: 'COLLECTIONS.ORDER_ELEMENTS_INFO',
@@ -1290,16 +1308,67 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                     { label: 'SAVE', config: { color: 'primary' } },
                 ],
             });
-            this.sortReferences.customSortingInProgress = false;
             if (response === 'SAVE') {
+                this.sortReferences.customSortingInProgress = false;
+                void this.changeReferencesOrder();
+                this.listReferences?.getSelection().clear();
+                return;
+            }
+            if (response === null && !this.sortReferences.customSortingInProgress) {
+                // The mode was left via the toggle, which takes care of the pending changes.
+                return;
+            }
+            this.sortReferences.customSortingInProgress = false;
+            this.refreshContent();
+        } else {
+            const decision = await this.confirmLeavingOrderMode(
+                this.dataSourceReferences,
+                this.referencesOrderSnapshot,
+            );
+            if (decision === 'CANCEL') {
+                this.sortReferences.customSortingInProgress = true;
+                return;
+            }
+            this.infobar.close();
+            if (decision === 'SAVE') {
                 void this.changeReferencesOrder();
                 this.listReferences?.getSelection().clear();
             } else {
                 this.refreshContent();
             }
-        } else {
-            this.infobar.close();
         }
+    }
+
+    private async getOrderSnapshot<T extends Node>(
+        dataSource: NodeDataSource<T>,
+    ): Promise<string[]> {
+        return RestHelper.getNodeIds(await dataSource.getData());
+    }
+
+    /**
+     * Resolves what to do with the arrangement made in the edit mode when the mode is left.
+     *
+     * Without any change in the order nothing needs to be decided and the arrangement is dropped.
+     */
+    private async confirmLeavingOrderMode<T extends Node>(
+        dataSource: NodeDataSource<T>,
+        snapshot: string[],
+    ): Promise<'SAVE' | 'DISCARD' | 'CANCEL'> {
+        const current = await this.getOrderSnapshot(dataSource);
+        if (current.length === snapshot.length && current.every((id, i) => id === snapshot[i])) {
+            return 'DISCARD';
+        }
+        const dialogRef = await this.dialogs.openGenericDialog({
+            title: 'COLLECTIONS.ORDER_UNSAVED_TITLE',
+            message: 'COLLECTIONS.ORDER_UNSAVED_MESSAGE',
+            buttons: [
+                { label: 'CANCEL', config: { color: 'standard' } },
+                { label: 'DISCARD', config: { color: 'standard' } },
+                { label: 'SAVE', config: { color: 'primary' } },
+            ],
+        });
+        // Dismissing the dialog without a choice keeps the user in the edit mode.
+        return (await firstValueFrom(dialogRef.afterClosed())) ?? 'CANCEL';
     }
 
     addNodesToCollection(nodes: Node[], allowDuplicate: boolean | 'ignore' = false) {
@@ -1367,12 +1436,11 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
 
     /** Makes the arrangement set by hand the order in which the children of the collection show. */
     private async storeCustomOrderMode(property: string): Promise<void> {
+        const value = [RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION, 'true'];
         await this.nodeServiceApi
-            .setProperty(this.collection.ref.repo, this.collection.ref.id, property, [
-                RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION,
-                'true',
-            ])
+            .setProperty(this.collection.ref.repo, this.collection.ref.id, property, value)
             .toPromise();
+        this.collection.properties = { ...this.collection.properties, [property]: value };
     }
 
     openItem(event: NodeClickEvent<CollectionReference>) {

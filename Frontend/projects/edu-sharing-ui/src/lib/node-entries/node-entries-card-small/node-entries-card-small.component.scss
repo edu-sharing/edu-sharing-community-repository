@@ -39,6 +39,17 @@ $collectionIconSize: 25px;
     }
 }
 
+// Hint that the card can be moved while the entries are arranged by hand.
+.card-small-drag-handle {
+    position: absolute;
+    z-index: 2;
+    top: 4px;
+    left: 4px;
+    display: flex;
+    color: var(--textMain);
+    cursor: grab;
+}
+
 .card-small-checkbox {
     position: absolute;
     z-index: 2;

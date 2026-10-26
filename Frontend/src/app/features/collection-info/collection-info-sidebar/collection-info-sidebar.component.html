@@ -8,7 +8,10 @@
       data-test="collection-info-actionbar"
     ></es-actionbar>
   </div>
-  <es-collection-info-facts [collection]="collection()"></es-collection-info-facts>
+  <es-collection-info-facts
+    [collection]="collection()"
+    [showSettings]="canEdit()"
+  ></es-collection-info-facts>
   <es-collection-info-participants [collection]="collection()"></es-collection-info-participants>
   @if (collection()?.properties) {
   <es-collection-info-section heading="COLLECTIONS.INFO.SECTION_METADATA">
