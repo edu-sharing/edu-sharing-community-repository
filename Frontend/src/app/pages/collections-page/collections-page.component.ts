@@ -440,13 +440,13 @@ export class CollectionsPageComponent implements OnDestroy {
     }
 
     private renderBreadcrumbs() {
-        this.breadcrumbsService.setNodePath([]);
         if (this.collection.ref.id === RestConstants.ROOT) {
+            this.breadcrumbsService.setNodePath([]);
             return;
         }
-        this.nodeService
-            .getNodeParents(this.collection.ref.id, false)
-            .subscribe((data: EduData.NodeList) => {
+        // the path of the collection before stays until this one's arrives
+        this.nodeService.getNodeParents(this.collection.ref.id, false).subscribe({
+            next: (data: EduData.NodeList) => {
                 const path = data.nodes.reverse();
                 if (path.length > 1) {
                     this.parentCollectionId = new EduData.Reference(
@@ -455,7 +455,9 @@ export class CollectionsPageComponent implements OnDestroy {
                     );
                 }
                 this.breadcrumbsService.setNodePath(path);
-            });
+            },
+            error: () => this.breadcrumbsService.setNodePath([]),
+        });
     }
 
     private initialize() {
