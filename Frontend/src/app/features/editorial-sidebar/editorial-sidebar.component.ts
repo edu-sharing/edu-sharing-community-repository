@@ -375,9 +375,8 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
                 );
             return validParent && isMapOrFolder;
         };
-        // selection-less option: the permissions are checked against `parent` (see setData below)
-        sortInto.permissions = [RestConstants.ACCESS_ADD_CHILDREN];
-        sortInto.permissionsMode = HideMode.Hide;
+        // only for logged-in users who may add children to the current collection or folder
+        sortInto.constrains = [Constrain.User, Constrain.AddObjects];
         sortInto.elementType = [ElementType.NoneOrUnknown];
         sortInto.scopes = ['collections', 'workspace'];
         options.push(sortInto);
