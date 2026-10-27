@@ -67,6 +67,11 @@ $collectionIconSize: 25px;
     // 10px column-gap would otherwise reserve a gutter and stop the row filling full width
     .card-options {
         display: block;
+        // the option buttons decide per node whether they are shown, so a strip without any
+        // visible button would only add an empty line with a separator
+        &:not(:has(es-option-button button:not(.display-none))) {
+            display: none;
+        }
         .card-options-area {
             justify-content: flex-end;
             padding: 0 $entriesCardPaddingHorizontal $entriesCardPaddingVertical;

@@ -21,7 +21,7 @@ import { CollectionInfoParticipantsComponent } from './collection-info-participa
 /** names of the options that are not offered next to the collection information */
 const HIDDEN_OPTIONS = ['EDITORIAL.OPTIONS.COLLECTION_INFO', 'OPTIONS.SHOW_TOPIC_PAGE'];
 /** names of the options that get a button of their own, all others are listed in the menu */
-const BUTTON_OPTIONS = ['OPTIONS.COLLECTION_EDIT', 'OPTIONS.INVITE', 'OPTIONS.QR_CODE'];
+const BUTTON_OPTIONS = ['OPTIONS.INVITE', 'OPTIONS.QR_CODE'];
 
 /**
  * Sidebar page with the general information about a collection. It only arranges the sections;

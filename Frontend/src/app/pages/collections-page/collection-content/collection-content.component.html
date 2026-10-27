@@ -21,6 +21,7 @@
         #listCollections
         [dataSource]="dataSourceCollections"
         [elementInteractionType]="interactionType"
+        [scope]="Scope.CollectionsReferences"
         [columns]="getCollectionsColumns()"
         (clickItem)="clickItem.emit($event)"
         (fetchData)="loadMoreCollections()"
