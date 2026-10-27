@@ -16,9 +16,9 @@ export class TemporaryStorageService {
     static COLLECTION_ADD_NODES = 'collection_add_nodes';
     static WORKSPACE_LAST_LOCATION = 'WORKSPACE_LAST_LOCATION';
     // default: false
-    static OPTION_HIDE_MAINNAV: 'option_hide_mainnav';
+    static OPTION_HIDE_MAINNAV = 'option_hide_mainnav';
     // default: false
-    static OPTION_DISABLE_SCROLL_LAYOUT: 'option_disable_scroll_layout';
+    static OPTION_DISABLE_SCROLL_LAYOUT = 'option_disable_scroll_layout';
     static CUSTOM_NODE_LIST_COMPONENT = 'custom_node_list_component';
     static CUSTOM_NODE_ENTRIES_COMPONENT = 'custom_node_entries_component';
 
