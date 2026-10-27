@@ -517,6 +517,8 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
                 RestHelper.hasAccessPermission(this.parent(), RestConstants.ACCESS_ADD_CHILDREN)
             );
         };
+        // only for logged-in users who may add children to the current collection or folder
+        sortInto.constrains = [Constrain.User, Constrain.AddObjects];
         sortInto.elementType = [ElementType.NoneOrUnknown];
         sortInto.group = DefaultGroups.Primary;
         sortInto.priority = 4;
@@ -535,7 +537,9 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         );
         manageContent.group = DefaultGroups.Edit;
         manageContent.elementType = [ElementType.Node];
-        manageContent.constrains = [Constrain.Files];
+        manageContent.constrains = [Constrain.Files, Constrain.User];
+        // TODO: a customShowCallback should also check the rights on the selected nodes, i.e.
+        // CCPublish for a collection target or the workspace toolpermission for a folder target
         manageContent.scopes = ['workspace', 'collections', 'search', 'render'];
         options.push(manageContent);
 

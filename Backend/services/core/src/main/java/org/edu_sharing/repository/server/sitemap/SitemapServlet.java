@@ -9,7 +9,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import com.typesafe.config.Config;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -53,6 +55,9 @@ public class SitemapServlet extends SpringHttpServlet {
     private static final int NODES_PER_MAP = 500;
     private static final int DEFAULT_PAGE_SIZE = 5000;
     private static final String CONFIG_PAGE_SIZE = "angular.sitemap.pageSize";
+    private static final String CONFIG_STATIC_PAGES = "angular.sitemap.staticPages";
+    private static final String TYPE_STATIC = "static";
+    private static final Set<String> CHANGE_FREQUENCIES = Set.of("always", "hourly", "daily", "weekly", "monthly", "yearly", "never");
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -61,6 +66,10 @@ public class SitemapServlet extends SpringHttpServlet {
             String from = req.getParameter("from");
             String after = req.getParameter("after");
             String type = req.getParameter("type");
+            if (TYPE_STATIC.equals(type)) {
+                toXml(getStaticPages(), resp);
+                return;
+            }
             SearchService search = SearchServiceFactory.getInstance().getLocalService();
 
             if (search instanceof SearchServiceElastic) {
@@ -101,6 +110,56 @@ public class SitemapServlet extends SpringHttpServlet {
         }
     }
 
+    private boolean hasStaticPages() {
+        Config config = lightbendConfigLoader.getConfig();
+        return config.hasPath(CONFIG_STATIC_PAGES) && !config.getConfigList(CONFIG_STATIC_PAGES).isEmpty();
+    }
+
+    /**
+     * the sitemap of the entry pages that are not nodes (e.g. the start page and the search), from the config
+     */
+    private Urlset getStaticPages() {
+        Config config = lightbendConfigLoader.getConfig();
+        List<? extends Config> pages = config.hasPath(CONFIG_STATIC_PAGES) ? config.getConfigList(CONFIG_STATIC_PAGES) : List.of();
+        return buildStaticUrlset(pages, URLHelper.getBaseUrl(true));
+    }
+
+    static Urlset buildStaticUrlset(List<? extends Config> pages, String baseUrl) {
+        Urlset set = new Urlset();
+        String base = baseUrl.replaceAll("/$", "");
+        for (Config page : pages) {
+            Urlset.Url url = new Urlset.Url();
+            String path = page.hasPath("path") ? page.getString("path").replaceAll("^/+", "") : "";
+            url.loc = base + "/" + path;
+            if (page.hasPath("priority")) {
+                double priority = page.getDouble("priority");
+                if (priority >= 0 && priority <= 1) {
+                    url.priority = priority;
+                } else {
+                    log.warn("Ignoring priority {} of the static sitemap page '{}', it must be between 0.0 and 1.0", priority, path);
+                }
+            }
+            if (page.hasPath("changefreq")) {
+                String changefreq = page.getString("changefreq");
+                if (CHANGE_FREQUENCIES.contains(changefreq)) {
+                    url.changefreq = changefreq;
+                } else {
+                    log.warn("Ignoring changefreq '{}' of the static sitemap page '{}', allowed are {}", changefreq, path, CHANGE_FREQUENCIES);
+                }
+            }
+            set.url.add(url);
+        }
+        return set;
+    }
+
+    private void addStaticSitemap(Sitemapindex index, HttpServletRequest request) {
+        if (hasStaticPages()) {
+            Sitemapindex.Sitemap map = new Sitemapindex.Sitemap();
+            map.loc = request.getRequestURL() + "?type=" + TYPE_STATIC;
+            index.sitemap.add(map);
+        }
+    }
+
     private static String formatDate(long epochMillis) {
         return DATE_FORMAT.format(Instant.ofEpochMilli(epochMillis));
     }
@@ -126,6 +185,7 @@ public class SitemapServlet extends SpringHttpServlet {
 
     private Sitemapindex getAllElastic(HttpServletRequest request, SearchServiceElastic elastic) throws Throwable {
         Sitemapindex index = new Sitemapindex();
+        addStaticSitemap(index, request);
         for (String type : new String[]{"io", "collection"}) {
             for (SitemapPage page : elastic.getSitemapPages(getContentType(type), getPageSize())) {
                 Sitemapindex.Sitemap map = new Sitemapindex.Sitemap();
@@ -173,6 +233,7 @@ public class SitemapServlet extends SpringHttpServlet {
 
     private Sitemapindex getAll(HttpServletRequest request) throws Throwable {
         Sitemapindex index = new Sitemapindex();
+        addStaticSitemap(index, request);
         SearchService search = SearchServiceFactory.getInstance().getLocalService();
 
         SearchToken token=new SearchToken();

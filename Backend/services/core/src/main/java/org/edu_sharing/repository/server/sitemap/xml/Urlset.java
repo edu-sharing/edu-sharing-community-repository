@@ -12,6 +12,8 @@ public class Urlset {
     public static class Url{
         @XmlElement(namespace = SitemapServlet.NS_SITEMAP) public String loc;
         @XmlElement(namespace = SitemapServlet.NS_SITEMAP) public String lastmod;
+        @XmlElement(namespace = SitemapServlet.NS_SITEMAP) public String changefreq;
+        @XmlElement(namespace = SitemapServlet.NS_SITEMAP) public Double priority;
         @XmlElement(namespace = "http://www.google.com/schemas/sitemap-image/1.1") public Collection<Image> image=new ArrayList<>();
         @XmlElement(namespace = "http://www.google.com/schemas/sitemap-video/1.1") public Collection<Video> video=new ArrayList<>();
         public static class Image{

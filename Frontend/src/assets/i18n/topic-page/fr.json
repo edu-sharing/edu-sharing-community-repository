@@ -444,8 +444,8 @@
       },
       "COLLECTION_FILTER": {
         "LABEL": "Filtré :",
-        "CHIP": "Collection actuelle",
-        "TOOLTIP": "N'afficher que les pages thématiques de cette collection"
+        "CHIP": "Collection actuelle et sous-collections",
+        "TOOLTIP": "N'afficher que les pages thématiques de cette collection et de ses sous-collections"
       },
       "SEARCH_PLACEHOLDER": "Rechercher des modèles de page thématique",
       "SEARCH": "Recherche",
