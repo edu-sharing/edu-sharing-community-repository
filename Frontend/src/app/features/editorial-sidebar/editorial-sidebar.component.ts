@@ -394,7 +394,9 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         );
         manageContent.group = DefaultGroups.Edit;
         manageContent.elementType = [ElementType.Node];
-        manageContent.constrains = [Constrain.Files];
+        manageContent.constrains = [Constrain.Files, Constrain.User];
+        // TODO: a customShowCallback should also check the rights on the selected nodes, i.e.
+        // CCPublish for a collection target or the workspace toolpermission for a folder target
         manageContent.scopes = ['workspace', 'collections', 'search', 'render'];
         options.push(manageContent);
 
