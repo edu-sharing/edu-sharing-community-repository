@@ -99,6 +99,8 @@
     height: 0;
     flex-grow: 1;
     position: relative;
+    // keeps positioned option content (e.g. an active tab body) below the header's shadow
+    isolation: isolate;
 }
 .option {
     padding: 0 20px;

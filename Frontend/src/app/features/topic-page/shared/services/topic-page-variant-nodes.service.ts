@@ -3,7 +3,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { v4 as uuidv4 } from 'uuid';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
-import { CopyOption } from '../../editor/add-page-variant-or-template-dialog/add-page-variant-or-template-dialog.component';
+import { CopyOption } from '../../editor/page-variant-or-template-picker/page-variant-or-template-picker.component';
 import {
     DEFAULT_PAGE_CONFIG_ASPECT,
     DEFAULT_PAGE_NAME_PREFIX,

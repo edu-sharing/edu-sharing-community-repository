@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { TranslateService } from '@ngx-translate/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
-import { CopyOption } from '../../editor/add-page-variant-or-template-dialog/add-page-variant-or-template-dialog.component';
+import { CopyOption } from '../../editor/page-variant-or-template-picker/page-variant-or-template-picker.component';
 import {
     DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP,
     DEFAULT_PAGE_VARIANT_PROFILING_PROPS,

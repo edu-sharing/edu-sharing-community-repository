@@ -6,6 +6,14 @@
       "TITLE": "Themenseite",
       "SEARCH_PLACEHOLDER": "Suche nach Inhalten auf der Themenseite ..."
     },
+    "SIDEBAR": {
+      "TITLE": "Themenseite",
+      "TITLE_DESCRIPTION": "Neue Themenseite oder Vorlage aus einer bestehenden erstellen",
+      "TAB": {
+        "VARIANT": "Themenseite",
+        "TEMPLATE": "Vorlage"
+      }
+    },
     "AI": {
       "GENERATED": "KI-generiert",
       "INVALID_PROMPT": "Prompt mit Syntax-Fehlern"

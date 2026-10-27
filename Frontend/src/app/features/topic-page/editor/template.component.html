@@ -27,7 +27,7 @@
       [stepLabel]="historyStepLabel"
       (jumpToIncomplete)="scrollToNextIncompleteSwimlane()"
       (leave)="mode === 'globalTemplate' ? leaveGlobalTemplateMode() : leaveTemplateMode()"
-      (backToSelection)="openVariantOrTemplateSelection($event)"
+      (backToSelection)="openCreationSidebar($event)"
     ></es-topic-page-status-bar>
     }
   </div>
@@ -657,22 +657,6 @@
     [form]="swimlaneToEditForm"
     [advancedEnabled]="isAdmin()"
   ></es-swimlane-settings-dialog>
-</ng-template>
-
-<ng-template #addPageVariantOrTemplateDialog>
-  <es-add-page-variant-or-template-dialog
-    [dialogRef]="createVariantOrTemplateDialogRef"
-    [collectionNodeId]="topicCollectionId()"
-    [pageConfigRef]="collectionNodePageConfigRef"
-    [pageVariantNode]="collectionPageVariantNode()"
-    [restoredSearchState]="variantPreviewSearchState()"
-    [(selectedNode)]="createVariantOrTemplateSelectedNode"
-    [templateMode]="createVariantOrTemplateMode() === 'template'"
-    (copyOptionChanged)="createVariantOrTemplateCopyOption = $event"
-    (editGlobalTemplate)="openGlobalTemplateFromDialog($event)"
-    (globalTemplateDeleted)="onGlobalTemplateDeleted($event)"
-    (searchStateChange)="createVariantOrTemplateSearchState = $event"
-  ></es-add-page-variant-or-template-dialog>
 </ng-template>
 
 <ng-template #showQrCodeDialog>

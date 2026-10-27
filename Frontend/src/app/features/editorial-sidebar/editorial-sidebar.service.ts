@@ -1,4 +1,13 @@
-import { effect, EventEmitter, inject, Injectable, signal, Type, untracked } from '@angular/core';
+import {
+    effect,
+    EventEmitter,
+    inject,
+    Injectable,
+    Injector,
+    signal,
+    Type,
+    untracked,
+} from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import {
     EDITORIAL_SIDEBAR_OPTIONS,
@@ -37,6 +46,8 @@ export type CustomSidebarOption = {
     icon: string;
     /** rendered while the option is open (via `ngComponentOutlet`, so it must be standalone) */
     component: Type<unknown>;
+    /** resolves the services of `component`, e.g. ones the registering view provides itself */
+    injector?: Injector;
     /**
      * Defaults to `'any'`: a contributed option is usually about the current context rather than
      * about the selection, and would otherwise be dropped the moment something is selected.

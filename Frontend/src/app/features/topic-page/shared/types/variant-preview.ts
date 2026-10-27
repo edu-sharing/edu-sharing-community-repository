@@ -2,7 +2,7 @@ import { Node, NodeEntries } from 'ngx-edu-sharing-api';
 import type {
     CopyOption,
     PageVariantSearchState,
-} from '../../editor/add-page-variant-or-template-dialog/add-page-variant-or-template-dialog.component';
+} from '../../editor/page-variant-or-template-picker/page-variant-or-template-picker.component';
 import { PromptToTextMapping } from './prompt-to-text-mapping';
 import { Swimlane } from './swimlane';
 

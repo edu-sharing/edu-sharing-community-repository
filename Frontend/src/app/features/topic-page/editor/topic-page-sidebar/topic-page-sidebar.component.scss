@@ -1,0 +1,30 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 100%;
+}
+
+.tabs {
+    flex: 1;
+}
+
+.tab-icon {
+    margin-right: 8px;
+}
+
+.picker {
+    padding: 20px;
+}
+
+.footer-buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.footer-actions {
+    display: flex;
+    gap: 8px;
+}

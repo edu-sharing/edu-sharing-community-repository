@@ -10,6 +10,7 @@ import {
     effect,
     ElementRef,
     HostBinding,
+    Injector,
     input,
     Input,
     InputSignal,
@@ -72,7 +73,6 @@ import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { RestConnectorService } from '../../../core-module/rest/services/rest-connector.service';
 import { UIService } from '../../../core-module/rest/services/ui.service';
 import { Closable } from '../../dialogs/card-dialog/card-dialog-config';
-import { CardDialogRef } from '../../dialogs/card-dialog/card-dialog-ref';
 import {
     DELETE_OR_CANCEL,
     GenericDialogButton,
@@ -82,6 +82,7 @@ import { QrDialogModule } from '../../dialogs/dialog-modules/qr-dialog/qr-dialog
 import { DialogsService } from '../../dialogs/dialogs.service';
 import { KeyboardShortcutsService } from '../../../services/keyboard-shortcuts.service';
 import { EditorialSidebarModule } from '../../editorial-sidebar/editorial-sidebar.module';
+import { EditorialSidebarService } from '../../editorial-sidebar/editorial-sidebar.service';
 import { PreviewSidebarWrapperComponent } from '../../editorial-sidebar/preview-sidebar/preview-sidebar-wrapper/preview-sidebar-wrapper.component';
 import {
     MainNavCreateConfig,
@@ -215,12 +216,9 @@ import { SideMenuItemComponent } from '../widgets/side-menu-wrapper/side-menu-it
 import { SideMenuWrapperComponent } from '../widgets/side-menu-wrapper/side-menu-wrapper.component';
 import { TopicHeaderComponent } from '../widgets/topic-header/topic-header.component';
 import {
-    AddPageVariantOrTemplateDialogComponent,
     CopyOption,
     PageVariantSearchState,
-    PREVIEW_USE_OR_CANCEL,
-    VARIANT_PREVIEW_BUTTON_LABEL,
-} from './add-page-variant-or-template-dialog/add-page-variant-or-template-dialog.component';
+} from './page-variant-or-template-picker/page-variant-or-template-picker.component';
 import { AddSwimlaneBorderButtonComponent } from './add-swimlane-button/add-swimlane-border-button.component';
 import { ConfigurePageVariantOrTemplateComponent } from './configure-page-variant-or-template/configure-page-variant-or-template.component';
 import { SwimlaneComponent } from './swimlane/swimlane.component';
@@ -228,6 +226,12 @@ import { SwimlaneBackgroundShapeComponent } from './swimlane-background-shape/sw
 import { SwimlaneSettingsDialogComponent } from './swimlane/swimlane-settings-dialog/swimlane-settings-dialog.component';
 import { SwimlaneConfigurationButtonsComponent } from './swimlane-configuration-buttons/swimlane-configuration-buttons.component';
 import { TopicPageFiltersSidebarComponent } from './topic-page-filters-sidebar/topic-page-filters-sidebar.component';
+import { TopicPageSidebarComponent } from './topic-page-sidebar/topic-page-sidebar.component';
+import {
+    TOPIC_PAGE_SIDEBAR_OPTION,
+    TopicPageSidebarHost,
+    TopicPageSidebarService,
+} from './topic-page-sidebar/topic-page-sidebar.service';
 import {
     TopicPageStatusBarComponent,
     TopicPageStatusBarMode,
@@ -249,7 +253,6 @@ const isEditableTarget = (target: EventTarget | null): boolean =>
 
 @Component({
     imports: [
-        AddPageVariantOrTemplateDialogComponent,
         AddSwimlaneBorderButtonComponent,
         AiTextPromptPipe,
         CdkAccordionModule,
@@ -289,6 +292,7 @@ const isEditableTarget = (target: EventTarget | null): boolean =>
         TopicPageVariantCopyService,
         TopicPageVariantNodesService,
         TopicPageVariantPreviewService,
+        TopicPageSidebarService,
     ],
     selector: 'es-template-page',
     templateUrl: './template.component.html',
@@ -303,7 +307,9 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     private aiHelperService = inject(AiHelperService);
     private connector = inject(RestConnectorService);
     private dialogs = inject(DialogsService);
+    private editorialSidebarService = inject(EditorialSidebarService);
     private elementRef = inject(ElementRef);
+    private injector = inject(Injector);
     private genericWidgetGlobalService = inject(GenericWidgetGlobalService);
     protected history = inject(TopicPageHistoryService);
     private keyboardShortcuts = inject(KeyboardShortcutsService);
@@ -327,6 +333,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     private topicPageVariantCopyService = inject(TopicPageVariantCopyService);
     private topicPageVariantNodesService = inject(TopicPageVariantNodesService);
     private variantPreviewService = inject(TopicPageVariantPreviewService);
+    private topicPageSidebarService = inject(TopicPageSidebarService);
     private translate = inject(TranslateService);
     private translationsService = inject(TranslationsService);
     private nodeHelperService = inject(NodeHelperService);
@@ -352,6 +359,16 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
 
     constructor() {
         this.variantPreviewService.attach(this.variantPreviewHost);
+        this.topicPageSidebarService.attach(this.topicPageSidebarHost);
+        // the sidebar offers the option only while there is something to do in it
+        effect((): void => {
+            if (this.creationKinds().length) {
+                this.registerSidebarOption();
+            } else {
+                untracked((): void => this.topicPageSidebarService.close());
+                this.editorialSidebarService.unregisterCustomOption(TOPIC_PAGE_SIDEBAR_OPTION);
+            }
+        });
         this.topicPageShareService.setScrollContainer(
             (): HTMLElement | undefined => this.scrollContainerRef()?.nativeElement,
         );
@@ -416,6 +433,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         this.connector.isLoggedIn().subscribe(async (): Promise<void> => {
             // check for administration privileges
             this.isAdmin.set(this.connector.getCurrentLogin()?.isAdmin ?? false);
+            this.isGuest.set(this.connector.getCurrentLogin()?.isGuest ?? true);
             // check whether the user may add children to the global templates folder
             await this.topicPageGlobalTemplatesService.updatePermission();
         });
@@ -514,8 +532,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     readonly topicChanged = output<TopicChangedEvent>();
     initialTopicColor: string;
     @HostBinding('style.--topic-color') topicColor: string;
-    @ViewChild('addPageVariantOrTemplateDialog')
-    addPageVariantOrTemplateRef: TemplateRef<undefined>;
     @ViewChild('editModeToggle') editModeToggle: TemplateRef<any>;
     @ViewChild('editSwimlaneDialog') editSwimlaneRef: TemplateRef<undefined>;
     @ViewChild('showQrCodeDialog') showQrCodeDialogRef: TemplateRef<undefined>;
@@ -532,6 +548,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
 
     userHasEditRights: WritableSignal<boolean> = signal(false);
     isAdmin: WritableSignal<boolean> = signal(false);
+    isGuest: WritableSignal<boolean> = signal(true);
     canAddToGlobalTemplates: Signal<boolean> = this.topicPageGlobalTemplatesService.canAdd;
     // set while a global template is edited in place of the collection's page; the collection
     // only provides the topic and sub-collections the preview is resolved for
@@ -655,12 +672,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         }
         return this.templateMode() ? 'CONFIG_PAGE_TEMPLATE' : 'CONFIG_PAGE_VARIANT';
     });
-    createVariantOrTemplateDialogRef: CardDialogRef;
-    createVariantOrTemplateMode: WritableSignal<CreationKind> = signal('variant');
-    createVariantOrTemplateSelectedNode: Node;
-    createVariantOrTemplateCopyOption: CopyOption;
-    // the search the creation dialog listed its nodes by
-    createVariantOrTemplateSearchState: PageVariantSearchState | null = null;
     // set while listed nodes are shown in place of the collection's page; such a preview never
     // writes, as the shown node belongs to no page of this collection
     variantPreview: Signal<VariantPreview | null> = this.variantPreviewService.preview;
@@ -686,16 +697,20 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             this.variantPreviewService.restoreState();
         return restoreState ? restoreState.pageVariantNode : this.pageVariantNode();
     });
-    // the search a reopened creation dialog continues with: the one of a preview of the same kind
-    variantPreviewSearchState: Signal<PageVariantSearchState | null> = computed(() => {
-        const preview: VariantPreview | null = this.variantPreview();
-        if (!preview?.searchState || preview.kind !== this.createVariantOrTemplateMode()) {
-            return null;
+    // what can be created on the page right now: whatever the "new" button offers
+    creationKinds: Signal<CreationKind[]> = computed((): CreationKind[] => {
+        const offered: string[] = this.topicPageCreateOptionsService.offered();
+        const kinds: CreationKind[] = [];
+        if (this.isGuest()) {
+            return kinds;
         }
-        return {
-            ...preview.searchState,
-            selectedNodeId: retrieveNodeId(this.variantPreviewNode()) ?? null,
-        };
+        if (offered.includes(this.createPageVariantTitle)) {
+            kinds.push('variant');
+        }
+        if (offered.includes(this.createPageTemplateTitle) && this.isAdmin()) {
+            kinds.push('template');
+        }
+        return kinds;
     });
     pageVariantReloadNecessary: boolean = false;
     qrCodeUrl: Signal<string> = this.topicPageShareService.qrCodeUrl;
@@ -1041,6 +1056,12 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         this.destroyed$.complete();
         this.topicPageHelperService.setInPlaceNavigationHandler(null);
         this.topicPageHelperService.setPreviewCustomOptions(null);
+        this.topicPageSidebarService.close();
+        this.editorialSidebarService.unregisterCustomOption(TOPIC_PAGE_SIDEBAR_OPTION);
+        void this.topicPageCreateOptionsService.remove(
+            this.createPageVariantTitle,
+            this.createPageTemplateTitle,
+        );
         this.mainNavService.unregisterCustomTemplateSlot(TemplateSlot.AfterCreateMenu);
         this.scrollHelperService.setScrollContainer(null);
     }
@@ -1504,47 +1525,18 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     }
 
     /**
-     * Allows creating a new page variant by opening a new dialog.
+     * Allows creating a new page variant by opening the sidebar for picking its source.
      */
-    async createPageVariant(): Promise<void> {
-        await this.openVariantOrTemplateSelection('variant');
+    createPageVariant(): void {
+        this.openCreationSidebar('variant');
     }
 
     /**
-     * Opens the dialog for picking the source of a new page variant or page template. The picked
-     * node is either used right away or previewed in place of the collection's page.
+     * Opens the topic page's sidebar option for picking the source of a new page variant or page
+     * template. The picked node is either used right away or previewed in place of the page.
      */
-    async openVariantOrTemplateSelection(kind: CreationKind): Promise<void> {
-        this.createVariantOrTemplateSelectedNode = null;
-        this.createVariantOrTemplateSearchState = null;
-        this.createVariantOrTemplateMode.set(kind);
-        this.createVariantOrTemplateDialogRef = await this.dialogs.openGenericDialog({
-            title:
-                kind === 'template'
-                    ? 'TOPIC_PAGE.CREATE_PAGE_TEMPLATE.HEADING'
-                    : 'TOPIC_PAGE.CREATE_PAGE_VARIANT.HEADING',
-            minWidth: '700px',
-            maxWidth: '100%',
-            contentTemplate: this.addPageVariantOrTemplateRef,
-            closable: Closable.Casual,
-            buttons: PREVIEW_USE_OR_CANCEL,
-        });
-        const response = await firstValueFrom(this.createVariantOrTemplateDialogRef.afterClosed());
-        const sourceNode: Node = this.createVariantOrTemplateSelectedNode;
-        if (!sourceNode) {
-            return;
-        }
-        if (response === VARIANT_PREVIEW_BUTTON_LABEL) {
-            await this.variantPreviewService.start(
-                kind,
-                this.createVariantOrTemplateCopyOption,
-                this.createVariantOrTemplateSearchState,
-                sourceNode,
-            );
-        } else if (response === 'USE') {
-            await this.endVariantPreview();
-            await this.createFrom(kind, sourceNode, this.createVariantOrTemplateCopyOption);
-        }
+    openCreationSidebar(kind: CreationKind): void {
+        this.topicPageSidebarService.open(kind);
     }
 
     /**
@@ -2830,10 +2822,10 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     }
 
     /**
-     * Opens a global template picked in the dialog for creating a page variant or template.
+     * Opens a global template picked in the sidebar for creating a page variant or template.
      */
-    async openGlobalTemplateFromDialog(templateNode: Node): Promise<void> {
-        this.createVariantOrTemplateDialogRef?.close();
+    async openGlobalTemplateFromSidebar(templateNode: Node): Promise<void> {
+        this.topicPageSidebarService.close();
         await this.switchIntoGlobalTemplateMode(templateNode);
     }
 
@@ -2912,6 +2904,55 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         createFrom: (kind: CreationKind, node: Node, copyOption: CopyOption): Promise<void> =>
             this.createFrom(kind, node, copyOption),
     };
+
+    // the collection's page as the topic page's sidebar option acts on it
+    private readonly topicPageSidebarHost: TopicPageSidebarHost = {
+        collectionNodeId: this.topicCollectionId,
+        pageVariantNode: this.collectionPageVariantNode,
+        pageConfigRef: (): string | null => this.collectionNodePageConfigRef ?? null,
+        creationKinds: this.creationKinds,
+        restoredSearchState: (kind: CreationKind): PageVariantSearchState | null => {
+            const preview: VariantPreview | null = this.variantPreview();
+            if (!preview?.searchState || preview.kind !== kind) {
+                return null;
+            }
+            return {
+                ...preview.searchState,
+                selectedNodeId: retrieveNodeId(this.variantPreviewNode()) ?? null,
+            };
+        },
+        // the status bar of the preview leads back to the selection
+        preview: async (
+            kind: CreationKind,
+            copyOption: CopyOption,
+            searchState: PageVariantSearchState | null,
+            node: Node,
+        ): Promise<void> => {
+            await this.variantPreviewService.start(kind, copyOption, searchState, node);
+            this.topicPageSidebarService.close();
+        },
+        use: async (kind: CreationKind, node: Node, copyOption: CopyOption): Promise<void> => {
+            this.topicPageSidebarService.close();
+            await this.endVariantPreview();
+            await this.createFrom(kind, node, copyOption);
+        },
+        editGlobalTemplate: (node: Node): Promise<void> => this.openGlobalTemplateFromSidebar(node),
+        globalTemplateDeleted: (node: Node): Promise<void> => this.onGlobalTemplateDeleted(node),
+    };
+
+    /**
+     * Offers the topic page's option in the editorial sidebar, rendered with the services of
+     * this page.
+     */
+    private registerSidebarOption(): void {
+        this.editorialSidebarService.registerCustomOption({
+            id: TOPIC_PAGE_SIDEBAR_OPTION,
+            label: 'TOPIC_PAGE.SIDEBAR.TITLE',
+            icon: 'edu-page_variant',
+            component: TopicPageSidebarComponent,
+            injector: this.injector,
+        });
+    }
 
     /**
      * Captures the state of the collection's page that a preview replaces.
@@ -3222,10 +3263,10 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     }
 
     /**
-     * Allows creating a page template by opening a dialog for picking its source.
+     * Allows creating a page template by opening the sidebar for picking its source.
      */
-    async createPageTemplate(): Promise<void> {
-        await this.openVariantOrTemplateSelection('template');
+    createPageTemplate(): void {
+        this.openCreationSidebar('template');
     }
 
     /**

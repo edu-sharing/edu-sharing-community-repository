@@ -2,12 +2,9 @@
 
 :host {
     display: block;
-    width: 800px;
-    // the dialog shrinks with the viewport, the fixed width is only the preferred one
-    max-width: 100%;
 }
 
-.add-page-variant-or-template-dialog {
+.page-variant-or-template-picker {
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -15,8 +12,8 @@
 
 .select-copy-option {
     display: flex;
-    align-items: center;
     justify-content: flex-end;
+    align-items: center;
     flex-wrap: wrap;
     gap: 16px;
 }
@@ -39,8 +36,10 @@
             padding-right: 0 !important;
         }
 
-        // adjust paddings of search field outer div
-        .mat-mdc-form-field-infix {
+        // adjust paddings of search field outer div, over the global outlined field padding
+        .mat-mdc-text-field-wrapper.mdc-text-field--outlined
+            .mat-mdc-form-field-flex
+            .mat-mdc-form-field-infix {
             padding-top: 4px;
             padding-bottom: 4px;
         }
@@ -98,10 +97,12 @@
 }
 
 .search-filters-and-results {
-    // the result table keeps its column widths, so it scrolls on its own instead of widening the dialog
+    // the result table keeps its column widths, so it scrolls on its own instead of widening the panel
     .topic-page-entries-wrapper {
         display: block;
         overflow-x: auto;
+        // separates the sorting from the filters above
+        margin-top: 8px;
     }
 
     .empty {

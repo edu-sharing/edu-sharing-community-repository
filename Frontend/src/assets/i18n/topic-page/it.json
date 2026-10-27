@@ -6,6 +6,14 @@
       "TITLE": "Pagina tematica",
       "SEARCH_PLACEHOLDER": "Cerca contenuti nella pagina tematica ..."
     },
+    "SIDEBAR": {
+      "TITLE": "Pagina tematica",
+      "TITLE_DESCRIPTION": "Crea una nuova pagina tematica o un modello da una esistente",
+      "TAB": {
+        "VARIANT": "Pagina tematica",
+        "TEMPLATE": "Modello"
+      }
+    },
     "AI": {
       "GENERATED": "Generato dall'IA",
       "INVALID_PROMPT": "Prompt non valido"

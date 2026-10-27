@@ -1,0 +1,56 @@
+<mat-tab-group
+  class="tabs"
+  [selectedIndex]="selectedIndex()"
+  [preserveContent]="true"
+  (selectedIndexChange)="onTabChange($event)"
+>
+  @for (kind of tabs(); track kind) {
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <i class="tab-icon" [esIcon]="TAB_ICONS[kind]" [aria]="false"></i>
+      <span class="tab-label">{{ i18nPrefix + 'TAB.' + (kind | uppercase) | translate }}</span>
+    </ng-template>
+    <ng-template matTabContent>
+      <es-page-variant-or-template-picker
+        class="picker"
+        [collectionNodeId]="host.collectionNodeId()"
+        [pageConfigRef]="pageConfigRef"
+        [pageVariantNode]="host.pageVariantNode()"
+        [templateMode]="kind === 'template'"
+        [restoredSearchState]="restoredSearchStates[kind]"
+        (selectedNodeChange)="patchState(kind, { node: $event })"
+        (copyOptionChanged)="patchState(kind, { copyOption: $event })"
+        (searchStateChange)="patchState(kind, { searchState: $event })"
+        (editGlobalTemplate)="host.editGlobalTemplate($event)"
+        (globalTemplateDeleted)="host.globalTemplateDeleted($event)"
+      ></es-page-variant-or-template-picker>
+    </ng-template>
+  </mat-tab>
+  }
+</mat-tab-group>
+<es-sidebar-sticky-footer>
+  <div class="footer-buttons">
+    <button mat-button type="button" (click)="cancel()">
+      {{ 'CANCEL' | translate }}
+    </button>
+    <div class="footer-actions">
+      <button
+        mat-stroked-button
+        type="button"
+        [disabled]="!selectedNode() || busy()"
+        (click)="preview()"
+      >
+        {{ 'TOPIC_PAGE.CREATE_PAGE_VARIANT.PREVIEW' | translate }}
+      </button>
+      <button
+        mat-flat-button
+        color="primary"
+        type="button"
+        [disabled]="!selectedNode() || busy()"
+        (click)="use()"
+      >
+        {{ 'USE' | translate }}
+      </button>
+    </div>
+  </div>
+</es-sidebar-sticky-footer>

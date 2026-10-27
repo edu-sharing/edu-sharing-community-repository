@@ -49,8 +49,6 @@ import {
 import { firstValueFrom, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
-import { CardDialogRef } from '../../../dialogs/card-dialog/card-dialog-ref';
-import { GenericDialogButton } from '../../../dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { valuesDictIsEquivalent } from '../../../mds/mds-editor/mds-editor-wrapper/values-dict-is-equivalent';
 import { MdsModule } from '../../../mds/mds.module';
 import { SharedModule } from '../../../../shared/shared.module';
@@ -77,7 +75,7 @@ export enum CopyOption {
 
 /**
  * The search a list of page variants or templates was produced by, with the listed and the
- * selected nodes, so that a later dialog or a preview can continue from it.
+ * selected nodes, so that a later picker or a preview can continue from it.
  */
 export interface PageVariantSearchState {
     copyOption: CopyOption;
@@ -91,27 +89,21 @@ export interface PageVariantSearchState {
 }
 type ListedSearch = Omit<PageVariantSearchState, 'selectedNodeId' | 'nodes'>;
 
-// footer button that shows the selected node on the topic page instead of using it right away
-export const VARIANT_PREVIEW_BUTTON_LABEL = 'TOPIC_PAGE.CREATE_PAGE_VARIANT.PREVIEW';
-export type PageVariantDialogResult = 'CANCEL' | typeof VARIANT_PREVIEW_BUTTON_LABEL | 'USE';
-export const PREVIEW_USE_OR_CANCEL: GenericDialogButton<PageVariantDialogResult>[] = [
-    { label: 'CANCEL', config: { color: 'standard' } },
-    { label: VARIANT_PREVIEW_BUTTON_LABEL, config: { color: 'standard' } },
-    { label: 'USE', config: { color: 'primary' } },
-];
-
+/**
+ * Searches the page variants or templates a new page variant or template can be copied from.
+ */
 @Component({
-    selector: 'es-add-page-variant-or-template-dialog',
+    selector: 'es-page-variant-or-template-picker',
     imports: [SharedModule, MdsModule],
     // own instances, so the row actions do not replace the options of the hosting topic page
     providers: [
         OptionsHelperDataService,
         { provide: OptionsHelperServiceAbstract, useClass: OptionsHelperService },
     ],
-    templateUrl: 'add-page-variant-or-template-dialog.component.html',
-    styleUrls: ['add-page-variant-or-template-dialog.component.scss'],
+    templateUrl: 'page-variant-or-template-picker.component.html',
+    styleUrls: ['page-variant-or-template-picker.component.scss'],
 })
-export class AddPageVariantOrTemplateDialogComponent implements AfterViewInit, OnDestroy, OnInit {
+export class PageVariantOrTemplatePickerComponent implements AfterViewInit, OnDestroy, OnInit {
     public genericWidgetGlobalService = inject(GenericWidgetGlobalService);
     private nodeHelperService = inject(NodeHelperService);
     private searchHelperService = inject(SearchHelperService);
@@ -121,14 +113,13 @@ export class AddPageVariantOrTemplateDialogComponent implements AfterViewInit, O
     readonly i18nPrefix: string = 'TOPIC_PAGE.CREATE_PAGE_VARIANT.';
     readonly templateI18nPrefix: string = 'TOPIC_PAGE.CREATE_PAGE_TEMPLATE.';
 
-    @Input() dialogRef: CardDialogRef;
     // the collection the topic page belongs to — its subtree is searched for existing page variants
     collectionNodeId: InputSignal<string> = input<string>(null);
     @Input() pageConfigRef: string;
     @Input() pageVariantNode: Node;
     @Input() selectedNode: Node;
     templateMode: InputSignal<boolean> = input(false);
-    // the search of an earlier dialog to continue with, e.g. when returning from a preview
+    // the search of an earlier picker to continue with, e.g. when returning from a preview
     restoredSearchState: InputSignal<PageVariantSearchState | null> =
         input<PageVariantSearchState | null>(null);
     searchStateChange: OutputEmitterRef<PageVariantSearchState> = output<PageVariantSearchState>();
@@ -235,7 +226,7 @@ export class AddPageVariantOrTemplateDialogComponent implements AfterViewInit, O
     }
 
     /**
-     * Takes over the search of an earlier dialog, including the node to select once it is listed.
+     * Takes over the search of an earlier picker, including the node to select once it is listed.
      */
     private restoreSearch(state: PageVariantSearchState): void {
         this.selectedOption = state.copyOption;
@@ -610,20 +601,12 @@ export class AddPageVariantOrTemplateDialogComponent implements AfterViewInit, O
     }
 
     /**
-     * Updates the selected node and the state of the buttons acting on it.
+     * Reports the selected node together with the search it was listed by.
      */
     private async updateSelectedNode(): Promise<void> {
         this.selectedNode = this.nodeEntries.getSelection().selected[0] || null;
         this.selectedNodeChange.emit(this.selectedNode);
         this.emitSearchState();
-        const buttons = (await firstValueFrom(this.dialogRef.observeConfig())).buttons;
-        const hasSelection: boolean = this.nodeEntries.getSelection().hasValue();
-        for (const button of buttons) {
-            if (button.label === 'USE' || button.label === VARIANT_PREVIEW_BUTTON_LABEL) {
-                button.disabled = !hasSelection;
-            }
-        }
-        this.dialogRef.patchConfig({ buttons });
     }
 
     protected readonly CopyOption = CopyOption;

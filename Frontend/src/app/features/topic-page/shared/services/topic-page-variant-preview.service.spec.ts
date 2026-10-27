@@ -4,7 +4,7 @@ import { Toast } from '../../../../services/toast';
 import {
     CopyOption,
     PageVariantSearchState,
-} from '../../editor/add-page-variant-or-template-dialog/add-page-variant-or-template-dialog.component';
+} from '../../editor/page-variant-or-template-picker/page-variant-or-template-picker.component';
 import { VariantPreviewRestoreState } from '../types/variant-preview';
 import { TopicPageHelperService } from './topic-page-helper.service';
 import {

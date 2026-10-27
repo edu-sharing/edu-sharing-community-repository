@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { Constrain, DefaultGroups, ElementType, OptionItem } from 'ngx-edu-sharing-ui';
 import { firstValueFrom } from 'rxjs';
 import { MainNavService } from '../../../../main/navigation/main-nav.service';
@@ -9,6 +9,10 @@ import { MainNavService } from '../../../../main/navigation/main-nav.service';
 @Injectable()
 export class TopicPageCreateOptionsService {
     private mainNavService = inject(MainNavService);
+    private readonly offeredNames = signal<string[]>([]);
+
+    /** the names of the options currently offered */
+    readonly offered = this.offeredNames.asReadonly();
 
     /**
      * Adds an option to the "new" button, unless one of the same name is already offered.
@@ -20,6 +24,7 @@ export class TopicPageCreateOptionsService {
         priority: number,
         constrain: Constrain,
     ): Promise<void> {
+        this.offeredNames.update((names) => (names.includes(name) ? names : [...names, name]));
         const option = new OptionItem(name, icon, callback);
         option.elementType = [ElementType.NoneOrUnknown];
         option.group = DefaultGroups.Toggles;
@@ -43,6 +48,7 @@ export class TopicPageCreateOptionsService {
      * Removes the options of the given names from the "new" button.
      */
     async remove(...names: string[]): Promise<void> {
+        this.offeredNames.update((offered) => offered.filter((name) => !names.includes(name)));
         const currentConfig = (await firstValueFrom(this.mainNavService.observeMainNavConfig()))
             .customCreateOptions;
         const existingCreateOptions = currentConfig?.addOptions || [];

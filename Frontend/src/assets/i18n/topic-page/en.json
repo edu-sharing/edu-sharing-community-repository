@@ -6,6 +6,14 @@
       "TITLE": "Topic page",
       "SEARCH_PLACEHOLDER": "Search for content on the topic page..."
     },
+    "SIDEBAR": {
+      "TITLE": "Topic page",
+      "TITLE_DESCRIPTION": "Create a new topic page or template from an existing one",
+      "TAB": {
+        "VARIANT": "Topic page",
+        "TEMPLATE": "Template"
+      }
+    },
     "AI": {
       "GENERATED": "AI-generated",
       "INVALID_PROMPT": "Invalid prompt"
