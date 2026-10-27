@@ -545,9 +545,9 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
      * Deliberately named differently from the getMediaType(...) overloads: a same-named overload taking
      * a ContentReader would force javac's overload resolution in every module that merely calls
      * getMediaType(...) - even unrelated ones without alfresco-data-model on their compile classpath - to
-     * resolve ContentReader, breaking their build even though this overload is package-private.
+     * resolve ContentReader, breaking their build.
      */
-    static MediaType resolveMediaType(String filename, ContentReader reader) throws IOException {
+    public static MediaType resolveMediaType(String filename, ContentReader reader) throws IOException {
         if (reader instanceof FileContentReader && ((FileContentReader) reader).exists()) {
             return getMediaType(filename, ((FileContentReader) reader).getFile().toPath());
         }
