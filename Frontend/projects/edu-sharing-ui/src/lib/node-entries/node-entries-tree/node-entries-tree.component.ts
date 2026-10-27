@@ -310,16 +310,43 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
     }
 
     canDrop = (dragData: DragData<T>): CanDrop => {
-        return this.entriesService.dragDrop.dropAllowed?.(
-            this.nodesDragDropService.convertDragData(this.elementRef, dragData),
-        );
+        const dropAllowed = this.entriesService.dragDrop?.dropAllowed;
+        if (!dropAllowed) {
+            return { accept: false };
+        }
+        if (this.isInsideDraggedNodes(dragData.target, dragData.draggedNodes)) {
+            // a node cannot become part of its own subtree
+            return { accept: false, denyExplicit: true };
+        }
+        return dropAllowed(this.nodesDragDropService.convertDragData(this.elementRef, dragData));
     };
 
     async drop(dragData: DragData<Node>): Promise<void> {
-        this.entriesService.dragDrop.dropped(dragData.target, {
+        this.entriesService.dragDrop?.dropped?.(dragData.target, {
             element: dragData.draggedNodes,
             mode: dragData.action,
         });
+    }
+
+    /**
+     * Whether the target is one of the dragged nodes or lies below one of them in the tree.
+     */
+    private isInsideDraggedNodes(target: T, draggedNodes: Node[]): boolean {
+        const draggedIds = new Set(draggedNodes.map((node) => node.ref.id));
+        const visited = new Set<string>();
+        let current: Partial<Node> = target as Partial<Node>;
+        while (current?.ref?.id && !visited.has(current.ref.id)) {
+            if (draggedIds.has(current.ref.id)) {
+                return true;
+            }
+            visited.add(current.ref.id);
+            const parentId = current.parent?.id;
+            current = parentId
+                ? this.treeNodeService.getCurrentData().find((d) => d.item.ref.id === parentId)
+                      ?.item
+                : null;
+        }
+        return false;
     }
 
     getDragData(node: T): T[] {
@@ -332,7 +359,10 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
     }
 
     onDragStarted(node: T) {
-        if (!this.entriesService.selection.isSelected(node)) {
+        if (
+            this.entriesService.treeConfig?.selectOnDrag !== false &&
+            !this.entriesService.selection.isSelected(node)
+        ) {
             this.entriesService.selection.clear();
             this.entriesService.selection.select(node);
         }

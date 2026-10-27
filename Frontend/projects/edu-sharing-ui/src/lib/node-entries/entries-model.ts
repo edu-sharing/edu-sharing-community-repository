@@ -130,6 +130,11 @@ export type TreeConfig = {
      */
     multipleSelection?: boolean;
     /**
+     * whether starting to drag a node selects it; defaults to true. A host that reacts to the
+     * selection (e.g. by opening a sidebar) sets this to false so a drag leaves the selection alone.
+     */
+    selectOnDrag?: boolean;
+    /**
      * whether to display the file name instead of the title
      */
     showFileName?: boolean;

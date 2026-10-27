@@ -40,6 +40,7 @@ import {
     DropSource,
     FetchEvent,
     InteractionType,
+    ListDragGropConfig,
     ListEventInterface,
     ListItem,
     ListItemSort,
@@ -130,6 +131,13 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     private translation = inject(TranslateService);
     private uiService = inject(UIService);
     private globalCollectionsPageService = inject(GlobalCollectionsPageService);
+
+    /**
+     * The number of collections requested per page when the tree needs all of them. A single
+     * request for everything exceeds the backend's search result window (10000 entries counted
+     * from the first one) and is rejected.
+     */
+    private static TREE_PAGE_SIZE = 1000;
 
     private static DEFAULT_REQUEST = {
         sortBy: [
@@ -258,6 +266,8 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     readonly treeConfig: TreeConfig = {
         label: 'COLLECTIONS.TITLE',
         showFiles: true,
+        // a selection opens the sidebar or the material, which a drag must not do
+        selectOnDrag: false,
         // the stand-in for the root level is no node the options or the sidebar could work on
         hasNoOptions: (node) => node.ref.id === ROOT,
     };
@@ -485,6 +495,15 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         });
     }
     canDropOnCollectionBreadcrumbs = (dropData: DragData<Node | 'HOME'>): CanDrop => {
+        const target = dropData.target;
+        if (target !== 'HOME' && target.ref.id === this.collection.ref.id) {
+            return { accept: false };
+        }
+        return this.canDropInto(dropData);
+    };
+
+    /** The drop rules that hold for every target, independent of the collection being shown. */
+    private canDropInto(dropData: DragData<Node | 'HOME'>): CanDrop {
         const nodes = dropData.draggedNodes;
         const target = dropData.target;
         if (target === 'HOME') {
@@ -499,7 +518,6 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         }
         if (
             nodes[0].ref.id === (target as Node).ref.id ||
-            (target as Node).ref.id === this.collection.ref.id ||
             (nodes[0].collection && dropData.action === 'copy')
         ) {
             return {
@@ -545,11 +563,57 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 NodesRightMode.Local,
             ),
         };
-    };
+    }
 
     canDropOnCollection = (dropData: DragData<Node>): CanDrop => {
         return this.canDropOnCollectionBreadcrumbs(dropData);
     };
+
+    /**
+     * The tree stands the root level in with a placeholder node, which stands for the top of the
+     * selected scope.
+     */
+    private treeDropTarget(target: Node): Node | 'HOME' {
+        return target.ref.id === ROOT ? 'HOME' : target;
+    }
+
+    canDropInTree = (dragData: DragData<Node>): CanDrop => {
+        const target = this.treeDropTarget(dragData.target);
+        const nodes = dragData.draggedNodes;
+        const targetId = target === 'HOME' ? ROOT : target.ref.id;
+        if (target !== 'HOME' && !this.nodeHelper.isNodeCollection(target)) {
+            return { accept: false };
+        }
+        // already there, so dropping would change nothing
+        if (nodes.every((node) => (node.parent?.id ?? ROOT) === targetId)) {
+            return { accept: false };
+        }
+        // collections are moved, materials are put in; a mixed drag has no single meaning
+        if (new Set(nodes.map((node) => this.nodeHelper.isNodeCollection(node))).size > 1) {
+            return { accept: false };
+        }
+        return this.canDropInto({ ...dragData, target });
+    };
+
+    dropInTree = (target: Node, source: DropSource<Node>) =>
+        this.dropOnCollection(this.treeDropTarget(target), source);
+
+    /**
+     * The drag configuration of the tree. `dragAllowed` is read whenever a drag could start, so it
+     * follows the collection that is currently shown.
+     */
+    readonly treeDragDrop: ListDragGropConfig<Node> = (() => {
+        const config: ListDragGropConfig<Node> = {
+            dragAllowed: false,
+            dropAllowed: this.canDropInTree,
+            dropped: this.dropInTree,
+        };
+        Object.defineProperty(config, 'dragAllowed', {
+            enumerable: true,
+            get: () => this.isAllowedToEditCollection(),
+        });
+        return config;
+    })();
 
     canDropOnRef = (dragData: DragData<CollectionReference>): CanDrop => {
         // allow dropping when only files are dragged and the view context was changed
@@ -615,7 +679,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                                         source.element,
                                     );
                                     this.toast.closeProgressSpinner();
-                                    this.refreshContent();
+                                    this.refreshAfterMove(source.element, target);
                                 },
                                 (error) => {
                                     this.handleError(error);
@@ -664,7 +728,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                         ).subscribe(
                             () => {
                                 this.toast.closeProgressSpinner();
-                                this.refreshContent();
+                                this.refreshAfterMove(source.element, target);
                             },
                             (error) => {
                                 this.handleError(error);
@@ -678,6 +742,23 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             }
         }
     };
+    /**
+     * Reloads the lists after nodes were moved. The tree updates the branches that lost and gained
+     * the nodes itself, so it is kept (and with it what the user has expanded) unless the nodes
+     * went to the top of the scope, which the tree cannot reload.
+     */
+    private refreshAfterMove(nodes: Node[], target: Node | 'HOME') {
+        if (this.viewState.viewType() === 'tree' && target !== 'HOME') {
+            this.keepTreeOnRefresh = true;
+            this.localEventsService.nodesMoved.emit({
+                nodes,
+                source: { ref: nodes[0]?.parent } as Node,
+                target,
+            });
+        }
+        this.refreshContent();
+    }
+
     private handleError(error: any) {
         if (error.status === RestConstants.DUPLICATE_NODE_RESPONSE) {
             this.toast.error(null, 'COLLECTIONS.ERROR_NODE_EXISTS');
@@ -1104,9 +1185,10 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         if (callback) {
             callback();
         }
-        if (this.viewState.viewType() === 'tree') {
+        if (this.viewState.viewType() === 'tree' && !this.keepTreeOnRefresh) {
             void this.buildTree();
         }
+        this.keepTreeOnRefresh = false;
         setTimeout(() => {
             this.wireListOptions();
             if (!this.loadingTask.isDone) {
@@ -1192,30 +1274,40 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
 
     /** Loads the pages of the root collections that have not been requested yet. */
     private async loadRemainingCollections() {
-        if (this.searchState.active() || !(await this.dataSourceCollections.hasMore())) {
+        if (this.searchState.active()) {
             return;
         }
-        const request: RequestObject = Helper.deepCopy(CollectionContentComponent.DEFAULT_REQUEST);
-        request.offset = (await this.dataSourceCollections.getData()).length;
-        request.count = RestConstants.COUNT_UNLIMITED;
         this.dataSourceCollections.isLoading = true;
         try {
-            const remaining = await firstValueFrom(
-                this.collectionService.getCollectionSubcollections(
-                    this.collection.ref.id,
-                    this.scope,
-                    [],
-                    request,
-                    this.collection.ref.repo,
-                ),
-            );
-            this.dataSourceCollections.appendData(remaining.collections);
+            while (this.dataSourceCollections.hasMore()) {
+                const request: RequestObject = Helper.deepCopy(
+                    CollectionContentComponent.DEFAULT_REQUEST,
+                );
+                request.offset = this.dataSourceCollections.getData().length;
+                request.count = CollectionContentComponent.TREE_PAGE_SIZE;
+                const page = await firstValueFrom(
+                    this.collectionService.getCollectionSubcollections(
+                        this.collection.ref.id,
+                        this.scope,
+                        [],
+                        request,
+                        this.collection.ref.repo,
+                    ),
+                );
+                if (!page.collections.length) {
+                    // the total is stale, so there is nothing more to page through
+                    break;
+                }
+                this.dataSourceCollections.appendData(page.collections);
+            }
         } finally {
             this.dataSourceCollections.isLoading = false;
         }
     }
 
     private handlingTreeSelection = false;
+    /** Whether the next load of the lists leaves the tree as it is instead of building it anew. */
+    private keepTreeOnRefresh = false;
 
     /**
      * A material that is selected in the tree is opened the same way as in the list; a selected

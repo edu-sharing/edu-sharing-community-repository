@@ -83,15 +83,96 @@ export class TreeNodeService {
         const updatedNodes: Node[] = [];
         const sourceId: string = source?.ref?.id ?? nodes[0]?.parent?.id;
         if (sourceId) {
+            this.adjustChildCounts(sourceId, nodes, -1);
             updatedNodes.push({ ref: { id: sourceId } } as Node);
         }
         if (target?.ref?.id) {
-            this.invalidateChildren(target.ref.id, true);
-            updatedNodes.push(target);
+            this.adjustChildCounts(target.ref.id, nodes, 1);
+            if (this.addMovedChildren(target, nodes)) {
+                updatedNodes.push(target);
+            }
         }
         if (updatedNodes.length) {
             this.nodesChanged.emit(updatedNodes);
         }
+    }
+
+    /**
+     * Keeps the child counts of a collection in step with nodes that left or entered it. Whether
+     * a collection can be expanded is decided from these counts whenever its parent is rendered.
+     *
+     * @param direction 1 for nodes that entered the collection, -1 for nodes that left it
+     */
+    private adjustChildCounts(collectionId: string, nodes: Node[], direction: 1 | -1): void {
+        const collection = [...this.dataMap.values()]
+            .flat()
+            .concat(this.currentData.map((data) => data.item))
+            .find((item) => item.ref?.id === collectionId)?.collection;
+        if (!collection) {
+            return;
+        }
+        const collections = nodes.filter((node) => this.nodeHelperService.isNodeCollection(node));
+        const count = (value: number, delta: number) => Math.max(0, (value ?? 0) + delta);
+        collection.childCollectionsCount = count(
+            collection.childCollectionsCount,
+            direction * collections.length,
+        );
+        collection.childReferencesCount = count(
+            collection.childReferencesCount,
+            direction * (nodes.length - collections.length),
+        );
+    }
+
+    /**
+     * Hangs moved nodes below their new parent without requesting its children again: the search
+     * index that serves them may not know about the move yet.
+     * A parent whose children were never loaded is left to load them on its first expand, unless
+     * it was empty, in which case the moved nodes are all it has.
+     *
+     * @returns whether the rendered branch of the parent has to be refreshed
+     */
+    private addMovedChildren(target: Node, nodes: Node[]): boolean {
+        const targetId = target.ref.id;
+        const moved = nodes
+            // a tree that lists folders only never shows the files that were moved into a folder
+            .filter(
+                (node) =>
+                    this.showFiles ||
+                    this.nodeHelperService.isNodeCollection(node) ||
+                    this.folderTypes.includes(node.type),
+            )
+            .map((node) => ({
+                ...node,
+                parent: { ...node.parent, id: targetId },
+            }));
+        if (!moved.length) {
+            return false;
+        }
+        const loaded = this.dataMap.get(targetId);
+        if (loaded?.length) {
+            const movedIds = moved.map((node) => node.ref.id);
+            const remaining = loaded.filter((child) => !movedIds.includes(child.ref.id));
+            const isCollection = (node: Partial<Node>) =>
+                this.nodeHelperService.isNodeCollection(node as Node);
+            // the children list holds the sub-collections first, then the materials
+            const collections = remaining.filter(isCollection).concat(moved.filter(isCollection));
+            this.dataMap.set(
+                targetId,
+                collections.concat(
+                    remaining.filter((node) => !isCollection(node)),
+                    moved.filter((node) => !isCollection(node)),
+                ),
+            );
+            return true;
+        }
+        const treeNode = this.currentData.find((data) => data.item.ref.id === targetId);
+        if (treeNode?.expandable) {
+            // has children that are not loaded yet
+            return false;
+        }
+        this.invalidateChildren(targetId, true);
+        this.dataMap.set(targetId, moved);
+        return true;
     }
 
     /**
@@ -104,9 +185,12 @@ export class TreeNodeService {
         this.emptyFolders = this.emptyFolders.filter((id) => id !== nodeId);
         if (gainedChildren) {
             this.emptyParentIds = this.emptyParentIds.filter((id) => id !== nodeId);
-            const treeNode = this.currentData.find((data) => data.item.ref.id === nodeId);
-            if (treeNode) {
-                treeNode.expandable = true;
+            // the tree picks the template of a row when it creates the node, so a node that
+            // becomes expandable has to be replaced to be rendered as a parent
+            const index = this.currentData.findIndex((data) => data.item.ref.id === nodeId);
+            if (index >= 0 && !this.currentData[index].expandable) {
+                const { item, level } = this.currentData[index];
+                this.currentData[index] = new DynamicFlatNode(item, level, true);
             }
         }
     }
