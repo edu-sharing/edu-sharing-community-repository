@@ -20,17 +20,9 @@
     position: relative;
 }
 
-// Embedded as web component, the page takes the viewport height and its fixed parts (side menu,
-// loading overlay) are positioned within it.
-:host(.embedded) {
-    contain: layout;
-    height: 100vh;
-    --roundedContainerMargin: 0px;
-}
-
-// The embedding page provides the outer spacing of the preview column, which therefore runs the
-// full height of the page; only the gap holding the resize handle stays.
-:host(.embedded.with-preview-panel) ::ng-deep es-preview-sidebar-wrapper {
+// The host page provides the outer spacing of the preview column, which therefore runs the full
+// height of the page; only the gap holding the resize handle stays.
+:host(.with-preview-panel) ::ng-deep es-preview-sidebar-wrapper {
     .preview-resizable {
         align-self: stretch;
     }
@@ -114,7 +106,7 @@ es-side-menu-wrapper {
 
 // Below a host page's bar, the status bar takes its height and the edges of a bar of its own:
 // the host bar's shadow is covered, so the status bar draws the line to it and to the page.
-:host(:not(.embedded)) es-topic-page-status-bar ::ng-deep .status-bar {
+es-topic-page-status-bar ::ng-deep .status-bar {
     min-height: topicPageVars.$secondaryBarHeight;
     box-shadow: inset 0 3px 3px -3px rgba(0, 0, 0, 0.25), 0 3px 3px rgba(0, 0, 0, 0.1);
 }

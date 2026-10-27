@@ -322,6 +322,7 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
     private destroyed = new Subject<void>();
 
     readonly customTemplates = this.globalCollectionsPageServiceInternal.customTemplates;
+    readonly showLanding = this.globalCollectionsPageServiceInternal.showLanding.asReadonly();
     // inject services
 
     ngOnDestroy() {

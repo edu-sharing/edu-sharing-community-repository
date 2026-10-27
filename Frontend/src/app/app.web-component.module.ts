@@ -7,11 +7,13 @@ import { AppModule, Providers } from './app.module';
 import { GenericWidgetComponent } from './features/topic-page/widgets/generic-widget/generic-widget.component';
 import { AppComponent } from './app.component';
 import { WebComponentOnlyService } from './main/web-component-only.service';
-import { TemplateComponent } from './features/topic-page/editor/template.component';
+import { TopicPageWrapperComponent } from './web-components/wrapper/topic-page/topic-page-wrapper.component';
 import { PreviewSidebarComponent } from './features/editorial-sidebar/preview-sidebar/preview-sidebar.component';
 
 @NgModule({
     imports: [AppModule],
+    // renders the app's own component, which AppModule exports
+    declarations: [TopicPageWrapperComponent],
     providers: Providers.concat(WebComponentOnlyService),
     exports: [AppComponent],
     schemas: [].concat(extensionSchemas),
@@ -42,6 +44,6 @@ export class WebComponentModule implements DoBootstrap {
             .registerWebComponent('edu-sharing-generic-widget', GenericWidgetComponent);
         this.injector
             .get(WebComponentService)
-            .registerWebComponent('edu-sharing-topic-page', TemplateComponent);
+            .registerWebComponent('edu-sharing-topic-page', TopicPageWrapperComponent);
     }
 }

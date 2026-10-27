@@ -1,4 +1,4 @@
-import { Injectable, TemplateRef, inject } from '@angular/core';
+import { Injectable, TemplateRef, inject, signal } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { Node, SessionStorageService, Store } from 'ngx-edu-sharing-api';
 
@@ -31,6 +31,13 @@ export class GlobalCollectionsPageService {
         this.internal.customTemplates.next(customTemplates);
     }
 
+    /**
+     * Shows the landing page in front of the breadcrumbs, e.g. off for a page that cannot open it.
+     */
+    setShowLanding(showLanding: boolean): void {
+        this.internal.showLanding.set(showLanding);
+    }
+
     async removeTemporaryCollections(nodes: Node[]) {
         const collections = await this.sessionStorageService.get<Node[]>(
             SessionStorageService.KEY_ROOT_COLLECTIONS,
@@ -54,4 +61,5 @@ export class GlobalCollectionsPageService {
 })
 export class GlobalCollectionsPageServiceInternal {
     readonly customTemplates = new BehaviorSubject<CollectionsPageCustomTemplates>({});
+    readonly showLanding = signal(true);
 }

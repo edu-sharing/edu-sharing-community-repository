@@ -68,7 +68,6 @@ import {
     takeUntil,
 } from 'rxjs/operators';
 import { v4 as uuidv4 } from 'uuid';
-import { environment } from '../../../../environments/environment';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { RestConnectorService } from '../../../core-module/rest/services/rest-connector.service';
 import { UIService } from '../../../core-module/rest/services/ui.service';
@@ -502,6 +501,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     /**
      * Shows the preview of clicked elements in a column of the page itself, e.g. as web component
      * without an `edu-sharing-preview-sidebar` of its own.
+     * TODO: possibly obsolete, as every host of the page registers an editorial sidebar for previews
      */
     readonly previewPanel = input(false, { transform: booleanAttribute });
     @HostBinding('class.with-preview-panel') get withPreviewPanel(): boolean {
@@ -514,8 +514,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     readonly topicChanged = output<TopicChangedEvent>();
     initialTopicColor: string;
     @HostBinding('style.--topic-color') topicColor: string;
-    /** As web component, the page is a box within a foreign page instead of the app's main view. */
-    @HostBinding('class.embedded') readonly embedded: boolean = environment.webComponentMode;
     @ViewChild('addPageVariantOrTemplateDialog')
     addPageVariantOrTemplateRef: TemplateRef<undefined>;
     @ViewChild('editModeToggle') editModeToggle: TemplateRef<any>;

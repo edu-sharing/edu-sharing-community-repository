@@ -97,7 +97,7 @@
               <h1 esTitle class="cdk-visually-hidden">
                 {{ 'COLLECTIONS.TITLE' | translate }}
               </h1>
-              } @if (!isLoading && isGuest) {
+              } @if (!isLoading && isGuest && !topicView.selected()) {
               <a
                 mat-button
                 color="primary"
@@ -123,7 +123,7 @@
                   class="collections-breadcrumb"
                   esScrollStartOverflow
                   [home]="'COLLECTIONS.TAB.' + tabSelected"
-                  [showLanding]="true"
+                  [showLanding]="showLanding()"
                   [showHomeNotice]="false"
                   [homeRouterLink]="{
                     routerLink: ['.'],
