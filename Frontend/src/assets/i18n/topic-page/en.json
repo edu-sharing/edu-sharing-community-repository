@@ -483,8 +483,8 @@
       },
       "COLLECTION_FILTER": {
         "LABEL": "Filtered:",
-        "CHIP": "Current collection",
-        "TOOLTIP": "Show only topic pages of this collection"
+        "CHIP": "Current collection incl. subcollections",
+        "TOOLTIP": "Show only topic pages of this collection and its subcollections"
       },
       "SEARCH_PLACEHOLDER": "Search for topic page variant",
       "SEARCH": "Search",

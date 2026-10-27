@@ -483,8 +483,8 @@
       },
       "COLLECTION_FILTER": {
         "LABEL": "Gefiltert:",
-        "CHIP": "Aktuelle Sammlung",
-        "TOOLTIP": "Nur Themenseiten dieser Sammlung anzeigen"
+        "CHIP": "Aktuelle Sammlung inkl. Untersammlungen",
+        "TOOLTIP": "Nur Themenseiten dieser Sammlung und ihrer Untersammlungen anzeigen"
       },
       "SEARCH_PLACEHOLDER": "Durchsuche Themenseiten-Varianten",
       "SEARCH": "Suche",
