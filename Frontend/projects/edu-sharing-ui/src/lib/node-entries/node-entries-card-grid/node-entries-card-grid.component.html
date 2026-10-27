@@ -11,13 +11,15 @@
   >
     <i esIcon="settings"></i>
   </button>
-  } @if (entriesService.sort?.allowed) {
+  } @if (entriesService.sort?.allowed && !(entriesService.sort.hideSortSelection &&
+  entriesService.sort.hideCustomSortToggle)) {
   <es-sort-select-panel
     class="order-panel"
     [active]="entriesService.sort.active"
     [direction]="entriesService.sort.direction"
     [columns]="entriesService.getSortColumns()"
     [showSelection]="!entriesService.sort.hideSortSelection"
+    [showCustomToggle]="!entriesService.sort.hideCustomSortToggle"
     (sortChange)="onSortChange($event)"
     [(customSortingInProgress)]="entriesService.sort.customSortingInProgress"
     (customSortingInProgressChange)="onCustomSortingInProgressChange()"

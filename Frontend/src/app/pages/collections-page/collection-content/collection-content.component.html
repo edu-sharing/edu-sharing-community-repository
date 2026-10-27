@@ -1,5 +1,15 @@
 <div class="collections-master-div">
-  @if (viewState.viewType() !== 'tree') {
+  @if (canOrder()) {
+  <div class="order-mode-bar">
+    <mat-slide-toggle
+      [checked]="isOrderModeActive()"
+      (change)="onOrderModeToggle($event)"
+      data-test="collection-order-mode-toggle"
+    >
+      {{ 'COLLECTIONS.SORT_SLIDER' | translate }}
+    </mat-slide-toggle>
+  </div>
+  } @if (viewState.viewType() !== 'tree') {
   <section class="collections-cards-div" data-test="collection-content-subcollections">
     <div
       class="collections-wrapper"
@@ -31,14 +41,9 @@
           customSortingInProgress: sortCollections.customSortingInProgress,
           columns: sortCollections.columns,
           hideSortSelection: true,
-          allowed:
-            !isMobile() &&
-            !searchState.active() &&
-            dataSourceCollections.getData()?.length > 1 &&
-            isUserAllowedToEdit(collection) &&
-            !sortReferences?.customSortingInProgress,
+          hideCustomSortToggle: true,
+          allowed: canOrderCollections(),
         }"
-        (sortChange)="setCollectionSort($event)"
       >
         <ng-template #title>
           <div class="heading-group">
@@ -102,17 +107,13 @@
             customSortingInProgress: sortReferences.customSortingInProgress,
             columns: sortReferences.columns,
             hideSortSelection: true,
-            allowed:
-              !isMobile() &&
-              dataSourceReferences.getData()?.length > 1 &&
-              isUserAllowedToEdit(collection) &&
-              !sortCollections?.customSortingInProgress,
+            hideCustomSortToggle: true,
+            allowed: canOrderReferences(),
           }"
         ctrlClickBehavior="emit"
         (selectionChange)="handleSelection($event)"
         (clickItem)="onContentClick($event)"
         (dblClickItem)="openItem($event)"
-        (sortChange)="setReferenceSort($event)"
         [globalOptions]="
           isAllowedToAddContent() ? [addMaterialSearchOptionItem, addMaterialBinaryOptionItem] : []
         "

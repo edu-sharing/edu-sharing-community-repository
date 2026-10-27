@@ -52,6 +52,11 @@ export interface ListSortConfig extends Sort {
      * arranging the entries by hand is shown.
      */
     hideSortSelection?: boolean;
+    /**
+     * Offers no toggle for arranging the entries by hand: the host switches the mode through
+     * `customSortingInProgress` itself.
+     */
+    hideCustomSortToggle?: boolean;
     customSortingInProgress?: boolean;
 }
 

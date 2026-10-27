@@ -1,6 +1,6 @@
 {
   "COLLECTIONS": {
-    "ORDER_COLLECTIONS_INFO": "Betrachtende der Sammlung sehen die enthaltenen Untersammlungen in der festgelegten Reihenfolge.",
+    "ORDER_ALL_INFO": "Betrachtende der Sammlung sehen die enthaltenen Untersammlungen und Materialien in der festgelegten Reihenfolge.",
     "CREATOR": "Ersteller{{GENDER_SEPARATOR}}in",
     "CREATE": {
       "SHARED_DESCRIPTION": "Sammlen Sie gemeinsam mit anderen. Dabei können Sie festlegen, wer was tun darf."

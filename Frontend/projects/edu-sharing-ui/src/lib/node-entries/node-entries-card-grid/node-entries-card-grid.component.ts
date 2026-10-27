@@ -1,5 +1,6 @@
 import { CdkDragEnter, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
 import {
+    AfterViewInit,
     ChangeDetectionStrategy,
     ChangeDetectorRef,
     Component,
@@ -43,7 +44,9 @@ let displayedWarnings: string[] = [];
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false,
 })
-export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnDestroy {
+export class NodeEntriesCardGridComponent<T extends Node>
+    implements OnInit, AfterViewInit, OnDestroy
+{
     entriesService = inject<NodeEntriesService<T>>(NodeEntriesService);
     entriesGlobalService = inject(NodeEntriesGlobalService);
     elementRef = inject(ElementRef);
@@ -141,6 +144,14 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
         this.registerItemsCap();
         this.registerLayout();
         this.registerVisibleItemsLimited();
+    }
+
+    ngAfterViewInit(): void {
+        // The lists exist only while the entries are arranged by hand, which the host may switch
+        // on from outside the grid. Deferred so the connected lists settle after the view check.
+        this.dropListsQuery.changes
+            .pipe(takeUntil(this.destroyed))
+            .subscribe(() => setTimeout(() => this.refreshDropLists()));
     }
 
     ngOnDestroy(): void {

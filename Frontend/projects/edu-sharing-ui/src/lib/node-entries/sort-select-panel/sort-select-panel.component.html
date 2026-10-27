@@ -1,4 +1,4 @@
-@if (!showSelection || active === 'ccm:collection_ordered_position') {
+@if (showCustomToggle && (!showSelection || active === 'ccm:collection_ordered_position')) {
 <mat-slide-toggle
   [(ngModel)]="customSortingInProgress"
   (ngModelChange)="customSortingInProgressChange.emit($event)"

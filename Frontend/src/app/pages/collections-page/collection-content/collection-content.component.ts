@@ -60,6 +60,7 @@ import {
     UIConstants,
     VirtualNode,
 } from 'ngx-edu-sharing-ui';
+import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { firstValueFrom, forkJoin, Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
 import * as EduData from '../../../core-module/core.module';
@@ -114,8 +115,9 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     private sessionStorageService = inject(SessionStorageService);
     private dialogs = inject(DialogsService);
     private infobar = inject(InfobarService);
-    private collectionsOrderSnapshot: string[] = [];
-    private referencesOrderSnapshot: string[] = [];
+    /** Order of the lists when the arrangement by hand started; null for a list not arranged. */
+    private collectionsOrderSnapshot: string[] | null = null;
+    private referencesOrderSnapshot: string[] | null = null;
     private loadingScreen = inject(LoadingScreenService);
     private mainNavService = inject(MainNavService);
     private mdsService = inject(MdsService);
@@ -1090,19 +1092,6 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     isMobile() {
         return this.uiService.isMobile();
     }
-    /** Enters or leaves the mode in which the materials are arranged by hand. */
-    async setReferenceSort(sort: ListSortConfig) {
-        this.sortReferences = sort;
-        if (sort.customSortingInProgress) {
-            // all materials have to be present to arrange them
-            await this.loadMoreReferences({
-                reset: true,
-                amount: RestConstants.COUNT_UNLIMITED,
-                offset: 0,
-            });
-        }
-        await this.toggleReferencesOrder();
-    }
 
     private getReferencesRequest(): RequestObject {
         return {
@@ -1346,12 +1335,6 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         this.deleteFromCollection();
     }
 
-    /** Enters or leaves the mode in which the sub-collections are arranged by hand. */
-    async setCollectionSort(sort: ListSortConfig) {
-        this.sortCollections = sort;
-        await this.toggleCollectionsOrder();
-    }
-
     private setOptionsCollection() {
         this.optionsService.setData({
             scope: Scope.CollectionsCollection,
@@ -1361,82 +1344,124 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         void this.optionsService.refreshComponents();
     }
 
-    async toggleCollectionsOrder() {
-        if (this.sortCollections.customSortingInProgress) {
-            this.collectionsOrderSnapshot = await this.getOrderSnapshot(this.dataSourceCollections);
-            const response = await this.infobar.open({
-                title: 'COLLECTIONS.ORDER_COLLECTIONS',
-                message: 'COLLECTIONS.ORDER_COLLECTIONS_INFO',
-                buttons: [
-                    { label: 'CANCEL', config: { color: 'standard' } },
-                    { label: 'SAVE', config: { color: 'primary' } },
-                ],
-            });
-            if (response === 'SAVE') {
-                return this.changeCollectionsOrder();
-            }
-            if (response === null && !this.sortCollections.customSortingInProgress) {
-                // The mode was left via the toggle, which takes care of the pending changes.
-                return;
-            }
-            this.sortCollections.customSortingInProgress = false;
-        } else {
-            const decision = await this.confirmLeavingOrderMode(
-                this.dataSourceCollections,
-                this.collectionsOrderSnapshot,
-            );
-            if (decision === 'CANCEL') {
-                this.sortCollections.customSortingInProgress = true;
-                return;
-            }
-            this.infobar.close();
-            if (decision === 'SAVE') {
-                return this.changeCollectionsOrder();
-            }
-        }
-        this.refreshContent();
+    /** Whether the sub-collections or the materials are currently arranged by hand. */
+    isOrderModeActive(): boolean {
+        return (
+            !!this.sortCollections.customSortingInProgress ||
+            !!this.sortReferences.customSortingInProgress
+        );
     }
 
-    async toggleReferencesOrder() {
-        if (this.sortReferences.customSortingInProgress) {
-            this.referencesOrderSnapshot = await this.getOrderSnapshot(this.dataSourceReferences);
-            const response = await this.infobar.open({
-                title: 'COLLECTIONS.ORDER_ELEMENTS',
-                message: 'COLLECTIONS.ORDER_ELEMENTS_INFO',
-                buttons: [
-                    { label: 'CANCEL', config: { color: 'standard' } },
-                    { label: 'SAVE', config: { color: 'primary' } },
-                ],
-            });
-            if (response === 'SAVE') {
-                this.sortReferences.customSortingInProgress = false;
-                void this.changeReferencesOrder();
-                this.listReferences?.getSelection().clear();
-                return;
-            }
-            if (response === null && !this.sortReferences.customSortingInProgress) {
-                // The mode was left via the toggle, which takes care of the pending changes.
-                return;
-            }
-            this.sortReferences.customSortingInProgress = false;
-            this.refreshContent();
+    /** Whether there is a list the user may arrange by hand, which the mode toggle depends on. */
+    canOrder(): boolean {
+        return (
+            this.viewState.viewType() !== 'tree' &&
+            (this.canOrderCollections() || this.canOrderReferences())
+        );
+    }
+
+    canOrderCollections(): boolean {
+        return (
+            !this.isMobile() &&
+            !this.searchState.active() &&
+            this.viewState.collectionsDisplayType() !== NodeEntriesDisplayType.Table &&
+            this.dataSourceCollections.getData()?.length > 1 &&
+            this.isUserAllowedToEdit(this.collection)
+        );
+    }
+
+    canOrderReferences(): boolean {
+        return (
+            !this.isMobile() &&
+            this.viewState.referencesDisplayType() !== NodeEntriesDisplayType.Table &&
+            this.dataSourceReferences.getData()?.length > 1 &&
+            this.isUserAllowedToEdit(this.collection)
+        );
+    }
+
+    /**
+     * Handles the toggle that switches the arrangement by hand on or off for the sub-collections
+     * and the materials together.
+     */
+    async onOrderModeToggle(event: MatSlideToggleChange) {
+        if (event.checked) {
+            await this.enterOrderMode();
         } else {
-            const decision = await this.confirmLeavingOrderMode(
-                this.dataSourceReferences,
-                this.referencesOrderSnapshot,
-            );
-            if (decision === 'CANCEL') {
-                this.sortReferences.customSortingInProgress = true;
-                return;
-            }
-            this.infobar.close();
-            if (decision === 'SAVE') {
-                void this.changeReferencesOrder();
-                this.listReferences?.getSelection().clear();
-            } else {
-                this.refreshContent();
-            }
+            await this.leaveOrderMode();
         }
+        // The toggle keeps its own state, which differs when leaving the mode was refused.
+        event.source.checked = this.isOrderModeActive();
+    }
+
+    private async enterOrderMode() {
+        const collections = this.canOrderCollections();
+        const references = this.canOrderReferences();
+        if (references) {
+            // all materials have to be present to arrange them
+            await this.loadMoreReferences({
+                reset: true,
+                amount: RestConstants.COUNT_UNLIMITED,
+                offset: 0,
+            });
+        }
+        this.collectionsOrderSnapshot = collections
+            ? await this.getOrderSnapshot(this.dataSourceCollections)
+            : null;
+        this.referencesOrderSnapshot = references
+            ? await this.getOrderSnapshot(this.dataSourceReferences)
+            : null;
+        this.sortCollections = { ...this.sortCollections, customSortingInProgress: collections };
+        this.sortReferences = { ...this.sortReferences, customSortingInProgress: references };
+        void this.awaitOrderDecision();
+    }
+
+    /** Shows the info bar of the mode and applies the choice made there. */
+    private async awaitOrderDecision() {
+        const response = await this.infobar.open({
+            title: 'COLLECTIONS.ORDER_ALL',
+            message: 'COLLECTIONS.ORDER_ALL_INFO',
+            buttons: [
+                { label: 'CANCEL', config: { color: 'standard' } },
+                { label: 'SAVE', config: { color: 'primary' } },
+            ],
+        });
+        if (!this.isOrderModeActive()) {
+            // The mode was left via the toggle, which takes care of the pending changes.
+            return;
+        }
+        const changed = await this.getChangedOrderLists();
+        this.endOrderMode();
+        if (response === 'SAVE') {
+            if (changed.collections || changed.references) {
+                await this.saveOrder(changed);
+            }
+        } else {
+            this.refreshContent();
+        }
+    }
+
+    private async leaveOrderMode() {
+        const changed = await this.getChangedOrderLists();
+        let decision: 'SAVE' | 'DISCARD' | 'CANCEL' = 'DISCARD';
+        if (changed.collections || changed.references) {
+            decision = await this.confirmLeavingOrderMode();
+        }
+        if (decision === 'CANCEL') {
+            return;
+        }
+        this.endOrderMode();
+        if (decision === 'SAVE') {
+            await this.saveOrder(changed);
+        } else {
+            this.refreshContent();
+        }
+    }
+
+    /** Switches both lists back to their regular view and closes the info bar of the mode. */
+    private endOrderMode() {
+        this.sortCollections = { ...this.sortCollections, customSortingInProgress: false };
+        this.sortReferences = { ...this.sortReferences, customSortingInProgress: false };
+        this.infobar.close();
     }
 
     private async getOrderSnapshot<T extends Node>(
@@ -1445,19 +1470,28 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         return RestHelper.getNodeIds(await dataSource.getData());
     }
 
-    /**
-     * Resolves what to do with the arrangement made in the edit mode when the mode is left.
-     *
-     * Without any change in the order nothing needs to be decided and the arrangement is dropped.
-     */
-    private async confirmLeavingOrderMode<T extends Node>(
-        dataSource: NodeDataSource<T>,
-        snapshot: string[],
-    ): Promise<'SAVE' | 'DISCARD' | 'CANCEL'> {
-        const current = await this.getOrderSnapshot(dataSource);
-        if (current.length === snapshot.length && current.every((id, i) => id === snapshot[i])) {
-            return 'DISCARD';
-        }
+    /** Tells which of the lists differ from the arrangement they had when the mode was entered. */
+    private async getChangedOrderLists(): Promise<{ collections: boolean; references: boolean }> {
+        const differs = async <T extends Node>(
+            dataSource: NodeDataSource<T>,
+            snapshot: string[] | null,
+        ) => {
+            if (snapshot === null) {
+                return false;
+            }
+            const current = await this.getOrderSnapshot(dataSource);
+            return (
+                current.length !== snapshot.length || current.some((id, i) => id !== snapshot[i])
+            );
+        };
+        return {
+            collections: await differs(this.dataSourceCollections, this.collectionsOrderSnapshot),
+            references: await differs(this.dataSourceReferences, this.referencesOrderSnapshot),
+        };
+    }
+
+    /** Resolves what to do with the arrangement made in the mode when the mode is left. */
+    private async confirmLeavingOrderMode(): Promise<'SAVE' | 'DISCARD' | 'CANCEL'> {
         const dialogRef = await this.dialogs.openGenericDialog({
             title: 'COLLECTIONS.ORDER_UNSAVED_TITLE',
             message: 'COLLECTIONS.ORDER_UNSAVED_MESSAGE',
@@ -1467,7 +1501,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 { label: 'SAVE', config: { color: 'primary' } },
             ],
         });
-        // Dismissing the dialog without a choice keeps the user in the edit mode.
+        // Dismissing the dialog without a choice keeps the user in the mode.
         return (await firstValueFrom(dialogRef.afterClosed())) ?? 'CANCEL';
     }
 
@@ -1485,47 +1519,49 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         );
     }
 
-    private async changeReferencesOrder() {
+    /**
+     * Stores the arrangement of the given lists as the order in which the children of the
+     * collection show.
+     */
+    private async saveOrder({
+        collections,
+        references,
+    }: {
+        collections: boolean;
+        references: boolean;
+    }) {
         this.toast.showProgressSpinner();
         try {
-            await firstValueFrom(
-                this.collectionService.setOrder(
-                    this.collection.ref.id,
-                    RestHelper.getNodeIds(await this.dataSourceReferences.getData()),
-                ),
-            );
-            await this.storeCustomOrderMode(RestConstants.CCM_PROP_COLLECTION_ORDER_MODE);
-            this.sortReferences = {
-                ...this.sortReferences,
-                active: RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION,
-                direction: 'asc',
-            };
-            this.toast.toast('COLLECTIONS.TOAST.SORT_SAVED_CUSTOM');
-        } catch (error) {
-            this.toast.error(error);
-        } finally {
-            this.toast.closeProgressSpinner();
-        }
-    }
-
-    private async changeCollectionsOrder() {
-        this.toast.showProgressSpinner();
-        try {
-            await firstValueFrom(
-                this.collectionService.setOrder(
-                    this.collection.ref.id,
-                    RestHelper.getNodeIds(await this.dataSourceCollections.getData()),
-                ),
-            );
-            await this.storeCustomOrderMode(
-                RestConstants.CCM_PROP_COLLECTION_SUBCOLLECTION_ORDER_MODE,
-            );
-            this.sortCollections = {
-                ...this.sortCollections,
-                active: RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION,
-                direction: 'asc',
-                customSortingInProgress: false,
-            };
+            if (references) {
+                await firstValueFrom(
+                    this.collectionService.setOrder(
+                        this.collection.ref.id,
+                        RestHelper.getNodeIds(await this.dataSourceReferences.getData()),
+                    ),
+                );
+                await this.storeCustomOrderMode(RestConstants.CCM_PROP_COLLECTION_ORDER_MODE);
+                this.sortReferences = {
+                    ...this.sortReferences,
+                    active: RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION,
+                    direction: 'asc',
+                };
+            }
+            if (collections) {
+                await firstValueFrom(
+                    this.collectionService.setOrder(
+                        this.collection.ref.id,
+                        RestHelper.getNodeIds(await this.dataSourceCollections.getData()),
+                    ),
+                );
+                await this.storeCustomOrderMode(
+                    RestConstants.CCM_PROP_COLLECTION_SUBCOLLECTION_ORDER_MODE,
+                );
+                this.sortCollections = {
+                    ...this.sortCollections,
+                    active: RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION,
+                    direction: 'asc',
+                };
+            }
             this.toast.toast('COLLECTIONS.TOAST.SORT_SAVED_CUSTOM');
         } catch (error) {
             this.toast.error(error);
