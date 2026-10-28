@@ -9,7 +9,7 @@
       {{ 'COLLECTIONS.SORT_SLIDER' | translate }}
     </mat-slide-toggle>
   </div>
-  } @if (searchState.active()) {
+  } @if (searchState.active() && searchState.includeSubLevels()) {
   <p class="search-flat-info" role="note" data-test="collection-search-flat-info">
     <i esIcon="info" aria-hidden="true"></i>
     {{ 'COLLECTIONS.SEARCH_FLAT_INFO' | translate }}
