@@ -76,12 +76,6 @@
   ></es-collection-proposals>
   @if (viewState.viewType() !== 'tree') {
   <section class="collections-cards-div" data-test="collection-content-materials">
-    <es-actionbar
-      #actionbarToggles
-      class="actionbarMaterials"
-      [class.display-none]="dataSourceReferences.isLoading"
-      [showActionOptions]="false"
-    ></es-actionbar>
     <div
       class="references-wrapper"
       [class.wrapper-table]="viewState.referencesDisplayType() === NodeEntriesDisplayType.Table"
@@ -125,6 +119,12 @@
             <h2 class="mat-heading-3">
               {{ 'collections_content' | translate }}
             </h2>
+            <es-actionbar
+              #actionbarToggles
+              class="actionbarMaterials"
+              [class.display-none]="dataSourceReferences.isLoading"
+              [showActionOptions]="false"
+            ></es-actionbar>
           </div>
         </ng-template>
         <ng-template #overlay let-element="element">

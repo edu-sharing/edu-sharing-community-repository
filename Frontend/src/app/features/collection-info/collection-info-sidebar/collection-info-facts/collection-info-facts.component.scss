@@ -3,3 +3,10 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 20px 16px;
 }
+
+// the view and sorting settings are set apart from the facts above by a hairline
+.settings {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--borderLight);
+}

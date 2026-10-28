@@ -32,6 +32,8 @@
     },
     "SEARCH": "Sammlungen durchsuchen",
     "SEARCH_RESULTS": "Treffer für „{{query}}“ in „{{scope}}“",
+    "SEARCH_RESULTS_COUNT": "{{count}} Treffer für „{{query}}“ in „{{scope}}“",
+    "SEARCH_RESULTS_IN_COLLECTION_COUNT": "{{count}} Treffer für „{{query}}“ in dieser Sammlung",
     "SEARCH_RESULTS_IN_COLLECTION": "Treffer für „{{query}}“ in dieser Sammlung",
     "SEARCH_TRUNCATED": "Es werden nur die ersten Treffer angezeigt. Bitte verfeinern Sie die Suche.",
     "SEARCH_PARENT_COLUMN": "In Sammlung",

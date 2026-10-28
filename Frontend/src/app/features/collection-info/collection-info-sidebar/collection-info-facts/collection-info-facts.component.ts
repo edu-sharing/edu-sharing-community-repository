@@ -12,7 +12,7 @@ import {
 import { TOPIC_PAGE_VIEW_TYPE } from '../../../topic-page/shared/utils/collection-topic-page-util';
 import { CollectionScopeLabelComponent } from '../../collection-scope-label/collection-scope-label.component';
 
-/** Visibility, type, content counts and creation/modification dates of a collection. */
+/** Visibility, type, content counts and default view/sorting of a collection. */
 @Component({
     selector: 'es-collection-info-facts',
     templateUrl: 'collection-info-facts.component.html',

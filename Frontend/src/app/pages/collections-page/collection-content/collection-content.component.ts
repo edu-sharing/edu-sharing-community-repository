@@ -963,6 +963,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                         return;
                     }
                     this.searchTruncated.set(result.truncated);
+                    this.searchState.hitCount.set(result.hits.length);
                     this.dataSourceCollections.setData(
                         result.hits.map((hit) => this.withParentTitle(hit, result.parents)),
                     );
@@ -995,6 +996,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         this.selection = [];
         this.selectionOverlayOpen = false;
         this.searchTruncated.set(false);
+        this.searchState.hitCount.set(null);
         if (this.searchState.active()) {
             this.searchContent();
             return;

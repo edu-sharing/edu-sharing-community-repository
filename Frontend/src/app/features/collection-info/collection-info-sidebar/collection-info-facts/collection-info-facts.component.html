@@ -28,23 +28,9 @@
     >
       {{ collection()?.collection?.childReferencesCount ?? 0 }}
     </es-collection-info-row>
-    @if (collection()?.createdAt) {
-    <es-collection-info-row
-      icon="event"
-      label="COLLECTIONS.INFO.CREATED_AT"
-      data-test="collection-info-created-at"
-    >
-      {{ collection().createdAt | formatDate : { time: true, relative: false } }}
-    </es-collection-info-row>
-    } @if (collection()?.modifiedAt) {
-    <es-collection-info-row
-      icon="update"
-      label="COLLECTIONS.INFO.MODIFIED_AT"
-      data-test="collection-info-modified-at"
-    >
-      {{ collection().modifiedAt | formatDate : { time: true, relative: false } }}
-    </es-collection-info-row>
-    } @if (showSettings()) {
+  </div>
+  @if (showSettings()) {
+  <div class="rows settings">
     <es-collection-info-row
       icon="visibility"
       label="COLLECTIONS.INFO.DEFAULT_VIEW"
@@ -68,6 +54,7 @@
     >
       {{ referenceSortKey() | translate }}
     </es-collection-info-row>
-    } }
+    }
   </div>
+  }
 </es-collection-info-section>
