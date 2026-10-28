@@ -21,7 +21,15 @@
     }
   </ol>
 </nav>
-@switch (step()) { @case ('DESIGN') {
+@if (location(); as path) {
+<p class="location" data-test="create-collection-location">
+  <i esIcon="folder_open" aria-hidden="true"></i>
+  <span class="label">{{ i18nPrefix + 'LOCATION' | translate }}</span>
+  <span class="path">{{
+    path.length ? path.join(' › ') : (i18nPrefix + 'LOCATION_ROOT' | translate)
+  }}</span>
+</p>
+} @switch (step()) { @case ('DESIGN') {
 <div class="content">
   <es-collection-design-form
     [collection]="draft"

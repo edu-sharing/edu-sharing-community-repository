@@ -130,3 +130,25 @@
     padding-bottom: 20px;
     color: var(--textLight);
 }
+
+.location {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 8px 20px 0;
+    color: var(--textLight);
+    font-size: 0.9em;
+
+    .label {
+        flex-shrink: 0;
+    }
+
+    .path {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: var(--textMain);
+    }
+}
