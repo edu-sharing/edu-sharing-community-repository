@@ -34,6 +34,16 @@ export interface CollectionSearchResult {
     hits: Node[];
     /** The collection each hit is placed in, by id of the hit; missing for top-level hits. */
     parents: Map<string, Node>;
+    /**
+     * The collections that lead from the searched level to the hits without being hits
+     * themselves, so the hits can be shown below them.
+     */
+    ancestors: Node[];
+    /**
+     * The id of the collection a hit or an ancestor is placed in within the result, by id;
+     * missing for the ones directly on the searched level.
+     */
+    parentIds: Map<string, string>;
     /** Whether more collections match than were requested. */
     truncated: boolean;
 }
@@ -128,7 +138,31 @@ export class CollectionSearchService {
                     : !topLevel || topLevel.has(hit.ref.id),
             );
         }
-        return { hits: filtered, parents, truncated: page.total > page.nodes.length };
+        const hitIds = new Set(filtered.map((hit) => hit.ref.id));
+        const ancestors = new Map<string, Node>();
+        const parentIds = new Map<string, string>();
+        for (const hit of filtered) {
+            let id = hit.ref.id;
+            for (let depth = 0; depth < MAX_DEPTH; depth++) {
+                const parentId = getParentId(id);
+                const parent = parentId ? placed?.get(parentId) : null;
+                if (!parent || parentId === request.parentId) {
+                    break;
+                }
+                parentIds.set(id, parentId);
+                if (!hitIds.has(parentId)) {
+                    ancestors.set(parentId, parent.node);
+                }
+                id = parentId;
+            }
+        }
+        return {
+            hits: filtered,
+            parents,
+            ancestors: [...ancestors.values()],
+            parentIds,
+            truncated: page.total > page.nodes.length,
+        };
     }
 
     private getTopLevelIds(scope: string): Promise<Set<string>> {

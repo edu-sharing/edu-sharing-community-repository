@@ -163,6 +163,13 @@ export type TreeConfig = {
     initialSelectionAttribute?: string;
     /** nodes for which neither the options button nor the context menu is offered */
     hasNoOptions?: (node: Node) => boolean;
+    /**
+     * whether every node whose children are part of the given data starts expanded, so a tree
+     * that was built from a complete set of paths shows all of them
+     */
+    expandAll?: boolean;
+    /** nodes that are shown in a subdued colour, e.g. because they only lead to other nodes */
+    isMuted?: (node: Node) => boolean;
 };
 
 export interface ListEventInterface<T extends NodeEntriesDataType> {

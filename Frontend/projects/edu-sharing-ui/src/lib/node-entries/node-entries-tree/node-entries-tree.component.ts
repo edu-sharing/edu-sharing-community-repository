@@ -424,13 +424,17 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
         }
         this.dataSource.data = this.treeNodeService.getCurrentData();
         if (!alreadyInitialized) {
-            // find a first level element that can be expanded and expand it
-            const firstLevelElement = this.dataSource.data.find(
-                (d) => d.level === 0 && d.expandable,
-            );
-            if (firstLevelElement) {
-                this.treeControl.expand(firstLevelElement);
-                await this.updateTree([firstLevelElement.item as Node]);
+            if (this.entriesService.treeConfig?.expandAll) {
+                this.expandAllNodes();
+            } else {
+                // find a first level element that can be expanded and expand it
+                const firstLevelElement = this.dataSource.data.find(
+                    (d) => d.level === 0 && d.expandable,
+                );
+                if (firstLevelElement) {
+                    this.treeControl.expand(firstLevelElement);
+                    await this.updateTree([firstLevelElement.item as Node]);
+                }
             }
         } else {
             // restore the previously existing expanded states
@@ -445,6 +449,43 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
             }
         }
         this.treeInitialized.set(true);
+    }
+
+    /**
+     * Renders every node of the initial data that has children in the data as expanded. The
+     * children are put into the rendered list directly, which is what a restored expansion does as
+     * well, so the expansion model is filled before the tree listens to it.
+     */
+    private expandAllNodes(): void {
+        const dataMap = this.treeNodeService.getDataMap();
+        const rendered: DynamicFlatNode[] = [];
+        const expanded: DynamicFlatNode[] = [];
+        const visited = new Set<string>();
+        const add = (flatNode: DynamicFlatNode) => {
+            rendered.push(flatNode);
+            const id = flatNode.item.ref.id;
+            const children = dataMap.get(id) ?? [];
+            if (!children.length || visited.has(id)) {
+                return;
+            }
+            visited.add(id);
+            flatNode.expandable = true;
+            expanded.push(flatNode);
+            this.treeNodeService.expandNode(flatNode.item);
+            children.forEach((child) =>
+                add(
+                    new DynamicFlatNode(
+                        child,
+                        flatNode.level + 1,
+                        this.treeNodeService.isExpandable(child),
+                    ),
+                ),
+            );
+        };
+        this.dataSource.data.forEach(add);
+        this.treeNodeService.setCurrentData(rendered);
+        this.dataSource.data = rendered;
+        this.treeControl.expansionModel.select(...expanded);
     }
 
     /**

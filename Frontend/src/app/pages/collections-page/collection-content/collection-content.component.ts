@@ -267,6 +267,9 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     readonly dataSourceTree = new NodeDataSource<Node>();
     readonly treeConfig: TreeConfig = {
         label: 'COLLECTIONS.TITLE',
+        // the hits of a search are shown with the collections that lead to them
+        expandAll: false,
+        isMuted: (node) => this.searchAncestorIds.has(node.ref.id),
         showFiles: true,
         // a selection opens the sidebar or the material, which a drag must not do
         selectOnDrag: false,
@@ -281,6 +284,11 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     private shownViewType = this.viewState.viewType();
     private shownQuery = this.searchState.query();
     private shownIncludeSubLevels = this.searchState.includeSubLevels();
+    /** The collections that lead to the hits of the search, which are no hits themselves. */
+    private searchAncestors: Node[] = [];
+    private searchAncestorIds = new Set<string>();
+    /** The collection each hit or ancestor of the search is placed in, by id. */
+    private searchParentIds = new Map<string, string>();
     /** Whether more collections match the search than are listed. */
     readonly searchTruncated = signal(false);
     collectionsColumns: ColumnType;
@@ -973,6 +981,9 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                     ) {
                         return;
                     }
+                    this.searchAncestors = result.ancestors;
+                    this.searchAncestorIds = new Set(result.ancestors.map((n) => n.ref.id));
+                    this.searchParentIds = result.parentIds;
                     this.searchTruncated.set(result.truncated);
                     this.searchState.hitCount.set(result.hits.length);
                     this.dataSourceCollections.setData(
@@ -1007,6 +1018,9 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         this.selection = [];
         this.selectionOverlayOpen = false;
         this.searchTruncated.set(false);
+        this.searchAncestors = [];
+        this.searchAncestorIds = new Set();
+        this.searchParentIds = new Map();
         this.searchState.hitCount.set(null);
         if (this.searchState.active()) {
             this.searchContent();
@@ -1241,14 +1255,31 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             ...node,
             collection: node.collection ? { ...node.collection } : node.collection,
         });
+        this.treeConfig.expandAll = this.searchState.active();
+        const collections = this.dataSourceCollections.getData() ?? [];
+        // a search lists its hits below the collections leading to them; whatever has no such
+        // collection among the listed ones hangs from the root
+        const listedIds = new Set([...this.searchAncestors, ...collections].map((n) => n.ref.id));
+        const placeInSearch = (node: Node): Node => {
+            const parentId = this.searchParentIds.get(node.ref.id);
+            return {
+                ...node,
+                parent: {
+                    ...node.parent,
+                    id: parentId && listedIds.has(parentId) ? parentId : this.collection.ref.id,
+                },
+            };
+        };
         this.dataSourceTree.setData(
             [
                 this.treeRoot(),
-                ...(this.dataSourceCollections.getData() ?? []).map((node) =>
-                    this.isRootLevel || this.searchState.active()
-                        ? { ...node, parent: { ...node.parent, id: this.collection.ref.id } }
-                        : node,
-                ),
+                ...(this.searchState.active()
+                    ? [...this.searchAncestors, ...collections].map(placeInSearch)
+                    : collections.map((node) =>
+                          this.isRootLevel
+                              ? { ...node, parent: { ...node.parent, id: this.collection.ref.id } }
+                              : node,
+                      )),
                 ...(this.dataSourceReferences.getData() ?? []),
             ].map(copy),
         );

@@ -197,6 +197,7 @@
       (selectionMode() !== 'source' || isValidSource(flatNode))
     "
     [class.insert-not-allowed]="selectionMode() === 'target' && !isValidInsertTarget(flatNode)"
+    [class.muted]="entriesService.treeConfig?.isMuted?.(flatNode.item)"
     (click)="!entriesService.checkbox && updateSelectedNodes(flatNode, $event)"
     (contextmenu)="onContextMenu($event, $any(flatNode.item))"
     (keydown.ContextMenu)="onContextMenu($event, $any(flatNode.item))"
