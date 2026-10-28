@@ -35,6 +35,7 @@
     "SEARCH_RESULTS_COUNT": "{{count}} Treffer für „{{query}}“ in „{{scope}}“",
     "SEARCH_RESULTS_IN_COLLECTION_COUNT": "{{count}} Treffer für „{{query}}“ in dieser Sammlung",
     "SEARCH_RESULTS_IN_COLLECTION": "Treffer für „{{query}}“ in dieser Sammlung",
+    "SEARCH_FLAT_INFO": "Die Treffer werden als flache Liste angezeigt, nicht in der Hierarchie der Sammlungen.",
     "SEARCH_TRUNCATED": "Es werden nur die ersten Treffer angezeigt. Bitte verfeinern Sie die Suche.",
     "SEARCH_PARENT_COLUMN": "In Sammlung",
     "SEARCH_FILTER_SUB_LEVELS": "Unterebenen durchsuchen",

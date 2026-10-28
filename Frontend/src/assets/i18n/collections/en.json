@@ -58,6 +58,7 @@
     "SEARCH_RESULTS_COUNT": "{{count}} results for “{{query}}” in “{{scope}}”",
     "SEARCH_RESULTS_IN_COLLECTION_COUNT": "{{count}} results for “{{query}}” in this collection",
     "SEARCH_RESULTS_IN_COLLECTION": "Results for “{{query}}” in this collection",
+    "SEARCH_FLAT_INFO": "The results are shown as a flat list, not in the hierarchy of the collections.",
     "SEARCH_TRUNCATED": "Only the first results are shown. Please refine your search.",
     "SEARCH_PARENT_COLUMN": "In collection",
     "SEARCH_FILTER_SUB_LEVELS": "Search sub-levels",

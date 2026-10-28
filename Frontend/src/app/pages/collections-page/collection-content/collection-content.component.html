@@ -9,6 +9,11 @@
       {{ 'COLLECTIONS.SORT_SLIDER' | translate }}
     </mat-slide-toggle>
   </div>
+  } @if (searchState.active()) {
+  <p class="search-flat-info" role="note" data-test="collection-search-flat-info">
+    <i esIcon="info" aria-hidden="true"></i>
+    {{ 'COLLECTIONS.SEARCH_FLAT_INFO' | translate }}
+  </p>
   } @if (viewState.viewType() !== 'tree') {
   <section class="collections-cards-div" data-test="collection-content-subcollections">
     <div
