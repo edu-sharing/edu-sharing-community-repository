@@ -15,6 +15,9 @@ export class CollectionSearchStateService {
      */
     readonly includeSubLevels = signal(true);
 
+    /** Number of collections the active search found, `null` until the hits are loaded. */
+    readonly hitCount = signal<number | null>(null);
+
     /** Whether the lists show search hits instead of the content of the collection. */
     readonly active = computed(() => !!this.query()?.trim());
 }
