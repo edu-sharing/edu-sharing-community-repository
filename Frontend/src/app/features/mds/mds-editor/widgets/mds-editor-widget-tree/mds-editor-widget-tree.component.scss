@@ -9,6 +9,10 @@
 mat-form-field {
     width: 100%;
 }
+.include-subcollections {
+    display: block;
+    margin-top: 4px;
+}
 mat-chip-grid {
     max-height: 84px;
     overflow: hidden;

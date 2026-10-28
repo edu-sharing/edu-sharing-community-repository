@@ -35,13 +35,16 @@ import {
 } from 'ngx-edu-sharing-ui';
 import { delay, filter } from 'rxjs/operators';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
-import { COLLECTION_TREE_ROOT_QUERY_PARAM } from '../../../../features/mds/mds-editor/widgets/mds-editor-widget-tree/collection-tree/collection-tree-config';
+import {
+    COLLECTION_TREE_PROPERTY,
+    COLLECTION_TREE_ROOT_QUERY_PARAM,
+} from '../../../../features/mds/mds-editor/widgets/mds-editor-widget-tree/collection-tree/collection-tree-config';
 import { SearchFilter } from '../../../search-page/search-page-results.component';
 import { OptionsHelperService } from '../../shared/services/options-helper.service';
 import { ScrollHelperService } from '../../shared/services/scroll-helper.service';
 import { TopicPageHelperService } from '../../shared/services/topic-page-helper.service';
 import { ConfigurationOption } from '../../shared/types/configuration-option';
-import { DEFAULT_COLLECTION_ID_PROP } from '../../shared/types/custom-definitions';
+import { rebindCollectionFilters } from '../../shared/utils/collection-filter-util';
 import { GenericNodeEntriesDisplayType } from '../../shared/types/generic-node-entries-display-type';
 import { LayoutOption } from '../../shared/types/layout-option';
 import { SwimlaneBackgroundShape } from '../../shared/types/swimlane-background-shape';
@@ -125,7 +128,7 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
         // if no propertyFilters were defined yet, set collectionIdKey to [COLLECTION_ID] to search for the collection
         if (!this.propertyFilters()) {
             criteriaArray.push({
-                property: DEFAULT_COLLECTION_ID_PROP,
+                property: COLLECTION_TREE_PROPERTY,
                 values: [this.contextNodeId],
             });
             // an unconfigured teaser has to match what the filter target shows for the collection
@@ -166,11 +169,8 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
 
         // special cases for propagating parent: replace the collectionId
         const propagatedWidget: boolean = this.propagatedNodeId && !this.nodeId;
-        // check if the propertyFilter contains the collectionId and replace it
-        const containsCollectionId: boolean =
-            !!this.propertyFilters()?.[DEFAULT_COLLECTION_ID_PROP];
-        if (propagatedWidget && containsCollectionId) {
-            this.propertyFilters()[DEFAULT_COLLECTION_ID_PROP] = [this.contextNodeId];
+        if (propagatedWidget) {
+            rebindCollectionFilters(this.propertyFilters(), this.contextNodeId);
         }
         // filter and convert the propertyFilters object and push the result into the criteriaArray
         criteriaArray.push(
@@ -298,7 +298,7 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
         // if no propertyFilters were defined yet, set collectionIdKey to [COLLECTION_ID] to filter for the collection
         if (!propertyFilters) {
             propertyFilters = {
-                [DEFAULT_COLLECTION_ID_PROP]: [this.contextNodeId],
+                [COLLECTION_TREE_PROPERTY]: [this.contextNodeId],
             };
         }
         // set both filters and query string; the collection filter starts at the page's collection

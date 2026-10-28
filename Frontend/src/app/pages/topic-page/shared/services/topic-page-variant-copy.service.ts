@@ -4,7 +4,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
 import {
     DEFAULT_AI_CONFIG_PROP,
-    DEFAULT_COLLECTION_ID_PROP,
     DEFAULT_PAGE_CONFIG_ASPECT,
     DEFAULT_PAGE_CONFIG_PROP,
     DEFAULT_PAGE_NAME_PREFIX,
@@ -18,6 +17,7 @@ import { PageConfig } from '../types/page-config';
 import { PageStructure } from '../types/page-structure';
 import { PageVariantConfig } from '../types/page-variant-config';
 import { ContentTeaserConfig } from '../types/widget-config/content-teaser-config';
+import { hasCollectionFilter, rebindCollectionFilters } from '../utils/collection-filter-util';
 import { TopicHeaderConfig } from '../types/widget-config/topic-header-config';
 import { WidgetConfig } from '../types/widget-config/widget-config';
 import { WidgetConfigObject } from '../types/widget-config-object';
@@ -314,16 +314,14 @@ export class TopicPageVariantCopyService {
         }
         const widgetConfig = JSON.parse(widgetConfigJson) as WidgetConfig;
         const hasPatch: boolean = !!configPatch && Object.keys(configPatch).length > 0;
+        const propertyFilters = (widgetConfig as ContentTeaserConfig)?.propertyFilters;
         const replacesCollectionId: boolean =
-            !!collectionId &&
-            !!(widgetConfig as ContentTeaserConfig)?.propertyFilters?.[DEFAULT_COLLECTION_ID_PROP];
+            !!collectionId && hasCollectionFilter(propertyFilters);
         if (!hasPatch && !replacesCollectionId) {
             return;
         }
         if (replacesCollectionId) {
-            (widgetConfig as ContentTeaserConfig).propertyFilters[DEFAULT_COLLECTION_ID_PROP] = [
-                collectionId,
-            ];
+            rebindCollectionFilters(propertyFilters, collectionId);
         }
         await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
             node.ref.id,

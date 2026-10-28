@@ -969,7 +969,8 @@
     "DELETE_KEY_NOTICE": "Löschen mit Entf-Taste.",
     "COLLECTION_TREE": {
       "WITHIN_ROOT": "Nur in „{{ root }}“",
-      "NOT_ACCESSIBLE": "Sammlung nicht verfügbar oder keine Leserechte"
+      "NOT_ACCESSIBLE": "Sammlung nicht verfügbar oder keine Leserechte",
+      "INCLUDE_SUBCOLLECTIONS": "Untersammlungen einbeziehen"
     },
     "SHOW_EXTENDED": "Erweitere Infos anzeigen",
     "AI": {

@@ -2402,6 +2402,23 @@
         <multiple>true</multiple>
         <multiplejoin>OR</multiplejoin>
       </property>
+      <!-- sent by the collectionTree widget instead of its own property when it leaves out sub-collections -->
+      <property name="virtual:collection_id_primary">
+        <statement>
+          { "nested": {
+          "path": "collections",
+          "query":
+          {"bool":{
+          "must":[
+          {"match":{"collections.nodeRef.id": "${valueRaw}"}},
+          {"match":{"collections.relation.type": "ccm:usage"}}
+          ]
+          }}
+          }}
+        </statement>
+        <multiple>true</multiple>
+        <multiplejoin>OR</multiplejoin>
+      </property>
       <property name="virtual:location">
         <multiple>true</multiple>
         <multiplejoin>INTERNAL</multiplejoin>

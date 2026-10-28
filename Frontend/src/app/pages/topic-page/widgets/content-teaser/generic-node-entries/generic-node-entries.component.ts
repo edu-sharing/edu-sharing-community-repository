@@ -249,7 +249,6 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
     // criteria extension related fields
     private propertyToTaxonomiesMatching: Map<string, string[]> = new Map<string, string[]>([
         ['ccm:curriculum', [this.TOPICS_TAXONOMY_URL]],
-        ['virtual:collection_id_primary', [this.TOPICS_TAXONOMY_URL]],
         ['virtual:oeh_lrt', [this.LRT_TAXONOMY_URL, this.OEH_LRT_TAXONOMY_URL]],
         [
             'virtual:taxonid',

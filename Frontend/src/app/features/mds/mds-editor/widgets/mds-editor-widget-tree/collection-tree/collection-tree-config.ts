@@ -4,6 +4,54 @@
  */
 export const COLLECTION_TREE_ROOT_QUERY_PARAM = 'collectionRoot';
 
+/**
+ * Search property of the default `collectionTree` widget; it matches material of the picked
+ * collections and of all their sub-collections.
+ */
+export const COLLECTION_TREE_PROPERTY = 'virtual:collection_id_tree';
+
+/**
+ * Search property the widget sends the picked collections under instead of its own one when
+ * sub-collections are left out; it matches material placed directly in those collections.
+ */
+export const COLLECTION_TREE_PRIMARY_PROPERTY = 'virtual:collection_id_primary';
+
+/** Search properties filtering by collection, with and without sub-collections. */
+export const COLLECTION_TREE_PROPERTIES: readonly string[] = [
+    COLLECTION_TREE_PROPERTY,
+    COLLECTION_TREE_PRIMARY_PROPERTY,
+];
+
+/** Search property holding the picked collections of the widget with the given ID. */
+export function getCollectionTreeSearchProperty(
+    widgetId: string,
+    includeSubcollections: boolean,
+): string {
+    return includeSubcollections ? widgetId : COLLECTION_TREE_PRIMARY_PROPERTY;
+}
+
+/**
+ * The picked collections stored in the given search values and whether they include
+ * sub-collections, which is told by the property holding them.
+ */
+export function readCollectionTreeValues<T>(
+    widgetId: string,
+    values: { [property: string]: T } | undefined,
+    primaryHasOwnWidget: boolean,
+): { value: T | undefined; includeSubcollections: boolean } {
+    if (widgetId === COLLECTION_TREE_PRIMARY_PROPERTY) {
+        return { value: values?.[widgetId], includeSubcollections: false };
+    }
+    if (
+        !primaryHasOwnWidget &&
+        values?.[widgetId] === undefined &&
+        values?.[COLLECTION_TREE_PRIMARY_PROPERTY]
+    ) {
+        return { value: values[COLLECTION_TREE_PRIMARY_PROPERTY], includeSubcollections: false };
+    }
+    return { value: values?.[widgetId], includeSubcollections: true };
+}
+
 export const DEFAULT_COLLECTION_TREE_PAGE_SIZE = 50;
 /** Search hits listed at most; a more specific search narrows them down. */
 export const COLLECTION_TREE_MAX_SEARCH_HITS = 100;
