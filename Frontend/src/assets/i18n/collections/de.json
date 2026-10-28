@@ -10,7 +10,7 @@
     "ORDER_ALL_INFO": "Betrachter{{GENDER_SEPARATOR}} der Sammlung sehen die enthaltenen Untersammlungen und Materialien in der festgelegten Reihenfolge.",
     "ORDER_UNSAVED_TITLE": "Änderungen an der Reihenfolge speichern?",
     "ORDER_UNSAVED_MESSAGE": "Die Reihenfolge wurde verändert. Sollen die Änderungen übernommen oder verworfen werden?",
-    "SORT_SLIDER": "Bearbeitungsmodus",
+    "SORT_SLIDER": "Sortieren",
     "CUSTOM_ORDER": "Festgelegte Reihenfolge",
     "PERMISSIONS": "Eingeladen",
     "DETAILS": "Sammlungsdetails",

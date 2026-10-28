@@ -1,5 +1,6 @@
 import { NgTemplateOutlet } from '@angular/common';
-import { Component, inject, input, viewChild } from '@angular/core';
+import { Component, inject, input, output, viewChild } from '@angular/core';
+import { MatSlideToggleChange, MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { TranslateModule } from '@ngx-translate/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { ActionbarComponent, EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
@@ -21,6 +22,7 @@ import { CollectionThumbnailComponent } from '../../../features/collection-info/
         TranslateModule,
         EduSharingUiCommonModule,
         SharedModule,
+        MatSlideToggleModule,
         CollectionThumbnailComponent,
         CollectionScopeLabelComponent,
     ],
@@ -29,6 +31,11 @@ export class CollectionHeaderBarComponent {
     private readonly navigation = inject(CollectionNavigationService);
 
     readonly collection = input.required<Node>();
+    /** whether the content of the collection can be arranged by hand, which shows the toggle */
+    readonly orderModeAvailable = input(false);
+    readonly orderModeActive = input(false);
+    readonly orderModeToggle = output<MatSlideToggleChange>();
+
     protected canShowInfo(): boolean {
         return this.navigation.canShowInfo();
     }

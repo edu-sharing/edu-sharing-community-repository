@@ -1,10 +1,5 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
 
-.order-mode-bar {
-    display: flex;
-    justify-content: flex-end;
-    margin: 0 20px 10px 0;
-}
 .collections-cards-div {
     display: flex;
     flex-direction: column;

@@ -1,16 +1,5 @@
 <div class="collections-master-div">
-  @if (canOrder()) {
-  <div class="order-mode-bar">
-    <mat-slide-toggle
-      [checked]="isOrderModeActive()"
-      (change)="onOrderModeToggle($event)"
-      data-test="collection-order-mode-toggle"
-    >
-      {{ 'COLLECTIONS.SORT_SLIDER' | translate }}
-    </mat-slide-toggle>
-  </div>
-  } @if (searchState.active() && searchState.includeSubLevels() && viewState.viewType() !== 'tree')
-  {
+  @if (searchState.active() && searchState.includeSubLevels() && viewState.viewType() !== 'tree') {
   <p class="search-flat-info" role="note" data-test="collection-search-flat-info">
     <i esIcon="info" aria-hidden="true"></i>
     {{ 'COLLECTIONS.SEARCH_FLAT_INFO' | translate }}

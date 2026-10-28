@@ -160,7 +160,12 @@
                 }}
               </h2>
               }
-              <es-collection-header-bar [collection]="collection"></es-collection-header-bar>
+              <es-collection-header-bar
+                [collection]="collection"
+                [orderModeAvailable]="!!collectionContentRef?.canOrder()"
+                [orderModeActive]="!!collectionContentRef?.isOrderModeActive()"
+                (orderModeToggle)="collectionContentRef?.onOrderModeToggle($event)"
+              ></es-collection-header-bar>
               } } @if (isRootLevelCollection() && !isLoading) {
               <div class="breadcrumb-space root-bar" data-test="collections-root-bar">
                 <h2 class="root-bar-title mat-heading-3">

@@ -32,6 +32,16 @@
       [collection]="collection()"
     ></es-collection-scope-label>
   </div>
+  @if (orderModeAvailable()) {
+  <mat-slide-toggle
+    class="order-mode"
+    data-test="collection-order-mode-toggle"
+    [checked]="orderModeActive()"
+    (change)="orderModeToggle.emit($event)"
+  >
+    {{ 'COLLECTIONS.SORT_SLIDER' | translate }}
+  </mat-slide-toggle>
+  }
   <es-actionbar
     [numberOfAlwaysVisibleOptions]="2"
     [numberOfAlwaysVisibleOptionsMobile]="1"
