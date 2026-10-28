@@ -3,13 +3,13 @@
   [attr.aria-label]="'COLLECTIONS.DETAILS' | translate"
   [style.--collection-color]="collection()?.collection?.color"
 >
-  @if (canEdit()) {
+  @if (canShowInfo()) {
   <button
     type="button"
     class="thumbnail-button"
-    data-test="collection-header-edit"
-    [attr.aria-label]="'OPTIONS.COLLECTION_EDIT' | translate"
-    (click)="edit()"
+    data-test="collection-header-info"
+    [attr.aria-label]="'EDITORIAL.OPTIONS.COLLECTION_INFO' | translate"
+    (click)="showInfo()"
   >
     <ng-container *ngTemplateOutlet="thumbnail"></ng-container>
   </button>
@@ -33,7 +33,7 @@
     ></es-collection-scope-label>
   </div>
   <es-actionbar
-    [numberOfAlwaysVisibleOptions]="1"
+    [numberOfAlwaysVisibleOptions]="2"
     [numberOfAlwaysVisibleOptionsMobile]="1"
     appearance="round"
     dropdownPosition="right"

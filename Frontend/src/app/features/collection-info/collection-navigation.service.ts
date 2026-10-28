@@ -16,6 +16,16 @@ export class CollectionNavigationService {
         return RestHelper.hasAccessPermission(collection, RestConstants.PERMISSION_WRITE);
     }
 
+    /** Whether the page has a sidebar that can show the information about the collection. */
+    canShowInfo(): boolean {
+        return !!this.editorialSidebarService.editorialSidebar;
+    }
+
+    /** Opens the information about the collection in the sidebar of the page. */
+    showInfo(): void {
+        this.editorialSidebarService.showOption({ option: 'COLLECTION_INFO', trap: false });
+    }
+
     /**
      * Opens the editor of the collection: in the sidebar of the page if it has one, else as a page
      * of its own that keeps the `mainnav` setting of the current page.

@@ -1,5 +1,5 @@
 import { NgTemplateOutlet } from '@angular/common';
-import { Component, computed, inject, input, viewChild } from '@angular/core';
+import { Component, inject, input, viewChild } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { ActionbarComponent, EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
@@ -29,12 +29,14 @@ export class CollectionHeaderBarComponent {
     private readonly navigation = inject(CollectionNavigationService);
 
     readonly collection = input.required<Node>();
-    protected readonly canEdit = computed(() => this.navigation.canEdit(this.collection()));
+    protected canShowInfo(): boolean {
+        return this.navigation.canShowInfo();
+    }
 
     /** the actionbar that shows the actions of the collection */
     readonly actionbar = viewChild(ActionbarComponent);
 
-    protected edit(): void {
-        void this.navigation.edit(this.collection());
+    protected showInfo(): void {
+        this.navigation.showInfo();
     }
 }

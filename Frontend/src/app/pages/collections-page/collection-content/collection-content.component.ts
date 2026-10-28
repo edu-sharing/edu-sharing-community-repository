@@ -307,6 +307,17 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             const includeSubLevels = this.searchState.includeSubLevels();
             untracked(() => this.onQueryChange(query, includeSubLevels));
         });
+        // the header bar is rendered independently of the content, so its actionbar can appear
+        // after the options were set up
+        effect(() => {
+            if (this.headerActionbar?.()) {
+                untracked(() => {
+                    if (this.collection) {
+                        this.setOptionsCollection();
+                    }
+                });
+            }
+        });
         this.sortCollectionColumns[this.sortCollectionColumns.length - 1].mode = 'ascending';
         // this.collectionSortEmitter.subscribe((sort: SortEvent) => this.setCollectionSort(sort));
         // this.collectionCustomSortEmitter.subscribe((state: boolean) => state ? this.toggleCollectionsOrder() : this.changeCollectionsOrder());
@@ -1337,6 +1348,15 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         this.optionsService.setData({
             scope: Scope.CollectionsCollection,
             activeObjects: [this.collection],
+            // the topic page is reached through the view toggle, so it stays in the menu and the
+            // buttons of the header are the information and the editing
+            postPrepareOptions: (options) => {
+                for (const option of options) {
+                    if (option.name === 'OPTIONS.SHOW_TOPIC_PAGE') {
+                        option.showAsAction = false;
+                    }
+                }
+            },
         });
         void this.optionsService.initComponents(this.headerActionbar?.(), this.listReferences);
         void this.optionsService.refreshComponents();
