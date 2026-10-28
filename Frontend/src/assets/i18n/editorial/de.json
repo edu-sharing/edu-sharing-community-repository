@@ -71,8 +71,14 @@
         }
       },
       "CREATE_COLLECTION": {
-        "DESIGN_TITLE": "Sammlung gestalten",
-        "CONFIGURE_TITLE": "Sammlung konfigurieren",
+        "TITLE": "Sammlung erstellen",
+        "EDIT_TITLE": "Sammlung bearbeiten",
+        "STEPS": "Schritte",
+        "STEP": {
+          "DESIGN": "Gestalten",
+          "CONFIGURE": "Konfigurieren",
+          "PERMISSIONS": "Freigeben"
+        },
         "NEXT": "Weiter",
         "CREATE": "Erstellen",
         "CREATED": "Die Sammlung wurde erstellt.",

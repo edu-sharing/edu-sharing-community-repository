@@ -179,7 +179,7 @@ export class CreateCollectionSidebarComponent {
     );
     protected readonly isDesignStep = computed(() => this.step() === 'DESIGN');
     /** the steps in the order they are shown; access is only asked for if it can be given */
-    private readonly steps = computed<Step[]>(() =>
+    protected readonly steps = computed<Step[]>(() =>
         this.permissionsKind() ? ['DESIGN', 'CONFIGURE', 'PERMISSIONS'] : ['DESIGN', 'CONFIGURE'],
     );
     protected readonly isLastStep = computed(() => this.step() === this.steps().at(-1));
@@ -237,6 +237,23 @@ export class CreateCollectionSidebarComponent {
                 } else {
                     this.editorialSidebarService.close();
                 }
+        }
+    }
+
+    /** Moves to another step, passing the steps in between so each of them keeps what was entered. */
+    protected async goToStep(target: Step): Promise<void> {
+        const order = this.steps();
+        while (this.step() !== target) {
+            const before = this.step();
+            if (order.indexOf(target) > order.indexOf(before)) {
+                await this.next();
+            } else {
+                await this.back();
+            }
+            if (this.step() === before) {
+                // blocked, e.g. by a missing title
+                return;
+            }
         }
     }
 
@@ -506,16 +523,7 @@ export class CreateCollectionSidebarComponent {
     }
 
     private getTitle(): string {
-        switch (this.step()) {
-            case 'DESIGN':
-                return this.i18nPrefix + 'DESIGN_TITLE';
-            case 'CONFIGURE':
-                return this.i18nPrefix + 'CONFIGURE_TITLE';
-            default:
-                return this.permissionsKind() === 'EDITORIAL_GROUPS'
-                    ? 'COLLECTIONS.STEP.EDITORIAL_GROUPS'
-                    : 'COLLECTIONS.EDIT_PERMISSIONS';
-        }
+        return this.i18nPrefix + (this.isEdit() ? 'EDIT_TITLE' : 'TITLE');
     }
 
     private handleError(error: any): void {

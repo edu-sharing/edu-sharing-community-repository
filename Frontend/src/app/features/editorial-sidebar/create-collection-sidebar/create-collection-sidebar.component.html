@@ -1,4 +1,27 @@
-@if (colors(); as colors) { @switch (step()) { @case ('DESIGN') {
+@if (colors(); as colors) {
+<nav class="steps" [attr.aria-label]="i18nPrefix + 'STEPS' | translate">
+  <ol>
+    @for (item of steps(); track item; let last = $last) {
+    <li>
+      <button
+        type="button"
+        class="step"
+        [class.active]="item === step()"
+        [attr.aria-current]="item === step() ? 'step' : null"
+        [attr.data-test]="'create-collection-step-' + item.toLowerCase()"
+        [disabled]="saving()"
+        (click)="goToStep(item)"
+      >
+        {{ i18nPrefix + 'STEP.' + item | translate }}
+      </button>
+      @if (!last) {
+      <i esIcon="chevron_right" class="separator" aria-hidden="true"></i>
+      }
+    </li>
+    }
+  </ol>
+</nav>
+@switch (step()) { @case ('DESIGN') {
 <div class="content">
   <es-collection-design-form
     [collection]="draft"

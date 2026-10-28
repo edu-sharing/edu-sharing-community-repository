@@ -71,8 +71,14 @@
         }
       },
       "CREATE_COLLECTION": {
-        "DESIGN_TITLE": "Design collection",
-        "CONFIGURE_TITLE": "Configure collection",
+        "TITLE": "Create collection",
+        "EDIT_TITLE": "Edit collection",
+        "STEPS": "Steps",
+        "STEP": {
+          "DESIGN": "Design",
+          "CONFIGURE": "Configure",
+          "PERMISSIONS": "Share"
+        },
         "NEXT": "Next",
         "CREATE": "Create",
         "CREATED": "The collection was created.",
