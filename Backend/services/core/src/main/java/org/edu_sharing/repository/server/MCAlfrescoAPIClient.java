@@ -1832,23 +1832,22 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         }
     }
 
-    public synchronized Version createVersion(String nodeId) throws Exception {
+    public Version createVersion(String nodeId) throws Exception {
+        return serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
+            VersionService versionService = serviceRegistry.getVersionService();
+            NodeRef nodeRef = new NodeRef(storeRef, nodeId);
+            Map<String, Serializable> transFormedProps = transformQNameKeyToString(nodeService.getProperties(nodeRef));
+            VersionHistory history = versionService.getVersionHistory(nodeRef);
+            if (history == null) {
 
-        VersionService versionService = serviceRegistry.getVersionService();
-        NodeRef nodeRef = new NodeRef(storeRef, nodeId);
-        Map<String, Serializable> transFormedProps = transformQNameKeyToString(nodeService.getProperties(nodeRef));
-        VersionHistory history = versionService.getVersionHistory(nodeRef);
-        if (history == null) {
-
-            // see https://issues.alfresco.com/jira/browse/ALF-12815
-            // alfresco-4.0.d fix version should start with 1.0 not with 0.1
-            transFormedProps.put(VersionModel.PROP_VERSION_TYPE, VersionType.MAJOR);
-        } else {
-            NodeCustomizationPolicies.repairNodeVersion(nodeService, history, transFormedProps, nodeRef);
-        }
-        return versionService.createVersion(nodeRef, transFormedProps);
-
-
+                // see https://issues.alfresco.com/jira/browse/ALF-12815
+                // alfresco-4.0.d fix version should start with 1.0 not with 0.1
+                transFormedProps.put(VersionModel.PROP_VERSION_TYPE, VersionType.MAJOR);
+            } else {
+                NodeCustomizationPolicies.repairNodeVersion(nodeService, history, transFormedProps, nodeRef);
+            }
+            return versionService.createVersion(nodeRef, transFormedProps);
+        });
     }
 
     public String getPath(String nodeID) {
