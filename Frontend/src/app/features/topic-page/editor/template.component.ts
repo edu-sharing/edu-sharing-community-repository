@@ -360,7 +360,8 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     constructor() {
         this.variantPreviewService.attach(this.variantPreviewHost);
         this.topicPageSidebarService.attach(this.topicPageSidebarHost);
-        // the sidebar offers the option only while there is something to do in it
+        // offered only while there is something to create; registering rebuilds the option list,
+        // whereas a `customShowCallback` would only be asked again on the next selection change
         effect((): void => {
             if (this.creationKinds().length) {
                 this.registerSidebarOption();
