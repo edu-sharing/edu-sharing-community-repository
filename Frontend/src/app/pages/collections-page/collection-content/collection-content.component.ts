@@ -64,8 +64,8 @@ import {
     VirtualNode,
 } from 'ngx-edu-sharing-ui';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
-import { firstValueFrom, forkJoin, Subject } from 'rxjs';
-import { filter, map, takeUntil } from 'rxjs/operators';
+import { firstValueFrom, forkJoin, from, Observable, of, Subject } from 'rxjs';
+import { catchError, concatMap, filter, map, takeUntil, toArray } from 'rxjs/operators';
 import * as EduData from '../../../core-module/core.module';
 import { ConfigurationHelper, LoginResult } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
@@ -80,7 +80,6 @@ import { Toast } from '../../../services/toast';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { DELETE_OR_CANCEL } from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
-import { forkJoinWithErrors } from '../../../util/rxjs/forkJoinWithErrors';
 import {
     ManagementEvent,
     ManagementEventType,
@@ -953,29 +952,44 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         if ((await firstValueFrom(dialogRef.afterClosed())) !== 'YES_DELETE') {
             return;
         }
-        void this.globalCollectionsPageService.removeTemporaryCollections(collections);
-        const { successes, errors } = await firstValueFrom(
-            forkJoinWithErrors([
-                ...collections.map((node) =>
-                    this.nodeService.deleteNode(node.ref.id).pipe(map(() => node)),
-                ),
-                ...references.map((node) =>
-                    this.collectionService
-                        .removeFromCollection(
-                            node.ref.id,
-                            (node.parent?.id ?? this.collection.ref.id) as string,
-                        )
-                        .pipe(map(() => node)),
-                ),
-            ]),
+        // what lies inside a collection that is deleted goes away together with it
+        const deletedIds = new Set(collections.map((node) => node.ref.id));
+        const isInsideDeleted = (node: Node) => deletedIds.has(node.parent?.id as string);
+        const toDelete = collections.filter((node) => !isInsideDeleted(node));
+        const toRemove = references.filter((node) => !isInsideDeleted(node));
+        void this.globalCollectionsPageService.removeTemporaryCollections(toDelete);
+        const requests: Observable<Node | { error: unknown }>[] = [
+            ...toDelete.map((node) =>
+                this.nodeService.deleteNode(node.ref.id).pipe(map(() => node)),
+            ),
+            ...toRemove.map((node) =>
+                this.collectionService
+                    .removeFromCollection(
+                        node.ref.id,
+                        (node.parent?.id ?? this.collection.ref.id) as string,
+                    )
+                    .pipe(map(() => node)),
+            ),
+        ].map((request) => request.pipe(catchError((error) => of({ error }))));
+        this.toast.showProgressSpinner();
+        const results = await firstValueFrom(
+            from(requests).pipe(
+                concatMap((request) => request),
+                toArray(),
+            ),
         );
-        if (errors.length > 0) {
-            this.toast.error(errors[0]);
+        this.toast.closeProgressSpinner();
+        const failed = results.find((result) => 'error' in result) as
+            | { error: unknown }
+            | undefined;
+        if (failed) {
+            this.toast.error(failed.error);
         } else {
             this.toast.toast('WORKSPACE.TOAST.DELETE_FINISHED');
         }
-        if (successes.length > 0) {
-            this.localEventsService.nodesDeleted.emit(successes);
+        const processed = results.filter((result) => !('error' in result)) as Node[];
+        if (processed.length > 0) {
+            this.localEventsService.nodesDeleted.emit(processed);
         }
     }
 
