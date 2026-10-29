@@ -189,7 +189,7 @@ export class MdsEditorWidgetTreeComponent
         if (this.widget.definition.type === MdsWidgetType.CollectionTree) {
             this.treeSource = this.injector
                 .get(CollectionTreeSource)
-                .configure(this.widget.definition.configuration, this.mdsEditorInstance.mdsId);
+                .configure(this.widget.definition.configuration);
             // with `hideIfEmpty`, the widget stays listed once it had a value, so it can be replaced
             this.hasValues = () => this.hadValues() || this.treeSource.showWithoutValues();
         }

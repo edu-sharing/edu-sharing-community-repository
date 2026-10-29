@@ -2,7 +2,8 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { AuthenticationService, Node } from 'ngx-edu-sharing-api';
+import { AuthenticationService, DEFAULT, Node } from 'ngx-edu-sharing-api';
+import { NodeHelperService } from 'ngx-edu-sharing-ui';
 import { firstValueFrom, forkJoin, from, Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { Tree, TreeNode } from '../tree';
@@ -26,6 +27,15 @@ import {
 /** Guards against a cycle in the parent links of corrupt data. */
 const MAX_DEPTH = 50;
 
+/** The category listing a collection, by the scope name `NodeHelperService` shows for it. */
+const CATEGORY_BY_SCOPE_NAME: { [scopeName: string]: CollectionTreeScope } = {
+    MY: 'MY',
+    SHARED: 'EDU_GROUPS',
+    TYPE_EDITORIAL: 'TYPE_EDITORIAL',
+    TYPE_MEDIA_CENTER: 'TYPE_MEDIA_CENTER',
+    PUBLIC: 'EDU_ALL',
+};
+
 /**
  * Lazily loaded, searchable tree of the collections the user can read, for `collectionTree`
  * widgets. It starts at the collection named by the page URL (`collectionRoot`), else at the one
@@ -35,6 +45,7 @@ const MAX_DEPTH = 50;
 export class CollectionTreeSource implements TreeSource {
     private readonly collectionTreeService = inject(CollectionTreeService);
     private readonly translate = inject(TranslateService);
+    private readonly nodeHelper = inject(NodeHelperService);
     private readonly isGuest = toSignal(
         inject(AuthenticationService)
             .observeLoginInfo()
@@ -48,8 +59,6 @@ export class CollectionTreeSource implements TreeSource {
         { initialValue: null },
     );
     private readonly config = signal<CollectionTreeConfig>({});
-    /** Metadata set whose `collections` query is used for searching. */
-    private mdsId: string;
     private readonly rootId = computed(
         () => this.urlRootId() || this.config().rootCollectionId || null,
     );
@@ -84,13 +93,9 @@ export class CollectionTreeSource implements TreeSource {
             : null;
     });
 
-    /**
-     * @param configuration the widget's configuration, see `CollectionTreeConfig`
-     * @param mdsId metadata set whose `collections` query is used for searching
-     */
-    configure(configuration: string | undefined, mdsId: string): this {
+    /** @param configuration the widget's configuration, see `CollectionTreeConfig` */
+    configure(configuration: string | undefined): this {
         this.config.set(parseCollectionTreeConfig(configuration));
-        this.mdsId = mdsId;
         return this;
     }
 
@@ -98,21 +103,22 @@ export class CollectionTreeSource implements TreeSource {
         if (!filter) {
             return from(this.getBrowseTree());
         }
-        // the browse tree loads the start collection the search is limited to
+        // the browse tree loads the start collection the search is limited to; the default metadata
+        // set searches all collections the browse tree lists, whatever metadata set they were made in
         return from(this.getBrowseTree()).pipe(
             switchMap(() => {
                 const rootId = this.withinRoot() ? this.rootNode()?.ref.id ?? null : null;
                 return this.collectionTreeService
                     .searchCollections(filter, {
                         rootId,
-                        mdsId: this.mdsId,
+                        mdsId: DEFAULT,
                         maxItems: COLLECTION_TREE_MAX_SEARCH_HITS,
                     })
                     .pipe(
                         map((hits) => hits.filter((hit) => matchesTitle(hit, filter))),
                         switchMap((hits) =>
                             this.collectionTreeService
-                                .getWithAncestors(hits, this.mdsId)
+                                .getWithAncestors(hits, DEFAULT)
                                 .pipe(map((placed) => this.createSearchTree(hits, placed, rootId))),
                         ),
                     );
@@ -180,12 +186,8 @@ export class CollectionTreeSource implements TreeSource {
             rootNode.hasChildren = rootNode.children.length > 0;
         } else {
             for (const scope of await this.getFilledCategories()) {
-                const category = tree.addNode({
-                    id: `category:${scope}`,
-                    caption: this.translate.instant(`COLLECTIONS.TAB.${scope}`),
-                    type: 'group',
-                    hasChildren: true,
-                });
+                const category = this.addCategory(tree, scope);
+                category.hasChildren = true;
                 this.lazyNodes.set(category, { tree, scope });
             }
         }
@@ -207,11 +209,24 @@ export class CollectionTreeSource implements TreeSource {
         return this.rootNode();
     }
 
-    /** Categories of the top level that hold collections, guests having none of their own. */
-    private async getFilledCategories(): Promise<CollectionTreeScope[]> {
-        const scopes = (this.config().scopes ?? DEFAULT_COLLECTION_TREE_SCOPES).filter(
+    private addCategory(tree: Tree, scope: CollectionTreeScope): TreeNode {
+        return tree.addNode({
+            id: `category:${scope}`,
+            caption: this.translate.instant(`COLLECTIONS.TAB.${scope}`),
+            type: 'group',
+        });
+    }
+
+    /** Categories of the top level, guests having none of their own. */
+    private getCategories(): CollectionTreeScope[] {
+        return (this.config().scopes ?? DEFAULT_COLLECTION_TREE_SCOPES).filter(
             (scope) => !this.isGuest() || !PERSONAL_COLLECTION_TREE_SCOPES.includes(scope),
         );
+    }
+
+    /** Categories of the top level that hold collections. */
+    private async getFilledCategories(): Promise<CollectionTreeScope[]> {
+        const scopes = this.getCategories();
         if (!scopes.length) {
             return [];
         }
@@ -265,8 +280,9 @@ export class CollectionTreeSource implements TreeSource {
     }
 
     /**
-     * Lists search hits below the collections leading to them from the start collection. A hit's
-     * own sub-collections are loaded once it is expanded.
+     * Lists search hits below the collections leading to them from the start collection, else from
+     * the category of their top-level collection. A hit's own sub-collections are loaded once it
+     * is expanded.
      */
     private createSearchTree(
         hits: Node[],
@@ -287,7 +303,7 @@ export class CollectionTreeSource implements TreeSource {
             if (offset < 0) {
                 continue;
             }
-            let parent: TreeNode | undefined;
+            let parent = rootId ? undefined : this.getSearchCategory(tree, path, placed, hit);
             for (const id of path?.slice(offset) ?? [hit.ref.id]) {
                 const siblings = parent ? parent.children : tree.rootNodes;
                 parent =
@@ -303,24 +319,46 @@ export class CollectionTreeSource implements TreeSource {
                 this.lazyNodes.set(parent, { tree, collection: hit });
             }
         }
+        const categories = this.getCategories().map((scope) => `category:${scope}`);
+        const rank = (node: TreeNode) =>
+            node.type === 'group' ? categories.indexOf(node.id) : categories.length;
+        tree.rootNodes.sort((a, b) => rank(a) - rank(b));
         return tree;
+    }
+
+    /**
+     * The category node a hit is listed in, labelled like the collection's scope elsewhere, e.g. a
+     * public collection of the user's as public; none for a category the widget does not list.
+     */
+    private getSearchCategory(
+        tree: Tree,
+        path: string[] | null,
+        placed: Map<string, PlacedCollection>,
+        hit: Node,
+    ): TreeNode | undefined {
+        const top = (path && placed.get(path[0])?.node) ?? hit;
+        const scope = CATEGORY_BY_SCOPE_NAME[this.nodeHelper.getCollectionScopeInfo(top).scopeName];
+        if (!scope || !this.getCategories().includes(scope)) {
+            return undefined;
+        }
+        return (
+            tree.rootNodes.find((node) => node.id === `category:${scope}`) ??
+            this.addCategory(tree, scope)
+        );
     }
 }
 
 /**
- * Whether the title of a collection holds every word searched for, or the filter is its id, since
- * the search also matches keywords and descriptions, which the tree does not show.
+ * Whether the title of a collection holds the text searched for, or the filter is its id, since the
+ * search also matches single words, keywords and descriptions, which the tree does not show.
  */
 function matchesTitle(collection: Node, filter: string): boolean {
-    if (collection.ref.id === filter.trim()) {
-        return true;
-    }
-    const title = getCollectionTitle(collection).toLocaleLowerCase();
-    return filter
-        .toLocaleLowerCase()
-        .split(/\s+/)
-        .map((word) => word.replace(/["*+|()~-]/g, ''))
-        .every((word) => title.includes(word));
+    const text = normalize(filter);
+    return collection.ref.id === text || normalize(getCollectionTitle(collection)).includes(text);
+}
+
+function normalize(text: string): string {
+    return text.trim().replace(/\s+/g, ' ').toLocaleLowerCase();
 }
 
 /** The ids from the top-most collection down to `id`, `null` while a collection is unknown. */

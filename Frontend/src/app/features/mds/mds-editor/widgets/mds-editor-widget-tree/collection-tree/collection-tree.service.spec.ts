@@ -182,6 +182,7 @@ describe('CollectionTreeService', () => {
 
     it('looks up several collections by id in one search', () => {
         searchService.requestSearch.and.returnValue(of({ nodes: [collection('a')] } as never));
+        nodeService.getParents.and.returnValue(throwError(() => ({ status: 403 })));
         const found = result(service.getCollections(['a', 'b'], DEFAULT));
         const params = searchService.requestSearch.calls.mostRecent().args[0];
         void expect(params.metadataset).toBe(DEFAULT);
@@ -191,6 +192,16 @@ describe('CollectionTreeService', () => {
             { property: 'virtual:node_id', values: ['a', 'b'] },
         ]);
         void expect(found).toEqual([collection('a')]);
+    });
+
+    it('loads the path of a collection the search leaves out', () => {
+        searchService.requestSearch.and.returnValue(of({ nodes: [collection('a')] } as never));
+        nodeService.getParents.and.returnValue(
+            of({ nodes: [collection('b', 'top'), collection('top')] } as never),
+        );
+        const found = result(service.getCollections(['a', 'b'], DEFAULT));
+        void expect(found.map((node) => node.ref.id)).toEqual(['a', 'top', 'b']);
+        void expect(searchService.requestSearch).toHaveBeenCalledTimes(1);
     });
 
     it('loads paths instead where the metadata set cannot look collections up by id', () => {

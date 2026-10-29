@@ -107,8 +107,8 @@ export class CollectionTreeService {
     }
 
     /**
-     * The collections with the given ids the user can read, each carrying its parent's id. A
-     * metadata set that cannot look them up by id makes this load the path of each one instead.
+     * The collections with the given ids the user can read, each carrying its parent's id. The path
+     * is loaded for each one the metadata set cannot look up by id or leaves out of its query.
      */
     getCollections(ids: string[], mdsId: string): Observable<Node[]> {
         const metadataset = mdsId || DEFAULT;
@@ -131,6 +131,15 @@ export class CollectionTreeService {
             })
             .pipe(
                 map((result) => (result.nodes ?? []) as Node[]),
+                switchMap((found) => {
+                    const foundIds = new Set(found.map((node) => node.ref.id));
+                    const left = ids.filter((id) => !foundIds.has(id));
+                    return left.length
+                        ? this.getCollectionsWithPaths(left).pipe(
+                              map((paths) => [...found, ...paths]),
+                          )
+                        : of(found);
+                }),
                 catchError((error: unknown) => {
                     markAsHandled(error);
                     console.warn('Collection lookup failed, loading paths instead', error);
