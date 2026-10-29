@@ -72,14 +72,20 @@
           [option]="$any(enabledOption())"
         ></es-create-collection-sidebar>
         } @if (option === 'EDIT_COLLECTION') {
-        <!-- opening the editor for another collection has to start over with that one -->
-        @for (collectionId of [$any(enabledOption().optionConfig)?.collectionId]; track
-        collectionId) {
+        <!-- opening the editor for another collection or step has to start over with that one -->
+        @for (editor of [$any(enabledOption().optionConfig)?.collectionId + '/' +
+        $any(enabledOption().optionConfig)?.step]; track editor) {
         <es-create-collection-sidebar
           [parent]="parent()"
           [option]="$any(enabledOption())"
         ></es-create-collection-sidebar>
-        } } @if (option === 'SHARE_COLLECTION') {
+        } } @if (option === 'EDIT_COLLECTION_MENU') {
+        <div class="entries">
+          <ng-container
+            *ngTemplateOutlet="entryList; context: { list: editMenuOptions() }"
+          ></ng-container>
+        </div>
+        } @if (option === 'SHARE_COLLECTION') {
         <es-share-collection-sidebar
           [collection]="collectionInfoTarget()!"
         ></es-share-collection-sidebar>
@@ -124,43 +130,11 @@
       <!-- a host may put its own intro above the option list (see `optionsHeaderTemplate`) -->
       <ng-container *ngTemplateOutlet="optionsHeaderTemplate()"></ng-container>
       <div class="entries">
-        @if (options()?.length) { @for (option of options(); track option.name) {
-        <button
-          type="button"
-          class="entry"
-          cdkMonitorElementFocus
-          (click)="activateOption(option, $event)"
-          [disabled]="!option.isEnabled"
-          [class.disabled]="!option.isEnabled"
-          [attr.aria-labelledby]="instanceId + '-option-' + $index"
-          [attr.aria-describedby]="instanceId + '-option-' + $index + '-description'"
-        >
-          <i class="icon" [esIcon]="option.icon"></i>
-          <div class="text">
-            <div
-              class="title"
-              [id]="instanceId + '-option-' + $index"
-              esCheckTextOverflow
-              #text="esCheckTextOverflow"
-              [matTooltip]="text.hasTextOverflow() ? (option.name | translate) : null"
-            >
-              {{ option.name | translate }}
-            </div>
-            <div
-              class="description"
-              [id]="instanceId + '-option-' + $index + '-description'"
-              esCheckTextOverflow
-              #description="esCheckTextOverflow"
-              [matTooltip]="
-                description.hasTextOverflow() ? (option.name + '_DESCRIPTION' | translate) : null
-              "
-            >
-              {{ option.name + '_DESCRIPTION' | translate }}
-            </div>
-          </div>
-          <i class="navigate" esIcon="keyboard_arrow_right" esIconContext="sidebar-navigate"></i>
-        </button>
-        } } @if (!options()?.length) {
+        @if (overviewOptions()?.length) {
+        <ng-container
+          *ngTemplateOutlet="entryList; context: { list: overviewOptions() }"
+        ></ng-container>
+        } @else {
         <es-info-message mode="info">
           <div class="message">
             {{
@@ -176,6 +150,46 @@
     </ng-template>
   </div>
 </div>
+
+<ng-template #entryList let-list="list">
+  @for (option of list; track option.name) {
+  <button
+    type="button"
+    class="entry"
+    cdkMonitorElementFocus
+    (click)="activateOption(option, $event)"
+    [disabled]="!option.isEnabled"
+    [class.disabled]="!option.isEnabled"
+    [attr.aria-labelledby]="instanceId + '-option-' + $index"
+    [attr.aria-describedby]="instanceId + '-option-' + $index + '-description'"
+  >
+    <i class="icon" [esIcon]="option.icon"></i>
+    <div class="text">
+      <div
+        class="title"
+        [id]="instanceId + '-option-' + $index"
+        esCheckTextOverflow
+        #text="esCheckTextOverflow"
+        [matTooltip]="text.hasTextOverflow() ? (option.name | translate) : null"
+      >
+        {{ option.name | translate }}
+      </div>
+      <div
+        class="description"
+        [id]="instanceId + '-option-' + $index + '-description'"
+        esCheckTextOverflow
+        #description="esCheckTextOverflow"
+        [matTooltip]="
+          description.hasTextOverflow() ? (option.name + '_DESCRIPTION' | translate) : null
+        "
+      >
+        {{ option.name + '_DESCRIPTION' | translate }}
+      </div>
+    </div>
+    <i class="navigate" esIcon="keyboard_arrow_right" esIconContext="sidebar-navigate"></i>
+  </button>
+  }
+</ng-template>
 
 <!-- Always-visible tab ("Lasche") to open/close the sidebar; replaces the former actionbar
   toggle option and the header close (X) button. -->

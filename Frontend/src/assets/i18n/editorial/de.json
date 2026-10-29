@@ -73,7 +73,6 @@
       "CREATE_COLLECTION": {
         "TITLE": "Sammlung erstellen",
         "EDIT_TITLE": "Sammlung bearbeiten",
-        "LOCATION": "Erstellt in:",
         "LOCATION_ROOT": "Meine Sammlungen",
         "STEPS": "Schritte",
         "STEP": {
@@ -222,6 +221,11 @@
       "COLLECTION_USAGE_DESCRIPTION": "Die Aufrufe, Downloads und Verwendungen der Sammlung anzeigen",
       "COLLECTION_EDIT": "Sammlung bearbeiten",
       "COLLECTION_EDIT_DESCRIPTION": "Titel, Aussehen, Metadaten und Sortierung der Sammlung ändern",
+      "COLLECTION_EDIT_DESIGN": "Sammlung gestalten",
+      "COLLECTION_EDIT_DESIGN_DESCRIPTION": "Titel, Beschreibung, Bild und Farbe der Sammlung ändern",
+      "COLLECTION_EDIT_CONFIGURE": "Sammlung konfigurieren",
+      "COLLECTION_EDIT_CONFIGURE_DESCRIPTION": "Typ, Metadaten und Standardsortierung der Sammlung einstellen",
+      "EDIT_COLLECTION_MENU": "Sammlung bearbeiten",
       "COLLECTION_SHARE": "Freigeben",
       "COLLECTION_SHARE_DESCRIPTION": "Zugriffsrechte verwalten"
     },

@@ -32,10 +32,14 @@ export class CollectionNavigationService {
      */
     edit(collection: Node): Promise<boolean> {
         if (this.editorialSidebarService.editorialSidebar) {
+            const sidebar = this.editorialSidebarService.editorialSidebar;
+            // the sidebar describes the collection that is selected, else its parent
+            if (sidebar.collectionInfoTarget()?.ref.id !== collection.ref.id) {
+                this.editorialSidebarService.nodes.set([collection]);
+            }
             this.editorialSidebarService.showOption({
-                option: 'EDIT_COLLECTION',
-                trap: true,
-                optionConfig: { collectionId: collection.ref.id },
+                option: 'EDIT_COLLECTION_MENU',
+                trap: false,
             });
             return Promise.resolve(true);
         }

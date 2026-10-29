@@ -63,7 +63,6 @@ import { BridgeService } from '../../../services/bridge.service';
 import { ConnectorOptionsService } from '../../../services/connector-options.service';
 import { LtiToolOptionsService } from '../../../services/lti-tool-options.service';
 import { OptionsHelperService } from '../../../services/options-helper.service';
-import { CreateCollectionConfig } from '../../../features/editorial-sidebar/create-collection-sidebar/create-collection-sidebar.component';
 import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
 import {
     NodesSelectorConfig,
@@ -380,8 +379,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         if (this.editorialSidebarService.editorialSidebar) {
             this.editorialSidebarService.showOption({
                 option: 'CREATE_COLLECTION',
-                trap: true,
-                optionConfig: { entry: 'menu' } as CreateCollectionConfig,
+                trap: false,
             });
         } else {
             const parentId =

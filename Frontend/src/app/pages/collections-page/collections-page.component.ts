@@ -60,7 +60,6 @@ import { CollectionHeaderBarComponent } from './collection-header-bar/collection
 import { CollectionViewStateService, CollectionViewType } from './collection-view-state.service';
 import { GlobalCollectionsPageServiceInternal } from './global-collections-page.service';
 import { OptionsHelperService } from 'src/app/services/options-helper.service';
-import { CreateCollectionConfig } from '../../features/editorial-sidebar/create-collection-sidebar/create-collection-sidebar.component';
 import { EditorialSidebarService } from '../../features/editorial-sidebar/editorial-sidebar.service';
 import { CollectionScope, CollectionScopesService } from '../../services/collection-scopes.service';
 import { CollectionDetailsService } from '../../features/collection-info/collection-details.service';
@@ -537,8 +536,7 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
             () =>
                 this.editorialSidebarService.showOption({
                     option: 'CREATE_COLLECTION',
-                    trap: true,
-                    optionConfig: { entry: 'menu' } as CreateCollectionConfig,
+                    trap: false,
                 }),
             { injector: this.injector },
         );

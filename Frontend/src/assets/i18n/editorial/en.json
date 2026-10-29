@@ -73,7 +73,6 @@
       "CREATE_COLLECTION": {
         "TITLE": "Create collection",
         "EDIT_TITLE": "Edit collection",
-        "LOCATION": "Created in:",
         "LOCATION_ROOT": "My collections",
         "STEPS": "Steps",
         "STEP": {
@@ -222,6 +221,11 @@
       "COLLECTION_USAGE_DESCRIPTION": "Show the views, downloads and usages of the collection",
       "COLLECTION_EDIT": "Edit collection",
       "COLLECTION_EDIT_DESCRIPTION": "Change the title, look, metadata and sorting of the collection",
+      "COLLECTION_EDIT_DESIGN": "Design collection",
+      "COLLECTION_EDIT_DESIGN_DESCRIPTION": "Change the title, description, image and colour of the collection",
+      "COLLECTION_EDIT_CONFIGURE": "Configure collection",
+      "COLLECTION_EDIT_CONFIGURE_DESCRIPTION": "Set the type, metadata and default sorting of the collection",
+      "EDIT_COLLECTION_MENU": "Edit collection",
       "COLLECTION_SHARE": "Share",
       "COLLECTION_SHARE_DESCRIPTION": "Manage access rights"
     },

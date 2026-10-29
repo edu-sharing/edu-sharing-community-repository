@@ -45,8 +45,8 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
 import { NodesSelectorConfig } from '../../pages/editorial-page/nodes-selector/nodes-selector.component';
 import {
-    CreateCollectionConfig,
     EditCollectionConfig,
+    Step,
 } from './create-collection-sidebar/create-collection-sidebar.component';
 import { CardDialogRef } from '../dialogs/card-dialog/card-dialog-ref';
 import { DialogsService } from '../dialogs/dialogs.service';
@@ -77,6 +77,14 @@ const COLLECTION_BOUND_OPTIONS: EditorialSidebarOption[] = [
     'COLLECTION_INFO',
     'COLLECTION_USAGE',
     'SHARE_COLLECTION',
+    'EDIT_COLLECTION_MENU',
+];
+
+/** the options that are offered on the page of `EDIT_COLLECTION_MENU` instead of the overview */
+const EDIT_COLLECTION_MENU_ENTRIES = [
+    'EDITORIAL.OPTIONS.COLLECTION_EDIT_DESIGN',
+    'EDITORIAL.OPTIONS.COLLECTION_EDIT_CONFIGURE',
+    'EDITORIAL.OPTIONS.COLLECTION_SHARE',
 ];
 
 export const EDITORIAL_SIDEBAR_OPTIONS = {
@@ -94,6 +102,8 @@ export const EDITORIAL_SIDEBAR_OPTIONS = {
     CREATE_COLLECTION: { selectionMode: 'none' },
     /** the same form for a collection that exists; it is about that collection, not the selection */
     EDIT_COLLECTION: { selectionMode: 'any' },
+    /** page that offers to design, configure or share the collection that is shown as `parent` */
+    EDIT_COLLECTION_MENU: { selectionMode: 'any' },
     /** the views and usages of the collection that is shown as `parent` */
     COLLECTION_USAGE: { selectionMode: 'any' },
     /** gives others access to the collection that is shown as `parent` */
@@ -124,7 +134,6 @@ export type OptionConfig =
     | SubmissionConfig
     | AssignmentConfig
     | PreviewConfig
-    | CreateCollectionConfig
     | EditCollectionConfig;
 export type OptionState<T extends OptionConfig> = {
     option: EditorialSidebarOption;
@@ -140,6 +149,11 @@ export type OptionState<T extends OptionConfig> = {
      * when true, do not allow to navigate back to the overview of all actions
      */
     trap: boolean;
+    /**
+     * the page the header's back arrow returns to instead of the overview, for an option that was
+     * reached from another option
+     */
+    backTo?: OptionState<OptionConfig>;
 };
 /** running counter so every instance's generated ids are document-unique */
 let nextInstanceId = 0;
@@ -236,6 +250,16 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
                 : 'EDITORIAL.SIDEBAR.TITLE_' + this.primaryMode()?.toUpperCase()),
     );
     options = signal<OptionItem[]>(null);
+    /** the options of the overview, without the ones that belong to a page of their own */
+    protected readonly overviewOptions = computed(() =>
+        this.options()?.filter((option) => !EDIT_COLLECTION_MENU_ENTRIES.includes(option.name)),
+    );
+    /** the options of the page that edits the collection, in the order they are offered */
+    protected readonly editMenuOptions = computed(() =>
+        EDIT_COLLECTION_MENU_ENTRIES.map((name) =>
+            this.options()?.find((option) => option.name === name),
+        ).filter((option) => !!option),
+    );
     /**
      * The registration of the currently enabled option, if it is one another module contributed.
      * Reactive: the registrations are a signal, so the panel follows a late registration.
@@ -450,11 +474,7 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         options.push(collectionUsage);
 
         const editCollection = new OptionItem('EDITORIAL.OPTIONS.COLLECTION_EDIT', 'edit', () =>
-            this.enabledOption.set({
-                trap: false,
-                option: 'EDIT_COLLECTION',
-                optionConfig: { collectionId: this.collectionInfoTarget().ref.id },
-            }),
+            this.enabledOption.set({ trap: false, option: 'EDIT_COLLECTION_MENU' }),
         );
         editCollection.group = DefaultGroups.Primary;
         editCollection.priority = 5;
@@ -465,29 +485,70 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
             return (
                 this.isCollectionContext() &&
                 this.isRealCollection(collection) &&
-                RestHelper.hasAccessPermission(collection, RestConstants.PERMISSION_WRITE)
+                (RestHelper.hasAccessPermission(collection, RestConstants.PERMISSION_WRITE) ||
+                    RestHelper.hasAccessPermission(
+                        collection,
+                        RestConstants.ACCESS_CHANGE_PERMISSIONS,
+                    ))
             );
         };
         options.push(editCollection);
 
-        const shareCollection = new OptionItem(
-            'EDITORIAL.OPTIONS.COLLECTION_SHARE',
-            'group_add',
-            () => this.enabledOption.set({ trap: false, option: 'SHARE_COLLECTION' }),
-        );
+        const editSteps: { name: string; icon: string; step: Step }[] = [
+            { name: EDIT_COLLECTION_MENU_ENTRIES[0], icon: 'palette', step: 'DESIGN' },
+            { name: EDIT_COLLECTION_MENU_ENTRIES[1], icon: 'tune', step: 'CONFIGURE' },
+        ];
+        for (const { name, icon, step } of editSteps) {
+            const editStep = new OptionItem(name, icon, () =>
+                this.enabledOption.set({
+                    trap: false,
+                    option: 'EDIT_COLLECTION',
+                    backTo: { trap: false, option: 'EDIT_COLLECTION_MENU' },
+                    optionConfig: { collectionId: this.collectionInfoTarget().ref.id, step },
+                }),
+            );
+            editStep.group = DefaultGroups.Primary;
+            editStep.elementType = [ElementType.NoneOrUnknown, ElementType.Node];
+            editStep.scopes = ['collections'];
+            editStep.customShowCallback = async () => {
+                const collection = this.collectionInfoTarget();
+                return (
+                    this.isCollectionContext() &&
+                    this.isRealCollection(collection) &&
+                    RestHelper.hasAccessPermission(collection, RestConstants.PERMISSION_WRITE)
+                );
+            };
+            options.push(editStep);
+        }
+
+        const shareCollection = new OptionItem(EDIT_COLLECTION_MENU_ENTRIES[2], 'group_add', () => {
+            const collection = this.collectionInfoTarget();
+            // a collection of type editorial is given to groups, which its editor asks for
+            this.enabledOption.set(
+                collection.collection?.type === RestConstants.COLLECTIONTYPE_EDITORIAL
+                    ? {
+                          trap: false,
+                          option: 'EDIT_COLLECTION',
+                          backTo: { trap: false, option: 'EDIT_COLLECTION_MENU' },
+                          optionConfig: { collectionId: collection.ref.id, step: 'PERMISSIONS' },
+                      }
+                    : {
+                          trap: false,
+                          option: 'SHARE_COLLECTION',
+                          backTo: { trap: false, option: 'EDIT_COLLECTION_MENU' },
+                      },
+            );
+        });
         shareCollection.group = DefaultGroups.Primary;
-        shareCollection.priority = 6;
         shareCollection.elementType = [ElementType.NoneOrUnknown, ElementType.Node];
         shareCollection.scopes = ['collections'];
         shareCollection.toolpermissions = [RestConstants.TOOLPERMISSION_INVITE];
         shareCollection.toolpermissionsMode = HideMode.Hide;
-        // a collection of type editorial is given to groups when it is edited
         shareCollection.customShowCallback = async () => {
             const collection = this.collectionInfoTarget();
             return (
                 this.isCollectionContext() &&
                 this.isRealCollection(collection) &&
-                collection.collection?.type !== RestConstants.COLLECTIONTYPE_EDITORIAL &&
                 RestHelper.hasAccessPermission(collection, RestConstants.ACCESS_CHANGE_PERMISSIONS)
             );
         };
@@ -639,6 +700,11 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
     async goBack(): Promise<void> {
         const canDeactivate = this.customOption()?.canDeactivate;
         if (canDeactivate && !(await canDeactivate())) {
+            return;
+        }
+        const backTo = this.enabledOption()?.backTo;
+        if (backTo) {
+            this.editorialSidebarService.showOption(backTo);
             return;
         }
         this.enabledOption.set(null);

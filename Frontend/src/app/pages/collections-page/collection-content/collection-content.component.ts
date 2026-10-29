@@ -1,5 +1,7 @@
 import {
+    afterNextRender,
     Component,
+    ElementRef,
     ContentChild,
     effect,
     EventEmitter,
@@ -131,6 +133,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     private nodeServiceApi = inject(NodeService);
     private optionsService = inject(OptionsHelperDataService);
     private injector = inject(Injector);
+    private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     /**
      * Options of the selection bar. The header and each list have an options service of their
      * own, none of which knows the selection of the sub-collections and materials together.
@@ -202,6 +205,13 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     selection: Node[] = [];
     /** Original node ids to auto-select once the references (re)load (a freshly *created* node). */
     private selectAfterLoad: string[] = [];
+    /**
+     * collections that were created below the shown one and are selected whenever the list is
+     * loaded until `createdCollectionsUntil`: the page reloads more than once after a change, and
+     * each load drops the selection
+     */
+    private createdCollections: Node[] = [];
+    private createdCollectionsUntil = 0;
     /** True while a sidebar-add reload is in flight, so its selection-clear does not close the sidebar. */
     private addInProgress = false;
     /** Whether the selected-nodes overlay above the selection bar is open. */
@@ -374,6 +384,15 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 filter((n) => n.some((n1) => n1?.ref?.id === this.collection?.ref?.id)),
             )
             .subscribe(() => this.refreshContent());
+        this.localEventsService.nodesCreated.pipe(takeUntil(this.destroyed$)).subscribe((nodes) => {
+            this.createdCollectionsUntil = Date.now() + 5000;
+            this.createdCollections = nodes.filter(
+                (node) =>
+                    !!node.collection &&
+                    (node.parent?.id === this.collection?.ref?.id ||
+                        (this.isRootLevel && node.collection.level0)),
+            );
+        });
         this.editorialSidebarService.applyNodeEmitted
             .pipe(takeUntil(this.destroyed$))
             .subscribe((payload) => {
@@ -1240,6 +1259,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                         collection.pagination,
                     );
                     this.dataSourceCollections.isLoading = false;
+                    this.selectCreatedCollections();
                     if (this.isRootLevel) {
                         if (this.scope === RestConstants.COLLECTIONSCOPE_MY) {
                             this.listCollections?.addVirtualNodes(
@@ -1350,6 +1370,31 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 this.dataSourceCollections.appendData(refs.collections);
                 this.dataSourceCollections.isLoading = false;
             });
+    }
+
+    /**
+     * Shows the collections that were just created like a node created in the workspace: marked as
+     * new, selected, and in view. The search index may not list them yet, so they are added to the
+     * list themselves.
+     */
+    private selectCreatedCollections(): void {
+        const created = this.createdCollections;
+        if (!created.length || Date.now() > this.createdCollectionsUntil) {
+            this.createdCollections = [];
+            return;
+        }
+        this.listCollections?.addVirtualNodes(
+            created.map((node) => Object.assign(node, { override: false })) as VirtualNode[],
+            { select: true },
+        );
+        // the selection replaced any earlier one, so the only selected entry is a created collection
+        afterNextRender(
+            () =>
+                this.elementRef.nativeElement
+                    .querySelector('es-node-entries-wrapper .selected, .mat-row-selected')
+                    ?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }),
+            { injector: this.injector },
+        );
     }
 
     private finishCollectionLoading(callback?: () => void) {

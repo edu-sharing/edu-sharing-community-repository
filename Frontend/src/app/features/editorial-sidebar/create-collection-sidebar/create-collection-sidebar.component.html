@@ -1,36 +1,32 @@
-@if (colors(); as colors) {
-<nav class="steps" [attr.aria-label]="i18nPrefix + 'STEPS' | translate">
-  <ol>
-    @for (item of steps(); track item; let last = $last) {
-    <li>
-      <button
-        type="button"
-        class="step"
-        [class.active]="item === step()"
-        [attr.aria-current]="item === step() ? 'step' : null"
-        [attr.data-test]="'create-collection-step-' + item.toLowerCase()"
-        [disabled]="saving()"
-        (click)="goToStep(item)"
-      >
-        {{ i18nPrefix + 'STEP.' + item | translate }}
-      </button>
-      @if (!last) {
-      <i esIcon="chevron_right" class="separator" aria-hidden="true"></i>
-      }
-    </li>
-    }
-  </ol>
-</nav>
-@if (location(); as path) {
-<p class="location" data-test="create-collection-location">
-  <i esIcon="folder_open" aria-hidden="true"></i>
-  <span class="label">{{ i18nPrefix + 'LOCATION' | translate }}</span>
-  <span class="path">{{
-    path.length ? path.join(' › ') : (i18nPrefix + 'LOCATION_ROOT' | translate)
-  }}</span>
-</p>
+@if (colors(); as colors) { @if (steps().length > 1) {
+<mat-stepper
+  class="steps"
+  labelPosition="bottom"
+  [linear]="false"
+  [attr.aria-label]="i18nPrefix + 'STEPS' | translate"
+  [selectedIndex]="steps().indexOf(step())"
+  (selectionChange)="onStepperChange($event.selectedIndex)"
+>
+  @for (item of steps(); track item) {
+  <mat-step
+    [label]="i18nPrefix + 'STEP.' + item | translate"
+    [completed]="steps().indexOf(item) < steps().indexOf(step())"
+  ></mat-step>
+  }
+</mat-stepper>
 } @switch (step()) { @case ('DESIGN') {
 <div class="content">
+  @if (location(); as path) {
+  <section class="location-field" data-test="create-collection-location">
+    <div class="caption">{{ 'WORKSPACE.FILE_LOCATION' | translate }}</div>
+    <div class="location-bar">
+      <i esIcon="folder_open" aria-hidden="true"></i>
+      <span class="path">{{
+        path.length ? path.join(' › ') : (i18nPrefix + 'LOCATION_ROOT' | translate)
+      }}</span>
+    </div>
+  </section>
+  }
   <es-collection-design-form
     [collection]="draft"
     [colors]="colors"
@@ -152,11 +148,22 @@
 } }
 <es-sidebar-sticky-footer>
   <div class="footer-buttons">
-    <button mat-button color="primary" data-test="create-collection-back" (click)="back()">
+    @if (isFirstStep()) {
+    <button mat-button color="primary" data-test="create-collection-cancel" (click)="cancel()">
+      {{ 'CANCEL' | translate }}
+    </button>
+    } @else {
+    <button
+      mat-button
+      color="primary"
+      data-test="create-collection-back"
+      [disabled]="saving()"
+      (click)="previousStep()"
+    >
       <i esIcon="arrow_back"></i>
       {{ 'BACK' | translate }}
     </button>
-    @if (isLastStep()) {
+    } @if (isLastStep()) {
     <button
       mat-flat-button
       color="primary"

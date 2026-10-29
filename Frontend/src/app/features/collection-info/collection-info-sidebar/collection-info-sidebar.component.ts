@@ -10,7 +10,6 @@ import {
     Scope,
 } from 'ngx-edu-sharing-ui';
 import { CollectionInfoSectionComponent } from './collection-info-section/collection-info-section.component';
-import { SidebarStickyFooterComponent } from '../../editorial-sidebar/sidebar-sticky-footer/sidebar-sticky-footer.component';
 import { MdsEditorInstanceService } from '../../mds/mds-editor/mds-editor-instance.service';
 import { CollectionDetailsService } from '../collection-details.service';
 import { CollectionNavigationService } from '../collection-navigation.service';
@@ -37,7 +36,6 @@ const BUTTON_OPTIONS = ['OPTIONS.INVITE', 'OPTIONS.QR_CODE'];
         TranslateModule,
         CollectionInfoSectionComponent,
         EduSharingUiCommonModule,
-        SidebarStickyFooterComponent,
         CollectionInfoHeroComponent,
         CollectionInfoFactsComponent,
         CollectionInfoParticipantsComponent,
@@ -70,10 +68,6 @@ export class CollectionInfoSidebarComponent {
 
     protected canEdit(): boolean {
         return this.navigation.canEdit(this.collection());
-    }
-
-    protected showAllDetails(): void {
-        void this.navigation.edit(this.collection());
     }
 
     /**

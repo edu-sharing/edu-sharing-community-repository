@@ -34,8 +34,9 @@ export class ShareCollectionSidebarComponent {
         inject(DestroyRef).onDestroy(() => this.editorialSidebarService.titleOverride.set(null));
     }
 
-    protected back(): void {
-        this.editorialSidebarService.close();
+    /** Leaves the page the same way the back arrow of the sidebar header does. */
+    protected cancel(): void {
+        void this.editorialSidebarService.editorialSidebar?.goBack();
     }
 
     protected async save(): Promise<void> {

@@ -8,47 +8,12 @@
 }
 
 .steps {
-    padding: 12px 20px 0;
-
-    ol {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        justify-content: center;
-        gap: 4px;
-        margin: 0;
-        padding: 0;
-        list-style: none;
-    }
-
-    li {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-    }
-}
-
-.step {
-    padding: 4px 8px;
-    border: 0;
-    border-radius: 4px;
     background: none;
-    color: var(--textLight);
-    font: inherit;
-    cursor: pointer;
 
-    &:hover:not(:disabled) {
-        background-color: var(--primaryBackground50);
+    // the stepper only shows the progress; the content of a step is the page below it
+    ::ng-deep .mat-horizontal-content-container {
+        display: none;
     }
-
-    &.active {
-        color: var(--primary);
-        font-weight: bold;
-    }
-}
-
-.separator {
-    color: var(--textLight);
 }
 
 .content {
@@ -131,17 +96,20 @@
     color: var(--textLight);
 }
 
-.location {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    margin: 8px 20px 0;
-    color: var(--textLight);
-    font-size: 0.9em;
+.location-field {
+    margin-bottom: 16px;
 
-    .label {
-        flex-shrink: 0;
+    .caption {
+        margin-bottom: 4px;
+        color: var(--textLight);
+        font-size: 0.9em;
+    }
+
+    .location-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--textLight);
     }
 
     .path {

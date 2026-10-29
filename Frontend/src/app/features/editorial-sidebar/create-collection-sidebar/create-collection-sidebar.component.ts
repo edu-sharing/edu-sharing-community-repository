@@ -23,6 +23,7 @@ import {
     ROOT,
 } from 'ngx-edu-sharing-api';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { MatStepper, MatStepperModule } from '@angular/material/stepper';
 import { firstValueFrom, of } from 'rxjs';
 import { AuthorityNamePipe, LocalEventsService } from 'ngx-edu-sharing-ui';
 import { RestConnectorService, RestConstants, RestHelper } from '../../../core-module/core.module';
@@ -54,18 +55,14 @@ import {
     NewCollectionType,
 } from './create-collection.service';
 
-/** where the creation was started from, which decides what the first "back" does */
-export type CreateCollectionConfig = {
-    /** `add` comes from the "add collection" choice, `menu` straight from the create menu */
-    entry: 'add' | 'menu';
-};
-
 /** the collection that is edited instead of a new one created */
 export type EditCollectionConfig = {
     collectionId: string;
+    /** edits only this step instead of passing all of them */
+    step?: Step;
 };
 
-type Step = 'DESIGN' | 'CONFIGURE' | 'PERMISSIONS';
+export type Step = 'DESIGN' | 'CONFIGURE' | 'PERMISSIONS';
 /** who the collection can be given to after it was created */
 type PermissionsKind = 'SHARE' | 'EDITORIAL_GROUPS';
 /**
@@ -79,6 +76,7 @@ type PermissionsKind = 'SHARE' | 'EDITORIAL_GROUPS';
     styleUrls: ['create-collection-sidebar.component.scss'],
     imports: [
         SharedModule,
+        MatStepperModule,
         MdsModule,
         ShareDialogModule,
         CollectionDesignFormComponent,
@@ -101,10 +99,11 @@ export class CreateCollectionSidebarComponent {
 
     /** the collection the new one is created in (unset on the collections root) */
     readonly parent = input<Node>();
-    readonly option = input<OptionState<CreateCollectionConfig | EditCollectionConfig>>();
+    readonly option = input<OptionState<EditCollectionConfig>>();
 
     protected readonly i18nPrefix = 'EDITORIAL.SIDEBAR.CREATE_COLLECTION.';
     protected readonly mds = viewChild<MdsEditorWrapperComponent>('mds');
+    private readonly stepper = viewChild(MatStepper);
     private readonly shareDialog = viewChild(ShareDialogComponent);
     private readonly editorialGroupsForm = viewChild(CollectionEditorialGroupsFormComponent);
     protected readonly step = signal<Step>('DESIGN');
@@ -180,9 +179,15 @@ export class CreateCollectionSidebarComponent {
     );
     protected readonly isDesignStep = computed(() => this.step() === 'DESIGN');
     /** the steps in the order they are shown; access is only asked for if it can be given */
-    protected readonly steps = computed<Step[]>(() =>
-        this.permissionsKind() ? ['DESIGN', 'CONFIGURE', 'PERMISSIONS'] : ['DESIGN', 'CONFIGURE'],
-    );
+    protected readonly steps = computed<Step[]>(() => {
+        if (this.singleStep()) {
+            return [this.singleStep()];
+        }
+        return this.permissionsKind()
+            ? ['DESIGN', 'CONFIGURE', 'PERMISSIONS']
+            : ['DESIGN', 'CONFIGURE'];
+    });
+    protected readonly isFirstStep = computed(() => this.step() === this.steps()[0]);
     protected readonly isLastStep = computed(() => this.step() === this.steps().at(-1));
     /** how access is given after the creation; none if the user cannot invite or the type has no such step */
     protected readonly permissionsKind = computed<PermissionsKind | null>(() => {
@@ -193,14 +198,15 @@ export class CreateCollectionSidebarComponent {
             ? 'EDITORIAL_GROUPS'
             : 'SHARE';
     });
-    protected readonly entry = computed(
-        () => (this.option()?.optionConfig as CreateCollectionConfig)?.entry ?? 'add',
-    );
     /** the id of the collection that is edited, unset when a new one is created */
     protected readonly editId = computed(
         () => (this.option()?.optionConfig as EditCollectionConfig)?.collectionId ?? null,
     );
     protected readonly isEdit = computed(() => !!this.editId());
+    /** the only step that is edited, unset if all steps are passed */
+    private readonly singleStep = computed(
+        () => (this.option()?.optionConfig as EditCollectionConfig)?.step ?? null,
+    );
 
     /** the collections from the top level down to the one the new collection is created in */
     private readonly parentPath = rxResource({
@@ -243,25 +249,29 @@ export class CreateCollectionSidebarComponent {
         return !!this.draft?.title?.trim();
     }
 
-    protected async back(): Promise<void> {
-        switch (this.step()) {
-            case 'PERMISSIONS':
-                await this.rememberPermissions();
-                this.metadata = this.values;
-                this.step.set('CONFIGURE');
-                break;
-            case 'CONFIGURE':
-                this.step.set('DESIGN');
-                break;
-            default:
-                if (this.entry() === 'add' && !this.isEdit()) {
-                    this.editorialSidebarService.showOption({
-                        option: 'ADD_COLLECTION',
-                        trap: false,
-                    });
-                } else {
-                    this.editorialSidebarService.close();
-                }
+    /** Follows a click on a step of the stepper, and shows the step that is current if it is blocked. */
+    protected async onStepperChange(index: number): Promise<void> {
+        if (!this.saving()) {
+            await this.goToStep(this.steps()[index]);
+        }
+        const stepper = this.stepper();
+        if (stepper) {
+            stepper.selectedIndex = this.steps().indexOf(this.step());
+        }
+    }
+
+    /** Leaves the form the same way the back arrow of the sidebar header does. */
+    protected cancel(): void {
+        void this.editorialSidebarService.editorialSidebar?.goBack();
+    }
+
+    protected async previousStep(): Promise<void> {
+        if (this.step() === 'PERMISSIONS') {
+            await this.rememberPermissions();
+            this.metadata = this.values;
+            this.step.set('CONFIGURE');
+        } else if (this.step() === 'CONFIGURE') {
+            this.step.set('DESIGN');
         }
     }
 
@@ -273,7 +283,7 @@ export class CreateCollectionSidebarComponent {
             if (order.indexOf(target) > order.indexOf(before)) {
                 await this.next();
             } else {
-                await this.back();
+                await this.previousStep();
             }
             if (this.step() === before) {
                 // blocked, e.g. by a missing title
@@ -318,6 +328,10 @@ export class CreateCollectionSidebarComponent {
 
     /** stores the collection together with who it is given to */
     protected async save(): Promise<void> {
+        if (this.step() === 'DESIGN' && !this.hasTitle()) {
+            this.toast.error(null, 'COLLECTIONS.ENTER_NAME');
+            return;
+        }
         if (this.step() === 'CONFIGURE') {
             const values = this.hasMetadata() ? await this.mds()?.getValues() : {};
             if (values === null) {
@@ -344,6 +358,8 @@ export class CreateCollectionSidebarComponent {
                     // the collection exists by now, so a retry would only run into its name
                     this.toast.error(error);
                 }
+                // announced first, so the list that reloads because of the refresh knows what to select
+                this.localEvents.nodesCreated.emit([created]);
                 this.refreshParent();
             }
             this.editorialSidebarService.close();
@@ -548,6 +564,14 @@ export class CreateCollectionSidebarComponent {
     }
 
     private getTitle(): string {
+        switch (this.singleStep()) {
+            case 'DESIGN':
+                return 'EDITORIAL.OPTIONS.COLLECTION_EDIT_DESIGN';
+            case 'CONFIGURE':
+                return 'EDITORIAL.OPTIONS.COLLECTION_EDIT_CONFIGURE';
+            case 'PERMISSIONS':
+                return 'EDITORIAL.OPTIONS.COLLECTION_SHARE';
+        }
         return this.i18nPrefix + (this.isEdit() ? 'EDIT_TITLE' : 'TITLE');
     }
 
@@ -578,6 +602,10 @@ export class CreateCollectionSidebarComponent {
         const permissions = await this.loadToolpermissions();
         if (this.isEdit()) {
             await this.loadEdited();
+            this.step.set(this.singleStep() ?? 'DESIGN');
+            if (this.step() === 'PERMISSIONS') {
+                this.preparePermissions();
+            }
         } else {
             this.draft = {
                 title: '',

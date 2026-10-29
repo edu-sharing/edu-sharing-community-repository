@@ -26,15 +26,3 @@
   </es-collection-info-section>
   }
 </div>
-@if (canEdit()) {
-<es-sidebar-sticky-footer>
-  <button
-    mat-stroked-button
-    color="primary"
-    data-test="collection-info-all-details"
-    (click)="showAllDetails()"
-  >
-    {{ 'COLLECTIONS.INFO.ALL_DETAILS' | translate }}
-  </button>
-</es-sidebar-sticky-footer>
-}

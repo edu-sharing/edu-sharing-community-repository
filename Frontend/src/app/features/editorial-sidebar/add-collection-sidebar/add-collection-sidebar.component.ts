@@ -5,7 +5,6 @@ import {
     NodesSelectorConfig,
     TabType,
 } from '../../../pages/editorial-page/nodes-selector/nodes-selector.component';
-import { CreateCollectionConfig } from '../create-collection-sidebar/create-collection-sidebar.component';
 import { EditorialSidebarService } from '../editorial-sidebar.service';
 
 type AddCollectionChoice = {
@@ -41,8 +40,8 @@ export class AddCollectionSidebarComponent {
     private create(): void {
         this.editorialSidebarService.showOption({
             option: 'CREATE_COLLECTION',
-            trap: true,
-            optionConfig: { entry: 'add' } as CreateCollectionConfig,
+            trap: false,
+            backTo: { option: 'ADD_COLLECTION', trap: false },
         });
     }
 
@@ -54,6 +53,7 @@ export class AddCollectionSidebarComponent {
         this.editorialSidebarService.showOption({
             option: 'SORT_INTO',
             trap: false,
+            backTo: { option: 'ADD_COLLECTION', trap: false },
             title: this.i18nPrefix + 'COPY.TITLE',
             optionConfig: {
                 state: TabType.COLLECTIONS,

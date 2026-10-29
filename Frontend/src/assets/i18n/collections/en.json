@@ -42,8 +42,7 @@
       "SUBCOLLECTIONS": "Subcollections",
       "MATERIALS": "Materials",
       "CREATED_AT": "Created on",
-      "MODIFIED_AT": "Last modified",
-      "ALL_DETAILS": "All details"
+      "MODIFIED_AT": "Last modified"
     },
     "STEP": {
       "GENERAL": "Title, Image, Description and Color",

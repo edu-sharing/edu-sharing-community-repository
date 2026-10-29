@@ -9,14 +9,14 @@
     padding: 16px 20px 0;
 }
 
+// the banner spans the whole width of the sidebar, beyond the padding of the content
+es-collection-info-hero {
+    display: block;
+    margin: -16px -20px 0;
+}
+
 .actions {
     display: flex;
     justify-content: flex-end;
     margin-top: 8px;
-}
-
-// the call to action in the footer is a pill, like the other buttons of the sidebars
-es-sidebar-sticky-footer button {
-    border-radius: var(--borderRadiusButtons);
-    padding: 0 28px;
 }
