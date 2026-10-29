@@ -34,7 +34,7 @@ import java.util.Objects;
 public class HandleServiceImpl implements HandleService {
 
 
-    private final Integer idIndex = 300;
+    public static final int DEFAULT_ADMIN_INDEX = 300;
     private final HandleConfig handleConfig;
 
 
@@ -45,7 +45,9 @@ public class HandleServiceImpl implements HandleService {
             if (handleConfig.isEnabled()) {
                 Objects.requireNonNull(handleConfig.getPrefix(), "repository.handleservice.prefix not set");
                 Objects.requireNonNull(handleConfig.getRepoid(), "repository.handleservice.repoid not set");
-                Objects.requireNonNull(handleConfig.getPrivkey(), "repository.handleservice.privkey not set");
+                if (getMode() == HandleConfig.Mode.protocol) {
+                    Objects.requireNonNull(handleConfig.getPrivkey(), "repository.handleservice.privkey not set");
+                }
             }
             if (StringUtils.isNotBlank(handleConfig.getConfigDir())) {
                 System.setProperty("net.handle.configDir", handleConfig.getConfigDir());
@@ -101,10 +103,20 @@ public class HandleServiceImpl implements HandleService {
         return "0.NA/" + handleConfig.getPrefix();
     }
 
+    /**
+     * @return handle of the identity used for authentication, defaults to the prefix handle (0.NA/{prefix})
+     */
+    public String getAdminHandle() {
+        if (StringUtils.isNotBlank(handleConfig.getAdminHandle())) {
+            return handleConfig.getAdminHandle();
+        }
+        return getId();
+    }
+
 
     public HandleValue[] getHandleValues(String handle, String[] values) {
         try {
-            HSAdapter adapter = HSAdapterFactory.newInstance(getId(), idIndex, getPrivateKeyBytes(), null);
+            HSAdapter adapter = HSAdapterFactory.newInstance(getAdminHandle(), getAdminIndex(), getPrivateKeyBytes(), null);
             return adapter.resolveHandle(handle, values, null);
 
         } catch (HandleException | IOException e) {
@@ -117,24 +129,24 @@ public class HandleServiceImpl implements HandleService {
     }
 
     public void handleServiceAvailable() throws HandleException, IOException {
-        HSAdapterFactory.newInstance(getId(), idIndex, getPrivateKeyBytes(), null);
+        HSAdapterFactory.newInstance(getAdminHandle(), getAdminIndex(), getPrivateKeyBytes(), null);
     }
 
     public String createHandle(String handle, final HandleValue[] values) throws Exception {
-        HSAdapter adapter = HSAdapterFactory.newInstance(getId(), idIndex, getPrivateKeyBytes(), null);
+        HSAdapter adapter = HSAdapterFactory.newInstance(getAdminHandle(), getAdminIndex(), getPrivateKeyBytes(), null);
         adapter.createHandle(handle, values);
         return handle;
     }
 
     public String updateHandle(String handle, final HandleValue[] values) throws Exception {
-        HSAdapter adapter = HSAdapterFactory.newInstance(getId(), idIndex, getPrivateKeyBytes(), null);
+        HSAdapter adapter = HSAdapterFactory.newInstance(getAdminHandle(), getAdminIndex(), getPrivateKeyBytes(), null);
         adapter.updateHandleValues(handle, values);
         return handle;
     }
 
 
     public void deleteHandle(String handle) throws Exception {
-        HSAdapter adapter = HSAdapterFactory.newInstance(getId(), idIndex, getPrivateKeyBytes(), null);
+        HSAdapter adapter = HSAdapterFactory.newInstance(getAdminHandle(), getAdminIndex(), getPrivateKeyBytes(), null);
         adapter.deleteHandle(handle);
     }
 
@@ -151,7 +163,7 @@ public class HandleServiceImpl implements HandleService {
 
         try {
 
-            return Util.getPrivateKeyFromBytes(getPrivateKeyBytes(), 0);
+            return getPrivateKey();
 
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -160,7 +172,33 @@ public class HandleServiceImpl implements HandleService {
         }
     }
 
+    /**
+     * loads the configured private key, either in handle format (e.g. admpriv.bin, unencrypted) or as PEM (PKCS#8 or PKCS#1)
+     */
+    PrivateKey getPrivateKey() throws Exception {
+        byte[] bytes = readPrivateKeyFile();
+        if (PemKeyReader.isPem(bytes)) {
+            return PemKeyReader.readPrivateKey(bytes);
+        }
+        return Util.getPrivateKeyFromBytes(Util.decrypt(bytes, null), 0);
+    }
+
+    /**
+     * @return private key in handle format as expected by {@link HSAdapterFactory}
+     */
     byte[] getPrivateKeyBytes() throws IOException {
+        byte[] bytes = readPrivateKeyFile();
+        if (!PemKeyReader.isPem(bytes)) {
+            return bytes;
+        }
+        try {
+            return Util.encrypt(Util.getBytesFromPrivateKey(PemKeyReader.readPrivateKey(bytes)), null, Common.ENCRYPT_NONE);
+        } catch (Exception e) {
+            throw new IOException("could not convert pem private key " + handleConfig.getPrivkey() + " to handle format", e);
+        }
+    }
+
+    private byte[] readPrivateKeyFile() throws IOException {
 
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         byte[] buf = new byte[4096];
@@ -209,6 +247,25 @@ public class HandleServiceImpl implements HandleService {
         return handleConfig.isEnabled();
     }
 
+    /**
+     * @return configured implementation mode, defaults to {@link HandleConfig.Mode#protocol}
+     */
+    public HandleConfig.Mode getMode() {
+        return handleConfig.getMode() == null ? HandleConfig.Mode.protocol : handleConfig.getMode();
+    }
+
+    /**
+     * @return index of the admin key at the prefix handle (0.NA/{prefix}), defaults to 300
+     */
+    public int getAdminIndex() {
+        return handleConfig.getAdminIndex() == null ? DEFAULT_ADMIN_INDEX : handleConfig.getAdminIndex();
+    }
+
+    public String getEmail() {
+        String mail = handleConfig.getEmail();
+        return (mail == null) ? "info@edu-sharing.com" : mail;
+    }
+
     public String generateHandle() throws SQLException {
 
         String id = HandleServiceImpl.generateUniqueHandleId();
@@ -218,14 +275,23 @@ public class HandleServiceImpl implements HandleService {
     public HandleValue[] getDefautValues(String url) {
         HandleValue hvUrl = new HandleValue(1, Common.STD_TYPE_URL, url.getBytes());
 
-        String mail = handleConfig.getEmail();
-        mail = (mail == null) ? "info@edu-sharing.com" : mail;
+        String mail = getEmail();
 
         HandleValue hvMail = new HandleValue(2, Common.STD_TYPE_EMAIL, mail.getBytes());
+        HandleValue hvAdmin = getAdminValue(100, getId(), 200);
+
+        if (!getId().equals(getAdminHandle())) {
+            // the authenticating identity is not the prefix admin, so it needs its own admin value to modify the handle later on
+            return new HandleValue[]{hvUrl, hvMail, hvAdmin, getAdminValue(101, getAdminHandle(), getAdminIndex())};
+        }
+        return new HandleValue[]{hvUrl, hvMail, hvAdmin};
+    }
+
+    private HandleValue getAdminValue(int index, String adminHandle, int adminIndex) {
         HandleValue hvAdmin = new HandleValue();
-        hvAdmin.setIndex(100);
+        hvAdmin.setIndex(index);
         hvAdmin.setType(Common.ADMIN_TYPE);
-        hvAdmin.setData(Encoder.encodeAdminRecord(new AdminRecord(Util.encodeString(getId()), 200,
+        hvAdmin.setData(Encoder.encodeAdminRecord(new AdminRecord(Util.encodeString(adminHandle), adminIndex,
                 true, // addHandle
                 true, // deleteHandle
                 false, // addNA
@@ -239,8 +305,7 @@ public class HandleServiceImpl implements HandleService {
                 true, // addAdmin
                 false  // listHandles
         )));
-
-        return new HandleValue[]{hvUrl, hvMail, hvAdmin};
+        return hvAdmin;
     }
 
 

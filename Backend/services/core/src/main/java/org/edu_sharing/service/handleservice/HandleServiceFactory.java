@@ -1,9 +1,7 @@
 package org.edu_sharing.service.handleservice;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.log4j.Logger;
 import org.edu_sharing.service.handleservicedoi.DOIService;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -11,7 +9,7 @@ import org.springframework.stereotype.Service;
 public class HandleServiceFactory {
     public enum IMPLEMENTATION {
         /**
-         * handle.net service implementation
+         * handle.net service implementation, see repository.handleservice.mode (protocol, rest or epic)
          */
         handle,
         /**
@@ -20,13 +18,18 @@ public class HandleServiceFactory {
         doi
     }
     private final HandleServiceImpl handleService;
+    private final HandleServiceRest handleServiceRest;
+    private final HandleServiceEpic handleServiceEpic;
     private final DOIService doiService;
 
     public HandleService instance(IMPLEMENTATION type) throws HandleServiceNotConfiguredException{
         if(type == IMPLEMENTATION.doi){
             return doiService;
-        } else {
-            return handleService;
         }
+        return switch (handleService.getMode()) {
+            case rest -> handleServiceRest;
+            case epic -> handleServiceEpic;
+            case protocol -> handleService;
+        };
     }
 }
