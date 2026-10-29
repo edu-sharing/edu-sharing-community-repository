@@ -995,6 +995,35 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
 
     onCollectionsSelectionChange() {
         this.updateSelection();
+        this.syncSidebarWithCollectionSelection();
+    }
+
+    /**
+     * Lets the sidebar follow a selection that contains collections: a single collection shows its
+     * information, anything else closes the sidebar, as the actions of several nodes are offered by
+     * the selection bar. A selection of materials only is handled by the list of the materials.
+     */
+    private syncSidebarWithCollectionSelection() {
+        if (this.interactionType !== InteractionType.DefaultActionLink) {
+            return;
+        }
+        const selected = this.selection;
+        if (
+            selected.length > 0 &&
+            !selected.some((node) => this.nodeHelper.isNodeCollection(node))
+        ) {
+            return;
+        }
+        if (selected.length === 1) {
+            this.editorialSidebarService.nodes.set(selected);
+            this.editorialSidebarService.showOption({ option: 'COLLECTION_INFO', trap: false });
+        } else {
+            this.editorialSidebarService.close();
+            // closing forgets the nodes, but a sidebar opened later has to describe the selection
+            if (selected.length > 0) {
+                this.editorialSidebarService.nodes.set(selected);
+            }
+        }
     }
 
     /**
@@ -1487,6 +1516,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
 
     onTreeSelectionChange() {
         this.updateSelection();
+        this.syncSidebarWithCollectionSelection();
     }
 
     /**

@@ -295,6 +295,18 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     /** the collections root has no collection of its own */
+    /**
+     * Whether the selection leaves the collection options meaningful: nothing is selected, or a
+     * single collection is, which the options then describe instead of the current parent.
+     */
+    private isCollectionContext(): boolean {
+        const nodes = this.editorialSidebarService.nodes();
+        return (
+            !nodes?.length ||
+            (nodes.length === 1 && this.nodeHelperService.isNodeCollection(nodes[0] as Node))
+        );
+    }
+
     private isRealCollection(collection: Node | undefined): boolean {
         return (
             !!collection &&
@@ -415,17 +427,11 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         );
         collectionInfo.group = DefaultGroups.Primary;
         collectionInfo.priority = 1;
-        collectionInfo.elementType = [ElementType.NoneOrUnknown];
+        collectionInfo.elementType = [ElementType.NoneOrUnknown, ElementType.Node];
         collectionInfo.scopes = ['collections'];
         // the root of the collections has no collection to describe
-        collectionInfo.customShowCallback = async () => {
-            const parent = this.parent();
-            return (
-                !!parent &&
-                parent.ref?.id !== ROOT &&
-                this.nodeHelperService.isNodeCollection(parent)
-            );
-        };
+        collectionInfo.customShowCallback = async () =>
+            this.isCollectionContext() && this.isRealCollection(this.collectionInfoTarget());
         options.push(collectionInfo);
 
         const collectionUsage = new OptionItem(
@@ -435,12 +441,12 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         );
         collectionUsage.group = DefaultGroups.Primary;
         collectionUsage.priority = 2;
-        collectionUsage.elementType = [ElementType.NoneOrUnknown];
+        collectionUsage.elementType = [ElementType.NoneOrUnknown, ElementType.Node];
         collectionUsage.scopes = ['collections'];
         collectionUsage.toolpermissions = [RestConstants.TOOLPERMISSION_SELECTIVE_STATISTICS_NODES];
         collectionUsage.toolpermissionsMode = HideMode.Hide;
         collectionUsage.customShowCallback = async () =>
-            this.isRealCollection(this.collectionInfoTarget());
+            this.isCollectionContext() && this.isRealCollection(this.collectionInfoTarget());
         options.push(collectionUsage);
 
         const editCollection = new OptionItem('EDITORIAL.OPTIONS.COLLECTION_EDIT', 'edit', () =>
@@ -452,11 +458,12 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         );
         editCollection.group = DefaultGroups.Primary;
         editCollection.priority = 5;
-        editCollection.elementType = [ElementType.NoneOrUnknown];
+        editCollection.elementType = [ElementType.NoneOrUnknown, ElementType.Node];
         editCollection.scopes = ['collections'];
         editCollection.customShowCallback = async () => {
             const collection = this.collectionInfoTarget();
             return (
+                this.isCollectionContext() &&
                 this.isRealCollection(collection) &&
                 RestHelper.hasAccessPermission(collection, RestConstants.PERMISSION_WRITE)
             );
@@ -470,7 +477,7 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         );
         shareCollection.group = DefaultGroups.Primary;
         shareCollection.priority = 6;
-        shareCollection.elementType = [ElementType.NoneOrUnknown];
+        shareCollection.elementType = [ElementType.NoneOrUnknown, ElementType.Node];
         shareCollection.scopes = ['collections'];
         shareCollection.toolpermissions = [RestConstants.TOOLPERMISSION_INVITE];
         shareCollection.toolpermissionsMode = HideMode.Hide;
@@ -478,6 +485,7 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         shareCollection.customShowCallback = async () => {
             const collection = this.collectionInfoTarget();
             return (
+                this.isCollectionContext() &&
                 this.isRealCollection(collection) &&
                 collection.collection?.type !== RestConstants.COLLECTIONTYPE_EDITORIAL &&
                 RestHelper.hasAccessPermission(collection, RestConstants.ACCESS_CHANGE_PERMISSIONS)
