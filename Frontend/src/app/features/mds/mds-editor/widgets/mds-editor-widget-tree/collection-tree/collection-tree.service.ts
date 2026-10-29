@@ -34,9 +34,12 @@ const PROPERTY_FILTER = [
     RestConstants.CCM_PROP_COLLECTION_SUBCOLLECTION_ORDER_MODE,
     PARENT_ID_PROPERTY,
 ];
-/** Parameters of the collections query limiting it to a subtree and to given collections. */
+/** Parameters of the collections query limiting it to a subtree, given collections and titles. */
 const PARENT_RECURSIVE_PARAMETER = 'virtual:parent_recursive';
 const NODE_ID_PARAMETER = 'virtual:node_id';
+const TITLE_CONTAINS_PARAMETER = 'virtual:title_contains';
+/** A node id, which the search matches against ids rather than titles. */
+const NODE_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const ANCESTORS_CACHE_DURATION_MS = 5 * 60 * 1000;
 const PARALLEL_PATH_REQUESTS = 4;
 /** Guards against a cycle in the parent links of corrupt data. */
@@ -305,11 +308,22 @@ export class CollectionTreeService {
         }
     }
 
+    /**
+     * Collections whose title contains `term`, so the limit of hits does not cut them off in favor
+     * of ones matching only a keyword or description. A node id, or a metadata set lacking the
+     * title parameter, is searched by `term` alone.
+     */
     private requestSearch(
         term: string,
         options: { rootId: string | null; mdsId: string; maxItems: number },
     ): Observable<Node[]> {
         const criteria = [{ property: RestConstants.PRIMARY_SEARCH_CRITERIA, values: [term] }];
+        const byTitle =
+            !NODE_ID_PATTERN.test(term.trim()) &&
+            !this.unsupportedParameters.has(`${options.mdsId}|${TITLE_CONTAINS_PARAMETER}`);
+        if (byTitle) {
+            criteria.push({ property: TITLE_CONTAINS_PARAMETER, values: [term.trim()] });
+        }
         if (options.rootId) {
             criteria.push({ property: PARENT_RECURSIVE_PARAMETER, values: [options.rootId] });
         }
@@ -325,6 +339,22 @@ export class CollectionTreeService {
                 maxItems: options.maxItems,
                 body: { criteria },
             })
-            .pipe(map((result) => (result.nodes ?? []) as Node[]));
+            .pipe(
+                map((result) => (result.nodes ?? []) as Node[]),
+                catchError((error: unknown) => {
+                    if (!byTitle || !rejectsParameter(error, TITLE_CONTAINS_PARAMETER)) {
+                        return throwError(() => error);
+                    }
+                    markAsHandled(error);
+                    this.unsupportedParameters.add(`${options.mdsId}|${TITLE_CONTAINS_PARAMETER}`);
+                    return this.requestSearch(term, options);
+                }),
+            );
     }
+}
+
+/** Whether a request was rejected for naming a parameter the query does not define. */
+function rejectsParameter(error: unknown, parameter: string): boolean {
+    const response = error as { status?: number; error?: unknown };
+    return response?.status === 400 && JSON.stringify(response.error ?? '').includes(parameter);
 }

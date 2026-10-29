@@ -2265,6 +2265,10 @@
         <multiple>true</multiple>
         <multiplejoin>OR</multiplejoin>
       </property>
+      <!-- collections whose title contains the value, as pickers list them by title -->
+      <property name="virtual:title_contains">
+        <statement>{"wildcard":{"properties.cm:title.keyword": {"value":"*${value}*", "case_insensitive": true }}}</statement>
+      </property>
     </query>
     <query join="AND" id="ngsearch">
       <!--TODO basequery-->
