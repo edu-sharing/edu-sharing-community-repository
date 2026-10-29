@@ -20,6 +20,7 @@
 
     <properties>
         <spring.boot.version>3.5.15</spring.boot.version>
+        <tomcat.version>10.1.61</tomcat.version>
         <spring.version>6.2.16</spring.version>
         <java.version>17</java.version>
         <maven.compiler.source>17</maven.compiler.source>
@@ -58,6 +59,24 @@
     </build>
     <dependencyManagement>
         <dependencies>
+            <!-- security update: override the tomcat version of spring-boot-dependencies (10.1.55),
+                 must be declared before the import, first declaration wins.
+                 can be removed again once spring boot ships a fixed tomcat version -->
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-core</artifactId>
+                <version>${tomcat.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-el</artifactId>
+                <version>${tomcat.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-websocket</artifactId>
+                <version>${tomcat.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
