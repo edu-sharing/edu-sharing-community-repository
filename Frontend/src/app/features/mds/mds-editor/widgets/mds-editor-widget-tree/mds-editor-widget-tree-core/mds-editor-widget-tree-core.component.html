@@ -161,7 +161,7 @@
       [indeterminate]="node.isIndeterminate"
       [disabled]="getIsDisabled(node)"
       (change)="toggleNode(node, $event.checked)"
-      ><span [innerHTML]="node.caption | escapeHtml | highlight : filterString"></span
+      ><span [innerHTML]="node.caption | escapeHtml | highlight : filterString : !source"></span
     ></mat-checkbox>
     <!-- Treeitems don't have a meaningful 'checked' state that is announced to screen-reader
     users. We would need a new role like 'treeitemcheckbox' for that. This is our workaround.
@@ -181,7 +181,7 @@
       [checked]="getIsChecked(node)"
       [disabled]="getIsDisabled(node)"
       (change)="toggleNode(node, true)"
-      ><span [innerHTML]="node.caption | escapeHtml | highlight : filterString"></span
+      ><span [innerHTML]="node.caption | escapeHtml | highlight : filterString : !source"></span
     ></mat-radio-button>
     <span class="cdk-visually-hidden" [id]="getCheckboxId(node) + '-state'">
       {{ (getIsChecked(node) ? 'RADIO_BUTTON_SELECTED' : 'RADIO_BUTTON_NOT_SELECTED') | translate }}
@@ -194,7 +194,7 @@
       (keyup.enter)="toggleNode(node, true, true, true)"
       class="option"
     >
-      <span [innerHTML]="node.caption | escapeHtml | highlight : filterString"></span>
+      <span [innerHTML]="node.caption | escapeHtml | highlight : filterString : !source"></span>
     </div>
   </ng-template>
   <ng-template #inputTemplate let-node="node">
