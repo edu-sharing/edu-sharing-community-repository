@@ -21,6 +21,7 @@
     <properties>
         <spring.boot.version>3.5.15</spring.boot.version>
         <tomcat.version>10.1.61</tomcat.version>
+        <jackson-bom.version>2.21.7</jackson-bom.version>
         <spring.version>6.2.16</spring.version>
         <java.version>17</java.version>
         <maven.compiler.source>17</maven.compiler.source>
@@ -76,6 +77,16 @@
                 <groupId>org.apache.tomcat.embed</groupId>
                 <artifactId>tomcat-embed-websocket</artifactId>
                 <version>${tomcat.version}</version>
+            </dependency>
+            <!-- security update: override the jackson version of spring-boot-dependencies (2.21.4),
+                 must be imported before spring-boot-dependencies, first imported bom wins.
+                 can be removed again once spring boot ships a fixed jackson version -->
+            <dependency>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${jackson-bom.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
