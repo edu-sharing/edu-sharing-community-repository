@@ -20,13 +20,14 @@ es-collection-thumbnail {
 
 .title {
     margin: 0 0 6px;
-    font-size: 1.7em;
-    font-weight: 600;
+    font-size: 2em;
+    font-weight: 700;
+    line-height: 1.2;
 }
 
 .description {
     margin: 0;
     font-size: 1.05em;
-    color: var(--textMediumLight);
+    color: var(--textMain);
     white-space: pre-line;
 }

@@ -1,8 +1,9 @@
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
-import { EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
+import { EduSharingUiCommonModule, IconDirective } from 'ngx-edu-sharing-ui';
 import { Node } from 'ngx-edu-sharing-api';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
+import { CollectionDetailsService } from '../../collection-details.service';
 import { CollectionInfoRowComponent } from '../collection-info-row/collection-info-row.component';
 import { CollectionInfoSectionComponent } from '../collection-info-section/collection-info-section.component';
 import {
@@ -12,7 +13,10 @@ import {
 import { TOPIC_PAGE_VIEW_TYPE } from '../../../topic-page/shared/utils/collection-topic-page-util';
 import { CollectionScopeLabelComponent } from '../../collection-scope-label/collection-scope-label.component';
 
-/** Visibility, type, content counts and default view/sorting of a collection. */
+/**
+ * The facts of a collection in three sections: the numbers (content counts and views), the general
+ * information (visibility, type) and the display settings (default view, sorting).
+ */
 @Component({
     selector: 'es-collection-info-facts',
     templateUrl: 'collection-info-facts.component.html',
@@ -20,12 +24,15 @@ import { CollectionScopeLabelComponent } from '../../collection-scope-label/coll
     imports: [
         TranslateModule,
         EduSharingUiCommonModule,
+        IconDirective,
         CollectionInfoSectionComponent,
         CollectionInfoRowComponent,
         CollectionScopeLabelComponent,
     ],
 })
 export class CollectionInfoFactsComponent {
+    protected readonly details = inject(CollectionDetailsService);
+
     readonly collection = input.required<Node>();
     /** whether the default view and sorting are shown, which only those who may change them see */
     readonly showSettings = input(false);

@@ -1,12 +1,57 @@
+// the sections take part in the layout of the sidebar as if they were its direct children
+:host {
+    display: contents;
+}
+
+// the divider below a section is kept for the last one, which is followed by further sections
+es-collection-info-section:last-of-type {
+    border-bottom: 1px solid var(--borderLight);
+}
+
 .rows {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 20px 16px;
 }
 
-// the view and sorting settings are set apart from the facts above by a hairline
-.settings {
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid var(--borderLight);
+// the counts are small tiles: the icon beside the figure, the label below
+.numbers {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.number {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 0;
+    padding: 6px 4px;
+    border: 1px solid var(--borderLight);
+    border-radius: 12px;
+
+    .figure {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+
+        i {
+            flex: none;
+            color: var(--primary);
+        }
+    }
+
+    .value {
+        font-size: 1.15em;
+        font-weight: 600;
+        line-height: 1.2;
+    }
+
+    .label {
+        max-width: 100%;
+        font-size: var(--fontSizeXSmall);
+        color: var(--textMediumLight);
+        overflow-wrap: anywhere;
+        text-align: center;
+    }
 }

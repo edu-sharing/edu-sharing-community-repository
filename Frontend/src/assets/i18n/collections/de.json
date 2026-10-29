@@ -135,7 +135,9 @@
       }
     },
     "INFO": {
-      "SECTION_FACTS": "Sammlungsinformationen",
+      "SECTION_GENERAL": "Allgemeines",
+      "SECTION_DISPLAY": "Darstellung",
+      "VIEWS": "Aufrufe",
       "DEFAULT_VIEW": "Standarddarstellung",
       "VIEW_TOPIC_PAGE": "Themenseite",
       "VIEW_COLLECTION": "Sammlungsansicht",
@@ -143,6 +145,7 @@
       "SORT_REFERENCES": "Sortierung der Materialien",
       "SECTION_PARTICIPANTS": "Beteiligte",
       "SECTION_METADATA": "Metadaten",
+      "OWNER": "Besitzer{{GENDER_SEPARATOR}}in",
       "VISIBILITY": "Sichtbarkeit",
       "TYPE": {
         "LABEL": "Sammlungstyp",

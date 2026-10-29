@@ -5,10 +5,10 @@ import { Ace, Node, NodeService, NodeStats, RestConstants } from 'ngx-edu-sharin
 
 /**
  * Details of a single collection that are not part of the collection node itself: the
- * authorities it is shared with and its view statistics.
+ * authorities it is shared with, its owner and its view statistics.
  *
- * Both are only available to users who may change the permissions of the collection. They are
- * requested once a host calls `activate()` and again whenever the collection id changes.
+ * All of them are only requested for users who may change the permissions of the collection. They
+ * are requested once a host calls `activate()` and again whenever the collection id changes.
  * Provide this service on the component that owns the collection so that all components below it
  * share one set of requests.
  */
@@ -35,6 +35,11 @@ export class CollectionDetailsService {
                     map((acl) => acl.localPermissions.permissions.concat(acl.inheritedPermissions)),
                 ),
     });
+    /** the node with all its properties, the collection of the list only has a part of them */
+    private readonly nodeResource = rxResource({
+        params: () => this.collectionId(),
+        stream: ({ params }) => this.nodeService.getNode(params),
+    });
     private readonly statsResource = rxResource({
         params: () => this.collectionId(),
         stream: ({ params }) => this.nodeService.getStats(params),
@@ -50,6 +55,12 @@ export class CollectionDetailsService {
             (p, i, arr) =>
                 arr.findIndex((q) => q.authority.authorityName === p.authority.authorityName) === i,
         ),
+    );
+    /** Authority name of the owner of the collection; `undefined` until loaded or not permitted. */
+    readonly ownerName = computed<string | undefined>(() =>
+        this.nodeResource.hasValue()
+            ? this.nodeResource.value().properties?.['cm:owner']?.[0]
+            : undefined,
     );
     readonly stats = computed<NodeStats | undefined>(() =>
         this.statsResource.hasValue() ? this.statsResource.value() : undefined,

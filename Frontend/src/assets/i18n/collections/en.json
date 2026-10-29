@@ -23,7 +23,9 @@
       "TOTAL": "Total views"
     },
     "INFO": {
-      "SECTION_FACTS": "Collection information",
+      "SECTION_GENERAL": "General",
+      "SECTION_DISPLAY": "Display",
+      "VIEWS": "Views",
       "DEFAULT_VIEW": "Default view",
       "VIEW_TOPIC_PAGE": "Topic page",
       "VIEW_COLLECTION": "Collection view",
@@ -31,6 +33,7 @@
       "SORT_REFERENCES": "Sorting of materials",
       "SECTION_PARTICIPANTS": "Participants",
       "SECTION_METADATA": "Metadata",
+      "OWNER": "Owner",
       "VISIBILITY": "Visibility",
       "TYPE": {
         "LABEL": "Collection type",

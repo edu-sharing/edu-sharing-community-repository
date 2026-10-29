@@ -1,44 +1,19 @@
 <es-collection-info-section heading="COLLECTIONS.INFO.SECTION_PARTICIPANTS">
-  <div class="rows">
-    <es-collection-info-row
-      icon="person"
-      label="COLLECTIONS.CREATOR"
-      data-test="collection-info-creator"
-    >
-      @if (collection()?.collection?.authorFreetext) {
-      {{ collection().collection.authorFreetext }}
-      } @else {
-      {{ collection()?.owner | authorityName }}
-      }
-    </es-collection-info-row>
-    @if (details.uniquePermissions(); as permissions) {
-    <es-collection-info-row
-      icon="group"
-      label="COLLECTIONS.PERMISSIONS"
-      data-test="collection-info-permissions"
-    >
-      <ul class="authorities">
-        @for (permission of permissions; track permission.authority.authorityName) { @if (
-        permission.authority.authorityType !== 'EVERYONE' && permission.authority.authorityName !==
-        'System' ) {
-        <li>
-          <es-user-avatar [user]="permission" size="xsmall"></es-user-avatar>
-          <span>{{
-            (permission.authority.authorityType === 'GROUP' ? permission.group : permission.user)
-              | authorityName
-          }}</span>
-        </li>
-        } }
-      </ul>
-    </es-collection-info-row>
-    } @if (details.viewCount() !== undefined) {
-    <es-collection-info-row
-      icon="bar_chart"
-      label="COLLECTIONS.STATS.TOTAL"
-      data-test="collection-info-stats"
-    >
-      {{ details.viewCount() }}
-    </es-collection-info-row>
+  <ul class="participants" data-test="collection-info-participants">
+    @for (participant of participants(); track participant.key) {
+    <li class="participant">
+      <es-user-avatar [user]="participant.source" size="xsmall"></es-user-avatar>
+      <span class="name">
+        @if (participant.isOwner && authorFreetext()) {
+        {{ authorFreetext() }}
+        } @else {
+        {{ participant.profile | authorityName }}
+        }
+      </span>
+      <span class="role">
+        {{ (participant.isOwner ? 'COLLECTIONS.INFO.OWNER' : participant.roleKey) | translate }}
+      </span>
+    </li>
     }
-  </div>
+  </ul>
 </es-collection-info-section>
