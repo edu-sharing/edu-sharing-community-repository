@@ -64,6 +64,7 @@ export class CollectionTreeSource implements TreeSource {
         { tree: Tree; collection?: Node; scope?: CollectionTreeScope }
     >();
     private browseTree: { key: string; tree: Promise<Tree> } | null = null;
+    private searchTree: Tree | null = null;
 
     /**
      * Listed only where the page URL names a start collection, like a search opened from a topic
@@ -108,10 +109,11 @@ export class CollectionTreeSource implements TreeSource {
                         maxItems: COLLECTION_TREE_MAX_SEARCH_HITS,
                     })
                     .pipe(
+                        map((hits) => hits.filter((hit) => matchesTitle(hit, filter))),
                         switchMap((hits) =>
                             this.collectionTreeService
                                 .getWithAncestors(hits, this.mdsId)
-                                .pipe(map((placed) => createSearchTree(hits, placed, rootId))),
+                                .pipe(map((placed) => this.createSearchTree(hits, placed, rootId))),
                         ),
                     );
             }),
@@ -261,34 +263,64 @@ export class CollectionTreeSource implements TreeSource {
         this.lazyNodes.set(node, { tree, collection });
         return node;
     }
+
+    /**
+     * Lists search hits below the collections leading to them from the start collection. A hit's
+     * own sub-collections are loaded once it is expanded.
+     */
+    private createSearchTree(
+        hits: Node[],
+        placed: Map<string, PlacedCollection>,
+        rootId: string | null,
+    ): Tree {
+        for (const [node, source] of this.lazyNodes) {
+            if (source.tree === this.searchTree) {
+                this.lazyNodes.delete(node);
+            }
+        }
+        const tree = Tree.generateTree([]);
+        this.searchTree = tree;
+        for (const hit of hits) {
+            const path = getPath(hit.ref.id, placed);
+            const offset = path && rootId ? path.indexOf(rootId) : 0;
+            // only a repository that cannot search below a collection returns hits outside of it
+            if (offset < 0) {
+                continue;
+            }
+            let parent: TreeNode | undefined;
+            for (const id of path?.slice(offset) ?? [hit.ref.id]) {
+                const siblings = parent ? parent.children : tree.rootNodes;
+                parent =
+                    siblings?.find((node) => node.id === id) ??
+                    tree.addNode(
+                        { id, caption: getCollectionTitle(placed.get(id)?.node ?? hit) },
+                        parent,
+                    );
+            }
+            // a hit leading to other hits lists only those
+            if (parent && !parent.children && (hit.collection?.childCollectionsCount ?? 0) > 0) {
+                parent.hasChildren = true;
+                this.lazyNodes.set(parent, { tree, collection: hit });
+            }
+        }
+        return tree;
+    }
 }
 
-/** Lists search hits below the collections leading to them from the start collection. */
-function createSearchTree(
-    hits: Node[],
-    placed: Map<string, PlacedCollection>,
-    rootId: string | null,
-): Tree {
-    const tree = Tree.generateTree([]);
-    for (const hit of hits) {
-        const path = getPath(hit.ref.id, placed);
-        const offset = path && rootId ? path.indexOf(rootId) : 0;
-        // only a repository that cannot search below a collection returns hits outside of it
-        if (offset < 0) {
-            continue;
-        }
-        let parent: TreeNode | undefined;
-        for (const id of path?.slice(offset) ?? [hit.ref.id]) {
-            const siblings = parent ? parent.children : tree.rootNodes;
-            parent =
-                siblings?.find((node) => node.id === id) ??
-                tree.addNode(
-                    { id, caption: getCollectionTitle(placed.get(id)?.node ?? hit) },
-                    parent,
-                );
-        }
+/**
+ * Whether the title of a collection holds every word searched for, or the filter is its id, since
+ * the search also matches keywords and descriptions, which the tree does not show.
+ */
+function matchesTitle(collection: Node, filter: string): boolean {
+    if (collection.ref.id === filter.trim()) {
+        return true;
     }
-    return tree;
+    const title = getCollectionTitle(collection).toLocaleLowerCase();
+    return filter
+        .toLocaleLowerCase()
+        .split(/\s+/)
+        .map((word) => word.replace(/["*+|()~-]/g, ''))
+        .every((word) => title.includes(word));
 }
 
 /** The ids from the top-most collection down to `id`, `null` while a collection is unknown. */
