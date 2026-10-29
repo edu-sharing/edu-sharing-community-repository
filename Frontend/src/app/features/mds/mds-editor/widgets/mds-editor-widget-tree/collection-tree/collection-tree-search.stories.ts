@@ -17,7 +17,7 @@ import { CollectionTreeService } from './collection-tree.service';
 
 const SEARCH_GROUP = 'storybook_collection_tree_search';
 
-/** Search form holding only a collection tree. */
+/** Search form holding a collection tree between two other fields, showing its spacing. */
 const SearchMds: MdsDefinition = {
     ...DefaultMds,
     widgets: [
@@ -40,7 +40,7 @@ const SearchMds: MdsDefinition = {
             id: SEARCH_GROUP,
             caption: 'Suche',
             icon: 'search',
-            html: `<${COLLECTION_TREE_PROPERTY}>`,
+            html: `<cclom:title><${COLLECTION_TREE_PROPERTY}><ccm:educationallearningresourcetype>`,
             rel: null,
             hideIfEmpty: false,
             isExtended: false,
