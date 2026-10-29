@@ -198,7 +198,16 @@
     "
     [class.insert-not-allowed]="selectionMode() === 'target' && !isValidInsertTarget(flatNode)"
     [class.muted]="entriesService.treeConfig?.isMuted?.(flatNode.item)"
-    (click)="!entriesService.checkbox && updateSelectedNodes(flatNode, $event)"
+    (click)="
+      entriesService.checkbox
+        ? flatNode.level !== 0 &&
+          entriesService.clickItem.emit({
+            element: flatNode.item,
+            source: ClickSource.Metadata,
+            ctrlKey: $event.ctrlKey || $event.metaKey
+          })
+        : updateSelectedNodes(flatNode, $event)
+    "
     (dblclick)="
       flatNode.level !== 0 &&
         entriesService.dblClickItem.emit({ element: flatNode.item, source: ClickSource.Metadata })

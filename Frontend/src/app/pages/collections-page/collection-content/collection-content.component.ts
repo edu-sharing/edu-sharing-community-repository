@@ -4,11 +4,13 @@ import {
     effect,
     EventEmitter,
     inject,
+    Injector,
     Input,
     OnChanges,
     OnDestroy,
     OnInit,
     Output,
+    runInInjectionContext,
     signal,
     Signal,
     SimpleChanges,
@@ -51,6 +53,7 @@ import {
     NodeDataSource,
     NodeEntriesDisplayType,
     ClickSource,
+    DefaultGroups,
     NodeEntriesWrapperComponent,
     TreeConfig,
     NodesRightMode,
@@ -62,7 +65,7 @@ import {
 } from 'ngx-edu-sharing-ui';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { firstValueFrom, forkJoin, Subject } from 'rxjs';
-import { filter, takeUntil } from 'rxjs/operators';
+import { filter, map, takeUntil } from 'rxjs/operators';
 import * as EduData from '../../../core-module/core.module';
 import { ConfigurationHelper, LoginResult } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
@@ -75,7 +78,9 @@ import { UIService } from '../../../core-module/rest/services/ui.service';
 import { NodeHelperService } from '../../../services/node-helper.service';
 import { Toast } from '../../../services/toast';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
+import { DELETE_OR_CANCEL } from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
+import { forkJoinWithErrors } from '../../../util/rxjs/forkJoinWithErrors';
 import {
     ManagementEvent,
     ManagementEventType,
@@ -126,6 +131,15 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     private nodeService = inject(RestNodeService);
     private nodeServiceApi = inject(NodeService);
     private optionsService = inject(OptionsHelperDataService);
+    private injector = inject(Injector);
+    /**
+     * Options of the selection bar. The header and each list have an options service of their
+     * own, none of which knows the selection of the sub-collections and materials together.
+     */
+    private readonly selectionOptions = runInInjectionContext(
+        this.injector,
+        () => new OptionsHelperDataService(),
+    );
     private platformLocation = inject(PlatformLocation);
     private route = inject(ActivatedRoute);
     private router = inject(Router);
@@ -179,6 +193,8 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     @ContentChild('empty') emptyRef: TemplateRef<unknown>;
     /** Toggles-only bar above the list (display type / sort). */
     @ViewChild('actionbarToggles') actionbarToggles: ActionbarComponent;
+    /** Toggles-only bar of the sub-collections list (select all). */
+    @ViewChild('actionbarCollectionToggles') actionbarCollectionToggles: ActionbarComponent;
     @ViewChild('listReferences') listReferences: NodeEntriesWrapperComponent<CollectionReference>;
     @ViewChild('listTree') listTree: NodeEntriesWrapperComponent<Node>;
     @ViewChild('listCollections') listCollections: ListEventInterface<Node>;
@@ -271,6 +287,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         expandAll: false,
         isMuted: (node) => this.searchAncestorIds.has(node.ref.id),
         showFiles: true,
+        multipleSelection: true,
         // a selection opens the sidebar or the material, which a drag must not do
         selectOnDrag: false,
         // the stand-in for the root level is no node the options or the sidebar could work on
@@ -391,6 +408,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     ngOnDestroy(): void {
         this.destroyed$.next();
         this.destroyed$.complete();
+        this.selectionOptions.ngOnDestroy();
     }
 
     async ngOnInit() {
@@ -819,7 +837,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     }
 
     handleSelection(selection: SelectionChange<Node>) {
-        this.selection = selection.source.selected;
+        this.updateSelection();
         // While a sidebar-add reload is in flight, swallow the selection-clear so it does not
         // close the sidebar (selectPendingNodes decides the final state afterwards).
         if (this.interactionType === InteractionType.DefaultActionLink && !this.addInProgress) {
@@ -852,9 +870,117 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     }
 
     clearSelection() {
-        this.listReferences?.getSelection().clear();
+        this.clearAllSelections();
         this.selection = [];
         this.selectionOverlayOpen = false;
+    }
+
+    /** The nodes selected in the lists that are currently rendered. */
+    private collectSelection(): Node[] {
+        if (this.viewState.viewType() === 'tree') {
+            return this.listTree?.getSelection()?.selected ?? [];
+        }
+        return [
+            ...(this.listCollections?.getSelection()?.selected ?? []),
+            ...(this.listReferences?.getSelection()?.selected ?? []),
+        ];
+    }
+
+    /** Mirrors the selection of the rendered lists into the selection bar and its options. */
+    updateSelection() {
+        this.selection = this.collectSelection();
+        this.selectionOptions.setData({
+            scope: Scope.CollectionsReferences,
+            activeObjects: this.selection,
+            selectedObjects: this.selection,
+            parent: this.collection,
+            postPrepareOptions: (options, nodes) =>
+                this.removeOptionsUnsupportedForSelection(options, nodes),
+        });
+        void this.selectionOptions.initComponents(
+            this.selectionActionbar?.(),
+            this.viewState.viewType() === 'tree'
+                ? (this.listTree as ListEventInterface<Node>)
+                : (this.listReferences as ListEventInterface<Node>),
+        );
+        void this.selectionOptions.refreshComponents();
+    }
+
+    /**
+     * Drops the options whose action only takes the first node into account or cannot be
+     * carried out for a selection that mixes sub-collections and materials.
+     */
+    private removeOptionsUnsupportedForSelection(options: OptionItem[], nodes: Node[]) {
+        const collections = nodes.filter((node) => this.nodeHelper.isNodeCollection(node)).length;
+        const mixed = collections > 0 && collections < nodes.length;
+        const unsupported = (option: OptionItem) =>
+            (nodes.length > 1 && option.name === 'OPTIONS.ADD_SHORTCUT') ||
+            (mixed && option.name === 'OPTIONS.COPY') ||
+            ((collections > 1 || mixed) && option.name === 'OPTIONS.INVITE');
+        for (let i = options.length - 1; i >= 0; i--) {
+            if (unsupported(options[i])) {
+                options.splice(i, 1);
+            }
+        }
+        // neither the deletion of collections nor the removal of references covers both kinds
+        if (mixed && this.nodeHelper.getNodesRight(nodes, RestConstants.ACCESS_DELETE)) {
+            const deleteMixed = new OptionItem('OPTIONS.DELETE', 'delete', () =>
+                this.deleteSelection(nodes),
+            );
+            deleteMixed.group = DefaultGroups.Delete;
+            deleteMixed.color = 'warn';
+            deleteMixed.priority = 10;
+            options.push(deleteMixed);
+        }
+    }
+
+    /**
+     * Deletes the selected sub-collections and removes the selected materials from the collection
+     * they are listed in, after a single confirmation.
+     */
+    private async deleteSelection(nodes: Node[]) {
+        const collections = nodes.filter((node) => this.nodeHelper.isNodeCollection(node));
+        const references = nodes.filter((node) => !this.nodeHelper.isNodeCollection(node));
+        const dialogRef = await this.dialogs.openGenericDialog({
+            title: 'OPTIONS.DELETE',
+            message: 'COLLECTIONS.DELETE_SELECTION_DIALOG_TEXT',
+            messageParameters: {
+                collections: collections.length.toString(),
+                references: references.length.toString(),
+            },
+            buttons: DELETE_OR_CANCEL,
+        });
+        if ((await firstValueFrom(dialogRef.afterClosed())) !== 'YES_DELETE') {
+            return;
+        }
+        void this.globalCollectionsPageService.removeTemporaryCollections(collections);
+        const { successes, errors } = await firstValueFrom(
+            forkJoinWithErrors([
+                ...collections.map((node) =>
+                    this.nodeService.deleteNode(node.ref.id).pipe(map(() => node)),
+                ),
+                ...references.map((node) =>
+                    this.collectionService
+                        .removeFromCollection(
+                            node.ref.id,
+                            (node.parent?.id ?? this.collection.ref.id) as string,
+                        )
+                        .pipe(map(() => node)),
+                ),
+            ]),
+        );
+        if (errors.length > 0) {
+            this.toast.error(errors[0]);
+        } else {
+            this.toast.toast('WORKSPACE.TOAST.DELETE_FINISHED');
+        }
+        if (successes.length > 0) {
+            this.localEventsService.nodesDeleted.emit(successes);
+        }
+    }
+
+    onCollectionsSelectionChange() {
+        this.updateSelection();
     }
 
     /**
@@ -862,7 +988,9 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
      * Deselecting on the list's selection model fires `selectionChange`, which updates `selection`.
      */
     deselectNode(node: Node) {
-        this.listReferences?.getSelection().deselect(node as CollectionReference);
+        this.listReferences?.getSelection()?.deselect(node as CollectionReference);
+        this.listCollections?.getSelection()?.deselect(node);
+        this.listTree?.getSelection()?.deselect(node);
     }
     private clickElementEvent(event: NodeClickEvent<CollectionReference | ProposalNode>) {
         if (this.interactionType === InteractionType.DefaultActionLink) {
@@ -879,8 +1007,11 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 );
                 return;
             }
-            // the tree selects a node on click already, so there the selection is kept
+            // a click replaces the selection of the tree by the clicked material
             const inTree = this.viewState.viewType() === 'tree';
+            if (!inTree) {
+                this.listCollections?.getSelection()?.clear();
+            }
             this.editorialSidebarService.handleSelect(
                 inTree ? this.listTree : this.listReferences,
                 event,
@@ -1217,12 +1348,15 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     private wireListOptions() {
         this.setOptionsCollection();
         void this.listReferences?.initOptionsGenerator({
-            actionbar: [this.actionbarToggles, this.selectionActionbar?.()],
+            actionbar: [this.actionbarToggles],
             parent: this.collection,
         });
         // the sub-collections offer the same actions as in the tree; in reurl picker mode with
         // applyCollections this also exposes the APPLY action on their cards
-        void this.listCollections?.initOptionsGenerator({ parent: this.collection });
+        void this.listCollections?.initOptionsGenerator({
+            actionbar: [this.actionbarCollectionToggles],
+            parent: this.collection,
+        });
     }
 
     /**
@@ -1334,40 +1468,31 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         }
     }
 
-    private handlingTreeSelection = false;
     /** Whether the next load of the lists leaves the tree as it is instead of building it anew. */
     private keepTreeOnRefresh = false;
 
+    onTreeSelectionChange() {
+        this.updateSelection();
+    }
+
     /**
-     * A material that is selected in the tree is opened the same way as in the list; a selected
-     * collection shows its information.
+     * A material that is clicked in the tree is opened the same way as in the list; a clicked
+     * collection shows its information. With the control key the node is added to or removed from
+     * the selection instead.
      */
-    onTreeSelectionChange(selection: SelectionChange<Node>) {
-        // Opening the material re-selects it in the tree, which emits another change event.
-        if (this.handlingTreeSelection) {
+    onTreeClick(event: NodeClickEvent<Node>) {
+        if (event.ctrlKey) {
+            this.listTree?.getSelection()?.toggle(event.element);
             return;
         }
-        const collection = selection.added.find((node) => this.nodeHelper.isNodeCollection(node));
-        if (collection) {
-            this.editorialSidebarService.nodes.set([collection]);
-            this.editorialSidebarService.showOption({ option: 'COLLECTION_INFO', trap: false });
+        if (this.nodeHelper.isNodeCollection(event.element)) {
+            this.onCollectionClick(event);
             return;
         }
-        if (
-            selection.removed.some((node) => this.nodeHelper.isNodeCollection(node)) &&
-            !selection.source.selected.length
-        ) {
-            this.editorialSidebarService.close();
-            return;
-        }
-        const material = selection.added.find((node) => !this.nodeHelper.isNodeCollection(node));
-        if (material) {
-            this.handlingTreeSelection = true;
-            void this.onContentClick({
-                element: material as CollectionReference,
-                source: ClickSource.Preview,
-            }).finally(() => (this.handlingTreeSelection = false));
-        }
+        void this.onContentClick({
+            element: event.element as CollectionReference,
+            source: event.source,
+        });
     }
 
     deleteReference(content: EduData.CollectionReference | EduData.Node) {
@@ -1643,8 +1768,25 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             this.clickItem.emit(event);
             return;
         }
+        const list = this.viewState.viewType() === 'tree' ? this.listTree : this.listCollections;
+        const selection = list?.getSelection();
+        const isSoleSelection =
+            selection?.selected.length === 1 && selection.selected[0] === event.element;
+        this.clearAllSelections();
+        if (isSoleSelection) {
+            this.editorialSidebarService.close();
+            return;
+        }
+        selection?.select(event.element as Node);
         this.editorialSidebarService.nodes.set([event.element]);
         this.editorialSidebarService.showOption({ option: 'COLLECTION_INFO', trap: false });
+    }
+
+    /** Empties the selection of every list that is currently rendered. */
+    private clearAllSelections() {
+        this.listReferences?.getSelection()?.clear();
+        this.listCollections?.getSelection()?.clear();
+        this.listTree?.getSelection()?.clear();
     }
 
     openCollection(event: NodeClickEvent<Node | CollectionReference>) {

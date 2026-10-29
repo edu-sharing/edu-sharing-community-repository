@@ -20,9 +20,9 @@
         [columns]="getCollectionsColumns()"
         (clickItem)="onCollectionClick($event)"
         (dblClickItem)="openCollection($event)"
+        (selectionChange)="onCollectionsSelectionChange()"
         (fetchData)="loadMoreCollections()"
         [infiniteScrollWindow]="false"
-        [checkbox]="false"
         [displayType]="viewState.collectionsDisplayType()"
         [globalOptions]="
           createAllowed() && !searchState.active() ? [createSubCollectionOptionItem] : []
@@ -50,6 +50,12 @@
               {{ 'COLLECTION.INFO_REFERENCES_MULTI' | translate }}
             </h2>
             }
+            <es-actionbar
+              #actionbarCollectionToggles
+              class="actionbarCollections"
+              [class.display-none]="dataSourceCollections.isLoading"
+              [showActionOptions]="false"
+            ></es-actionbar>
           </div>
         </ng-template>
         <ng-template #empty>
@@ -184,8 +190,8 @@
       [treeConfig]="treeConfig"
       [dragDrop]="treeDragDrop"
       [scope]="Scope.CollectionsReferences"
-      [checkbox]="false"
-      (selectionChange)="onTreeSelectionChange($event)"
+      (selectionChange)="onTreeSelectionChange()"
+      (clickItem)="onTreeClick($event)"
       (dblClickItem)="openCollection($event)"
     ></es-node-entries-wrapper>
     @if ( (isRootLevel || searchState.active()) && dataSourceCollections.isEmpty() &&
