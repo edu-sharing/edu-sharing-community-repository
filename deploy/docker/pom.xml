@@ -31,7 +31,7 @@
     </docker.edu_sharing.community.common.alfresco.transform.core.aio.name>
 
     <docker.edu_sharing.community.common.alfresco.transform.core.aio.tag>
-      5.4.5-3
+      5.4.5-4
     </docker.edu_sharing.community.common.alfresco.transform.core.aio.tag>
 
     <docker.edu_sharing.community.common.alfresco.search.service.name>
@@ -39,7 +39,7 @@
     </docker.edu_sharing.community.common.alfresco.search.service.name>
 
     <docker.edu_sharing.community.common.alfresco.search.service.tag>
-      2.0.10-3
+      2.0.10-4
     </docker.edu_sharing.community.common.alfresco.search.service.tag>
 
     <docker.edu_sharing.community.common.alfresco.share.name>
@@ -47,7 +47,7 @@
     </docker.edu_sharing.community.common.alfresco.share.name>
 
     <docker.edu_sharing.community.common.alfresco.share.tag>
-      25.3.0-2
+      25.3.0-3
     </docker.edu_sharing.community.common.alfresco.share.tag>
 
     <docker.edu_sharing.community.common.postgresql.name>
@@ -55,7 +55,7 @@
     </docker.edu_sharing.community.common.postgresql.name>
 
     <docker.edu_sharing.community.common.postgresql.tag>
-      16.6.0-2
+      16.6.0-3
     </docker.edu_sharing.community.common.postgresql.tag>
 
     <docker.edu_sharing.community.common.postgresql.exporter.name>
