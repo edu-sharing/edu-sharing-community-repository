@@ -150,6 +150,10 @@
 }
 
 :host ::ng-deep {
+    // captions wrap anywhere, so deeply nested entries never make the tree wider than its card
+    .tree .mdc-label {
+        overflow-wrap: anywhere;
+    }
     mat-form-field {
         .mat-form-field-wrapper {
             padding-bottom: 0;
