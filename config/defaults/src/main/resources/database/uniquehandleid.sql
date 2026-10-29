@@ -1,3 +1,3 @@
-create table EDU_HANDLE(
+create table if not exists EDU_HANDLE(
     ID varchar(255) UNIQUE
 );
