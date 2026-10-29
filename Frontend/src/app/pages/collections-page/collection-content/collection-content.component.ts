@@ -1628,6 +1628,31 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         this.collection.properties = { ...this.collection.properties, [property]: value };
     }
 
+    /**
+     * The sub-collections are not links when the page handles them itself: a click shows the
+     * information of the collection and only a double click enters it.
+     */
+    collectionsInteractionType(): InteractionType {
+        return this.interactionType === InteractionType.DefaultActionLink
+            ? InteractionType.Emitter
+            : this.interactionType;
+    }
+
+    onCollectionClick(event: NodeClickEvent<Node | CollectionReference>) {
+        if (this.interactionType !== InteractionType.DefaultActionLink) {
+            this.clickItem.emit(event);
+            return;
+        }
+        this.editorialSidebarService.nodes.set([event.element]);
+        this.editorialSidebarService.showOption({ option: 'COLLECTION_INFO', trap: false });
+    }
+
+    openCollection(event: NodeClickEvent<Node | CollectionReference>) {
+        if (this.interactionType === InteractionType.DefaultActionLink) {
+            void this.nodeHelper.navigateToNode(event);
+        }
+    }
+
     openItem(event: NodeClickEvent<CollectionReference>) {
         void this.nodeHelper.navigateToNode(event);
     }

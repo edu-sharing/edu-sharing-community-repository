@@ -78,6 +78,12 @@
         source: ClickSource.Preview,
       })
     "
+    (dblclick)="
+      entriesService.dblClickItem.emit({
+        element: node,
+        source: ClickSource.Preview,
+      })
+    "
   >
     @if (nodeHelper.isNodeCollection(node) && node.collection.pinned) {
     <div class="collection-pin">
@@ -98,6 +104,12 @@
     class="card-meta"
     (click)="
       entriesService.clickItem.emit({
+        element: node,
+        source: ClickSource.Metadata,
+      })
+    "
+    (dblclick)="
+      entriesService.dblClickItem.emit({
         element: node,
         source: ClickSource.Metadata,
       })

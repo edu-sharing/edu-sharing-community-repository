@@ -15,10 +15,11 @@
       <es-node-entries-wrapper
         #listCollections
         [dataSource]="dataSourceCollections"
-        [elementInteractionType]="interactionType"
+        [elementInteractionType]="collectionsInteractionType()"
         [scope]="Scope.CollectionsReferences"
         [columns]="getCollectionsColumns()"
-        (clickItem)="clickItem.emit($event)"
+        (clickItem)="onCollectionClick($event)"
+        (dblClickItem)="openCollection($event)"
         (fetchData)="loadMoreCollections()"
         [infiniteScrollWindow]="false"
         [checkbox]="false"
@@ -185,6 +186,7 @@
       [scope]="Scope.CollectionsReferences"
       [checkbox]="false"
       (selectionChange)="onTreeSelectionChange($event)"
+      (dblClickItem)="openCollection($event)"
     ></es-node-entries-wrapper>
     @if ( (isRootLevel || searchState.active()) && dataSourceCollections.isEmpty() &&
     (!createAllowed() || searchState.active()) ) {
