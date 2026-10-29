@@ -53,7 +53,7 @@
     <mongodb.version>5.5.1</mongodb.version>
     <spring.version>6.2.19</spring.version>
     <spring-security.version>6.5.9</spring-security.version>
-    <redisson.version>3.50.0</redisson.version>
+    <redisson.version>4.8.0</redisson.version>
 
 
   </properties>
