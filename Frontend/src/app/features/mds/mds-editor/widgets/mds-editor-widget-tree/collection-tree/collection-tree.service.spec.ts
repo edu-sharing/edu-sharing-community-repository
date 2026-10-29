@@ -269,6 +269,24 @@ describe('CollectionTreeService', () => {
         ]);
     });
 
+    it('requests a later page of hits with the total of all', () => {
+        searchService.requestSearch.and.returnValue(
+            of({ nodes: [collection('c')], pagination: { total: 3 } } as never),
+        );
+        const page = result(
+            service.searchCollectionsPage('phys', {
+                rootId: null,
+                mdsId: DEFAULT,
+                maxItems: 2,
+                skipCount: 2,
+            }),
+        );
+        const params = searchService.requestSearch.calls.mostRecent().args[0];
+        void expect(params.skipCount).toBe(2);
+        void expect(params.maxItems).toBe(2);
+        void expect(page).toEqual({ nodes: [collection('c')], total: 3 });
+    });
+
     it('searches a node id by the term alone', () => {
         searchService.requestSearch.and.returnValue(of({ nodes: [] } as never));
         const id = '5e40e372-735c-4b17-bbf7-e827a5702b57';

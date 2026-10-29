@@ -91,7 +91,7 @@
           mat-button
           color="primary"
           [id]="getCheckboxId(node)"
-          [disabled]="isLoading(node.parent)"
+          [disabled]="isLoading(node.parent ?? node)"
           (click)="loadMore(node)"
         >
           {{ 'LOAD_MORE' | translate }}

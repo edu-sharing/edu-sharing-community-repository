@@ -190,10 +190,12 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnDestroy {
         return this.sourceAdapter?.expandNode(node) ?? Promise.resolve();
     }
 
-    /** Loads the next siblings of a `more` row. */
+    /** Loads the next siblings of a `more` row; one at the top level makes the source reload. */
     loadMore(node: TreeNode): void {
         if (node.parent) {
             void this.sourceAdapter?.loadChildren(node.parent);
+        } else {
+            void this.sourceAdapter?.loadChildren(node).then(() => this.reload$.next());
         }
     }
 

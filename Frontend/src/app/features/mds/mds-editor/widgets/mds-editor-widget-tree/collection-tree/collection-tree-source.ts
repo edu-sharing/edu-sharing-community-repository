@@ -4,7 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { AuthenticationService, DEFAULT, Node } from 'ngx-edu-sharing-api';
 import { NodeHelperService } from 'ngx-edu-sharing-ui';
-import { firstValueFrom, forkJoin, from, Observable } from 'rxjs';
+import { firstValueFrom, forkJoin, from, Observable, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { Tree, TreeNode } from '../tree';
 import { TreeSource, TreeSourceValue } from '../tree-source';
@@ -26,6 +26,8 @@ import {
 
 /** Guards against a cycle in the parent links of corrupt data. */
 const MAX_DEPTH = 50;
+/** The row loading the next page of search hits. */
+const SEARCH_MORE_ID = 'more:search';
 
 /** The category listing a collection, by the scope name `NodeHelperService` shows for it. */
 const CATEGORY_BY_SCOPE_NAME: { [scopeName: string]: CollectionTreeScope } = {
@@ -74,6 +76,8 @@ export class CollectionTreeSource implements TreeSource {
     >();
     private browseTree: { key: string; tree: Promise<Tree> } | null = null;
     private searchTree: Tree | null = null;
+    /** The hits of the latest search, extended page by page. */
+    private search: SearchState | null = null;
 
     /**
      * Listed only where the page URL names a start collection, like a search opened from a topic
@@ -108,26 +112,32 @@ export class CollectionTreeSource implements TreeSource {
         return from(this.getBrowseTree()).pipe(
             switchMap(() => {
                 const rootId = this.withinRoot() ? this.rootNode()?.ref.id ?? null : null;
-                return this.collectionTreeService
-                    .searchCollections(filter, {
-                        rootId,
-                        mdsId: DEFAULT,
-                        maxItems: COLLECTION_TREE_MAX_SEARCH_HITS,
-                    })
-                    .pipe(
-                        map((hits) => hits.filter((hit) => matchesTitle(hit, filter))),
-                        switchMap((hits) =>
-                            this.collectionTreeService
-                                .getWithAncestors(hits, DEFAULT)
-                                .pipe(map((placed) => this.createSearchTree(hits, placed, rootId))),
-                        ),
-                    );
+                const key = `${rootId}|${filter}`;
+                // the latest search is listed again with all pages loaded so far
+                const search =
+                    this.search?.key === key
+                        ? of(this.search)
+                        : this.loadSearchPage({
+                              key,
+                              filter,
+                              rootId,
+                              hits: [],
+                              placed: new Map(),
+                              loaded: 0,
+                              total: 0,
+                          });
+                return search.pipe(map((state) => this.createSearchTree(state)));
             }),
         );
     }
 
-    loadChildren(node: TreeNode): Promise<void> {
-        return this.appendPage(node);
+    async loadChildren(node: TreeNode): Promise<void> {
+        if (node.id !== SEARCH_MORE_ID) {
+            return this.appendPage(node);
+        }
+        if (this.search) {
+            await firstValueFrom(this.loadSearchPage(this.search));
+        }
     }
 
     loadValues(ids: string[]): void {
@@ -279,16 +289,42 @@ export class CollectionTreeSource implements TreeSource {
         return node;
     }
 
+    /** Loads the next page of hits of a search, which becomes the latest one. */
+    private loadSearchPage(search: SearchState): Observable<SearchState> {
+        return this.collectionTreeService
+            .searchCollectionsPage(search.filter, {
+                rootId: search.rootId,
+                mdsId: DEFAULT,
+                maxItems: COLLECTION_TREE_MAX_SEARCH_HITS,
+                skipCount: search.loaded,
+            })
+            .pipe(
+                switchMap((page) => {
+                    const hits = page.nodes.filter((hit) => matchesTitle(hit, search.filter));
+                    return this.collectionTreeService.getWithAncestors(hits, DEFAULT).pipe(
+                        map((placed) => {
+                            const loaded = search.loaded + page.nodes.length;
+                            this.search = {
+                                ...search,
+                                hits: [...search.hits, ...hits],
+                                placed: new Map([...search.placed, ...placed]),
+                                loaded,
+                                // an empty page ends the list, e.g. when hits became unreadable
+                                total: page.nodes.length ? page.total : loaded,
+                            };
+                            return this.search;
+                        }),
+                    );
+                }),
+            );
+    }
+
     /**
      * Lists search hits below the collections leading to them from the start collection, else from
      * the category of their top-level collection. A hit's own sub-collections are loaded once it
      * is expanded.
      */
-    private createSearchTree(
-        hits: Node[],
-        placed: Map<string, PlacedCollection>,
-        rootId: string | null,
-    ): Tree {
+    private createSearchTree({ hits, placed, rootId, loaded, total }: SearchState): Tree {
         for (const [node, source] of this.lazyNodes) {
             if (source.tree === this.searchTree) {
                 this.lazyNodes.delete(node);
@@ -323,6 +359,9 @@ export class CollectionTreeSource implements TreeSource {
         const rank = (node: TreeNode) =>
             node.type === 'group' ? categories.indexOf(node.id) : categories.length;
         tree.rootNodes.sort((a, b) => rank(a) - rank(b));
+        if (loaded < total) {
+            tree.addNode({ id: SEARCH_MORE_ID, caption: '', type: 'more' });
+        }
         return tree;
     }
 
@@ -346,6 +385,18 @@ export class CollectionTreeSource implements TreeSource {
             this.addCategory(tree, scope)
         );
     }
+}
+
+/** A search with the hits of the pages loaded so far and the collections leading to them. */
+interface SearchState {
+    key: string;
+    filter: string;
+    rootId: string | null;
+    hits: Node[];
+    placed: Map<string, PlacedCollection>;
+    /** Hits loaded so far, including those dropped for not matching the title. */
+    loaded: number;
+    total: number;
 }
 
 /**

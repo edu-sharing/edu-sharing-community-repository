@@ -20,6 +20,16 @@ export interface CollectionPage {
     total: number;
 }
 
+/** Options of a name search for collections. */
+export interface CollectionSearchOptions {
+    /** Limits the search to the descendants of this collection. */
+    rootId: string | null;
+    mdsId: string;
+    maxItems: number;
+    /** Hits to skip, e.g. those of the pages listed already. */
+    skipCount?: number;
+}
+
 /** A collection with the id of the collection above it, `null` for a top-level collection. */
 export interface PlacedCollection {
     node: Node;
@@ -258,6 +268,17 @@ export class CollectionTreeService {
         term: string,
         options: { rootId: string | null; mdsId: string; maxItems: number },
     ): Observable<Node[]> {
+        return this.searchCollectionsPage(term, options).pipe(map((page) => page.nodes));
+    }
+
+    /**
+     * Like `searchCollections`, but also tells how many collections match in total and allows
+     * requesting a later page.
+     */
+    searchCollectionsPage(
+        term: string,
+        options: CollectionSearchOptions,
+    ): Observable<CollectionPage> {
         const mdsId = options.mdsId || DEFAULT;
         const unrestricted = { ...options, rootId: null as string | null, mdsId: DEFAULT };
         if (
@@ -315,8 +336,8 @@ export class CollectionTreeService {
      */
     private requestSearch(
         term: string,
-        options: { rootId: string | null; mdsId: string; maxItems: number },
-    ): Observable<Node[]> {
+        options: CollectionSearchOptions,
+    ): Observable<CollectionPage> {
         const criteria = [{ property: RestConstants.PRIMARY_SEARCH_CRITERIA, values: [term] }];
         const byTitle =
             !NODE_ID_PATTERN.test(term.trim()) &&
@@ -335,12 +356,15 @@ export class CollectionTreeService {
                 query: RestConstants.QUERY_NAME_COLLECTIONS,
                 contentType: 'COLLECTIONS',
                 propertyFilter: PROPERTY_FILTER,
-                skipCount: 0,
+                skipCount: options.skipCount ?? 0,
                 maxItems: options.maxItems,
                 body: { criteria },
             })
             .pipe(
-                map((result) => (result.nodes ?? []) as Node[]),
+                map((result) => {
+                    const nodes = (result.nodes ?? []) as Node[];
+                    return { nodes, total: result.pagination?.total ?? nodes.length };
+                }),
                 catchError((error: unknown) => {
                     if (!byTitle || !rejectsParameter(error, TITLE_CONTAINS_PARAMETER)) {
                         return throwError(() => error);

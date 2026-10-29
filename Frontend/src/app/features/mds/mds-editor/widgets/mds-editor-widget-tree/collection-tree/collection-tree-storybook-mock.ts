@@ -120,10 +120,10 @@ export class CollectionTreeServiceMock implements Partial<CollectionTreeService>
         return of({ nodes, total: children.length }).pipe(delay(RESPONSE_DELAY_MS));
     }
 
-    searchCollections(
+    searchCollectionsPage(
         term: string,
-        options: { rootId: string | null; maxItems: number },
-    ): Observable<Node[]> {
+        options: { rootId: string | null; maxItems: number; skipCount?: number },
+    ): Observable<CollectionPage> {
         const words = term.toLowerCase().split(/\s+/);
         const hits = FIXTURE.filter(
             (collection) =>
@@ -133,6 +133,8 @@ export class CollectionTreeServiceMock implements Partial<CollectionTreeService>
                         .slice(0, -1)
                         .some((ancestor) => ancestor.id === options.rootId)),
         );
-        return of(hits.slice(0, options.maxItems).map(toNode)).pipe(delay(RESPONSE_DELAY_MS));
+        const skipCount = options.skipCount ?? 0;
+        const nodes = hits.slice(skipCount, skipCount + options.maxItems).map(toNode);
+        return of({ nodes, total: hits.length }).pipe(delay(RESPONSE_DELAY_MS));
     }
 }
