@@ -59,6 +59,17 @@
         'WORKSPACE.LICENSE.MORE' | translate
       }}</a>
     </div>
+    <div class="licenseTitleOfWork" *ngIf="titleOfWork || profileUrl">
+      <h5>{{ 'LICENSE.TITLE_OF_WORK' | translate }}</h5>
+      <a *ngIf="sourceUrl; else plainTitle" [href]="sourceUrl" target="_blank">{{
+        titleOfWork || ('MDS.AUTHOR_UNSET' | translate)
+      }}</a>
+      <ng-template #plainTitle>{{ titleOfWork || ('MDS.AUTHOR_UNSET' | translate) }}</ng-template>
+      <ng-container *ngIf="profileUrl">
+        (<a [href]="profileUrl" target="_blank">{{ 'LICENSE.LINK_AUTHOR' | translate }}</a
+        >)
+      </ng-container>
+    </div>
     <div class="ai-info">{{ properties || nodes?.[0]?.properties | esLicenseAiInfo }}</div>
   </div>
 </div>
