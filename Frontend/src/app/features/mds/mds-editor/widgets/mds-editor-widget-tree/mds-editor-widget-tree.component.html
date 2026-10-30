@@ -189,7 +189,7 @@
   } }
 </div>
 <!-- Outside the overlay origin, so the dropdown keeps opening right below the field. -->
-@if (widget.canLeaveOutSubcollections()) {
+@if (widget.canLeaveOutSubcollections() && isFieldShown()) {
 <mat-slide-toggle
   class="include-subcollections"
   [checked]="widget.includeSubcollections | async"

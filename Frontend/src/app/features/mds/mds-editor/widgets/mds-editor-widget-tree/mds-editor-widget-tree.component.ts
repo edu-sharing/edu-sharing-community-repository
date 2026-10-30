@@ -186,6 +186,13 @@ export class MdsEditorWidgetTreeComponent
         super();
     }
 
+    /** Whether the field is listed, as the container lists it in a search hiding empty fields. */
+    protected isFieldShown(): boolean {
+        const hidesEmpty =
+            this.mdsEditorInstance.editorMode === 'search' && this.widget.definition.hideIfEmpty;
+        return !hidesEmpty || !this.hasValues || this.hasValues();
+    }
+
     async ngOnInit() {
         if (this.widget.definition.type === MdsWidgetType.CollectionTree) {
             this.treeSource = this.injector
