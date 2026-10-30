@@ -2,9 +2,11 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { Node } from 'ngx-edu-sharing-api';
-import { firstValueFrom, from, Observable } from 'rxjs';
+import { AuthenticationService, DEFAULT, Node } from 'ngx-edu-sharing-api';
+import { NodeHelperService } from 'ngx-edu-sharing-ui';
+import { firstValueFrom, from, Observable, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
+import { RestConstants } from '../../../../../../core-module/rest/rest-constants';
 import { Tree, TreeNode } from '../tree';
 import { TreeSource, TreeSourceValue } from '../tree-source';
 import {
@@ -26,6 +28,18 @@ import {
 
 /** Guards against a cycle in the parent links of corrupt data. */
 const MAX_DEPTH = 50;
+/** The row loading the next page of search hits. */
+const SEARCH_MORE_ID = 'more:search';
+
+/**
+ * The category listing a collection, by the scope name `NodeHelperService` shows for it. Other
+ * collections are the user's own or ones shared with them, as the owner tells.
+ */
+const CATEGORY_BY_SCOPE_NAME: { [scopeName: string]: CollectionScope } = {
+    TYPE_EDITORIAL: 'TYPE_EDITORIAL',
+    TYPE_MEDIA_CENTER: 'TYPE_MEDIA_CENTER',
+    PUBLIC: 'EDU_ALL',
+};
 
 /**
  * Lazily loaded, searchable tree of the collections the user can read, for `collectionTree`
@@ -37,6 +51,10 @@ export class CollectionTreeSource implements TreeSource {
     private readonly collectionScopesService = inject(CollectionScopesService);
     private readonly collectionTreeService = inject(CollectionTreeService);
     private readonly translate = inject(TranslateService);
+    private readonly nodeHelper = inject(NodeHelperService);
+    private readonly login = toSignal(inject(AuthenticationService).observeLoginInfo(), {
+        initialValue: null,
+    });
     private readonly urlRootId = toSignal(
         inject(ActivatedRoute).queryParamMap.pipe(
             map((params) => params.get(COLLECTION_TREE_ROOT_QUERY_PARAM)),
@@ -44,8 +62,6 @@ export class CollectionTreeSource implements TreeSource {
         { initialValue: null },
     );
     private readonly config = signal<CollectionTreeConfig>({});
-    /** Metadata set whose `collections` query is used for searching. */
-    private mdsId: string;
     private readonly rootId = computed(
         () => this.urlRootId() || this.config().rootCollectionId || null,
     );
@@ -60,6 +76,11 @@ export class CollectionTreeSource implements TreeSource {
         { tree: Tree; collection?: Node; scope?: CollectionScope }
     >();
     private browseTree: { key: string; tree: Promise<Tree> } | null = null;
+    /** The categories the browse tree lists, none below a start collection. */
+    private categories: CollectionScope[] = [];
+    private searchTree: Tree | null = null;
+    /** The hits of the latest search, extended page by page. */
+    private search: SearchState | null = null;
 
     /**
      * Listed only where the page URL names a start collection, like a search opened from a topic
@@ -79,13 +100,9 @@ export class CollectionTreeSource implements TreeSource {
             : null;
     });
 
-    /**
-     * @param configuration the widget's configuration, see `CollectionTreeConfig`
-     * @param mdsId metadata set whose `collections` query is used for searching
-     */
-    configure(configuration: string | undefined, mdsId: string): this {
+    /** @param configuration the widget's configuration, see `CollectionTreeConfig` */
+    configure(configuration: string | undefined): this {
         this.config.set(parseCollectionTreeConfig(configuration));
-        this.mdsId = mdsId;
         return this;
     }
 
@@ -93,29 +110,37 @@ export class CollectionTreeSource implements TreeSource {
         if (!filter) {
             return from(this.getBrowseTree());
         }
-        // the browse tree loads the start collection the search is limited to
+        // the browse tree loads the start collection the search is limited to; the default metadata
+        // set searches all collections the browse tree lists, whatever metadata set they were made in
         return from(this.getBrowseTree()).pipe(
             switchMap(() => {
                 const rootId = this.withinRoot() ? this.rootNode()?.ref.id ?? null : null;
-                return this.collectionTreeService
-                    .searchCollections(filter, {
-                        rootId,
-                        mdsId: this.mdsId,
-                        maxItems: COLLECTION_TREE_MAX_SEARCH_HITS,
-                    })
-                    .pipe(
-                        switchMap((hits) =>
-                            this.collectionTreeService
-                                .getWithAncestors(hits, this.mdsId)
-                                .pipe(map((placed) => createSearchTree(hits, placed, rootId))),
-                        ),
-                    );
+                const key = `${rootId}|${filter}`;
+                // the latest search is listed again with all pages loaded so far
+                const search =
+                    this.search?.key === key
+                        ? of(this.search)
+                        : this.loadSearchPage({
+                              key,
+                              filter,
+                              rootId,
+                              hits: [],
+                              placed: new Map(),
+                              loaded: 0,
+                              total: 0,
+                          });
+                return search.pipe(map((state) => this.createSearchTree(state)));
             }),
         );
     }
 
-    loadChildren(node: TreeNode): Promise<void> {
-        return this.appendPage(node);
+    async loadChildren(node: TreeNode): Promise<void> {
+        if (node.id !== SEARCH_MORE_ID) {
+            return this.appendPage(node);
+        }
+        if (this.search) {
+            await firstValueFrom(this.loadSearchPage(this.search));
+        }
     }
 
     loadValues(ids: string[]): void {
@@ -164,6 +189,7 @@ export class CollectionTreeSource implements TreeSource {
 
     private async createBrowseTree(): Promise<Tree> {
         const tree = Tree.generateTree([]);
+        this.categories = [];
         const root = this.withinRoot() ? await this.loadRoot() : null;
         if (root) {
             const rootNode = this.addCollection(tree, root);
@@ -173,19 +199,15 @@ export class CollectionTreeSource implements TreeSource {
             rootNode.children ??= [];
             rootNode.hasChildren = rootNode.children.length > 0;
         } else {
-            const scopes = await firstValueFrom(
+            this.categories = await firstValueFrom(
                 this.collectionScopesService.getScopes({
                     scopes: this.config().scopes,
                     hideEmpty: true,
                 }),
             );
-            for (const scope of scopes) {
-                const category = tree.addNode({
-                    id: `category:${scope}`,
-                    caption: this.translate.instant(`COLLECTIONS.TAB.${scope}`),
-                    type: 'group',
-                    hasChildren: true,
-                });
+            for (const scope of this.categories) {
+                const category = this.addCategory(tree, scope);
+                category.hasChildren = true;
                 this.lazyNodes.set(category, { tree, scope });
             }
         }
@@ -205,6 +227,14 @@ export class CollectionTreeSource implements TreeSource {
             this.rootNode.set(null);
         }
         return this.rootNode();
+    }
+
+    private addCategory(tree: Tree, scope: CollectionScope): TreeNode {
+        return tree.addNode({
+            id: `category:${scope}`,
+            caption: this.translate.instant(`COLLECTIONS.TAB.${scope}`),
+            type: 'group',
+        });
     }
 
     /** Appends the next page of collections below `node`, with a `more` row if any are left. */
@@ -249,34 +279,150 @@ export class CollectionTreeSource implements TreeSource {
         this.lazyNodes.set(node, { tree, collection });
         return node;
     }
+
+    /** Loads the next page of hits of a search, which becomes the latest one. */
+    private loadSearchPage(search: SearchState): Observable<SearchState> {
+        return this.collectionTreeService
+            .searchCollectionsPage(search.filter, {
+                rootId: search.rootId,
+                mdsId: DEFAULT,
+                maxItems: COLLECTION_TREE_MAX_SEARCH_HITS,
+                skipCount: search.loaded,
+            })
+            .pipe(
+                switchMap((page) => {
+                    const hits = page.nodes.filter((hit) => matchesTitle(hit, search.filter));
+                    // the search covers the collections below the start collection, not itself
+                    const root = this.rootNode();
+                    if (
+                        !search.loaded &&
+                        root?.ref.id === search.rootId &&
+                        matchesTitle(root, search.filter)
+                    ) {
+                        hits.unshift(root);
+                    }
+                    return this.collectionTreeService.getWithAncestors(hits, DEFAULT).pipe(
+                        map((placed) => {
+                            const loaded = search.loaded + page.nodes.length;
+                            this.search = {
+                                ...search,
+                                hits: [...search.hits, ...hits],
+                                placed: new Map([...search.placed, ...placed]),
+                                loaded,
+                                // an empty page ends the list, e.g. when hits became unreadable
+                                total: page.nodes.length ? page.total : loaded,
+                            };
+                            return this.search;
+                        }),
+                    );
+                }),
+            );
+    }
+
+    /**
+     * Lists search hits below the collections leading to them from the start collection, else from
+     * the category of their top-level collection. A hit's own sub-collections are loaded once it
+     * is expanded.
+     */
+    private createSearchTree({ hits, placed, rootId, loaded, total }: SearchState): Tree {
+        for (const [node, source] of this.lazyNodes) {
+            if (source.tree === this.searchTree) {
+                this.lazyNodes.delete(node);
+            }
+        }
+        const tree = Tree.generateTree([]);
+        this.searchTree = tree;
+        for (const hit of hits) {
+            const path = getPath(hit.ref.id, placed);
+            const offset = path && rootId ? path.indexOf(rootId) : 0;
+            // only a repository that cannot search below a collection returns hits outside of it
+            if (offset < 0) {
+                continue;
+            }
+            const top = (path && placed.get(path[0])?.node) ?? hit;
+            // another user's private collection is readable to admins, but no category lists it
+            if (!rootId && this.isPrivateOfOthers(top)) {
+                continue;
+            }
+            let parent = rootId ? undefined : this.getSearchCategory(tree, top);
+            for (const id of path?.slice(offset) ?? [hit.ref.id]) {
+                const siblings = parent ? parent.children : tree.rootNodes;
+                parent =
+                    siblings?.find((node) => node.id === id) ??
+                    tree.addNode(
+                        { id, caption: getCollectionTitle(placed.get(id)?.node ?? hit) },
+                        parent,
+                    );
+            }
+            // a hit leading to other hits lists only those
+            if (parent && !parent.children && (hit.collection?.childCollectionsCount ?? 0) > 0) {
+                parent.hasChildren = true;
+                this.lazyNodes.set(parent, { tree, collection: hit });
+            }
+        }
+        const categories = this.categories.map((scope) => `category:${scope}`);
+        const rank = (node: TreeNode) =>
+            node.type === 'group' ? categories.indexOf(node.id) : categories.length;
+        tree.rootNodes.sort((a, b) => rank(a) - rank(b));
+        if (loaded < total) {
+            tree.addNode({ id: SEARCH_MORE_ID, caption: '', type: 'more' });
+        }
+        return tree;
+    }
+
+    /**
+     * The category node listing a hit below the given top-level collection, labelled like the
+     * collection's scope elsewhere, e.g. a public collection of the user's as public; none for a
+     * category the widget does not list.
+     */
+    private getSearchCategory(tree: Tree, top: Node): TreeNode | undefined {
+        const scope =
+            CATEGORY_BY_SCOPE_NAME[this.nodeHelper.getCollectionScopeInfo(top).scopeName] ??
+            (this.isOwn(top) ? 'MY' : 'EDU_GROUPS');
+        if (!scope || !this.categories.includes(scope)) {
+            return undefined;
+        }
+        return (
+            tree.rootNodes.find((node) => node.id === `category:${scope}`) ??
+            this.addCategory(tree, scope)
+        );
+    }
+
+    private isOwn(collection: Node): boolean {
+        return collection.properties?.[RestConstants.CM_OWNER]?.[0] === this.login()?.authorityName;
+    }
+
+    private isPrivateOfOthers(collection: Node): boolean {
+        return (
+            this.nodeHelper.getCollectionScopeInfo(collection).scopeName === 'MY' &&
+            !this.isOwn(collection)
+        );
+    }
 }
 
-/** Lists search hits below the collections leading to them from the start collection. */
-function createSearchTree(
-    hits: Node[],
-    placed: Map<string, PlacedCollection>,
-    rootId: string | null,
-): Tree {
-    const tree = Tree.generateTree([]);
-    for (const hit of hits) {
-        const path = getPath(hit.ref.id, placed);
-        const offset = path && rootId ? path.indexOf(rootId) : 0;
-        // only a repository that cannot search below a collection returns hits outside of it
-        if (offset < 0) {
-            continue;
-        }
-        let parent: TreeNode | undefined;
-        for (const id of path?.slice(offset) ?? [hit.ref.id]) {
-            const siblings = parent ? parent.children : tree.rootNodes;
-            parent =
-                siblings?.find((node) => node.id === id) ??
-                tree.addNode(
-                    { id, caption: getCollectionTitle(placed.get(id)?.node ?? hit) },
-                    parent,
-                );
-        }
-    }
-    return tree;
+/** A search with the hits of the pages loaded so far and the collections leading to them. */
+interface SearchState {
+    key: string;
+    filter: string;
+    rootId: string | null;
+    hits: Node[];
+    placed: Map<string, PlacedCollection>;
+    /** Hits loaded so far, including those dropped for not matching the title. */
+    loaded: number;
+    total: number;
+}
+
+/**
+ * Whether the title of a collection holds the text searched for, or the filter is its id, since the
+ * search also matches single words, keywords and descriptions, which the tree does not show.
+ */
+function matchesTitle(collection: Node, filter: string): boolean {
+    const text = normalize(filter);
+    return collection.ref.id === text || normalize(getCollectionTitle(collection)).includes(text);
+}
+
+function normalize(text: string): string {
+    return text.trim().replace(/\s+/g, ' ').toLocaleLowerCase();
 }
 
 /** The ids from the top-most collection down to `id`, `null` while a collection is unknown. */

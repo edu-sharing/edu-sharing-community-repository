@@ -2266,6 +2266,10 @@
         <multiple>true</multiple>
         <multiplejoin>OR</multiplejoin>
       </property>
+      <!-- collections whose title contains the value, as pickers list them by title -->
+      <property name="virtual:title_contains">
+        <statement>{"wildcard":{"properties.cm:title.keyword": {"value":"*${value}*", "case_insensitive": true }}}</statement>
+      </property>
     </query>
     <query join="AND" id="ngsearch">
       <!--TODO basequery-->
@@ -2395,6 +2399,23 @@
           ],
           "minimum_should_match": 1
           }},
+          {"match":{"collections.relation.type": "ccm:usage"}}
+          ]
+          }}
+          }}
+        </statement>
+        <multiple>true</multiple>
+        <multiplejoin>OR</multiplejoin>
+      </property>
+      <!-- sent by the collectionTree widget instead of its own property when it leaves out sub-collections -->
+      <property name="virtual:collection_id_primary">
+        <statement>
+          { "nested": {
+          "path": "collections",
+          "query":
+          {"bool":{
+          "must":[
+          {"match":{"collections.nodeRef.id": "${valueRaw}"}},
           {"match":{"collections.relation.type": "ccm:usage"}}
           ]
           }}

@@ -29,14 +29,16 @@ import { Node } from 'ngx-edu-sharing-api';
 import { EduSharingUiCommonModule, NodeTitlePipe } from 'ngx-edu-sharing-ui';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { COLLECTION_TREE_ROOT_QUERY_PARAM } from '../../../../features/mds/mds-editor/widgets/mds-editor-widget-tree/collection-tree/collection-tree-config';
+import {
+    COLLECTION_TREE_PROPERTY,
+    COLLECTION_TREE_ROOT_QUERY_PARAM,
+} from '../../../../features/mds/mds-editor/widgets/mds-editor-widget-tree/collection-tree/collection-tree-config';
 import { SharedModule } from '../../../../shared/shared.module';
 import { RenderWrapperComponent } from '../../../render2-page/render-wrapper-component/render-wrapper.component';
 import { HighlightSearchPipe } from '../../shared/pipes/highlight-search.pipe';
 import { TopicPageGlobalService } from '../../shared/services/topic-page-global.service';
 import { TopicPageHelperService } from '../../shared/services/topic-page-helper.service';
 import { ConfigurationOption } from '../../shared/types/configuration-option';
-import { DEFAULT_COLLECTION_ID_PROP } from '../../shared/types/custom-definitions';
 import { LayoutOption } from '../../shared/types/layout-option';
 import { MediaRenderingDisplayType } from '../../shared/types/media-rendering-display-type';
 import { MediaRenderingConfig } from '../../shared/types/widget-config/media-rendering-config';
@@ -213,7 +215,7 @@ export class MediaRenderingComponent implements AfterViewInit, OnDestroy, Widget
         const mediaRenderingExtra: NavigationExtras = {
             queryParams: {
                 filters: {
-                    [DEFAULT_COLLECTION_ID_PROP]: [this.contextNodeId],
+                    [COLLECTION_TREE_PROPERTY]: [this.contextNodeId],
                 },
                 [COLLECTION_TREE_ROOT_QUERY_PARAM]: this.contextNodeId,
             },

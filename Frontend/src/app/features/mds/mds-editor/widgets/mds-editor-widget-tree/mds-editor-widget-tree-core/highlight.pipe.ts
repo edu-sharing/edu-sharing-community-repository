@@ -5,9 +5,13 @@ import { Pipe, PipeTransform } from '@angular/core';
     standalone: false,
 })
 export class HighlightPipe implements PipeTransform {
-    transform(value: string, highlightString: string): string {
+    /** @param byWord whether to mark each word of the highlight string instead of it as a whole */
+    transform(value: string, highlightString: string, byWord = false): string {
         if (highlightString && highlightString.trim()) {
-            const highlightWords = highlightString.trim().toLowerCase().split(/\s+/);
+            const highlight = highlightString.trim().toLowerCase();
+            const highlightWords = byWord
+                ? highlight.split(/\s+/)
+                : [highlight.replace(/\s+/g, ' ')];
             let index = -1;
             do {
                 let length: number;

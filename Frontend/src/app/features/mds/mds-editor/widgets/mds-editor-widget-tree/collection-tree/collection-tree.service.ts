@@ -20,6 +20,16 @@ export interface CollectionPage {
     total: number;
 }
 
+/** Options of a name search for collections. */
+export interface CollectionSearchOptions {
+    /** Limits the search to the descendants of this collection. */
+    rootId: string | null;
+    mdsId: string;
+    maxItems: number;
+    /** Hits to skip, e.g. those of the pages listed already. */
+    skipCount?: number;
+}
+
 /** A collection with the id of the collection above it, `null` for a top-level collection. */
 export interface PlacedCollection {
     node: Node;
@@ -29,14 +39,18 @@ export interface PlacedCollection {
 /** Property holding the id of a collection's parent, requested with each search hit. */
 export const PARENT_ID_PROPERTY = 'virtual:primaryparent_nodeid';
 
-/** Properties requested for every collection: the order of its children and its parent. */
+/** Properties requested for every collection: the order of its children, its parent and owner. */
 const PROPERTY_FILTER = [
     RestConstants.CCM_PROP_COLLECTION_SUBCOLLECTION_ORDER_MODE,
     PARENT_ID_PROPERTY,
+    RestConstants.CM_OWNER,
 ];
-/** Parameters of the collections query limiting it to a subtree and to given collections. */
+/** Parameters of the collections query limiting it to a subtree, given collections and titles. */
 const PARENT_RECURSIVE_PARAMETER = 'virtual:parent_recursive';
 const NODE_ID_PARAMETER = 'virtual:node_id';
+const TITLE_CONTAINS_PARAMETER = 'virtual:title_contains';
+/** A node id, which the search matches against ids rather than titles. */
+const NODE_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const ANCESTORS_CACHE_DURATION_MS = 5 * 60 * 1000;
 const PARALLEL_PATH_REQUESTS = 4;
 /** Guards against a cycle in the parent links of corrupt data. */
@@ -107,8 +121,8 @@ export class CollectionTreeService {
     }
 
     /**
-     * The collections with the given ids the user can read, each carrying its parent's id. A
-     * metadata set that cannot look them up by id makes this load the path of each one instead.
+     * The collections with the given ids the user can read, each carrying its parent's id. The path
+     * is loaded for each one the metadata set cannot look up by id or leaves out of its query.
      */
     getCollections(ids: string[], mdsId: string): Observable<Node[]> {
         const metadataset = mdsId || DEFAULT;
@@ -131,6 +145,15 @@ export class CollectionTreeService {
             })
             .pipe(
                 map((result) => (result.nodes ?? []) as Node[]),
+                switchMap((found) => {
+                    const foundIds = new Set(found.map((node) => node.ref.id));
+                    const left = ids.filter((id) => !foundIds.has(id));
+                    return left.length
+                        ? this.getCollectionsWithPaths(left).pipe(
+                              map((paths) => [...found, ...paths]),
+                          )
+                        : of(found);
+                }),
                 catchError((error: unknown) => {
                     markAsHandled(error);
                     console.warn('Collection lookup failed, loading paths instead', error);
@@ -235,6 +258,17 @@ export class CollectionTreeService {
         term: string,
         options: { rootId: string | null; mdsId: string; maxItems: number },
     ): Observable<Node[]> {
+        return this.searchCollectionsPage(term, options).pipe(map((page) => page.nodes));
+    }
+
+    /**
+     * Like `searchCollections`, but also tells how many collections match in total and allows
+     * requesting a later page.
+     */
+    searchCollectionsPage(
+        term: string,
+        options: CollectionSearchOptions,
+    ): Observable<CollectionPage> {
         const mdsId = options.mdsId || DEFAULT;
         const unrestricted = { ...options, rootId: null as string | null, mdsId: DEFAULT };
         if (
@@ -285,11 +319,22 @@ export class CollectionTreeService {
         }
     }
 
+    /**
+     * Collections whose title contains `term`, so the limit of hits does not cut them off in favor
+     * of ones matching only a keyword or description. A node id, or a metadata set lacking the
+     * title parameter, is searched by `term` alone.
+     */
     private requestSearch(
         term: string,
-        options: { rootId: string | null; mdsId: string; maxItems: number },
-    ): Observable<Node[]> {
+        options: CollectionSearchOptions,
+    ): Observable<CollectionPage> {
         const criteria = [{ property: RestConstants.PRIMARY_SEARCH_CRITERIA, values: [term] }];
+        const byTitle =
+            !NODE_ID_PATTERN.test(term.trim()) &&
+            !this.unsupportedParameters.has(`${options.mdsId}|${TITLE_CONTAINS_PARAMETER}`);
+        if (byTitle) {
+            criteria.push({ property: TITLE_CONTAINS_PARAMETER, values: [term.trim()] });
+        }
         if (options.rootId) {
             criteria.push({ property: PARENT_RECURSIVE_PARAMETER, values: [options.rootId] });
         }
@@ -301,10 +346,29 @@ export class CollectionTreeService {
                 query: RestConstants.QUERY_NAME_COLLECTIONS,
                 contentType: 'COLLECTIONS',
                 propertyFilter: PROPERTY_FILTER,
-                skipCount: 0,
+                skipCount: options.skipCount ?? 0,
                 maxItems: options.maxItems,
                 body: { criteria },
             })
-            .pipe(map((result) => (result.nodes ?? []) as Node[]));
+            .pipe(
+                map((result) => {
+                    const nodes = (result.nodes ?? []) as Node[];
+                    return { nodes, total: result.pagination?.total ?? nodes.length };
+                }),
+                catchError((error: unknown) => {
+                    if (!byTitle || !rejectsParameter(error, TITLE_CONTAINS_PARAMETER)) {
+                        return throwError(() => error);
+                    }
+                    markAsHandled(error);
+                    this.unsupportedParameters.add(`${options.mdsId}|${TITLE_CONTAINS_PARAMETER}`);
+                    return this.requestSearch(term, options);
+                }),
+            );
     }
+}
+
+/** Whether a request was rejected for naming a parameter the query does not define. */
+function rejectsParameter(error: unknown, parameter: string): boolean {
+    const response = error as { status?: number; error?: unknown };
+    return response?.status === 400 && JSON.stringify(response.error ?? '').includes(parameter);
 }

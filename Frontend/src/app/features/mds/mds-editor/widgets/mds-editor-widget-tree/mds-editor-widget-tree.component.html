@@ -188,6 +188,17 @@
   </button>
   } }
 </div>
+<!-- Outside the overlay origin, so the dropdown keeps opening right below the field. -->
+@if (widget.canLeaveOutSubcollections() && isFieldShown()) {
+<mat-slide-toggle
+  class="include-subcollections"
+  [checked]="widget.includeSubcollections | async"
+  [disabled]="chipsControl?.disabled"
+  (change)="widget.setIncludeSubcollections($event.checked)"
+>
+  {{ 'MDS.COLLECTION_TREE.INCLUDE_SUBCOLLECTIONS' | translate }}
+</mat-slide-toggle>
+}
 <ng-template
   cdkConnectedOverlay
   [cdkConnectedOverlayOrigin]="trigger"
@@ -222,7 +233,7 @@
       [values]="chipsControl?.value"
       [indeterminateValues]="indeterminateValues$ | async"
       [suggestions]="chipsSuggestionsSubject"
-      [parentImpliesChildren]="editorMode === 'search'"
+      [parentImpliesChildren]="editorMode === 'search' && (widget.includeSubcollections | async)"
       (closeTree)="closeOverlay()"
       (valuesChange)="onValuesChange($event)"
       (indeterminateValuesChange)="indeterminateValues$.next($event)"

@@ -9,6 +9,7 @@ import {
     Component,
     Directive,
     ElementRef,
+    HostListener,
     inject,
     Injector,
     OnDestroy,
@@ -185,11 +186,18 @@ export class MdsEditorWidgetTreeComponent
         super();
     }
 
+    /** Whether the field is listed, as the container lists it in a search hiding empty fields. */
+    protected isFieldShown(): boolean {
+        const hidesEmpty =
+            this.mdsEditorInstance.editorMode === 'search' && this.widget.definition.hideIfEmpty;
+        return !hidesEmpty || !this.hasValues || this.hasValues();
+    }
+
     async ngOnInit() {
         if (this.widget.definition.type === MdsWidgetType.CollectionTree) {
             this.treeSource = this.injector
                 .get(CollectionTreeSource)
-                .configure(this.widget.definition.configuration, this.mdsEditorInstance.mdsId);
+                .configure(this.widget.definition.configuration);
             // with `hideIfEmpty`, the widget stays listed once it had a value, so it can be replaced
             this.hasValues = () => this.hadValues() || this.treeSource.showWithoutValues();
         }
@@ -526,14 +534,19 @@ export class MdsEditorWidgetTreeComponent
     onPositionChange(event: ConnectedOverlayPositionChange) {
         this.positionY.set(event.connectionPair?.originY || null);
     }
-    closeOverlay(event?: FocusEvent): void {
-        // prevent directly closing because cdk outside click might trigger
-        if (
-            UIHelper.isParentElementOfElement(
-                event?.target as HTMLElement,
-                this.boxRef.nativeElement,
-            )
-        ) {
+    /** Where the latest press anywhere on the page started. */
+    private pressTarget: EventTarget | null = null;
+
+    @HostListener('document:pointerdown', ['$event'])
+    onDocumentPointerDown(event: PointerEvent): void {
+        this.pressTarget = event.target;
+    }
+
+    closeOverlay(event?: Event): void {
+        // a click counts where it was pressed, as for the overlay itself: one pressed in the field
+        // and released on the dropdown opening over it stays inside
+        const target = event?.type === 'click' ? this.pressTarget ?? event.target : event?.target;
+        if (UIHelper.isParentElementOfElement(target as HTMLElement, this.boxRef.nativeElement)) {
             return;
         }
         this.overlayIsVisible = false;

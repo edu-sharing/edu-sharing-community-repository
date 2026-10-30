@@ -4,12 +4,13 @@ import {
     Component,
     ElementRef,
     EventEmitter,
+    inject,
     Input,
     OnDestroy,
     OnInit,
     Output,
+    signal,
     ViewChild,
-    inject,
 } from '@angular/core';
 import { MatTreeNestedDataSource } from '@angular/material/tree';
 import { BehaviorSubject, from, merge, Observable, of, ReplaySubject, Subject } from 'rxjs';
@@ -17,6 +18,7 @@ import {
     catchError,
     debounceTime,
     distinctUntilChanged,
+    finalize,
     map,
     switchMap,
     takeUntil,
@@ -51,6 +53,8 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnDestroy {
     private static readonly FILTER_DEBOUNCE_MS = 250;
 
     readonly uid = `app-mds-editor-widget-tree-core-${nextUniqueId++}`;
+    /** Whether the tree for the current filter is still being fetched. */
+    readonly searching = signal(false);
     @ViewChild('input') input: ElementRef;
     @Input() widget: Widget;
     @Input() tree: Tree;
@@ -144,11 +148,13 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnDestroy {
             .pipe(
                 // `switchMap` discards the result of an outdated request, so a slow response can
                 // never overwrite the tree of a newer one
-                switchMap((filterString) =>
-                    this.fetchSuggestedTree(filterString).pipe(
+                switchMap((filterString) => {
+                    this.searching.set(true);
+                    return this.fetchSuggestedTree(filterString).pipe(
                         map((tree) => ({ filterString, tree })),
-                    ),
-                ),
+                        finalize(() => this.searching.set(false)),
+                    );
+                }),
                 takeUntil(this.destroyed$),
             )
             .subscribe(({ filterString, tree }) => {
@@ -190,16 +196,27 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnDestroy {
         return this.sourceAdapter?.expandNode(node) ?? Promise.resolve();
     }
 
-    /** Loads the next siblings of a `more` row. */
+    /** Loads the next siblings of a `more` row; one at the top level makes the source reload. */
     loadMore(node: TreeNode): void {
         if (node.parent) {
             void this.sourceAdapter?.loadChildren(node.parent);
+        } else {
+            void this.sourceAdapter?.loadChildren(node).then(() => this.reload$.next());
         }
     }
 
     /** Whether the children of a node of a tree from the source are being loaded. */
     isLoading(node: TreeNode): boolean {
         return !!this.sourceAdapter?.isLoading(node);
+    }
+
+    /** Whether an applied filter leaves nothing to list. */
+    hasNoMatches(): boolean {
+        if (!this.toEffectiveFilter(this.filterString) || this.searching()) {
+            return false;
+        }
+        const nodes = this.tree?.rootNodes ?? [];
+        return this.source ? !nodes.length : nodes.every((node) => node.isHidden);
     }
 
     private toEffectiveFilter(filterString: string): string | null {

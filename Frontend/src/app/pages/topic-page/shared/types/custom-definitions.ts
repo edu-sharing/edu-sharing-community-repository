@@ -6,7 +6,6 @@ import { WidgetSelectOption } from './widget-select-option';
 
 // GENERAL CONSTANTS
 export const DEFAULT_AI_CONFIG_PROP: string = 'ccm:bapi_config';
-export const DEFAULT_COLLECTION_ID_PROP: string = 'virtual:collection_id_tree';
 export const DEFAULT_PAGE_CONFIG_ASPECT: string = 'ccm:page';
 export const DEFAULT_PAGE_CONFIG_PROP: string = 'ccm:page_config';
 export const DEFAULT_PAGE_CONFIG_PROPAGATE_REF_PROP: string =

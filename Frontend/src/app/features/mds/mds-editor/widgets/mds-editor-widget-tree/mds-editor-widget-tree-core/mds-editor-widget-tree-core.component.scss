@@ -70,10 +70,19 @@
                 margin-bottom: 0;
             }
         }
+        .search-spinner {
+            display: block;
+            margin-right: 12px;
+        }
         button {
             margin-left: 20px;
             height: 50px;
         }
+    }
+    .no-matches {
+        margin: 0;
+        padding: 10px 20px 20px;
+        color: var(--textLight);
     }
     .tree-header-toggle {
         padding: 0 20px 10px;
@@ -150,6 +159,10 @@
 }
 
 :host ::ng-deep {
+    // captions wrap anywhere, so deeply nested entries never make the tree wider than its card
+    .tree .mdc-label {
+        overflow-wrap: anywhere;
+    }
     mat-form-field {
         .mat-form-field-wrapper {
             padding-bottom: 0;

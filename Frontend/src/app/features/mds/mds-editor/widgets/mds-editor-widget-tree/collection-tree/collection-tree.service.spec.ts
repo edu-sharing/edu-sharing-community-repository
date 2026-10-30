@@ -94,6 +94,7 @@ describe('CollectionTreeService', () => {
         void expect(params.query).toBe('collections');
         void expect(params.body.criteria).toEqual([
             { property: 'ngsearchword', values: ['phys'] },
+            { property: 'virtual:title_contains', values: ['phys'] },
             { property: 'virtual:parent_recursive', values: ['root'] },
         ]);
         void expect(params.propertyFilter).toContain('virtual:primaryparent_nodeid');
@@ -112,7 +113,10 @@ describe('CollectionTreeService', () => {
             }),
         );
         const params = searchService.requestSearch.calls.mostRecent().args[0];
-        void expect(params.body.criteria).toEqual([{ property: 'ngsearchword', values: ['phys'] }]);
+        void expect(params.body.criteria).toEqual([
+            { property: 'ngsearchword', values: ['phys'] },
+            { property: 'virtual:title_contains', values: ['phys'] },
+        ]);
     });
 
     it('retries without restriction in the default metadata set when the search fails', () => {
@@ -131,7 +135,10 @@ describe('CollectionTreeService', () => {
         const retry = searchService.requestSearch.calls.mostRecent().args[0];
         void expect(searchService.requestSearch).toHaveBeenCalledTimes(2);
         void expect(retry.metadataset).toBe(DEFAULT);
-        void expect(retry.body.criteria).toEqual([{ property: 'ngsearchword', values: ['phys'] }]);
+        void expect(retry.body.criteria).toEqual([
+            { property: 'ngsearchword', values: ['phys'] },
+            { property: 'virtual:title_contains', values: ['phys'] },
+        ]);
         void expect(hits).toEqual([]);
     });
 
@@ -165,6 +172,7 @@ describe('CollectionTreeService', () => {
             propertyFilter: [
                 'ccm:collectionsubcollectionordermode',
                 'virtual:primaryparent_nodeid',
+                'cm:owner',
             ],
         });
     });
@@ -182,6 +190,7 @@ describe('CollectionTreeService', () => {
 
     it('looks up several collections by id in one search', () => {
         searchService.requestSearch.and.returnValue(of({ nodes: [collection('a')] } as never));
+        nodeService.getParents.and.returnValue(throwError(() => ({ status: 403 })));
         const found = result(service.getCollections(['a', 'b'], DEFAULT));
         const params = searchService.requestSearch.calls.mostRecent().args[0];
         void expect(params.metadataset).toBe(DEFAULT);
@@ -191,6 +200,16 @@ describe('CollectionTreeService', () => {
             { property: 'virtual:node_id', values: ['a', 'b'] },
         ]);
         void expect(found).toEqual([collection('a')]);
+    });
+
+    it('loads the path of a collection the search leaves out', () => {
+        searchService.requestSearch.and.returnValue(of({ nodes: [collection('a')] } as never));
+        nodeService.getParents.and.returnValue(
+            of({ nodes: [collection('b', 'top'), collection('top')] } as never),
+        );
+        const found = result(service.getCollections(['a', 'b'], DEFAULT));
+        void expect(found.map((node) => node.ref.id)).toEqual(['a', 'top', 'b']);
+        void expect(searchService.requestSearch).toHaveBeenCalledTimes(1);
     });
 
     it('loads paths instead where the metadata set cannot look collections up by id', () => {
@@ -235,6 +254,69 @@ describe('CollectionTreeService', () => {
         result(service.searchCollections('physik', options));
         void expect(searchService.requestSearch).toHaveBeenCalledTimes(3);
         const last = searchService.requestSearch.calls.mostRecent().args[0];
-        void expect(last.body.criteria).toEqual([{ property: 'ngsearchword', values: ['physik'] }]);
+        void expect(last.body.criteria).toEqual([
+            { property: 'ngsearchword', values: ['physik'] },
+            { property: 'virtual:title_contains', values: ['physik'] },
+        ]);
+    });
+
+    it('limits the search to collections whose title contains the term', () => {
+        searchService.requestSearch.and.returnValue(of({ nodes: [] } as never));
+        result(service.searchCollections('Unter ', { rootId: null, mdsId: DEFAULT, maxItems: 25 }));
+        const params = searchService.requestSearch.calls.mostRecent().args[0];
+        void expect(params.body.criteria).toEqual([
+            { property: 'ngsearchword', values: ['Unter '] },
+            { property: 'virtual:title_contains', values: ['Unter'] },
+        ]);
+    });
+
+    it('requests a later page of hits with the total of all', () => {
+        searchService.requestSearch.and.returnValue(
+            of({ nodes: [collection('c')], pagination: { total: 3 } } as never),
+        );
+        const page = result(
+            service.searchCollectionsPage('phys', {
+                rootId: null,
+                mdsId: DEFAULT,
+                maxItems: 2,
+                skipCount: 2,
+            }),
+        );
+        const params = searchService.requestSearch.calls.mostRecent().args[0];
+        void expect(params.skipCount).toBe(2);
+        void expect(params.maxItems).toBe(2);
+        void expect(page).toEqual({ nodes: [collection('c')], total: 3 });
+    });
+
+    it('searches a node id by the term alone', () => {
+        searchService.requestSearch.and.returnValue(of({ nodes: [] } as never));
+        const id = '5e40e372-735c-4b17-bbf7-e827a5702b57';
+        result(service.searchCollections(id, { rootId: null, mdsId: DEFAULT, maxItems: 25 }));
+        const params = searchService.requestSearch.calls.mostRecent().args[0];
+        void expect(params.body.criteria).toEqual([{ property: 'ngsearchword', values: [id] }]);
+    });
+
+    it('searches by the term alone once the title parameter was rejected', () => {
+        const rejected = {
+            status: 400,
+            error: { message: 'Could not find parameter virtual:title_contains in the query' },
+        };
+        searchService.requestSearch.and.returnValues(
+            throwError(() => rejected),
+            of({ nodes: [collection('a')] } as never),
+            of({ nodes: [] } as never),
+        );
+        const options = { rootId: null as string | null, mdsId: DEFAULT, maxItems: 25 };
+        const found = result(service.searchCollections('unter', options));
+        result(service.searchCollections('unter b', options));
+        void expect(found).toEqual([collection('a')]);
+        const criteria = searchService.requestSearch.calls
+            .allArgs()
+            .map(([params]) => params.body.criteria.map((c: { property: string }) => c.property));
+        void expect(criteria).toEqual([
+            ['ngsearchword', 'virtual:title_contains'],
+            ['ngsearchword'],
+            ['ngsearchword'],
+        ]);
     });
 });

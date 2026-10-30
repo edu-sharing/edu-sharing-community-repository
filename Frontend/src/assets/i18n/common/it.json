@@ -790,7 +790,8 @@
     "DELETE_KEY_NOTICE": "Cancellare con il tasto Canc",
     "COLLECTION_TREE": {
       "WITHIN_ROOT": "Solo in «{{ root }}»",
-      "NOT_ACCESSIBLE": "Raccolta non disponibile o non leggibile"
+      "NOT_ACCESSIBLE": "Raccolta non disponibile o non leggibile",
+      "INCLUDE_SUBCOLLECTIONS": "Includi le sottoraccolte"
     },
     "SHOW_EXTENDED_FALSE": "nascondere le informazioni aggiuntive",
     "SUGGEST_VALUE_SEND": "suggerire",
