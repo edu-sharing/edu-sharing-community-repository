@@ -1143,11 +1143,11 @@ public class AdminApi {
 
 
 
-    @GET
+    @POST
     @Path("/elastic")
-    @Consumes({"application/json"})
+    @Consumes({"application/json", "text/plain"})
 
-    @Operation(summary = "Search for custom elastic DSL query")
+    @Operation(summary = "Search for custom elastic DSL query", description = "The dsl is sent as request body (no url length limit)")
 
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = SearchResultElastic.class))),
             @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -1157,16 +1157,13 @@ public class AdminApi {
             @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
 
     public Response searchByElasticDSL(
-            @Parameter(description = "dsl query (json encoded)", schema = @Schema(defaultValue = "")) @QueryParam("dsl") String dsl,
             @Parameter(description = "index", schema = @Schema(defaultValue = "")) @QueryParam("index") String index,
+            @Parameter(description = "dsl query (json)", required = true) String dsl,
             @Context HttpServletRequest req) {
-
         try {
-
             //check that there is an admin
             AdminServiceFactory.getInstance();
             return Response.status(Response.Status.OK).entity(searchElasticDSL(dsl, index)).build();
-
         } catch (Throwable t) {
             return ErrorResponse.createResponse(t);
         }
@@ -1312,11 +1309,11 @@ public class AdminApi {
         }
     }
 
-    @GET
+    @POST
     @Path("/lucene")
-    @Consumes({"application/json"})
+    @Consumes({"application/json", "text/plain"})
 
-    @Operation(summary = "Search for custom lucene query", description = "e.g. @cm\\:name:\"*\"")
+    @Operation(summary = "Search for custom lucene query", description = "The query (lucene or elastic json, e.g. @cm\\:name:\"*\") is sent as request body (no url length limit)")
 
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = SearchResult.class))),
             @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -1326,7 +1323,6 @@ public class AdminApi {
             @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
 
     public Response searchByLucene(
-            @Parameter(description = "query", schema = @Schema(defaultValue = "@cm\\:name:\"*\"")) @QueryParam("query") String query,
             @Parameter(description = "maximum items per page", schema = @Schema(defaultValue = "10")) @QueryParam("maxItems") Integer maxItems,
             @Parameter(description = "skip a number of items", schema = @Schema(defaultValue = "0")) @QueryParam("skipCount") Integer skipCount,
             @Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
@@ -1334,13 +1330,11 @@ public class AdminApi {
             @Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue = "-all-"))) @QueryParam("propertyFilter") List<String> propertyFilter,
             @Parameter(description = "store, workspace or archive") @QueryParam("store") LuceneStore store,
             @Parameter(description = "authority scope to search for") @QueryParam("authorityScope") List<String> authorityScope,
+            @Parameter(description = "query (lucene or elastic json)", required = true) String query,
             @Context HttpServletRequest req) {
-
         try {
-
             //check that there is an admin
             AdminServiceFactory.getInstance();
-
             Filter filter = new Filter(propertyFilter);
             RepositoryDao repoDao = RepositoryDao.getHomeRepository();
 
@@ -1374,7 +1368,6 @@ public class AdminApi {
             response.setPagination(pagination);
             response.setFacets(search.getFacets());
             return Response.status(Response.Status.OK).entity(response).build();
-
         } catch (DAOException e) {
             return ErrorResponse.createResponse(e);
         } catch (Throwable t) {

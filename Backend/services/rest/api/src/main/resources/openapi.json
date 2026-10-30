@@ -12885,17 +12885,10 @@
       }
     },
     "/admin/v1/elastic": {
-      "get": {
+      "post": {
+        "description": "The dsl is sent as request body (no url length limit)",
         "operationId": "searchByElasticDSL",
         "parameters": [
-          {
-            "description": "dsl query (json encoded)",
-            "in": "query",
-            "name": "dsl",
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "description": "index",
             "in": "query",
@@ -12905,6 +12898,22 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              }
+            },
+            "text/plain": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          },
+          "description": "dsl query (json)",
+          "required": true
+        },
         "responses": {
           "200": {
             "content": {
@@ -15305,19 +15314,10 @@
       }
     },
     "/admin/v1/lucene": {
-      "get": {
-        "description": "e.g. @cm\\:name:\"*\"",
+      "post": {
+        "description": "The query (lucene or elastic json, e.g. @cm\\:name:\"*\") is sent as request body (no url length limit)",
         "operationId": "searchByLucene",
         "parameters": [
-          {
-            "description": "query",
-            "in": "query",
-            "name": "query",
-            "schema": {
-              "default": "@cm\\:name:\"*\"",
-              "type": "string"
-            }
-          },
           {
             "description": "maximum items per page",
             "in": "query",
@@ -15396,6 +15396,22 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              }
+            },
+            "text/plain": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          },
+          "description": "query (lucene or elastic json)",
+          "required": true
+        },
         "responses": {
           "200": {
             "content": {

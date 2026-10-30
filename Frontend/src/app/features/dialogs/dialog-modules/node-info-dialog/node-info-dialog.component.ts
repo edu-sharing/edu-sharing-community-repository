@@ -163,8 +163,17 @@ export class NodeInfoDialogComponent implements OnInit, AfterViewInit {
     }
     /** open the node in the index inspector of the admin node browser (`AdminNodeBrowserComponent.QUERY_PARAM_INSPECT`) */
     openIndexInspector(node: Node) {
+        // persons and groups are indexed in the authorities index only
+        const isAuthority = [
+            RestConstants.CM_TYPE_PERSON,
+            RestConstants.CM_TYPE_AUTHORITY_CONTAINER,
+        ].includes(node.type);
         void this.router.navigate([UIConstants.ROUTER_PREFIX, 'admin'], {
-            queryParams: { mode: 'BROWSER', inspect: node.ref.id },
+            queryParams: {
+                mode: 'BROWSER',
+                inspect: node.ref.id,
+                inspectIndex: isAuthority ? '-authorities-' : '-workspace-',
+            },
         });
         this.dialogRef.close();
     }

@@ -80,6 +80,8 @@ type ElasticIndexOption = {
 export class AdminNodeBrowserComponent implements OnInit {
     /** query param of the admin page: node id which should be opened in the index inspector */
     static readonly QUERY_PARAM_INSPECT = 'inspect';
+    /** query param of the admin page: index used by {@link AdminNodeBrowserComponent.QUERY_PARAM_INSPECT} */
+    static readonly QUERY_PARAM_INSPECT_INDEX = 'inspectIndex';
     private static readonly STORAGE_KEY = 'admin_lucene';
 
     private admin = inject(RestAdminService);
@@ -178,16 +180,21 @@ export class AdminNodeBrowserComponent implements OnInit {
         this.route.queryParams
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe((params) =>
-                this.handleInspectParam(params[AdminNodeBrowserComponent.QUERY_PARAM_INSPECT]),
+                this.handleInspectParam(
+                    params[AdminNodeBrowserComponent.QUERY_PARAM_INSPECT],
+                    params[AdminNodeBrowserComponent.QUERY_PARAM_INSPECT_INDEX],
+                ),
             );
     }
 
-    private handleInspectParam(nodeId: string) {
+    private handleInspectParam(nodeId: string, index?: string) {
         if (!nodeId) {
             return;
         }
         this.lucene.mode = 'INSPECT';
         this.lucene.noderef = nodeId;
+        // e.g. persons and groups are only part of the authorities index
+        this.setIndex(index || '-workspace-');
         this.inspectElasticDocument();
     }
 
@@ -241,7 +248,7 @@ export class AdminNodeBrowserComponent implements OnInit {
         this.elasticResponseStats = null;
         if (this.lucene.mode === 'ELASTIC' && !this.isElasticRaw()) {
             this.admin
-                .searchLucene(this.getCompactQuery(), this.lucene.store, authorities, request)
+                .searchLucene(this.lucene.query, this.lucene.store, authorities, request)
                 .subscribe({
                     next: (data) => {
                         this.globalProgress = false;
@@ -253,7 +260,7 @@ export class AdminNodeBrowserComponent implements OnInit {
                     },
                 });
         } else if (this.lucene.mode === 'ELASTIC' && this.isElasticRaw()) {
-            this.admin.searchElastic(this.getCompactQuery(), this.lucene.index).subscribe({
+            this.admin.searchElastic(this.lucene.query, this.lucene.index).subscribe({
                 next: (data) => {
                     this.globalProgress = false;
                     this.elasticResponse = data;
@@ -265,18 +272,6 @@ export class AdminNodeBrowserComponent implements OnInit {
                     this.toast.error(error);
                 },
             });
-        }
-    }
-
-    /**
-     * the query is sent as url parameter: drop the formatting, otherwise large (pretty printed) queries
-     * exceed the maximum request header size of tomcat. Invalid/unparsable json is sent as it is
-     */
-    private getCompactQuery() {
-        try {
-            return JSON.stringify(JSON.parse(this.lucene.query));
-        } catch (e) {
-            return this.lucene.query;
         }
     }
 

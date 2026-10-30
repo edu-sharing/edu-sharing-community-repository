@@ -282,6 +282,10 @@ public class SearchServiceElastic implements SearchService {
         if (jsonBody != null) {
             request.setJsonEntity(jsonBody);
         }
+        // same response size limit as the java client (the low level default is a fixed 100mb)
+        RequestOptions.Builder options = RequestOptions.DEFAULT.toBuilder();
+        options.setHttpAsyncResponseConsumerFactory(new HttpAsyncResponseConsumerFactory.HeapBufferedResponseConsumerFactory(MAX_RESPONSE_ENTITY_SIZE));
+        request.setOptions(options);
         return EntityUtils.toString(restClient.performRequest(request).getEntity(), java.nio.charset.StandardCharsets.UTF_8);
     }
 
