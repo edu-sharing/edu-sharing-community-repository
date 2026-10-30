@@ -5,6 +5,12 @@ import { Tree, TreeNode } from './tree';
 import { TreeSource } from './tree-source';
 
 /**
+ * The nodes left expanded in each tree shown before. Kept apart from the views, so a tree shown
+ * again, e.g. when its dropdown is reopened, looks the way the user left it.
+ */
+const expandedNodes = new WeakMap<Tree, Set<TreeNode>>();
+
+/**
  * Adapts the trees of a `TreeSource` to the tree view, apart from the trees of the valuespace:
  * children loaded on expansion, and trees shown as delivered with a checked state from the values.
  */
@@ -15,8 +21,7 @@ export class TreeSourceAdapter {
      * so loaded children reach it through this subject.
      */
     private readonly lazyChildren = new Map<TreeNode, BehaviorSubject<TreeNode[]>>();
-    /** Trees shown before, whose expansion is left to the user. */
-    private readonly shownTrees = new Set<Tree>();
+    private shownTree: Tree | null = null;
 
     /**
      * @param changed called when loading starts and ends, so the host can render the change
@@ -25,7 +30,13 @@ export class TreeSourceAdapter {
         private readonly source: TreeSource,
         private readonly treeControl: NestedTreeControl<TreeNode>,
         private readonly changed: () => void,
-    ) {}
+    ) {
+        treeControl.expansionModel.changed.subscribe(({ added, removed }) => {
+            const expanded = this.shownTree && expandedNodes.get(this.shownTree);
+            added.forEach((node) => expanded?.add(node));
+            removed.forEach((node) => expanded?.delete(node));
+        });
+    }
 
     isLoading(node: TreeNode): boolean {
         return this.loadingNodes.has(node);
@@ -73,19 +84,18 @@ export class TreeSourceAdapter {
 
     /**
      * Shows a tree as the source delivers it, since its nodes may match a filter on more than their
-     * captions. Nodes with loaded children are expanded the first time a tree is shown.
+     * captions. Nodes with loaded children are expanded the first time a tree is shown, later on
+     * the ones left expanded.
      */
     show(tree: Tree, values: DisplayValue[]): void {
         this.syncCheckedState(tree, values);
-        if (this.shownTrees.has(tree)) {
-            return;
+        this.shownTree = tree;
+        let expanded = expandedNodes.get(tree);
+        if (!expanded) {
+            expanded = new Set([...tree.iterate()].filter((node) => node.children?.length));
+            expandedNodes.set(tree, expanded);
         }
-        this.shownTrees.add(tree);
-        for (const node of tree.iterate()) {
-            if (node.children?.length) {
-                this.treeControl.expand(node);
-            }
-        }
+        [...expanded].forEach((node) => this.treeControl.expand(node));
     }
 
     /** Derives the checked state of the nodes, since a source's tree may list a value twice. */
