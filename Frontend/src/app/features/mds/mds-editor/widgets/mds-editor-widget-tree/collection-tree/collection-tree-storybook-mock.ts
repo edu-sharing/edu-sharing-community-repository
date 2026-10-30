@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HOME_REPOSITORY, Node } from 'ngx-edu-sharing-api';
-import { Observable, of, throwError, timer } from 'rxjs';
+import { firstValueFrom, Observable, of, throwError, timer } from 'rxjs';
 import { delay, switchMap } from 'rxjs/operators';
 import {
     COLLECTION_SCOPES,
@@ -148,5 +148,11 @@ export class CollectionScopesServiceMock implements Partial<CollectionScopesServ
             FIXTURE.some((collection) => collection.scopes?.includes(scope)),
         );
         return of(scopes).pipe(delay(RESPONSE_DELAY_MS));
+    }
+
+    loadTopLevelIds(scope: CollectionScope): Promise<Set<string>> {
+        const ids = FIXTURE.filter((collection) => collection.scopes?.includes(scope));
+        const result = of(new Set(ids.map((collection) => collection.id)));
+        return firstValueFrom(result.pipe(delay(RESPONSE_DELAY_MS)));
     }
 }

@@ -4,10 +4,8 @@ import {
     CollectionEntries,
     CollectionService,
     HOME_REPOSITORY,
-    Node,
     ROOT,
 } from 'ngx-edu-sharing-api';
-import { NodeHelperService } from 'ngx-edu-sharing-ui';
 import { Observable, of, throwError } from 'rxjs';
 import { CollectionScopesService } from './collection-scopes.service';
 
@@ -17,9 +15,10 @@ function result<T>(observable: Observable<T>): T {
     return value;
 }
 
-/** A top-level collection owned by `owner`. */
-function collectionOf(owner: string): Node {
-    return { properties: { 'cm:owner': [owner] } } as unknown as Node;
+/** A page of top-level collections with ids `first` to `first + count - 1`. */
+function page(first: number, count: number): Observable<CollectionEntries> {
+    const collections = Array.from({ length: count }, (_, i) => ({ ref: { id: `${first + i}` } }));
+    return of({ collections } as unknown as CollectionEntries);
 }
 
 /** Answers the category checks; a scope missing in `totals` holds no collections. */
@@ -35,14 +34,12 @@ describe('CollectionScopesService', () => {
     let service: CollectionScopesService;
     let collectionService: jasmine.SpyObj<CollectionService>;
     let isGuest: boolean;
-    let scopeName: string;
 
     const checkedScopes = () =>
         collectionService.getSubcollections.calls.allArgs().map(([params]) => params.scope);
 
     beforeEach(() => {
         isGuest = false;
-        scopeName = 'UNKNOWN';
         collectionService = jasmine.createSpyObj('CollectionService', ['getSubcollections']);
         TestBed.configureTestingModule({
             providers: [
@@ -50,11 +47,7 @@ describe('CollectionScopesService', () => {
                 { provide: CollectionService, useValue: collectionService },
                 {
                     provide: AuthenticationService,
-                    useValue: { observeLoginInfo: () => of({ isGuest, authorityName: 'me' }) },
-                },
-                {
-                    provide: NodeHelperService,
-                    useValue: { getCollectionScopeInfo: () => ({ icon: '', scopeName }) },
+                    useValue: { observeLoginInfo: () => of({ isGuest }) },
                 },
             ],
         });
@@ -131,27 +124,14 @@ describe('CollectionScopesService', () => {
         void expect(collectionService.getSubcollections).not.toHaveBeenCalled();
     });
 
-    it('lists editorial, media-center and public collections in their own category', () => {
-        for (const [name, scope] of [
-            ['TYPE_EDITORIAL', 'TYPE_EDITORIAL'],
-            ['TYPE_MEDIA_CENTER', 'TYPE_MEDIA_CENTER'],
-            ['PUBLIC', 'EDU_ALL'],
-        ]) {
-            scopeName = name;
-            void expect(service.getScopeOf(collectionOf('someone'))).toBe(scope);
-        }
-    });
-
-    it("lists other collections as the user's own or as shared ones, as the owner tells", () => {
-        scopeName = 'SHARED';
-        void expect(service.getScopeOf(collectionOf('me'))).toBe('MY');
-        void expect(service.getScopeOf(collectionOf('someone'))).toBe('EDU_GROUPS');
-        scopeName = 'MY';
-        void expect(service.getScopeOf(collectionOf('me'))).toBe('MY');
-    });
-
-    it("lists another user's private collection in no category", () => {
-        scopeName = 'MY';
-        void expect(service.getScopeOf(collectionOf('someone'))).toBeNull();
+    it('loads the top-level collections of a category page by page', async () => {
+        collectionService.getSubcollections.and.returnValues(page(0, 500), page(500, 2));
+        const ids = await service.loadTopLevelIds('EDU_GROUPS');
+        void expect(ids.size).toBe(502);
+        void expect(ids.has('501')).toBeTrue();
+        const calls = collectionService.getSubcollections.calls.allArgs().map(([params]) => params);
+        void expect(calls.map((params) => params.skipCount)).toEqual([0, 500]);
+        void expect(calls.every((params) => params.scope === 'EDU_GROUPS')).toBeTrue();
+        void expect(calls[0].collection).toBe(ROOT);
     });
 });

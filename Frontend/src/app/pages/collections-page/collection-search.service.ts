@@ -1,21 +1,14 @@
 import { inject, Injectable } from '@angular/core';
-import {
-    CollectionService,
-    DEFAULT,
-    HOME_REPOSITORY,
-    Node,
-    PROPERTY_FILTER_ALL,
-    ROOT,
-} from 'ngx-edu-sharing-api';
+import { DEFAULT, Node, PROPERTY_FILTER_ALL } from 'ngx-edu-sharing-api';
 import { firstValueFrom, from, Observable } from 'rxjs';
 import {
     CollectionTreeService,
     PARENT_ID_PROPERTY,
 } from '../../features/mds/mds-editor/widgets/mds-editor-widget-tree/collection-tree/collection-tree.service';
+import { CollectionScope, CollectionScopesService } from '../../services/collection-scopes.service';
 
 /** Most hits requested at once; the hits are filtered by category afterwards, so no paging. */
 export const COLLECTION_SEARCH_MAX_HITS = 500;
-const ROOT_PAGE_SIZE = 500;
 /** Guards against a cycle in the parent links of corrupt data. */
 const MAX_DEPTH = 50;
 
@@ -57,7 +50,7 @@ export interface CollectionSearchResult {
 @Injectable()
 export class CollectionSearchService {
     private readonly treeService = inject(CollectionTreeService);
-    private readonly collectionService = inject(CollectionService);
+    private readonly collectionScopesService = inject(CollectionScopesService);
     /** Ids of the top-level collections per category, loaded once until `reset`. */
     private readonly topLevelIds = new Map<string, Promise<Set<string>>>();
 
@@ -168,33 +161,11 @@ export class CollectionSearchService {
     private getTopLevelIds(scope: string): Promise<Set<string>> {
         let ids = this.topLevelIds.get(scope);
         if (!ids) {
-            ids = this.loadTopLevelIds(scope);
+            ids = this.collectionScopesService.loadTopLevelIds(scope as CollectionScope);
             this.topLevelIds.set(scope, ids);
             // a failed request must not be remembered
             ids.catch(() => this.topLevelIds.delete(scope));
         }
         return ids;
-    }
-
-    private async loadTopLevelIds(scope: string): Promise<Set<string>> {
-        const ids = new Set<string>();
-        for (let skipCount = 0; ; skipCount += ROOT_PAGE_SIZE) {
-            const entries = await firstValueFrom(
-                this.collectionService.getSubcollections({
-                    repository: HOME_REPOSITORY,
-                    collection: ROOT,
-                    scope: scope as never,
-                    fetchCounts: false,
-                    skipCount,
-                    maxItems: ROOT_PAGE_SIZE,
-                    propertyFilter: [],
-                }),
-            );
-            const collections = entries?.collections ?? [];
-            collections.forEach((collection) => ids.add(collection.ref.id));
-            if (collections.length < ROOT_PAGE_SIZE) {
-                return ids;
-            }
-        }
     }
 }

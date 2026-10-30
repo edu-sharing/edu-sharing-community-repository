@@ -1,16 +1,12 @@
 import { inject, Injectable } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import {
     AuthenticationService,
     CollectionService,
     HOME_REPOSITORY,
-    Node,
     ROOT,
 } from 'ngx-edu-sharing-api';
-import { NodeHelperService } from 'ngx-edu-sharing-ui';
-import { forkJoin, Observable, of } from 'rxjs';
+import { firstValueFrom, forkJoin, Observable, of } from 'rxjs';
 import { catchError, first, map, switchMap } from 'rxjs/operators';
-import { RestConstants } from '../core-module/rest/rest-constants';
 
 /** Top-level categories of collections, as the `scope` of the collections API names them. */
 export type CollectionScope =
@@ -33,12 +29,7 @@ export const COLLECTION_SCOPES: readonly CollectionScope[] = [
 const PERSONAL_SCOPES: readonly CollectionScope[] = ['MY', 'EDU_GROUPS'];
 /** Categories listed only while they hold collections. */
 const OPTIONAL_SCOPES: readonly CollectionScope[] = ['TYPE_EDITORIAL', 'TYPE_MEDIA_CENTER'];
-/** The categories named by a scope label of `NodeHelperService`; the others depend on the owner. */
-const SCOPE_BY_SCOPE_NAME: { [scopeName: string]: CollectionScope } = {
-    TYPE_EDITORIAL: 'TYPE_EDITORIAL',
-    TYPE_MEDIA_CENTER: 'TYPE_MEDIA_CENTER',
-    PUBLIC: 'EDU_ALL',
-};
+const TOP_LEVEL_PAGE_SIZE = 500;
 
 /**
  * Decides which categories of collections the current user gets listed, e.g. as the tabs of the
@@ -48,10 +39,6 @@ const SCOPE_BY_SCOPE_NAME: { [scopeName: string]: CollectionScope } = {
 export class CollectionScopesService {
     private readonly authentication = inject(AuthenticationService);
     private readonly collectionService = inject(CollectionService);
-    private readonly nodeHelper = inject(NodeHelperService);
-    private readonly login = toSignal(this.authentication.observeLoginInfo(), {
-        initialValue: null,
-    });
 
     /**
      * The categories of `scopes` listed to the current user, in their order: none of the personal
@@ -83,17 +70,29 @@ export class CollectionScopesService {
     }
 
     /**
-     * The category listing the top-level `collection` (loaded with `cm:owner`), labelled like its
-     * scope elsewhere; `null` for another user's private one, which no category lists.
+     * The ids of the top-level collections of `scope`. They define the category: a collection
+     * belongs to it when the top-most collection above it is one of them.
      */
-    getScopeOf(collection: Node): CollectionScope | null {
-        const scopeName = this.nodeHelper.getCollectionScopeInfo(collection).scopeName;
-        const isOwn =
-            collection.properties?.[RestConstants.CM_OWNER]?.[0] === this.login()?.authorityName;
-        if (scopeName === 'MY' && !isOwn) {
-            return null;
+    async loadTopLevelIds(scope: CollectionScope): Promise<Set<string>> {
+        const ids = new Set<string>();
+        for (let skipCount = 0; ; skipCount += TOP_LEVEL_PAGE_SIZE) {
+            const entries = await firstValueFrom(
+                this.collectionService.getSubcollections({
+                    repository: HOME_REPOSITORY,
+                    collection: ROOT,
+                    scope,
+                    fetchCounts: false,
+                    skipCount,
+                    maxItems: TOP_LEVEL_PAGE_SIZE,
+                    propertyFilter: [],
+                }),
+            );
+            const collections = entries?.collections ?? [];
+            collections.forEach((collection) => ids.add(collection.ref.id));
+            if (collections.length < TOP_LEVEL_PAGE_SIZE) {
+                return ids;
+            }
         }
-        return SCOPE_BY_SCOPE_NAME[scopeName] ?? (isOwn ? 'MY' : 'EDU_GROUPS');
     }
 
     /** Whether the top level of `scope` holds collections; one that cannot be checked counts. */
