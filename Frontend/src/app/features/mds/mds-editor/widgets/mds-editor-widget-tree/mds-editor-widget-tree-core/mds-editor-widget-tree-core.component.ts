@@ -4,12 +4,13 @@ import {
     Component,
     ElementRef,
     EventEmitter,
+    inject,
     Input,
     OnDestroy,
     OnInit,
     Output,
+    signal,
     ViewChild,
-    inject,
 } from '@angular/core';
 import { MatTreeNestedDataSource } from '@angular/material/tree';
 import { BehaviorSubject, from, merge, Observable, of, ReplaySubject, Subject } from 'rxjs';
@@ -17,6 +18,7 @@ import {
     catchError,
     debounceTime,
     distinctUntilChanged,
+    finalize,
     map,
     switchMap,
     takeUntil,
@@ -51,6 +53,8 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnDestroy {
     private static readonly FILTER_DEBOUNCE_MS = 250;
 
     readonly uid = `app-mds-editor-widget-tree-core-${nextUniqueId++}`;
+    /** Whether the tree for the current filter is still being fetched. */
+    readonly searching = signal(false);
     @ViewChild('input') input: ElementRef;
     @Input() widget: Widget;
     @Input() tree: Tree;
@@ -144,11 +148,13 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnDestroy {
             .pipe(
                 // `switchMap` discards the result of an outdated request, so a slow response can
                 // never overwrite the tree of a newer one
-                switchMap((filterString) =>
-                    this.fetchSuggestedTree(filterString).pipe(
+                switchMap((filterString) => {
+                    this.searching.set(true);
+                    return this.fetchSuggestedTree(filterString).pipe(
                         map((tree) => ({ filterString, tree })),
-                    ),
-                ),
+                        finalize(() => this.searching.set(false)),
+                    );
+                }),
                 takeUntil(this.destroyed$),
             )
             .subscribe(({ filterString, tree }) => {

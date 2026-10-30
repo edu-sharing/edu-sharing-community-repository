@@ -55,6 +55,9 @@
         [attr.aria-activedescendant]="selectedNode?.uid"
         aria-haspopup="tree"
       />
+      @if (searching()) {
+      <es-spinner-small matSuffix class="search-spinner"></es-spinner-small>
+      }
     </mat-form-field>
     <button mat-button (click)="closeTree.emit()" [attr.aria-label]="'CLOSE' | translate">
       <i esIcon="close"></i>
