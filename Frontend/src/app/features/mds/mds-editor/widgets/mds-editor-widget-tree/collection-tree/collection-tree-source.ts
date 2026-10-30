@@ -2,11 +2,9 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { AuthenticationService, DEFAULT, Node } from 'ngx-edu-sharing-api';
-import { NodeHelperService } from 'ngx-edu-sharing-ui';
+import { DEFAULT, Node } from 'ngx-edu-sharing-api';
 import { firstValueFrom, from, Observable, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
-import { RestConstants } from '../../../../../../core-module/rest/rest-constants';
 import { Tree, TreeNode } from '../tree';
 import { TreeSource, TreeSourceValue } from '../tree-source';
 import {
@@ -32,16 +30,6 @@ const MAX_DEPTH = 50;
 const SEARCH_MORE_ID = 'more:search';
 
 /**
- * The category listing a collection, by the scope name `NodeHelperService` shows for it. Other
- * collections are the user's own or ones shared with them, as the owner tells.
- */
-const CATEGORY_BY_SCOPE_NAME: { [scopeName: string]: CollectionScope } = {
-    TYPE_EDITORIAL: 'TYPE_EDITORIAL',
-    TYPE_MEDIA_CENTER: 'TYPE_MEDIA_CENTER',
-    PUBLIC: 'EDU_ALL',
-};
-
-/**
  * Lazily loaded, searchable tree of the collections the user can read, for `collectionTree`
  * widgets. It starts at the collection named by the page URL (`collectionRoot`), else at the one
  * configured, else at the categories of the collections page.
@@ -51,10 +39,6 @@ export class CollectionTreeSource implements TreeSource {
     private readonly collectionScopesService = inject(CollectionScopesService);
     private readonly collectionTreeService = inject(CollectionTreeService);
     private readonly translate = inject(TranslateService);
-    private readonly nodeHelper = inject(NodeHelperService);
-    private readonly login = toSignal(inject(AuthenticationService).observeLoginInfo(), {
-        initialValue: null,
-    });
     private readonly urlRootId = toSignal(
         inject(ActivatedRoute).queryParamMap.pipe(
             map((params) => params.get(COLLECTION_TREE_ROOT_QUERY_PARAM)),
@@ -340,11 +324,12 @@ export class CollectionTreeSource implements TreeSource {
                 continue;
             }
             const top = (path && placed.get(path[0])?.node) ?? hit;
+            const scope = rootId ? undefined : this.collectionScopesService.getScopeOf(top);
             // another user's private collection is readable to admins, but no category lists it
-            if (!rootId && this.isPrivateOfOthers(top)) {
+            if (scope === null) {
                 continue;
             }
-            let parent = rootId ? undefined : this.getSearchCategory(tree, top);
+            let parent = scope ? this.getSearchCategory(tree, scope) : undefined;
             for (const id of path?.slice(offset) ?? [hit.ref.id]) {
                 const siblings = parent ? parent.children : tree.rootNodes;
                 parent =
@@ -370,32 +355,14 @@ export class CollectionTreeSource implements TreeSource {
         return tree;
     }
 
-    /**
-     * The category node listing a hit below the given top-level collection, labelled like the
-     * collection's scope elsewhere, e.g. a public collection of the user's as public; none for a
-     * category the widget does not list.
-     */
-    private getSearchCategory(tree: Tree, top: Node): TreeNode | undefined {
-        const scope =
-            CATEGORY_BY_SCOPE_NAME[this.nodeHelper.getCollectionScopeInfo(top).scopeName] ??
-            (this.isOwn(top) ? 'MY' : 'EDU_GROUPS');
-        if (!scope || !this.categories.includes(scope)) {
+    /** The category node listing hits of `scope`, none for a category the widget does not list. */
+    private getSearchCategory(tree: Tree, scope: CollectionScope): TreeNode | undefined {
+        if (!this.categories.includes(scope)) {
             return undefined;
         }
         return (
             tree.rootNodes.find((node) => node.id === `category:${scope}`) ??
             this.addCategory(tree, scope)
-        );
-    }
-
-    private isOwn(collection: Node): boolean {
-        return collection.properties?.[RestConstants.CM_OWNER]?.[0] === this.login()?.authorityName;
-    }
-
-    private isPrivateOfOthers(collection: Node): boolean {
-        return (
-            this.nodeHelper.getCollectionScopeInfo(collection).scopeName === 'MY' &&
-            !this.isOwn(collection)
         );
     }
 }
