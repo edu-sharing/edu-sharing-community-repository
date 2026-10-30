@@ -210,6 +210,15 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnDestroy {
         return !!this.sourceAdapter?.isLoading(node);
     }
 
+    /** Whether an applied filter leaves nothing to list. */
+    hasNoMatches(): boolean {
+        if (!this.toEffectiveFilter(this.filterString) || this.searching()) {
+            return false;
+        }
+        const nodes = this.tree?.rootNodes ?? [];
+        return this.source ? !nodes.length : nodes.every((node) => node.isHidden);
+    }
+
     private toEffectiveFilter(filterString: string): string | null {
         return filterString?.length >= 2 ? filterString : null;
     }

@@ -153,7 +153,9 @@
       </div>
     </mat-nested-tree-node>
   </mat-tree>
-  }
+  @if (hasNoMatches()) {
+  <p class="no-matches" aria-live="polite">{{ 'MDS.NO_MATCHING_VALUES' | translate }}</p>
+  } }
   <ng-template #checkBox let-node="node">
     @if (node.type === 'suggestionInput') {
     <ng-container *ngTemplateOutlet="inputTemplate; context: { node: node }"></ng-container>
