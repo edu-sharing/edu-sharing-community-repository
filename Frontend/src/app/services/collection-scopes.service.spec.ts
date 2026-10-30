@@ -4,8 +4,10 @@ import {
     CollectionEntries,
     CollectionService,
     HOME_REPOSITORY,
+    Node,
     ROOT,
 } from 'ngx-edu-sharing-api';
+import { NodeHelperService } from 'ngx-edu-sharing-ui';
 import { Observable, of, throwError } from 'rxjs';
 import { CollectionScopesService } from './collection-scopes.service';
 
@@ -13,6 +15,11 @@ function result<T>(observable: Observable<T>): T {
     let value: T;
     observable.subscribe((next) => (value = next));
     return value;
+}
+
+/** A top-level collection owned by `owner`. */
+function collectionOf(owner: string): Node {
+    return { properties: { 'cm:owner': [owner] } } as unknown as Node;
 }
 
 /** Answers the category checks; a scope missing in `totals` holds no collections. */
@@ -28,12 +35,14 @@ describe('CollectionScopesService', () => {
     let service: CollectionScopesService;
     let collectionService: jasmine.SpyObj<CollectionService>;
     let isGuest: boolean;
+    let scopeName: string;
 
     const checkedScopes = () =>
         collectionService.getSubcollections.calls.allArgs().map(([params]) => params.scope);
 
     beforeEach(() => {
         isGuest = false;
+        scopeName = 'UNKNOWN';
         collectionService = jasmine.createSpyObj('CollectionService', ['getSubcollections']);
         TestBed.configureTestingModule({
             providers: [
@@ -41,7 +50,11 @@ describe('CollectionScopesService', () => {
                 { provide: CollectionService, useValue: collectionService },
                 {
                     provide: AuthenticationService,
-                    useValue: { observeLoginInfo: () => of({ isGuest }) },
+                    useValue: { observeLoginInfo: () => of({ isGuest, authorityName: 'me' }) },
+                },
+                {
+                    provide: NodeHelperService,
+                    useValue: { getCollectionScopeInfo: () => ({ icon: '', scopeName }) },
                 },
             ],
         });
@@ -116,5 +129,29 @@ describe('CollectionScopesService', () => {
         isGuest = true;
         void expect(result(service.getScopes({ scopes: ['MY', 'EDU_GROUPS'] }))).toEqual([]);
         void expect(collectionService.getSubcollections).not.toHaveBeenCalled();
+    });
+
+    it('lists editorial, media-center and public collections in their own category', () => {
+        for (const [name, scope] of [
+            ['TYPE_EDITORIAL', 'TYPE_EDITORIAL'],
+            ['TYPE_MEDIA_CENTER', 'TYPE_MEDIA_CENTER'],
+            ['PUBLIC', 'EDU_ALL'],
+        ]) {
+            scopeName = name;
+            void expect(service.getScopeOf(collectionOf('someone'))).toBe(scope);
+        }
+    });
+
+    it("lists other collections as the user's own or as shared ones, as the owner tells", () => {
+        scopeName = 'SHARED';
+        void expect(service.getScopeOf(collectionOf('me'))).toBe('MY');
+        void expect(service.getScopeOf(collectionOf('someone'))).toBe('EDU_GROUPS');
+        scopeName = 'MY';
+        void expect(service.getScopeOf(collectionOf('me'))).toBe('MY');
+    });
+
+    it("lists another user's private collection in no category", () => {
+        scopeName = 'MY';
+        void expect(service.getScopeOf(collectionOf('someone'))).toBeNull();
     });
 });
