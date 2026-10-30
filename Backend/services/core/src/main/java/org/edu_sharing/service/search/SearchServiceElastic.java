@@ -1381,6 +1381,10 @@ public class SearchServiceElastic implements SearchService {
         eduNodeRef.setIsPublic(false);
         Map<String, List<String>> permissionsElastic = (Map) sourceAsMap.get("permissions");
         String owner = (String) sourceAsMap.get("owner");
+        eduNodeRef.setSharedWithOthers(permissionsElastic != null && permissionsElastic.values().stream()
+                .filter(Objects::nonNull)
+                .flatMap(List::stream)
+                .anyMatch(a -> !a.equals(owner) && !a.equals(CCConstants.AUTHORITY_ROLE_OWNER)));
         if (permissionsElastic != null) {
             for (Map.Entry<String, List<String>> entry : permissionsElastic.entrySet()) {
                 if ("read".equals(entry.getKey())) {

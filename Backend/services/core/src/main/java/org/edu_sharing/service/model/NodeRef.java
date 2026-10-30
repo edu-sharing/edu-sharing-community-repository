@@ -77,6 +77,10 @@ public interface NodeRef {
 
     void setIsPublic(Boolean aPublic);
 
+    Boolean getSharedWithOthers();
+
+    void setSharedWithOthers(Boolean sharedWithOthers);
+
     void setAspects(List<String> aspects);
 
     List<String> getAspects();
