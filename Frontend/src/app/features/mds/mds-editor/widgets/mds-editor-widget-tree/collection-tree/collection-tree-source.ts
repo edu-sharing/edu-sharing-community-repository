@@ -301,6 +301,15 @@ export class CollectionTreeSource implements TreeSource {
             .pipe(
                 switchMap((page) => {
                     const hits = page.nodes.filter((hit) => matchesTitle(hit, search.filter));
+                    // the search covers the collections below the start collection, not itself
+                    const root = this.rootNode();
+                    if (
+                        !search.loaded &&
+                        root?.ref.id === search.rootId &&
+                        matchesTitle(root, search.filter)
+                    ) {
+                        hits.unshift(root);
+                    }
                     return this.collectionTreeService.getWithAncestors(hits, DEFAULT).pipe(
                         map((placed) => {
                             const loaded = search.loaded + page.nodes.length;
