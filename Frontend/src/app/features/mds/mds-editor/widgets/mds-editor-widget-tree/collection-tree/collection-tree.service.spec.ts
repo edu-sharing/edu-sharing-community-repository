@@ -172,6 +172,7 @@ describe('CollectionTreeService', () => {
             propertyFilter: [
                 'ccm:collectionsubcollectionordermode',
                 'virtual:primaryparent_nodeid',
+                'cm:owner',
             ],
         });
     });

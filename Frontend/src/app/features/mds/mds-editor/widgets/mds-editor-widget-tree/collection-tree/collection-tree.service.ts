@@ -39,10 +39,11 @@ export interface PlacedCollection {
 /** Property holding the id of a collection's parent, requested with each search hit. */
 export const PARENT_ID_PROPERTY = 'virtual:primaryparent_nodeid';
 
-/** Properties requested for every collection: the order of its children and its parent. */
+/** Properties requested for every collection: the order of its children, its parent and owner. */
 const PROPERTY_FILTER = [
     RestConstants.CCM_PROP_COLLECTION_SUBCOLLECTION_ORDER_MODE,
     PARENT_ID_PROPERTY,
+    RestConstants.CM_OWNER,
 ];
 /** Parameters of the collections query limiting it to a subtree, given collections and titles. */
 const PARENT_RECURSIVE_PARAMETER = 'virtual:parent_recursive';
