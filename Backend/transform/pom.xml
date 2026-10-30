@@ -22,7 +22,7 @@
         <spring.boot.version>3.5.15</spring.boot.version>
         <tomcat.version>10.1.61</tomcat.version>
         <jackson-bom.version>2.21.7</jackson-bom.version>
-        <spring.version>6.2.16</spring.version>
+        <spring.version>6.2.19</spring.version>
         <java.version>17</java.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
@@ -87,6 +87,41 @@
                 <version>${jackson-bom.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <!-- security update: transitive versions of alfresco-base-t-engine (guava, plexus-utils via maven-artifact,
+                 httpclient5/httpcore5, activemq-client via spring-boot-starter-activemq).
+                 activemq-client, httpclient5 and httpcore5 are managed by spring-boot-dependencies and therefore have to
+                 be declared before the import. can be removed again once alfresco-base-t-engine and spring boot ship
+                 fixed versions -->
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>33.7.2-jre</version>
+            </dependency>
+            <dependency>
+                <groupId>org.codehaus.plexus</groupId>
+                <artifactId>plexus-utils</artifactId>
+                <version>4.0.3</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.activemq</groupId>
+                <artifactId>activemq-client</artifactId>
+                <version>6.2.10</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents.client5</groupId>
+                <artifactId>httpclient5</artifactId>
+                <version>5.6.5</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents.core5</groupId>
+                <artifactId>httpcore5</artifactId>
+                <version>5.4.4</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents.core5</groupId>
+                <artifactId>httpcore5-h2</artifactId>
+                <version>5.4.4</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
