@@ -2,6 +2,7 @@ package org.edu_sharing.restservices.node.v1;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Encoding;
@@ -35,6 +36,8 @@ import org.edu_sharing.restservices.node.v1.model.*;
 import org.edu_sharing.restservices.node.v1.model.SearchResult;
 import org.edu_sharing.restservices.search.v1.model.SearchFacet;
 import org.edu_sharing.restservices.shared.*;
+import org.edu_sharing.service.altcha.AltchaService;
+import org.edu_sharing.service.altcha.RequireAltchaForGuests;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.clientutils.ClientUtilsService;
 import org.edu_sharing.service.clientutils.WebsiteInformation;
@@ -157,6 +160,8 @@ public class NodeApi {
     @Path("/nodes/{repository}/{node}/report")
 
     @Operation(summary = "Report the node.", description = "Report a node to notify the admin about an issue)")
+    @Parameter(name = AltchaService.HEADER, in = ParameterIn.HEADER, description = "solved ALTCHA payload, required for guests if ALTCHA is enabled (see /altcha/v1/challenge)")
+    @RequireAltchaForGuests(AltchaService.ACTION_REPORT)
 
     @ApiResponses(
             value = {
@@ -165,6 +170,7 @@ public class NodeApi {
                     @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "409", description = "ALTCHA payload was already used."),
                     @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             })
 

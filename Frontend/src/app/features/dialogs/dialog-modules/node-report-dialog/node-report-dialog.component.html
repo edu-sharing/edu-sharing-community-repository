@@ -53,4 +53,13 @@
       {{ data.mode + '.EMAIL_REQUIRED' | translate }}
     </mat-error>
   </mat-form-field>
+  @if (altchaChallengeUrl(); as challengeUrl) {
+  <es-altcha-widget
+    [challengeUrl]="challengeUrl"
+    (payloadChange)="onAltchaPayloadChange($event)"
+  ></es-altcha-widget>
+  @if (altchaMissing()) {
+  <mat-error>{{ 'NODE_REPORT.ALTCHA_REQUIRED' | translate }}</mat-error>
+  }
+  }
 </form>
