@@ -6,8 +6,8 @@ import { Closable } from '../../../../dialogs/card-dialog/card-dialog-config';
 import { YES_OR_NO } from '../../../../dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { DialogsService } from '../../../../dialogs/dialogs.service';
 import { SharedModule } from '../../../../../shared/shared.module';
+import { COLLECTION_TREE_PROPERTY } from '../../../../../features/mds/mds-editor/widgets/mds-editor-widget-tree/collection-tree/collection-tree-config';
 import {
-    DEFAULT_COLLECTION_ID_PROP,
     SWIMLANE_TYPE_OPTIONS,
     WIDGET_TYPE_OPTIONS,
     WIDGETS,
@@ -61,7 +61,7 @@ export class SwimlaneSettingsDialogComponent implements OnInit {
     protected readonly advancedCount = signal<number>(0);
     /** the patch a content teaser gets by default, which is what it is repeated for */
     private readonly collectionFilterExample: string = patchExample({
-        propertyFilters: { [DEFAULT_COLLECTION_ID_PROP]: ['${item.nodeId}'] },
+        propertyFilters: { [COLLECTION_TREE_PROPERTY]: ['${item.nodeId}'] },
     });
 
     ngOnInit(): void {
@@ -142,7 +142,7 @@ export class SwimlaneSettingsDialogComponent implements OnInit {
             {
                 key: 'COLLECTION_FILTER_NEWEST',
                 json: patchExample({
-                    propertyFilters: { [DEFAULT_COLLECTION_ID_PROP]: ['${item.nodeId}'] },
+                    propertyFilters: { [COLLECTION_TREE_PROPERTY]: ['${item.nodeId}'] },
                     sort: { active: 'cm:modified', direction: 'desc' },
                 }),
             },

@@ -1,13 +1,14 @@
 package org.edu_sharing.service.mime;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.axis.utils.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.alfresco.action.RessourceInfoExecuter;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
-import org.edu_sharing.metadataset.v2.MetadataWidget;
+import org.edu_sharing.metadataset.v2.MetadataKey;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.Theme;
+import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.tools.URLHelper;
@@ -264,18 +265,16 @@ public class MimeTypesV2 {
 					mdsSet = CCConstants.metadatasetdefault_id;
 				}
                 try {
-					Object values = info.properties.get(CCConstants.getValidGlobalName(id));
-					if(values instanceof Collection) {
-						values = ((Collection<?>) values).iterator().next();
-					}
-					if(values instanceof String) {
-						MetadataWidget widget = MetadataHelper.getMetadataset(mdsSet).findWidget(id);
-						String icon = widget.getValuesAsMap().get(values).getIcon();
-						if(!StringUtils.isEmpty(icon)) {
-							return icon;
+					List<String> values = getValues(info.properties.get(CCConstants.getValidGlobalName(id)));
+					if(!values.isEmpty()) {
+						Map<String, MetadataKey> valuespace = MetadataHelper.getMetadataset(mdsSet).findWidget(id).getValuesAsMap();
+						// use the first value that has an icon (multivalue properties may contain values without one)
+						for(String value : values) {
+							MetadataKey key = valuespace.get(value);
+							if(key != null && !StringUtils.isEmpty(key.getIcon())) {
+								return key.getIcon();
+							}
 						}
-					} else if (values != null) {
-						log.info("Not valid string value for " + id + " / " + info.properties.get(CCConstants.SYS_PROP_NODE_UID) + ": " + values.getClass());
 					}
                 } catch (Throwable t) {
 					log.info("Error resolving font glyphe:" + t.getMessage(), t);
@@ -569,9 +568,25 @@ public class MimeTypesV2 {
 		}
 		// try to map from learningResourceType
 		if(mimeType == null && properties.containsKey(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_LEARNINGRESSOURCETYPE)) {
-			mimeType = getLrtMimeMap().get(properties.get(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_LEARNINGRESSOURCETYPE));
+			mimeType = getValues(properties.get(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_LEARNINGRESSOURCETYPE)).stream()
+					.map(getLrtMimeMap()::get)
+					.filter(Objects::nonNull)
+					.findFirst().orElse(null);
 		}
 		return mimeType;
+	}
+
+	/**
+	 * multivalue properties are either provided as a collection or as a string joined by {@link CCConstants#MULTIVALUE_SEPARATOR}
+	 */
+	private static List<String> getValues(Object value) {
+		if(value instanceof Collection) {
+			return ((Collection<?>) value).stream().filter(Objects::nonNull).map(Object::toString).toList();
+		}
+		if(value instanceof String && !((String) value).isEmpty()) {
+			return Arrays.asList(ValueTool.getMultivalue((String) value));
+		}
+		return Collections.emptyList();
 	}
 
 	public enum Type {
