@@ -120,6 +120,12 @@
     <span class="slider-value">{{ value()[0] }}</span
     >-<span class="slider-value">{{ value()[1] }}</span>
   </div>
+  @if (basicType() === 'html') {
+  <div
+    class="widget-html"
+    [innerHTML]="value()?.[0] | safeHtml : { purify: true, allowedTags: HTML_ALLOWED_TAGS }"
+  ></div>
+  }
   <div *ngIf="basicType() === 'checkbox'">
     {{ (value()?.[0] === 'true' ? 'YES' : 'NO') | translate }}
   </div>

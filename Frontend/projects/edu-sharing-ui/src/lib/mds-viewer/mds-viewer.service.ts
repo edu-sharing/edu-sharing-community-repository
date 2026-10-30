@@ -106,6 +106,8 @@ export class MdsViewerService {
             case 'checkbox':
             case 'toggle':
                 return 'checkbox';
+            case 'tinyMCE':
+                return 'html';
         }
         return 'unknown';
     }
