@@ -59,7 +59,7 @@ import {
     VirtualNode,
 } from 'ngx-edu-sharing-ui';
 import { firstValueFrom, forkJoin, Subject } from 'rxjs';
-import { filter, takeUntil } from 'rxjs/operators';
+import { filter, map, takeUntil } from 'rxjs/operators';
 import * as EduData from '../../../core-module/core.module';
 import { ConfigurationHelper, LoginResult, Permission } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
@@ -272,6 +272,21 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 }
             }
         });
+        // new level0 collections (e.g. pasted on the start page) are shown right away, the search
+        // index does not know them yet (they are also kept in KEY_ROOT_COLLECTIONS for reloads)
+        this.localEventsService.nodesCreated
+            .pipe(
+                takeUntil(this.destroyed$),
+                filter(() => this.isRootLevel && this.scope === RestConstants.COLLECTIONSCOPE_MY),
+                map((nodes) => nodes.filter((n) => this.nodeHelper.isNodeCollection(n))),
+                filter((nodes) => nodes.length > 0),
+            )
+            .subscribe((nodes) =>
+                this.listCollections?.addVirtualNodes(
+                    nodes.map((n) => ({ ...n, override: false } as VirtualNode)),
+                    { select: false },
+                ),
+            );
         this.localEventsService.nodesChanged
             .pipe(
                 takeUntil(this.destroyed$),

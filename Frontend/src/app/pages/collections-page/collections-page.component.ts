@@ -226,6 +226,19 @@ export class CollectionsPageComponent implements OnDestroy {
                 () => this.uiService.goToLogin(),
             );
         });
+        // New level0 collections (e.g. pasted on the start page) always belong to the user's own
+        // collections and are only shown (as virtual nodes until indexed) in the "my" tab.
+        this.localEvents.nodesCreated
+            .pipe(
+                takeUntil(this.destroyed),
+                filter(
+                    (nodes) =>
+                        this.isRootLevelCollection() &&
+                        this.tabSelected !== RestConstants.COLLECTIONSCOPE_MY &&
+                        nodes.some((node) => this.nodeHelper.isNodeCollection(node)),
+                ),
+            )
+            .subscribe(() => this.selectTab(RestConstants.COLLECTIONSCOPE_MY));
         // Navigate to parent collection when the current collection is deleted.
         this.localEvents.nodesDeleted
             .pipe(

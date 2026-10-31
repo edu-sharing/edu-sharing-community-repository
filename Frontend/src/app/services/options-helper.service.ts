@@ -62,6 +62,7 @@ import { WorkspaceManagementDialogsComponent } from '../features/management-dial
 import { MainNavService } from '../main/navigation/main-nav.service';
 import { BridgeService } from './bridge.service';
 import { MessageType } from '../util/message-type';
+import { GlobalCollectionsPageService } from '../pages/collections-page/global-collections-page.service';
 import { forkJoinWithErrors } from '../util/rxjs/forkJoinWithErrors';
 import { ConfigOptionItem, NodeHelperService } from './node-helper.service';
 import { Toast } from './toast';
@@ -104,6 +105,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
     public toast = inject(Toast);
     public assignmentV1Service = inject(AssignmentV1Service);
     private translate = inject(TranslateService);
+    private globalCollectionsPageService = inject(GlobalCollectionsPageService);
     public uiService = inject(UIService);
 
     static DownloadElementTypes = [
@@ -288,13 +290,20 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         }
         this.toast.showProgressSpinner();
         try {
+            const moved: Node[] = [];
             for (const node of clip.nodes) {
-                await firstValueFrom(
+                const result = await firstValueFrom(
                     this.nodeServiceLegacy.moveNode(
                         toRoot ? RestConstants.COLLECTIONHOME : target.ref.id,
                         node.ref.id,
                     ),
                 );
+                moved.push({ ...node, ...result?.node, collection: node.collection } as Node);
+            }
+            if (toRoot) {
+                // fake the client state until the index has the new level0 collections
+                await this.globalCollectionsPageService.addTemporaryCollections(moved);
+                this.localEvents.nodesCreated.emit(moved);
             }
             this.storage.remove(TemporaryStorageService.WORKSPACE_CLIPBOARD);
             this.bridge.showTemporaryMessage(MessageType.info, 'WORKSPACE.TOAST.PASTE', {
@@ -305,7 +314,11 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                 count: clip.nodes.length,
                 mode: this.translate.instant('WORKSPACE.PASTE_MOVE'),
             });
-            this.localEvents.nodesChanged.emit([target, clip.sourceNode].filter(Boolean));
+            if (!toRoot) {
+                // the start page shows the moved collections via `nodesCreated`, a reload would
+                // only return what the index already knows
+                this.localEvents.nodesChanged.emit([target, clip.sourceNode].filter(Boolean));
+            }
         } catch (error) {
             if (error?.status === RestConstants.DUPLICATE_NODE_RESPONSE) {
                 this.toast.error(null, 'COLLECTIONS.ERROR_NODE_EXISTS');
@@ -354,6 +367,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         this.toast.showProgressSpinner();
         try {
             let skippedRefs = 0;
+            const created: Node[] = [];
             for (const source of clip.nodes) {
                 const copyResponse = await firstValueFrom(
                     this.collectionApiService.copyCollection({
@@ -373,9 +387,15 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                         (entry) => entry?.errorCode === 'NO_PUBLISH_PERMISSION',
                     )?.length ?? 0;
                 if (copyResponse?.root) {
-                    this.localEvents.nodesCreated.emit([copyResponse.root]);
+                    created.push(copyResponse.root);
                 }
             }
+            const toRoot = target.ref.id === ROOT;
+            if (toRoot) {
+                // fake the client state until the index has the new level0 collections
+                await this.globalCollectionsPageService.addTemporaryCollections(created);
+            }
+            this.localEvents.nodesCreated.emit(created);
             this.storage.remove(TemporaryStorageService.WORKSPACE_CLIPBOARD);
             if (skippedRefs > 0) {
                 this.toast.toast('COLLECTIONS.TOAST.COPIED_NO_PUBLISH_PERMISSION', {
@@ -384,7 +404,11 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             } else {
                 this.toast.toast('COLLECTIONS.TOAST.COPIED');
             }
-            this.localEvents.nodesChanged.emit([target]);
+            if (!toRoot) {
+                // the start page shows the copies via `nodesCreated`, a reload would only return
+                // what the index already knows
+                this.localEvents.nodesChanged.emit([target]);
+            }
         } catch (error) {
             this.toast.error(error);
         } finally {
