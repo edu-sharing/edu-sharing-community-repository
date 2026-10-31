@@ -173,6 +173,8 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     private addInProgress = false;
     /** Whether the selected-nodes overlay above the selection bar is open. */
     selectionOverlayOpen = false;
+    /** Whether the sub-collections list (start page) currently feeds the bottom bar. */
+    private collectionsListDrivesBar = false;
     /** Open the selection overlay upward (its bottom edge aligned to the bar's top edge). */
     readonly overlayPositions: ConnectedPosition[] = [
         {
@@ -1029,6 +1031,23 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             const queryParams = this.route.snapshot.queryParams;
             if (queryParams.reurl && queryParams.applyCollections === 'true') {
                 void this.listCollections?.initOptionsGenerator({});
+            } else if (this.isRootLevel) {
+                // the start page has no references list: its sub-collections list drives the
+                // bottom bar instead, which only offers pasting collections as level0 collections
+                void this.listCollections?.initOptionsGenerator({
+                    actionbar: this.selectionActionbar?.(),
+                    parent: this.collection,
+                    scope: Scope.CollectionsCollection,
+                    customOptions: { useDefaultOptions: true, supportedOptions: ['OPTIONS.PASTE'] },
+                });
+                this.collectionsListDrivesBar = true;
+            } else if (this.collectionsListDrivesBar) {
+                // inside a collection the references list drives the bottom bar: unbind the
+                // start page wiring so both lists do not write into the same bar
+                void this.listCollections?.initOptionsGenerator({
+                    customOptions: { useDefaultOptions: false },
+                });
+                this.collectionsListDrivesBar = false;
             }
             if (!this.loadingTask.isDone) {
                 this.loadingTask.done();

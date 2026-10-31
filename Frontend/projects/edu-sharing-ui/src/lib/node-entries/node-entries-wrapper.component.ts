@@ -5,6 +5,7 @@ import {
     Component,
     ComponentRef,
     ContentChild,
+    effect,
     ElementRef,
     EventEmitter,
     HostBinding,
@@ -18,6 +19,7 @@ import {
     Output,
     SimpleChange,
     TemplateRef,
+    untracked,
     Type,
     ViewChild,
     ViewContainerRef,
@@ -237,6 +239,15 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
                 console.warn('optionsHelper is not initalized correctly; data is empty');
             }
             void this.optionsHelper.refreshComponents();
+        });
+        // clipboard dependent options (e.g. paste) must follow cut/copy/paste immediately
+        effect(() => {
+            this.temporaryStorageService.clipboard();
+            untracked(() => {
+                if (this.optionsHelper.getData()) {
+                    void this.optionsHelper.refreshComponents();
+                }
+            });
         });
     }
 
@@ -560,7 +571,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     async initOptionsGenerator(config: ListOptionsConfig) {
         await this.optionsHelper.initComponents(config.actionbar, this);
         this.optionsHelper.setData({
-            scope: this.entriesService.scope,
+            scope: config.scope ?? this.entriesService.scope,
             activeObjects: this.entriesService.selection.selected,
             selectedObjects: this.entriesService.selection.selected,
             allObjects: this.dataSource.getData(),

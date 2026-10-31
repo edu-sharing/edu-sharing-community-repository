@@ -128,6 +128,10 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy,
     private searchField = inject(SearchFieldService);
     private session = inject(SessionStorageService);
     private storage = inject(TemporaryStorageService);
+    /** Cut/copied nodes; while not empty the bottom bar offers "paste". */
+    readonly clipboard = this.storage.clipboard;
+    /** Whether the clipboard-nodes overlay above the bottom bar is open. */
+    clipboardOverlayOpen = false;
     private userService = inject(UserService);
     private toast = inject(Toast);
     private toolService = inject(RestToolService);
@@ -1102,7 +1106,9 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy,
     }
 
     private canPasteInCurrentLocation() {
-        const clip = this.storage.get('workspace_clipboard') as ClipboardObject;
+        const clip = this.storage.get(
+            TemporaryStorageService.WORKSPACE_CLIPBOARD,
+        ) as ClipboardObject;
         return (
             this.currentFolder &&
             !this.searchQuery &&
@@ -1161,6 +1167,20 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy,
     /** Display type of the current view, used by the selection overlay (recycle is always a table). */
     get selectionDisplayType() {
         return this.root === 'RECYCLE' ? NodeEntriesDisplayType.Table : this.displayType;
+    }
+
+    /** Whether the bottom bar is shown without a selection, to offer pasting the clipboard. */
+    showClipboardBar(): boolean {
+        return this.isLoggedIn && this.root !== 'RECYCLE' && !!this.clipboard()?.nodes?.length;
+    }
+
+    clearClipboard() {
+        this.storage.remove(TemporaryStorageService.WORKSPACE_CLIPBOARD);
+        this.clipboardOverlayOpen = false;
+    }
+
+    removeFromClipboard(node: Node) {
+        this.storage.removeFromClipboard(node);
     }
 
     clearSelection() {

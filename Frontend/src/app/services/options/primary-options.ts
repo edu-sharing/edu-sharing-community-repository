@@ -149,8 +149,9 @@ export function createPrimaryOptions({
         Constrain.AddObjects,
         Constrain.User,
     ];
-    // collections can only be pasted into another collection
-    pasteNodeIntoFolder.customShowCallback = async () => !service.clipboardContainsCollections();
+    // collections and collection references can only be pasted into another collection
+    pasteNodeIntoFolder.customShowCallback = async (nodes) =>
+        service.canPasteIntoFolder(nodes?.[0]);
     pasteNodeIntoFolder.toolpermissions = [
         RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FOLDERS,
         RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES,

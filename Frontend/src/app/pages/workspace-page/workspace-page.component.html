@@ -34,9 +34,13 @@
           ></es-breadcrumbs>
           }
           <!-- Split actionbar (mirrors collections/search): node actions move to the bottom
-            selection bar, so the topbar only paints them while nothing is selected — that is where
-            the selection-independent actions such as "paste" live. -->
-          <es-actionbar #actionbar [showActionOptions]="!selection.length"></es-actionbar>
+            selection bar, so the topbar only paints them while nothing is selected. Clipboard
+            actions such as "paste" are shown in the bottom bar as long as the clipboard has
+            content. -->
+          <es-actionbar
+            #actionbar
+            [showActionOptions]="!selection.length && !showClipboardBar()"
+          ></es-actionbar>
         </div>
       </div>
       @if (isBlocked) {
@@ -94,7 +98,7 @@
           role="navigation"
           [attr.aria-label]="'NAV.WORKSPACE_TREE' | translate"
           [style.--treeOffset.px]="treeOffset"
-          [class.selection-bar-visible]="selection.length"
+          [class.selection-bar-visible]="selection.length || showClipboardBar()"
         >
           <es-workspace-tree
             [class.tree-quota]="user.person.quota.enabled"
@@ -151,13 +155,15 @@
       <es-global-progress></es-global-progress>
       }
 
-      <!-- Full-width selection bar; mirrors the search/collections selection layout. -->
+      <!-- Full-width selection bar; mirrors the search/collections selection layout. Without a
+        selection it stays visible while the clipboard has content, to offer "paste". -->
       <div
         class="selection-action-bar"
         cdkOverlayOrigin
         #selectionBar="cdkOverlayOrigin"
-        [class.visible]="selection.length"
+        [class.visible]="selection.length || showClipboardBar()"
       >
+        @if (selection.length) {
         <button
           mat-icon-button
           class="clear-selection"
@@ -176,6 +182,26 @@
           {{ 'SEARCH.N_SELECTED' | translate : { count: selection.length || 0 } }}
           <i [esIcon]="selectionOverlayOpen ? 'expand_more' : 'expand_less'"></i>
         </button>
+        } @else {
+        <button
+          mat-icon-button
+          class="clear-selection"
+          (click)="clearClipboard()"
+          [attr.aria-label]="'SEARCH.CLEAR_CLIPBOARD' | translate"
+          matTooltip="{{ 'SEARCH.CLEAR_CLIPBOARD' | translate }}"
+        >
+          <i esIcon="close"></i>
+        </button>
+        <button
+          mat-button
+          color="primary"
+          class="count"
+          (click)="clipboardOverlayOpen = !clipboardOverlayOpen"
+        >
+          {{ 'SEARCH.N_IN_CLIPBOARD' | translate : { count: clipboard()?.nodes?.length || 0 } }}
+          <i [esIcon]="clipboardOverlayOpen ? 'expand_more' : 'expand_less'"></i>
+        </button>
+        }
         <es-actionbar
           #selectionActionbarRef
           [showToggleOptions]="false"
@@ -197,6 +223,24 @@
           [columns]="selectionColumns"
           [displayType]="selectionDisplayType"
           (deselect)="deselectNode($event)"
+        ></es-search-selection-overlay>
+      </ng-template>
+      <!-- clipboard counterpart of the selection overlay; removing a node takes it off the
+        clipboard -->
+      <ng-template
+        cdkConnectedOverlay
+        [cdkConnectedOverlayOrigin]="selectionBar"
+        [cdkConnectedOverlayOpen]="clipboardOverlayOpen && !selection.length && showClipboardBar()"
+        [cdkConnectedOverlayPositions]="overlayPositions"
+        [cdkConnectedOverlayWidth]="selectionBar.elementRef.nativeElement.offsetWidth"
+        [cdkConnectedOverlayHasBackdrop]="false"
+        (overlayOutsideClick)="clipboardOverlayOpen = false"
+      >
+        <es-search-selection-overlay
+          [nodes]="clipboard()?.nodes || []"
+          [columns]="selectionColumns"
+          [displayType]="selectionDisplayType"
+          (deselect)="removeFromClipboard($event)"
         ></es-search-selection-overlay>
       </ng-template>
     </div>

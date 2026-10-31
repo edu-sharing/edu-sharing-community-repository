@@ -24,6 +24,7 @@ import {
     NodeEntriesDisplayType,
     NodeEntriesGlobalService,
     NodeHelperService as NodeHelperServiceUi,
+    NodesRightMode,
     OptionData,
     OptionItem,
     OptionItemToggle,
@@ -143,21 +144,25 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         }
         list = Helper.deepCopy(list);
         const clip: ClipboardObject = { sourceNode: data.parent, nodes: list, copy };
-        this.storage.set('workspace_clipboard', clip);
+        this.storage.set(TemporaryStorageService.WORKSPACE_CLIPBOARD, clip);
         this.bridge.showTemporaryMessage(MessageType.info, 'WORKSPACE.TOAST.CUT_COPY', {
             count: list.length,
         });
     }
 
+    private getClipboard(): ClipboardObject | null {
+        return this.storage.get(TemporaryStorageService.WORKSPACE_CLIPBOARD) as ClipboardObject;
+    }
+
     /** Whether the clipboard holds collections. */
     clipboardContainsCollections(): boolean {
-        const clip = this.storage.get('workspace_clipboard') as ClipboardObject;
+        const clip = this.getClipboard();
         return !!clip?.nodes?.length && clip.nodes.every((node) => this.isCollection(node));
     }
 
     /** Whether the clipboard holds files, the only nodes a collection can reference. */
     clipboardContainsCollectableNodes(): boolean {
-        const clip = this.storage.get('workspace_clipboard') as ClipboardObject;
+        const clip = this.getClipboard();
         return (
             !!clip?.nodes?.length &&
             clip.nodes.every(
@@ -166,21 +171,159 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         );
     }
 
+    /** Whether the clipboard was cut inside the collections (collections/references to be moved). */
+    private clipboardIsCutFromCollection(): boolean {
+        const clip = this.getClipboard();
+        return (
+            !!clip?.nodes?.length &&
+            !clip.copy &&
+            clip.nodes.every(
+                (node) =>
+                    this.isCollection(node) ||
+                    node.aspects?.includes(RestConstants.CCM_ASPECT_IO_REFERENCE),
+            )
+        );
+    }
+
+    /**
+     * Whether the clipboard can be pasted into a workspace folder: collections and nodes cut
+     * inside a collection (collection references) can only be pasted into another collection.
+     * Cut nodes can neither be pasted into their source folder again nor a folder into itself.
+     */
+    canPasteIntoFolder(target?: Node): boolean {
+        if (this.clipboardContainsCollections() || this.clipboardIsCutFromCollection()) {
+            return false;
+        }
+        const clip = this.getClipboard();
+        if (!clip || !target?.ref?.id) {
+            return true;
+        }
+        if (clip.nodes?.some((node) => node.ref.id === target.ref.id)) {
+            return false;
+        }
+        return clip.copy || clip.sourceNode?.ref?.id !== target.ref.id;
+    }
+
+    /** Whether the clipboard can be pasted into the given collection. */
+    canPasteIntoCollection(target: Node): boolean {
+        const clip = this.getClipboard();
+        if (!clip?.nodes?.length || !this.isCollection(target)) {
+            return false;
+        }
+        if (target.ref.id === ROOT) {
+            // collections start page: only collections can become level0 collections
+            return (
+                this.clipboardContainsCollections() &&
+                this.connector.hasToolPermissionInstant(
+                    RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS,
+                ) &&
+                (clip.copy ||
+                    (this.clipboardIsCutFromCollection() &&
+                        !clip.nodes.some((node) => node.collection?.level0)))
+            );
+        }
+        if (
+            !this.nodeHelper.getNodesRight(
+                [target],
+                RestConstants.ACCESS_WRITE,
+                NodesRightMode.Local,
+            )
+        ) {
+            return false;
+        }
+        if (!this.clipboardContainsCollections() && !this.clipboardContainsCollectableNodes()) {
+            return false;
+        }
+        if (clip.copy) {
+            return true;
+        }
+        // cut: only moving within the collections is supported, not into the current parent again
+        // and a collection not into itself
+        return (
+            this.clipboardIsCutFromCollection() &&
+            !clip.nodes.some(
+                (node) =>
+                    node.ref.id === target.ref.id ||
+                    (node.parent?.id ?? clip.sourceNode?.ref?.id) === target.ref.id,
+            )
+        );
+    }
+
     private isCollection(node: Node): boolean {
         return !!node?.collection || !!node?.aspects?.includes(RestConstants.CCM_ASPECT_COLLECTION);
     }
 
-    /** Pastes the clipboard into a collection: collections are copied, files added as references. */
+    /**
+     * Pastes the clipboard into a collection: cut nodes are moved, copied collections are copied
+     * and copied files are added as references.
+     */
     private async pasteIntoCollection(target: Node): Promise<void> {
+        if (!this.canPasteIntoCollection(target)) {
+            return;
+        }
+        if (!this.getClipboard().copy) {
+            return this.moveClipboardIntoCollection(target);
+        }
         if (this.clipboardContainsCollections()) {
             return this.pasteCollections(target);
         }
         this.addClipboardNodesToCollection(target);
     }
 
+    /** Moves the cut collections/references of the clipboard into the target collection. */
+    private async moveClipboardIntoCollection(target: Node): Promise<void> {
+        const clip = this.getClipboard();
+        // editorial and other collections can not be nested into each other (same as drag & drop)
+        const isEditorial = (node: Node) =>
+            node.collection?.type === RestConstants.COLLECTIONTYPE_EDITORIAL;
+        const toRoot = target.ref.id === ROOT;
+        // moving to the start page is always allowed (same as dropping on the breadcrumb home)
+        if (
+            !toRoot &&
+            this.clipboardContainsCollections() &&
+            clip.nodes.some((node) => isEditorial(node) !== isEditorial(target))
+        ) {
+            this.toast.error(null, 'INVALID_OPERATION');
+            return;
+        }
+        this.toast.showProgressSpinner();
+        try {
+            for (const node of clip.nodes) {
+                await firstValueFrom(
+                    this.nodeServiceLegacy.moveNode(
+                        toRoot ? RestConstants.COLLECTIONHOME : target.ref.id,
+                        node.ref.id,
+                    ),
+                );
+            }
+            this.storage.remove(TemporaryStorageService.WORKSPACE_CLIPBOARD);
+            this.bridge.showTemporaryMessage(MessageType.info, 'WORKSPACE.TOAST.PASTE', {
+                from: clip.sourceNode?.title || clip.sourceNode?.name || '',
+                to: toRoot
+                    ? this.translate.instant('COLLECTIONS.TITLE')
+                    : target.title || target.name,
+                count: clip.nodes.length,
+                mode: this.translate.instant('WORKSPACE.PASTE_MOVE'),
+            });
+            this.localEvents.nodesChanged.emit([target, clip.sourceNode].filter(Boolean));
+        } catch (error) {
+            if (error?.status === RestConstants.DUPLICATE_NODE_RESPONSE) {
+                this.toast.error(null, 'COLLECTIONS.ERROR_NODE_EXISTS');
+            } else {
+                this.toast.error(error);
+            }
+            // partially moved nodes are visible after a refresh
+            this.localEvents.nodesChanged.emit([target, clip.sourceNode].filter(Boolean));
+        } finally {
+            this.toast.closeProgressSpinner();
+        }
+    }
+
     /** Adds the clipboard nodes to the given collection, they become collection references. */
     private addClipboardNodesToCollection(target: Node): void {
-        const clip = this.storage.get('workspace_clipboard') as ClipboardObject;
+        const clip = this.storage.get(
+            TemporaryStorageService.WORKSPACE_CLIPBOARD,
+        ) as ClipboardObject;
         if (!clip?.nodes?.length || !target) {
             return;
         }
@@ -192,7 +335,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         this.toast.showProgressSpinner();
         // `addToCollection` reports the result, handles duplicates and emits the node events itself
         this.uiService.addToCollection(target, nodes, false, () => {
-            this.storage.remove('workspace_clipboard');
+            this.storage.remove(TemporaryStorageService.WORKSPACE_CLIPBOARD);
             this.toast.closeProgressSpinner();
         });
     }
@@ -202,7 +345,9 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
      * references and permissions.
      */
     private async pasteCollections(target: Node): Promise<void> {
-        const clip = this.storage.get('workspace_clipboard') as ClipboardObject;
+        const clip = this.storage.get(
+            TemporaryStorageService.WORKSPACE_CLIPBOARD,
+        ) as ClipboardObject;
         if (!clip?.nodes?.length || !target) {
             return;
         }
@@ -231,7 +376,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                     this.localEvents.nodesCreated.emit([copyResponse.root]);
                 }
             }
-            this.storage.remove('workspace_clipboard');
+            this.storage.remove(TemporaryStorageService.WORKSPACE_CLIPBOARD);
             if (skippedRefs > 0) {
                 this.toast.toast('COLLECTIONS.TOAST.COPIED_NO_PUBLISH_PERMISSION', {
                     count: skippedRefs,
@@ -253,14 +398,17 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         addVirtualNodes = true,
         nodes: Node[] = [],
     ) {
-        const clip = this.storage.get('workspace_clipboard') as ClipboardObject;
+        const clip = this.storage.get(
+            TemporaryStorageService.WORKSPACE_CLIPBOARD,
+        ) as ClipboardObject;
         // a collection target is not pasted node by node
         if (this.isCollection(data.parent)) {
             void this.pasteIntoCollection(data.parent);
             return;
         }
-        // collections can only be pasted into another collection
-        if (this.clipboardContainsCollections()) {
+        // collections and collection references can only be pasted into another collection;
+        // checked before the first node only, the recursion continues the started paste
+        if (!nodes.length && !this.canPasteIntoFolder(data.parent)) {
             return;
         }
         if (!this.canAddObjects(data)) {
@@ -268,7 +416,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         }
         if (nodes.length === clip.nodes.length) {
             this.bridge.closeModalDialog();
-            this.storage.remove('workspace_clipboard');
+            this.storage.remove(TemporaryStorageService.WORKSPACE_CLIPBOARD);
             const info: any = {
                 from: clip.sourceNode
                     ? clip.sourceNode.name
