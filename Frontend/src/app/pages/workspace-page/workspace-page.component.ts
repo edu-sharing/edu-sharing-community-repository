@@ -74,7 +74,10 @@ import {
 import { CardService } from '../../services/card.service';
 import { NodeHelperService } from '../../services/node-helper.service';
 import { Toast } from '../../services/toast';
-import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
+import {
+    BreadcrumbsDropHandler,
+    BreadcrumbsService,
+} from '../../shared/components/breadcrumbs/breadcrumbs.service';
 import { WorkspaceExplorerComponent } from './explorer/explorer.component';
 import { WorkspaceTreeComponent } from './tree/tree.component';
 import { canDragDrop, canDropOnNode } from './workspace-utils';
@@ -237,6 +240,11 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy,
     displayType: NodeEntriesDisplayType = null;
     reorderDialog: boolean;
     private readonly destroyed$ = new Subject<void>();
+    /** allow global/custom breadcrumbs (e.g. of extensions) to act as drop targets as well */
+    private readonly breadcrumbsDropHandler: BreadcrumbsDropHandler = {
+        canDropNodes: (dragData) => this.canDropOnBreadcrumb(dragData),
+        dropElement: (target, source) => this.handleDropOnBreadcrumb({ target, source }),
+    };
     private loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed$ });
 
     constructor() {
@@ -250,11 +258,13 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy,
     }
 
     ngOnInit(): void {
+        this.breadcrumbsService.setDropHandler(this.breadcrumbsDropHandler);
         this.registerScroll();
         this.registerUpdateMainNav();
     }
 
     ngOnDestroy(): void {
+        this.breadcrumbsService.clearDropHandler(this.breadcrumbsDropHandler);
         this.destroyed$.next();
         this.destroyed$.complete();
         // the clipboard is kept when leaving the workspace, it is also used by the collections page

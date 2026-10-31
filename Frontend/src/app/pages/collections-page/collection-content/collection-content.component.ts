@@ -13,6 +13,10 @@ import {
     TemplateRef,
     ViewChild,
 } from '@angular/core';
+import {
+    BreadcrumbsDropHandler,
+    BreadcrumbsService,
+} from '../../../shared/components/breadcrumbs/breadcrumbs.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PlatformLocation } from '@angular/common';
 import { TranslateService } from '@ngx-translate/core';
@@ -95,6 +99,7 @@ import {
 })
 export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy {
     private authenticationService = inject(AuthenticationService);
+    private breadcrumbsService = inject(BreadcrumbsService);
     private localEventsService = inject(LocalEventsService);
     private editorialSidebarService = inject(EditorialSidebarService);
     private bridge = inject(BridgeService);
@@ -129,6 +134,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     };
     referencesDisplayType = NodeEntriesDisplayType.Grid;
     private readonly destroyed$ = new Subject<void>();
+    private breadcrumbsDropHandler: BreadcrumbsDropHandler;
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
@@ -301,11 +307,18 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     }
 
     ngOnDestroy(): void {
+        this.breadcrumbsService.clearDropHandler(this.breadcrumbsDropHandler);
         this.destroyed$.next();
         this.destroyed$.complete();
     }
 
     async ngOnInit() {
+        // allow global/custom breadcrumbs (e.g. of extensions) to act as drop targets as well
+        this.breadcrumbsDropHandler = {
+            canDropNodes: this.canDropOnCollectionBreadcrumbs,
+            dropElement: (target, source) => void this.dropOnCollection(target, source),
+        };
+        this.breadcrumbsService.setDropHandler(this.breadcrumbsDropHandler);
         this.registerMainNav();
         this.mainNavUpdateTrigger.next();
         const mdsSets = await ConfigurationHelper.getAvailableMds(
