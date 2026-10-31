@@ -116,7 +116,7 @@
     ></ng-container>
     <ng-container *ngTemplateOutlet="meta"></ng-container>
   </div>
-  } @if (entriesService.options || showRatings) {
+  } @if (entriesService.options || (showRatings | async)) {
   <div class="card-options">
     <div class="card-rating-area">
       <es-node-rating [node]="node"></es-node-rating>
