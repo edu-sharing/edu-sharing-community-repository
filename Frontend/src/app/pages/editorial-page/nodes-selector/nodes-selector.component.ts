@@ -15,6 +15,7 @@ import {
 } from '@angular/core';
 import { MatButtonToggleChange } from '@angular/material/button-toggle';
 import { MatTabChangeEvent } from '@angular/material/tabs';
+import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import {
     AboutService,
@@ -62,7 +63,9 @@ import {
     NodesRightMode,
     OptionItem,
     Scope,
+    TemporaryStorageService,
     TreeConfig,
+    UIConstants,
 } from 'ngx-edu-sharing-ui';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import {
@@ -261,6 +264,8 @@ export class NodesSelectorComponent implements OnInit {
     private mdsService = inject(MdsService);
     private toast = inject(Toast);
     private translate = inject(TranslateService);
+    private router = inject(Router);
+    private temporaryStorage = inject(TemporaryStorageService);
 
     protected readonly i18nPrefix: string = 'EDITORIAL.OPTIONS.NODES_SELECTOR.';
     protected readonly idPrefix: string = 'nodes-selector-tab';
@@ -472,6 +477,26 @@ export class NodesSelectorComponent implements OnInit {
             ),
         ),
         { initialValue: false },
+    );
+    /** whether the user may create new collections */
+    private canCreateCollection: Signal<boolean> = toSignal(
+        from(
+            this.authenticationService.hasToolpermission(
+                RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS,
+            ),
+        ),
+        { initialValue: false },
+    );
+    /**
+     * whether the "new collection" entry is offered on top of the collections tree. Only while
+     * acting as a target: the selected nodes are added to the newly created collection.
+     */
+    showCreateCollection: Signal<boolean> = computed(
+        () =>
+            this.selectionMode() === 'target' &&
+            this.canCreateCollection() &&
+            this.collectionsDisplayType() === NodeEntriesDisplayType.Tree &&
+            !this.collectionsTreeToggleDisabled(),
     );
     workspaceAction = model<'move' | 'copy'>('move');
     canMoveWorkspaceNodes = computed(
@@ -1151,6 +1176,25 @@ export class NodesSelectorComponent implements OnInit {
             } catch (e) {}
             this.editorialSidebarService.sidebarLoading.set(false);
         }
+    }
+
+    /**
+     * Creates a new (root) collection and adds the selected source nodes to it, as the collection
+     * chooser did in 10.0: the nodes are handed over via the temporary storage and picked up by
+     * the collection editor once the new collection is saved.
+     */
+    async createCollectionWithSelectedNodes(): Promise<void> {
+        this.temporaryStorage.set(TemporaryStorageService.COLLECTION_ADD_NODES, {
+            nodes: this.selectedSourceNodes(),
+        });
+        this.editorialSidebarService.sidebarOpened.set(false);
+        await this.router.navigate([
+            UIConstants.ROUTER_PREFIX,
+            'collections',
+            'collection',
+            'new',
+            RestConstants.ROOT,
+        ]);
     }
 
     /**
