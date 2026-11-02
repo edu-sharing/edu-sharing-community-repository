@@ -119,7 +119,7 @@
     </docker.edu_sharing.community.common.varnish.exporter.tag>
 
     <docker.from.openjdk.17.liberica.debian>
-      ${docker.registry}/${docker.common}/edu_sharing-community-common-docker-openjdk-liberica:17.0.20-3
+      ${docker.registry}/${docker.common}/edu_sharing-community-common-docker-openjdk-liberica:17.0.20-4
     </docker.from.openjdk.17.liberica.debian>
 
     <docker.from.edu_sharing.community.common.alfresco.repository>
