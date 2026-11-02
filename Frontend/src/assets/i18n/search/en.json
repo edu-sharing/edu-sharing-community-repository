@@ -10,6 +10,8 @@
     "MATERIALS_NGSEARCHWORD": "Materials",
     "N_SELECTED": "{{count}} selected",
     "CLEAR_SELECTION": "Clear selection",
+    "N_IN_CLIPBOARD": "{{count}} element(s) in clipboard",
+    "CLEAR_CLIPBOARD": "Clear clipboard",
     "FRONTPAGE": "Recommended materials",
     "IGNORED_PARAMETERS": "The result contains objects which may not fit all given search criteria",
     "MAINSEARCHFIELD": "Input field for search",

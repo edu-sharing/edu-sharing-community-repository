@@ -13,6 +13,10 @@ import {
     TemplateRef,
     ViewChild,
 } from '@angular/core';
+import {
+    BreadcrumbsDropHandler,
+    BreadcrumbsService,
+} from '../../../shared/components/breadcrumbs/breadcrumbs.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PlatformLocation } from '@angular/common';
 import { TranslateService } from '@ngx-translate/core';
@@ -55,7 +59,7 @@ import {
     VirtualNode,
 } from 'ngx-edu-sharing-ui';
 import { firstValueFrom, forkJoin, Subject } from 'rxjs';
-import { filter, takeUntil } from 'rxjs/operators';
+import { filter, map, takeUntil } from 'rxjs/operators';
 import * as EduData from '../../../core-module/core.module';
 import { ConfigurationHelper, LoginResult, Permission } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
@@ -95,6 +99,7 @@ import {
 })
 export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy {
     private authenticationService = inject(AuthenticationService);
+    private breadcrumbsService = inject(BreadcrumbsService);
     private localEventsService = inject(LocalEventsService);
     private editorialSidebarService = inject(EditorialSidebarService);
     private bridge = inject(BridgeService);
@@ -137,6 +142,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     };
     referencesDisplayType = NodeEntriesDisplayType.Grid;
     private readonly destroyed$ = new Subject<void>();
+    private breadcrumbsDropHandler: BreadcrumbsDropHandler;
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
@@ -179,6 +185,8 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     private addInProgress = false;
     /** Whether the selected-nodes overlay above the selection bar is open. */
     selectionOverlayOpen = false;
+    /** Whether the sub-collections list (start page) currently feeds the bottom bar. */
+    private collectionsListDrivesBar = false;
     /** Open the selection overlay upward (its bottom edge aligned to the bar's top edge). */
     readonly overlayPositions: ConnectedPosition[] = [
         {
@@ -276,6 +284,21 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 }
             }
         });
+        // new level0 collections (e.g. pasted on the start page) are shown right away, the search
+        // index does not know them yet (they are also kept in KEY_ROOT_COLLECTIONS for reloads)
+        this.localEventsService.nodesCreated
+            .pipe(
+                takeUntil(this.destroyed$),
+                filter(() => this.isRootLevel && this.scope === RestConstants.COLLECTIONSCOPE_MY),
+                map((nodes) => nodes.filter((n) => this.nodeHelper.isNodeCollection(n))),
+                filter((nodes) => nodes.length > 0),
+            )
+            .subscribe((nodes) =>
+                this.listCollections?.addVirtualNodes(
+                    nodes.map((n) => ({ ...n, override: false } as VirtualNode)),
+                    { select: false },
+                ),
+            );
         this.localEventsService.nodesChanged
             .pipe(
                 takeUntil(this.destroyed$),
@@ -313,11 +336,18 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     }
 
     ngOnDestroy(): void {
+        this.breadcrumbsService.clearDropHandler(this.breadcrumbsDropHandler);
         this.destroyed$.next();
         this.destroyed$.complete();
     }
 
     async ngOnInit() {
+        // allow global/custom breadcrumbs (e.g. of extensions) to act as drop targets as well
+        this.breadcrumbsDropHandler = {
+            canDropNodes: this.canDropOnCollectionBreadcrumbs,
+            dropElement: (target, source) => void this.dropOnCollection(target, source),
+        };
+        this.breadcrumbsService.setDropHandler(this.breadcrumbsDropHandler);
         this.registerMainNav();
         this.mainNavUpdateTrigger.next();
         const mdsSets = await ConfigurationHelper.getAvailableMds(
@@ -1035,6 +1065,23 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             const queryParams = this.route.snapshot.queryParams;
             if (queryParams.reurl && queryParams.applyCollections === 'true') {
                 void this.listCollections?.initOptionsGenerator({});
+            } else if (this.isRootLevel) {
+                // the start page has no references list: its sub-collections list drives the
+                // bottom bar instead, which only offers pasting collections as level0 collections
+                void this.listCollections?.initOptionsGenerator({
+                    actionbar: this.selectionActionbar?.(),
+                    parent: this.collection,
+                    scope: Scope.CollectionsCollection,
+                    customOptions: { useDefaultOptions: true, supportedOptions: ['OPTIONS.PASTE'] },
+                });
+                this.collectionsListDrivesBar = true;
+            } else if (this.collectionsListDrivesBar) {
+                // inside a collection the references list drives the bottom bar: unbind the
+                // start page wiring so both lists do not write into the same bar
+                void this.listCollections?.initOptionsGenerator({
+                    customOptions: { useDefaultOptions: false },
+                });
+                this.collectionsListDrivesBar = false;
             }
             if (!this.loadingTask.isDone) {
                 this.loadingTask.done();

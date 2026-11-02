@@ -65,6 +65,17 @@
                 height: 30px;
             }
         }
+        > .sodix-origin-link {
+            flex-shrink: 0;
+            align-self: center;
+            margin-top: 1em;
+            .link-label {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+            }
+        }
     }
 
     .ltiFrame {

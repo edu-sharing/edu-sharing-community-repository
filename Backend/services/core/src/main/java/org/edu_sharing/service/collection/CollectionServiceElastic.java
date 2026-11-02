@@ -14,10 +14,7 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.*;
-import org.alfresco.service.cmr.security.AccessPermission;
-import org.alfresco.service.cmr.security.AuthenticationService;
-import org.alfresco.service.cmr.security.OwnableService;
-import org.alfresco.service.cmr.security.PermissionService;
+import org.alfresco.service.cmr.security.*;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.transaction.TransactionService;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
@@ -765,7 +762,34 @@ public class CollectionServiceElastic implements CollectionService {
         }
     }
 
+    /**
+     * can anyone besides the owner access the node, incl. inherited permissions
+     * uses the permissions from the index if available, otherwise falls back to alfresco
+     */
+    private boolean isSharedWithOthers(org.edu_sharing.service.model.NodeRef nodeRef) {
+        if (nodeRef.getSharedWithOthers() != null) {
+            return nodeRef.getSharedWithOthers();
+        }
+        NodeRef ref = nodeRef.asAlfrescoNodeRef();
+        return AuthenticationUtil.runAsSystem(() -> {
+            // without inheritance the stored scope is already up to date
+            if (!permissionService.getInheritParentPermissions(ref)) {
+                return false;
+            }
+            String owner = ownableService.getOwner(ref);
+            return permissionService.getAllSetPermissions(ref).stream()
+                    .filter(p -> p.getAccessStatus() == AccessStatus.ALLOWED)
+                    .map(AccessPermission::getAuthority)
+                    .anyMatch(a -> !a.equals(owner) && !a.equals(PermissionService.OWNER_AUTHORITY));
+        });
+    }
+
     private void detectAndSetCollectionScope(org.edu_sharing.service.model.NodeRef nodeRef, Collection collection) {
+        // the stored scope MY is not updated when permissions are inherited from a parent collection
+        if (CollectionDao.Scope.MY.name().equals(collection.getScope()) && isSharedWithOthers(nodeRef)) {
+            collection.setScope(CollectionDao.Scope.CUSTOM.name());
+        }
+
         if (!CollectionDao.Scope.CUSTOM.name().equals(collection.getScope())) {
             return;
         }

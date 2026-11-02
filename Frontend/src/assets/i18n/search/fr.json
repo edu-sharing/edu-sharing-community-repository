@@ -10,6 +10,8 @@
     "MATERIALS_NGSEARCHWORD": "Ressources",
     "N_SELECTED": "{{count}} sélectionné(e)s",
     "CLEAR_SELECTION": "Annuler la sélection",
+    "N_IN_CLIPBOARD": "{{count}} élément(s) dans le presse-papiers",
+    "CLEAR_CLIPBOARD": "Vider le presse-papiers",
     "FRONTPAGE": "Ressources recommandées",
     "IGNORED_PARAMETERS": "Le résultat contient des objets qui peuvent ne pas correspondre à tous les critères de recherche donnés.",
     "MAINSEARCHFIELD": "Champ de saisie pour la recherche",
