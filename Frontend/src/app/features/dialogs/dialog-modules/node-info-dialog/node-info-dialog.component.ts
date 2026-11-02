@@ -106,7 +106,9 @@ export class NodeInfoDialogComponent implements OnInit, AfterViewInit {
     ngOnInit(): void {
         const originScope = this.data.optionData?.scope;
         this.optionDebugScope =
-            originScope && originScope !== Scope.DebugShowAll ? originScope : Scope.WorkspaceList;
+            originScope && originScope !== Scope.DebugShowAll
+                ? (originScope as Scope)
+                : Scope.WorkspaceList;
         this.setNodes(this.data.nodes);
     }
 
