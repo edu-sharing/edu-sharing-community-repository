@@ -17,7 +17,7 @@ RUN locale-gen \
 ENV LANG=en_US.UTF-8
 ENV LC_ALL=en_US.UTF-8
 
-# security update: spring-*-7.0.2, bc*, cxf, camel, netty, activemq-client, jackson-core/databind/dataformat-yaml jars
+# security update: spring-*-7.0.2, bc*, cxf, camel, netty, activemq-client, jackson-core/databind/dataformat-yaml, jspecify jars
 # (+ angus-activation, neethi, qpid-jms-client, proton-j, xmlschema-core as their deps) are removed from alfresco.war and
 # replaced by newer versions from the edu-sharing amp, can be removed again once we switch to a newer alfresco version
 RUN set -eux \
@@ -65,6 +65,7 @@ RUN set -eux \
         tomcat/webapps/alfresco/WEB-INF/lib/qpid-jms-client-* \
         tomcat/webapps/alfresco/WEB-INF/lib/proton-j-* \
         tomcat/webapps/alfresco/WEB-INF/lib/xmlschema-core-* \
+        tomcat/webapps/alfresco/WEB-INF/lib/jspecify-* \
         tomcat/webapps/alfresco/WEB-INF/lib/jackson-core-* \
         tomcat/webapps/alfresco/WEB-INF/lib/jackson-databind-* \
         tomcat/webapps/alfresco/WEB-INF/lib/jackson-dataformat-yaml-* \
