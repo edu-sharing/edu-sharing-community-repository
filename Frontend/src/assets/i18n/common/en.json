@@ -919,7 +919,9 @@
       "GENERIC_INTERNAL_SERVER_ERROR": "Internal server error",
       "GENERIC_ACCESS_DENIED": "Insufficient rights",
       "H5P_PACKAGE_TOO_LARGE": "The H5P package is too large to be displayed.",
-      "H5P_PACKAGE_INVALID": "The H5P package is invalid or contains files that are not allowed and cannot be displayed."
+      "H5P_PACKAGE_INVALID": "The H5P package is invalid or contains files that are not allowed and cannot be displayed.",
+      "CONVERTER_DOCUMENT_INVALID": "The document is invalid or corrupted and cannot be displayed.",
+      "CONVERTER_DOCUMENT_TOO_LARGE": "The document is too large to be displayed."
     },
     "GDPR": {
       "EXTERNAL_SITE": "External site",

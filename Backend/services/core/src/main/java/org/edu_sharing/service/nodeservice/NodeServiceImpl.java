@@ -17,6 +17,7 @@ import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.version.Version;
+import org.alfresco.service.cmr.version.VersionDoesNotExistException;
 import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.cmr.version.VersionService;
 import org.alfresco.service.namespace.QName;
@@ -1776,6 +1777,19 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                 return cr.getReader();
             } else return null;
         }
+    }
+
+    @Override
+    public Serializable getVersionProperty(String protocol, String storeId, String nodeId, String property, String version){
+        VersionHistory versionHistory = serviceRegistry.getVersionService().getVersionHistory(new NodeRef(new StoreRef(protocol, storeId), nodeId));
+        if(versionHistory == null) return null;
+        Version versionObj;
+        try {
+            versionObj = versionHistory.getVersion(version);
+        } catch (VersionDoesNotExistException e) {
+            return null;
+        }
+        return nodeService.getProperty(versionObj.getFrozenStateNodeRef(),QName.createQName(property));
     }
 
     @Override

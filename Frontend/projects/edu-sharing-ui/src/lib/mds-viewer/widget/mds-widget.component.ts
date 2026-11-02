@@ -28,6 +28,7 @@ import { NodeHelperService } from '../../services/node-helper.service';
 import { MdsEditorInstanceServiceAbstract } from '../mds-editor-instance-service.abstract';
 import { VCard } from '../../util/VCard';
 import { VCardNamePipe } from '../../pipes/vcard-name.pipe';
+import { SafeHtmlPipe } from '../../pipes/safe-html.pipe';
 
 export interface VCardEntry {
     name: string;
@@ -150,6 +151,8 @@ export class MdsWidgetComponent implements OnInit, OnDestroy, OnChanges {
 
     @ViewChild('editWrapper') editWrapper: ElementRef;
     @ViewChild(MatRipple) matRipple: MatRipple;
+    /** tags kept for html widgets (tinyMCE): the defaults plus the headings of its toolbar */
+    readonly HTML_ALLOWED_TAGS = [...SafeHtmlPipe.DEFAULT_ALLOWED_TAGS, 'h1', 'h2', 'h3', 'h4'];
     basicType = signal<string>(null);
     rawValue: { path: MdsValue[]; id: string }[];
 

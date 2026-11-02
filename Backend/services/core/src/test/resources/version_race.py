@@ -209,6 +209,8 @@ def main():
                    help="nach kaputtem Knoten nicht abbrechen")
     p.add_argument("--insecure", action="store_true", help="TLS-Zertifikat nicht pruefen")
     p.add_argument("--csv", help="Einzelzeiten aller Requests als CSV schreiben")
+    p.add_argument("--fresh-every", type=int, default=0, metavar="N",
+                   help="alle N Runden einen neuen Knoten anlegen, damit die Versionshistorie klein bleibt")
     p.add_argument("--size", type=parse_size, default=0,
                    help="Groesse des Contents pro Save, z.B. 500KB, 5MB (Default: nur wenige Byte Text)")
     a = p.parse_args()
@@ -229,6 +231,12 @@ def main():
     rows = []
     wall_start = time.perf_counter()
     for rnd in range(1, a.rounds + 1):
+        if a.fresh_every and rnd > 1 and (rnd - 1) % a.fresh_every == 0:
+            node_id = c.create_node(f"version-race-{int(time.time())}.txt")
+            st, body = c.save(node_id, "seed\n", "seed")
+            if st != 200:
+                sys.exit(f"Initialer Save fehlgeschlagen: {st} {body[:500]}")
+            print(f"Neuer Knoten: {node_id}")
         results = run_round(c, node_id, rnd, a.threads, a.mix_metadata)
         rc = Counter(k for k, _, _, _, _ in results)
         total.update(rc)

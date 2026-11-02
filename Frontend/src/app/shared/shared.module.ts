@@ -66,7 +66,6 @@ import { AuthorityColorPipe } from './pipes/authority-color.pipe';
 import { AuthorityNamePipe } from './pipes/authority-name.pipe';
 import { BitwisePipe } from './pipes/bitwise.pipe';
 import { PermissionNamePipe } from './pipes/permission-name.pipe';
-import { SafeHtmlPipe } from './pipes/safe-html.pipe';
 import { SplitNewLinesPipe } from './pipes/split-new-lines.pipe';
 import { VersionLabelPipe } from './pipes/version-label.pipe';
 import { SmallCollectionComponent } from './components/small-collection/small-collection.component';
@@ -101,7 +100,6 @@ import { extensionUiProviders } from '../extension/extension-ui-providers';
         PermissionNamePipe,
         PoweredByComponent,
         RegisterCustomPropertyDirective,
-        SafeHtmlPipe,
         SkipTargetDirective,
         SmallCollectionComponent,
         SplitNewLinesPipe,
@@ -205,7 +203,6 @@ import { extensionUiProviders } from '../extension/extension-ui-providers';
         ReactiveFormsModule,
         RegisterCustomPropertyDirective,
         RouterModule,
-        SafeHtmlPipe,
         SkipTargetDirective,
         SmallCollectionComponent,
         SplitNewLinesPipe,

@@ -57,6 +57,7 @@ export * from './pipes/node-license.pipe';
 export * from './pipes/node-person-name.pipe';
 export * from './pipes/node-title.pipe';
 export * from './pipes/vcard-name.pipe';
+export * from './pipes/safe-html.pipe';
 export * from './services/abstract/app.service';
 export * from './services/abstract/keyboard-shortcuts.service';
 export * from './services/abstract/options-helper.service';

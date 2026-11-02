@@ -106,7 +106,9 @@ public interface NodeService {
 
     ContentReader getContentReader(String storeProtocol, String storeId, String nodeId, String version, String contentProp);
 
-    InputStream getContent(String storeProtocol, String storeId, String nodeId, String version, String contentProp) throws Throwable;
+	Serializable getVersionProperty(String protocol, String storeId, String nodeId, String property, String version);
+
+	InputStream getContent(String storeProtocol, String storeId, String nodeId, String version, String contentProp) throws Throwable;
 
 	Long getContentLength(String storeProtocol, String storeId, String nodeId, String version, String contentProp) throws Throwable;
 
