@@ -48,9 +48,9 @@
 
     <postgresql.jdbc.version>42.7.13</postgresql.jdbc.version>
     <tomcat.version>11.0.27</tomcat.version>
-    <jackson.version>2.17.2</jackson.version>
+    <jackson.version>2.18.12</jackson.version>
     <mongodb.version>5.5.1</mongodb.version>
-    <spring.version>7.0.2</spring.version>
+    <spring.version>7.0.10</spring.version>
     <spring-security.version>7.0.0</spring-security.version>
     <redisson.version>3.50.0</redisson.version>
 
@@ -155,6 +155,13 @@
         <groupId>org.apache.activemq</groupId>
         <artifactId>activemq-client-jakarta</artifactId>
         <version>5.18.6</version>
+      </dependency>
+
+      <!-- security update: replaces the activemq-client 6.2.0 removed from alfresco.war (see Dockerfile) -->
+      <dependency>
+        <groupId>org.apache.activemq</groupId>
+        <artifactId>activemq-client</artifactId>
+        <version>6.2.10</version>
       </dependency>
 
       <dependency>
@@ -308,23 +315,23 @@
       <dependency>
         <groupId>org.bouncycastle</groupId>
         <artifactId>bcpkix-jdk18on</artifactId>
-        <version>1.81.1</version>
+        <version>1.85</version>
       </dependency>
 
       <dependency>
           <groupId>org.bouncycastle</groupId>
           <artifactId>bcjmail-jdk18on</artifactId>
-          <version>1.81.1</version>
+          <version>1.85</version>
       </dependency>
       <dependency>
         <groupId>org.bouncycastle</groupId>
         <artifactId>bcutil-jdk18on</artifactId>
-        <version>1.81.1</version>
+        <version>1.85</version>
       </dependency>
       <dependency>
         <groupId>org.bouncycastle</groupId>
         <artifactId>bcprov-jdk18on</artifactId>
-        <version>1.81.1</version>
+        <version>1.85</version>
       </dependency>
       <dependency>
         <groupId>net.sourceforge.cardme</groupId>
