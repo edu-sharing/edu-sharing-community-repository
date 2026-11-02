@@ -129,8 +129,6 @@
           "EMPTY_MESSAGE": "So far you have neither created your own collection nor been given access to a collection.",
           "PLACEHOLDER": "Search for collections",
           "RECENT_COLLECTIONS": "Recently used",
-          "MY_COLLECTIONS": "My collections",
-          "EDITORIAL_COLLECTIONS": "Editorial collections",
           "DISPLAY_TYPE": {
             "LABEL": "Display type",
             "GRID": "Display as tiles",

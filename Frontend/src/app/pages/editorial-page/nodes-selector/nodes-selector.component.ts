@@ -1491,7 +1491,9 @@ export class NodesSelectorComponent implements OnInit {
     }
 
     /**
-     * Helper function to initialize the collections datasource with (faked) nodes for "my" and "editorial" collections.
+     * Helper function to initialize the collections datasource with (faked) root nodes, one per
+     * collection scope (recent, my, shared, editorial, public). Roots without collections are
+     * omitted.
      */
     private async updateCollectionsDataSource(): Promise<void> {
         // return, if dataSource is already initialized
@@ -1499,85 +1501,77 @@ export class NodesSelectorComponent implements OnInit {
             return;
         }
         this.dataSourceCollectionsTree.isLoading = true;
-        let initialData: Partial<Node>[] = [];
         const request = {
             sortBy: [this.nodeHelperService.getSortByForCollection(ROOT).active],
             sortAscending: this.nodeHelperService.getSortByForCollection(ROOT).direction === 'asc',
         };
-        // recent collections
-        const recentCollectionsNode: Partial<Node> = this.createFakeNode(
-            this.translate.instant(this.i18nPrefix + 'COLLECTIONS.RECENT_COLLECTIONS'),
-            'history_2',
-            RestConstants.COLLECTIONSCOPE_RECENT,
-            true,
-        );
-        const subRecentCollections: CollectionSubcollections = await firstValueFrom(
-            this.collectionService.getCollectionSubcollections(
-                RestConstants.ROOT,
-                RestConstants.COLLECTIONSCOPE_RECENT,
-                [PROPERTY_FILTER_ALL],
-                request,
+        // labels are shared with the collections page tabs (may be overridden by the client config)
+        const roots: { scope: string; label: string; icon: string; flat?: boolean }[] = [
+            {
+                scope: RestConstants.COLLECTIONSCOPE_RECENT,
+                label: this.i18nPrefix + 'COLLECTIONS.RECENT_COLLECTIONS',
+                icon: 'history_2',
+                // provide the recent collections as a flat list
+                flat: true,
+            },
+            {
+                scope: RestConstants.COLLECTIONSCOPE_MY,
+                label: 'COLLECTIONS.TAB.MY',
+                icon: 'person',
+            },
+            {
+                scope: RestConstants.COLLECTIONSCOPE_ORGA,
+                label: 'COLLECTIONS.TAB.EDU_GROUPS',
+                icon: 'group',
+            },
+            {
+                scope: RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL,
+                label: 'COLLECTIONS.TAB.TYPE_EDITORIAL',
+                icon: 'star',
+            },
+            {
+                scope: RestConstants.COLLECTIONSCOPE_ALL,
+                label: 'COLLECTIONS.TAB.EDU_ALL',
+                icon: 'language',
+            },
+        ];
+        // load all scopes in parallel, but keep the order of the roots
+        const subCollections: CollectionSubcollections[] = await Promise.all(
+            roots.map((root) =>
+                firstValueFrom(
+                    this.collectionService.getCollectionSubcollections(
+                        RestConstants.ROOT,
+                        root.scope,
+                        [PROPERTY_FILTER_ALL],
+                        request,
+                    ),
+                ),
             ),
         );
-        subRecentCollections.collections?.forEach((collection) => {
-            // set the ID to the (fake) parent node
-            collection.parent.id = recentCollectionsNode.ref.id;
-            // reset childCollectionsCount and childReferencesCount to provide them as a flat list
-            if (collection.collection) {
-                collection.collection.childCollectionsCount = 0;
-                collection.collection.childReferencesCount = 0;
+        let initialData: Partial<Node>[] = [];
+        roots.forEach((root, i) => {
+            const collections = subCollections[i]?.collections;
+            if (!collections?.length) {
+                return;
             }
+            const rootNode: Partial<Node> = this.createFakeNode(
+                this.translate.instant(root.label),
+                root.icon,
+                root.scope,
+                true,
+            );
+            collections.forEach((collection) => {
+                // set the ID to the (fake) parent node
+                collection.parent.id = rootNode.ref.id;
+                // reset childCollectionsCount and childReferencesCount to provide them as a flat list
+                if (root.flat && collection.collection) {
+                    collection.collection.childCollectionsCount = 0;
+                    collection.collection.childReferencesCount = 0;
+                }
+            });
+            initialData.push(rootNode);
+            initialData = initialData.concat(collections);
         });
-        if (subRecentCollections.collections?.length) {
-            initialData.push(recentCollectionsNode);
-            initialData = initialData.concat(subRecentCollections.collections);
-        }
-        // my collections
-        const myCollectionsNode: Partial<Node> = this.createFakeNode(
-            this.translate.instant(this.i18nPrefix + 'COLLECTIONS.MY_COLLECTIONS'),
-            'person',
-            RestConstants.COLLECTIONSCOPE_MY,
-            true,
-        );
-        const subMyCollections: CollectionSubcollections = await firstValueFrom(
-            this.collectionService.getCollectionSubcollections(
-                RestConstants.ROOT,
-                RestConstants.COLLECTIONSCOPE_MY,
-                [PROPERTY_FILTER_ALL],
-                request,
-            ),
-        );
-        subMyCollections.collections?.forEach((collection) => {
-            // set the ID to the (fake) parent node
-            collection.parent.id = myCollectionsNode.ref.id;
-        });
-        if (subMyCollections.collections?.length) {
-            initialData.push(myCollectionsNode);
-            initialData = initialData.concat(subMyCollections.collections);
-        }
-        // editorial collections
-        const editorialCollectionsNode: Partial<Node> = this.createFakeNode(
-            this.translate.instant(this.i18nPrefix + 'COLLECTIONS.EDITORIAL_COLLECTIONS'),
-            'star',
-            RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL,
-            true,
-        );
-        const subEditorialCollections: CollectionSubcollections = await firstValueFrom(
-            this.collectionService.getCollectionSubcollections(
-                RestConstants.ROOT,
-                RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL,
-                [PROPERTY_FILTER_ALL],
-                request,
-            ),
-        );
-        subEditorialCollections.collections?.forEach((collection) => {
-            // set the ID to the (fake) parent node
-            collection.parent.id = editorialCollectionsNode.ref.id;
-        });
-        if (subEditorialCollections.collections?.length) {
-            initialData.push(editorialCollectionsNode);
-            initialData = initialData.concat(subEditorialCollections.collections);
-        }
         this.dataSourceCollectionsTree.setData(initialData);
         this.dataSourceCollectionsTree.isLoading = false;
     }
