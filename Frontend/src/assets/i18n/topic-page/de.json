@@ -8,10 +8,34 @@
     },
     "SIDEBAR": {
       "TITLE": "Themenseite",
-      "TITLE_DESCRIPTION": "Neue Themenseite oder Vorlage aus einer bestehenden erstellen",
+      "TITLE_DESCRIPTION": "Themenseiten und Vorlagen verwalten und neu anlegen",
       "TAB": {
         "VARIANT": "Themenseite",
         "TEMPLATE": "Vorlage"
+      },
+      "MENU": {
+        "MANAGE": "Themenseiten verwalten",
+        "MANAGE_DESCRIPTION": "Seiten und Vorlagen anzeigen, neu generieren oder löschen",
+        "CREATE": "Neue Themenseite/Variante",
+        "CREATE_DESCRIPTION": "Neue Themenseite oder Vorlage aus einer bestehenden erstellen",
+        "INHERITANCE": "Vererbung",
+        "INHERITANCE_DESCRIPTION": "Themenseiten an Untersammlungen weitergeben"
+      },
+      "MANAGE": {
+        "INHERITED_HEADING": "Geerbt von {{title}}",
+        "VARIANTS_HEADING": "Seiten an dieser Sammlung",
+        "TEMPLATES_HEADING": "Vorlagen dieser Sammlung",
+        "DEFAULT": "(Standard)",
+        "CREATED": "erstellt von {{name}} am {{date}}",
+        "SHOW": "Anzeigen",
+        "REGENERATE": "Neu generieren",
+        "EDIT_TEMPLATE": "Vorlage bearbeiten",
+        "DELETE": "Löschen",
+        "EMPTY": "Für diese Sammlung gibt es noch keine Themenseite.",
+        "LOAD_ERROR": "Die Themenseiten konnten nicht geladen werden."
+      },
+      "INHERITANCE": {
+        "PLACEHOLDER": "Die Vererbung von Themenseiten an Untersammlungen wird in Kürze ergänzt."
       }
     },
     "AI": {

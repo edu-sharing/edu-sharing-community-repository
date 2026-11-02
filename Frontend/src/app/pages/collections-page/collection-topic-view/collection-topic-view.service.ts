@@ -5,6 +5,8 @@ import { ParentList, RestConstants, RestHelper } from '../../../core-module/core
 import { CollectionDetailsService } from '../../../features/collection-info/collection-details.service';
 import {
     hasTopicPage,
+    OPEN_MANAGE_SIDEBAR_PARAM,
+    OPEN_MENU_QUERY_PARAM,
     TOPIC_PAGE_VIEW_TYPE,
     VIEW_TYPE_QUERY_PARAM,
 } from '../../../features/topic-page/shared/utils/collection-topic-page-util';
@@ -12,7 +14,7 @@ import { ViewToggleItem } from '../../../shared/components/view-toggle-group/vie
 import { CollectionViewStateService, CollectionViewType } from '../collection-view-state.service';
 
 // query params only the topic view reads; they are dropped when another view is selected
-const TOPIC_STATE_QUERY_PARAMS = ['variantId', 'openMenu', 'q', 'filters'];
+const TOPIC_STATE_QUERY_PARAMS = ['variantId', OPEN_MENU_QUERY_PARAM, 'q', 'filters'];
 
 /**
  * The topic view of the collections page: whether the open collection offers it, when it is shown
@@ -134,7 +136,10 @@ export class CollectionTopicViewService {
         const leavesTopicView = this.selected() && viewType !== 'topicPage';
         this.viewState.viewType.set(viewType);
         if (viewType === 'topicPage') {
-            void this.setTopicViewParam(true, false);
+            // switched to by the user, the topic page starts with the list of its pages
+            void this.setTopicViewParam(true, false, false, {
+                [OPEN_MENU_QUERY_PARAM]: OPEN_MANAGE_SIDEBAR_PARAM,
+            });
         } else if (leavesTopicView) {
             void this.setTopicViewParam(false, false);
         }
@@ -165,14 +170,19 @@ export class CollectionTopicViewService {
         return false;
     }
 
-    /** @param resetTopicState drops the topic view's state, e.g. one of a collection before */
+    /**
+     * @param resetTopicState drops the topic view's state, e.g. one of a collection before
+     * @param topicParams further state the topic view opens with
+     */
     private async setTopicViewParam(
         topicView: boolean,
         replaceUrl: boolean,
         resetTopicState = false,
+        topicParams: Params = {},
     ): Promise<void> {
         const queryParams: Params = {
             [VIEW_TYPE_QUERY_PARAM]: topicView ? TOPIC_PAGE_VIEW_TYPE : null,
+            ...topicParams,
         };
         if (!topicView || resetTopicState) {
             TOPIC_STATE_QUERY_PARAMS.forEach((key) => (queryParams[key] = null));

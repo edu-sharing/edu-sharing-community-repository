@@ -1,19 +1,19 @@
 import { Component, computed, inject, linkedSignal, signal } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
-import { SharedModule } from '../../../../shared/shared.module';
-import { EditorialSidebarService } from '../../../editorial-sidebar/editorial-sidebar.service';
-import { SidebarStickyFooterComponent } from '../../../editorial-sidebar/sidebar-sticky-footer/sidebar-sticky-footer.component';
-import { CreationKind } from '../../shared/types/variant-preview';
+import { SharedModule } from '../../../../../shared/shared.module';
+import { EditorialSidebarService } from '../../../../editorial-sidebar/editorial-sidebar.service';
+import { SidebarStickyFooterComponent } from '../../../../editorial-sidebar/sidebar-sticky-footer/sidebar-sticky-footer.component';
+import { CreationKind } from '../../../shared/types/variant-preview';
 import {
     CopyOption,
     PageVariantOrTemplatePickerComponent,
     PageVariantSearchState,
-} from '../page-variant-or-template-picker/page-variant-or-template-picker.component';
+} from '../../page-variant-or-template-picker/page-variant-or-template-picker.component';
 import {
     TopicPageSidebarHost,
     TopicPageSidebarService,
     TopicPageSidebarTab,
-} from './topic-page-sidebar.service';
+} from '../topic-page-sidebar.service';
 
 /** what is picked on a creation tab, kept per tab while switching between them */
 type CreationState = {
@@ -28,16 +28,16 @@ const TAB_ICONS: Record<TopicPageSidebarTab, string> = {
 };
 
 /**
- * The topic page's option in the editorial sidebar: creating a page variant or template from an
- * existing one, one tab each.
+ * Entry of the topic page's sidebar menu that creates a page variant or template from an existing
+ * one, one tab each.
  */
 @Component({
-    selector: 'es-topic-page-sidebar',
+    selector: 'es-topic-page-create-sidebar',
     imports: [SharedModule, PageVariantOrTemplatePickerComponent, SidebarStickyFooterComponent],
-    templateUrl: './topic-page-sidebar.component.html',
-    styleUrls: ['./topic-page-sidebar.component.scss'],
+    templateUrl: './topic-page-create-sidebar.component.html',
+    styleUrls: ['./topic-page-create-sidebar.component.scss'],
 })
-export class TopicPageSidebarComponent {
+export class TopicPageCreateSidebarComponent {
     private readonly editorialSidebarService = inject(EditorialSidebarService);
     private readonly topicPageSidebarService = inject(TopicPageSidebarService);
 

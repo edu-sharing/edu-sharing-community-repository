@@ -250,9 +250,28 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
                 : 'EDITORIAL.SIDEBAR.TITLE_' + this.primaryMode()?.toUpperCase()),
     );
     options = signal<OptionItem[]>(null);
-    /** the options of the overview, without the ones that belong to a page of their own */
-    protected readonly overviewOptions = computed(() =>
-        this.options()?.filter((option) => !EDIT_COLLECTION_MENU_ENTRIES.includes(option.name)),
+    /**
+     * The options of the overview, without the ones that belong to a page of their own and without
+     * a custom menu page none of whose entries is offered.
+     */
+    protected readonly overviewOptions = computed(() => {
+        const customOptions = this.editorialSidebarService.getCustomOptions();
+        const subEntries = customOptions
+            .filter((custom) => custom.parent)
+            .map((custom) => custom.label);
+        const emptyMenus = customOptions
+            .filter((custom) => !custom.component && !this.customMenuEntries(custom.id).length)
+            .map((custom) => custom.label);
+        return this.options()?.filter(
+            (option) =>
+                !EDIT_COLLECTION_MENU_ENTRIES.includes(option.name) &&
+                !subEntries.includes(option.name) &&
+                !emptyMenus.includes(option.name),
+        );
+    });
+    /** the entries of the custom menu page that is open, in the order they were registered */
+    protected readonly customMenuOptions = computed(() =>
+        this.customMenuEntries(this.enabledOption()?.option),
     );
     /** the options of the page that edits the collection, in the order they are offered */
     protected readonly editMenuOptions = computed(() =>
@@ -616,7 +635,11 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         // offer and render them (see `EditorialSidebarService.registerCustomOption`)
         for (const custom of this.editorialSidebarService.getCustomOptions()) {
             const option = new OptionItem(custom.label, custom.icon, () =>
-                this.enabledOption.set({ trap: false, option: custom.id }),
+                this.enabledOption.set({
+                    trap: false,
+                    option: custom.id,
+                    ...(custom.parent && { backTo: { trap: false, option: custom.parent } }),
+                }),
             );
             option.group = custom.group ?? DefaultGroups.Primary;
             // Offered whatever is selected: `isOptionAvailable` hides an option whose `elementType`
@@ -652,6 +675,18 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         void this.uiService.updateOptionEnabledState(options$);
         this.options.set(options$.value);
         return options;
+    }
+
+    /** the offered options that the custom option with the given id lists on its menu page */
+    private customMenuEntries(parent: EditorialSidebarOption | undefined): OptionItem[] {
+        if (!parent) {
+            return [];
+        }
+        return this.editorialSidebarService
+            .getCustomOptions()
+            .filter((custom) => custom.parent === parent)
+            .map((custom) => this.options()?.find((option) => option.name === custom.label))
+            .filter((option) => !!option);
     }
 
     ngOnDestroy(): void {

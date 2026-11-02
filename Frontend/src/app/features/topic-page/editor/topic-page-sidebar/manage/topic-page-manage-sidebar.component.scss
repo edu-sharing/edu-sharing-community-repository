@@ -1,0 +1,94 @@
+:host {
+    display: block;
+    padding: 20px;
+}
+
+.loading {
+    display: flex;
+    justify-content: center;
+}
+
+.sections {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.section-heading {
+    margin: 0;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--genericSeperatorLineColor);
+    font-size: 1rem;
+    font-weight: bold;
+    color: var(--textMain);
+}
+
+.entry {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px 44px 12px 12px;
+    border: 1px solid var(--borderLight);
+    border-radius: var(--borderRadiusCards);
+    background: var(--cardLightBackground);
+    &.current {
+        border-color: var(--primary);
+        background: var(--primaryBackground50);
+    }
+}
+
+.entry-title {
+    font-weight: bold;
+    color: var(--textMain);
+}
+
+.entry-badge {
+    margin-left: 6px;
+    font-size: var(--fontSizeXSmall);
+    font-weight: normal;
+    color: var(--textLight);
+}
+
+.entry-meta,
+.entry-status {
+    font-size: var(--fontSizeXSmall);
+    color: var(--textLight);
+}
+
+.status-up-to-date {
+    color: var(--colorStatusPositiveText);
+}
+
+.status-update-available,
+.status-missing {
+    color: var(--warn);
+}
+
+.entry-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    i {
+        margin-right: 4px;
+    }
+}
+
+.entry-delete {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+}
+
+.create {
+    align-self: flex-start;
+    i {
+        margin-right: 4px;
+    }
+}

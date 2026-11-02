@@ -8,10 +8,34 @@
     },
     "SIDEBAR": {
       "TITLE": "Pagina tematica",
-      "TITLE_DESCRIPTION": "Crea una nuova pagina tematica o un modello da una esistente",
+      "TITLE_DESCRIPTION": "Gestisci e crea pagine tematiche e modelli",
       "TAB": {
         "VARIANT": "Pagina tematica",
         "TEMPLATE": "Modello"
+      },
+      "MENU": {
+        "MANAGE": "Gestisci pagine tematiche",
+        "MANAGE_DESCRIPTION": "Mostra, rigenera o elimina pagine e modelli",
+        "CREATE": "Nuova pagina tematica/variante",
+        "CREATE_DESCRIPTION": "Crea una nuova pagina tematica o un modello da una esistente",
+        "INHERITANCE": "Ereditarietà",
+        "INHERITANCE_DESCRIPTION": "Trasmetti le pagine tematiche alle sotto-collezioni"
+      },
+      "MANAGE": {
+        "INHERITED_HEADING": "Ereditato da {{title}}",
+        "VARIANTS_HEADING": "Pagine di questa collezione",
+        "TEMPLATES_HEADING": "Modelli di questa collezione",
+        "DEFAULT": "(predefinito)",
+        "CREATED": "creato da {{name}} il {{date}}",
+        "SHOW": "Mostra",
+        "REGENERATE": "Rigenera",
+        "EDIT_TEMPLATE": "Modifica modello",
+        "DELETE": "Elimina",
+        "EMPTY": "Non esiste ancora una pagina tematica per questa collezione.",
+        "LOAD_ERROR": "Non è stato possibile caricare le pagine tematiche."
+      },
+      "INHERITANCE": {
+        "PLACEHOLDER": "La trasmissione delle pagine tematiche alle sotto-collezioni sarà aggiunta a breve."
       }
     },
     "AI": {

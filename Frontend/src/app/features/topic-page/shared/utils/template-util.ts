@@ -8,6 +8,7 @@ import {
     DEFAULT_PAGE_VARIANT_CONFIG_PROP,
     DEFAULT_PAGE_VARIANT_CONFIG_VALUE,
     DEFAULT_PAGE_VARIANT_DEFAULT_TEMPLATE_MAP_TYPE,
+    DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP,
     DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP,
     DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP,
     DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION,
@@ -163,6 +164,28 @@ export const retrievePageVariantTemplateVersion = (node: Node): string => {
         node.properties?.[DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP]?.[0] ||
         DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION
     );
+};
+
+/**
+ * Whether the template a page variant or template was built from has changed since. A non-root
+ * template stores "{parent_sync}:{own_counter}", of which only the first part names the parent's
+ * version; a page variant stores its template's version verbatim.
+ */
+export const isTemplateUpdateAvailable = (templateNode: Node, variantNode: Node): boolean => {
+    if (!templateNode || !variantNode) {
+        return false;
+    }
+    const currentTemplateVersion: string = retrievePageVariantTemplateVersion(templateNode);
+    const variantTemplateVersion: string = retrievePageVariantTemplateVersion(variantNode);
+    const isTemplate: boolean =
+        variantNode.properties?.[DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP]?.[0] === 'true';
+    if (isTemplate && variantTemplateVersion.includes(':')) {
+        return (
+            currentTemplateVersion !==
+            variantTemplateVersion.slice(0, variantTemplateVersion.lastIndexOf(':'))
+        );
+    }
+    return currentTemplateVersion !== variantTemplateVersion;
 };
 
 /**

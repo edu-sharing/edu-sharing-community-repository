@@ -8,10 +8,34 @@
     },
     "SIDEBAR": {
       "TITLE": "Page thématique",
-      "TITLE_DESCRIPTION": "Créer une nouvelle page thématique ou un modèle à partir d'une page existante",
+      "TITLE_DESCRIPTION": "Gérer et créer des pages thématiques et des modèles",
       "TAB": {
         "VARIANT": "Page thématique",
         "TEMPLATE": "Modèle"
+      },
+      "MENU": {
+        "MANAGE": "Gérer les pages thématiques",
+        "MANAGE_DESCRIPTION": "Afficher, régénérer ou supprimer des pages et des modèles",
+        "CREATE": "Nouvelle page thématique/variante",
+        "CREATE_DESCRIPTION": "Créer une nouvelle page thématique ou un modèle à partir d'une page existante",
+        "INHERITANCE": "Héritage",
+        "INHERITANCE_DESCRIPTION": "Transmettre les pages thématiques aux sous-collections"
+      },
+      "MANAGE": {
+        "INHERITED_HEADING": "Hérité de {{title}}",
+        "VARIANTS_HEADING": "Pages de cette collection",
+        "TEMPLATES_HEADING": "Modèles de cette collection",
+        "DEFAULT": "(par défaut)",
+        "CREATED": "créé par {{name}} le {{date}}",
+        "SHOW": "Afficher",
+        "REGENERATE": "Régénérer",
+        "EDIT_TEMPLATE": "Modifier le modèle",
+        "DELETE": "Supprimer",
+        "EMPTY": "Il n'existe pas encore de page thématique pour cette collection.",
+        "LOAD_ERROR": "Les pages thématiques n'ont pas pu être chargées."
+      },
+      "INHERITANCE": {
+        "PLACEHOLDER": "La transmission des pages thématiques aux sous-collections sera bientôt ajoutée."
       }
     },
     "AI": {

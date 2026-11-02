@@ -8,10 +8,34 @@
     },
     "SIDEBAR": {
       "TITLE": "Topic page",
-      "TITLE_DESCRIPTION": "Create a new topic page or template from an existing one",
+      "TITLE_DESCRIPTION": "Manage and create topic pages and templates",
       "TAB": {
         "VARIANT": "Topic page",
         "TEMPLATE": "Template"
+      },
+      "MENU": {
+        "MANAGE": "Manage topic pages",
+        "MANAGE_DESCRIPTION": "Show, regenerate or delete pages and templates",
+        "CREATE": "New topic page/variant",
+        "CREATE_DESCRIPTION": "Create a new topic page or template from an existing one",
+        "INHERITANCE": "Inheritance",
+        "INHERITANCE_DESCRIPTION": "Pass topic pages on to sub-collections"
+      },
+      "MANAGE": {
+        "INHERITED_HEADING": "Inherited from {{title}}",
+        "VARIANTS_HEADING": "Pages of this collection",
+        "TEMPLATES_HEADING": "Templates of this collection",
+        "DEFAULT": "(default)",
+        "CREATED": "created by {{name}} on {{date}}",
+        "SHOW": "Show",
+        "REGENERATE": "Regenerate",
+        "EDIT_TEMPLATE": "Edit template",
+        "DELETE": "Delete",
+        "EMPTY": "There is no topic page for this collection yet.",
+        "LOAD_ERROR": "The topic pages could not be loaded."
+      },
+      "INHERITANCE": {
+        "PLACEHOLDER": "Passing topic pages on to sub-collections will be added soon."
       }
     },
     "AI": {
