@@ -27,6 +27,7 @@ public class RestConstants {
 	public static final String HTTP_404="Ressources are not found.";
 	public static final String HTTP_409="Duplicate Entity/Node conflict (Node with same name exists)";
 	public static final String HTTP_500="Fatal error occured.";
+	public static final String HTTP_501="Feature is not enabled on this repository.";
 	public static final String VALUES_FILTER = "files,folders";
 	public static final String VALUES_SORT_PROPERTIES = "cm:name,cm:modifiedDate";
 	public static final int DEFAULT_MAX_ITEMS = 10;

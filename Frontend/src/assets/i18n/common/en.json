@@ -1008,7 +1008,11 @@
       "GENERIC_MODULE_NOT_AVAILABLE": "The rendering module needed to display the object is not available.",
       "GENERIC_OBJECT_NOT_SUPPORTED": "This object is not supported by the rendering service.",
       "GENERIC_INTERNAL_SERVER_ERROR": "Internal server error",
-      "GENERIC_ACCESS_DENIED": "Insufficient rights"
+      "GENERIC_ACCESS_DENIED": "Insufficient rights",
+      "H5P_PACKAGE_TOO_LARGE": "The H5P package is too large to be displayed.",
+      "H5P_PACKAGE_INVALID": "The H5P package is invalid or contains files that are not allowed and cannot be displayed.",
+      "CONVERTER_DOCUMENT_INVALID": "The document is invalid or corrupted and cannot be displayed.",
+      "CONVERTER_DOCUMENT_TOO_LARGE": "The document is too large to be displayed."
     },
     "GDPR": {
       "EXTERNAL_SITE": "External site",
@@ -1511,7 +1515,19 @@
     "CUSTOM_PROPERTY_NAME": "Enter name for custom property",
     "CUSTOM_PROPERTY_VALUE": "Enter value for custom property",
     "CONTEXT_ACTIONS": "Actions for this element-type",
-    "ALL_ACTIONS": "All actions (might be not compatible with this type!)"
+    "ALL_ACTIONS": "All actions (might be not compatible with this type!)",
+    "OPTION_DEBUG": "Action debugger (why is an action not shown?)",
+    "OPTION_DEBUG_SCOPE": "Scope",
+    "OPTION_DEBUG_TARGET": "Target",
+    "OPTION_DEBUG_OPTION": "Select action",
+    "OPTION_DEBUG_CHECK": "Check",
+    "OPTION_DEBUG_EXPECTED": "Expected",
+    "OPTION_DEBUG_ACTUAL": "Actual",
+    "OPTION_DEBUG_EFFECT": "Effect",
+    "OPTION_DEBUG_VISIBILITY_shown": "Shown",
+    "OPTION_DEBUG_VISIBILITY_disabled": "Disabled",
+    "OPTION_DEBUG_VISIBILITY_hidden": "Hidden",
+    "OPTION_DEBUG_NO_CHECKS": "No restrictions are defined for this action."
   },
   "NOTIFICATION": {
     "MENU": "Notifications",

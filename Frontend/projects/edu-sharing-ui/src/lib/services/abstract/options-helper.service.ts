@@ -1,5 +1,6 @@
 import { OptionData, OptionsHelperComponents } from '../options-helper-data.service';
 import {
+    OptionExplanation,
     Constrain,
     ElementType,
     HideMode,
@@ -356,24 +357,41 @@ export abstract class OptionsHelperService {
     }
 
     private async validateToolpermissions(option: OptionItem) {
-        for (let t of option.toolpermissions) {
+        return (await this.getMissingToolpermissions(option, true)).length === 0;
+    }
+
+    /**
+     * Returns the toolpermissions of the option which are not granted
+     * @param stopAtFirst stop evaluating after the first missing toolpermission
+     */
+    protected async getMissingToolpermissions(
+        option: OptionItem,
+        stopAtFirst = false,
+    ): Promise<string[]> {
+        const missing: string[] = [];
+        for (const t of option.toolpermissions) {
             if (!(await this.authenticationService.hasToolpermission(t))) {
-                return false;
+                missing.push(t);
+                if (stopAtFirst) {
+                    break;
+                }
             }
         }
-        return true;
+        return missing;
     }
 
     private validatePermissions(option: OptionItem, objects: Node[] | any[]) {
-        return (
-            option.permissions.filter(
-                (p) =>
-                    this.nodeHelperService.getNodesRight(
-                        objects,
-                        p,
-                        option.permissionsRightMode,
-                    ) === false,
-            ).length === 0
+        return this.getMissingPermissions(option, objects).length === 0;
+    }
+
+    /**
+     * Returns the permissions of the option which are missing for the given objects
+     */
+    protected getMissingPermissions(option: OptionItem, objects: Node[] | any[]): string[] {
+        return option.permissions.filter(
+            (p) =>
+                this.nodeHelperService.getNodesRight(objects, p, option.permissionsRightMode) ===
+                false,
         );
     }
 
@@ -463,4 +481,13 @@ export abstract class OptionsHelperService {
         addVirutalNodes: boolean,
         nodes: Node[],
     ): void;
+
+    /**
+     * Debug helper: evaluates every check of all options for the given target + data
+     * and returns the result of each check (without short-circuiting)
+     * Returns null if the implementation does not support it
+     */
+    explainOptions(target: Target, data: OptionData): Promise<OptionExplanation[]> {
+        return Promise.resolve(null);
+    }
 }

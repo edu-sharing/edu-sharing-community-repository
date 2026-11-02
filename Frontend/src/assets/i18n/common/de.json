@@ -259,7 +259,19 @@
     "CUSTOM_PROPERTY_NAME": "Eigene Property eingeben.",
     "CUSTOM_PROPERTY_VALUE": "Wert für Property eingeben.",
     "CONTEXT_ACTIONS": "Aktionen für diesen Element-Typ.",
-    "ALL_ACTIONS": "Alle Aktionen (ggf. nicht mit diesen Typ kompatibel!)"
+    "ALL_ACTIONS": "Alle Aktionen (ggf. nicht mit diesen Typ kompatibel!)",
+    "OPTION_DEBUG": "Aktions-Debugger (Warum wird eine Aktion nicht angezeigt?)",
+    "OPTION_DEBUG_SCOPE": "Scope",
+    "OPTION_DEBUG_TARGET": "Ziel",
+    "OPTION_DEBUG_OPTION": "Aktion auswählen",
+    "OPTION_DEBUG_CHECK": "Prüfung",
+    "OPTION_DEBUG_EXPECTED": "Erwartet",
+    "OPTION_DEBUG_ACTUAL": "Tatsächlich",
+    "OPTION_DEBUG_EFFECT": "Auswirkung",
+    "OPTION_DEBUG_VISIBILITY_shown": "Sichtbar",
+    "OPTION_DEBUG_VISIBILITY_disabled": "Deaktiviert",
+    "OPTION_DEBUG_VISIBILITY_hidden": "Ausgeblendet",
+    "OPTION_DEBUG_NO_CHECKS": "Für diese Aktion sind keine Einschränkungen definiert."
   },
   "SIDEBAR": {
     "LANDING": "Startseite",
@@ -1134,7 +1146,11 @@
       "GENERIC_MODULE_NOT_AVAILABLE": "Das zur Anzeige des Objekts nötige Rendering-Modul ist nicht verfügbar.",
       "GENERIC_OBJECT_NOT_SUPPORTED": "Das Objekt wird vom Rendering-Service nicht unterstützt.",
       "GENERIC_INTERNAL_SERVER_ERROR": "Die Anfrage konnte vom Server nicht bearbeitet werden",
-      "GENERIC_ACCESS_DENIED": "Keine ausreichenden Rechte"
+      "GENERIC_ACCESS_DENIED": "Keine ausreichenden Rechte",
+      "H5P_PACKAGE_TOO_LARGE": "Das H5P-Paket ist zu groß und kann nicht dargestellt werden.",
+      "H5P_PACKAGE_INVALID": "Das H5P-Paket ist ungültig oder enthält nicht erlaubte Dateien und kann nicht dargestellt werden.",
+      "CONVERTER_DOCUMENT_INVALID": "Das Dokument ist ungültig oder beschädigt und kann nicht dargestellt werden.",
+      "CONVERTER_DOCUMENT_TOO_LARGE": "Das Dokument ist zu groß und kann nicht dargestellt werden."
     },
     "GDPR": {
       "EXTERNAL_SITE": "Externe Seite",

@@ -24,6 +24,7 @@ import { NodeTitlePipe } from '../pipes/node-title.pipe';
 import { OptionTooltipPipe } from '../pipes/option-tooltip.pipe';
 import { ReplaceCharsPipe } from '../pipes/replace-chars.pipe';
 import { VCardNamePipe } from '../pipes/vcard-name.pipe';
+import { SafeHtmlPipe } from '../pipes/safe-html.pipe';
 import { SortDropdownComponent } from '../sort-dropdown/sort-dropdown.component';
 import { SpinnerComponent } from '../spinner/spinner.component';
 import { PropertySlugPipe } from '../pipes/property-slug.pipe';
@@ -74,6 +75,7 @@ import { DropdownBottomSheetComponent } from '../dropdown/dropdown-bottom-sheet/
         NodeUrlComponent,
         OptionTooltipPipe,
         ReplaceCharsPipe,
+        SafeHtmlPipe,
         SortDropdownComponent,
         VCardNamePipe,
     ],
@@ -125,6 +127,7 @@ import { DropdownBottomSheetComponent } from '../dropdown/dropdown-bottom-sheet/
         NodeUrlComponent,
         ToolpermissionPipe,
         GlobalAdminPipe,
+        SafeHtmlPipe,
         SortDropdownComponent,
         SpinnerComponent,
         SpinnerSmallComponent,

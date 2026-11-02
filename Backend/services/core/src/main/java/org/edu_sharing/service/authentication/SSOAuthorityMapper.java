@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationException;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -621,6 +622,10 @@ public class SSOAuthorityMapper {
         } catch (AuthenticationException e) {
             throw e;
         } catch (Throwable e) {
+            // let the outer RetryingTransactionHelper retry on concurrency failures (e.g. parallel logins of the same user)
+            if (e instanceof RuntimeException && RetryingTransactionHelper.extractRetryCause(e) != null) {
+                throw (RuntimeException) e;
+            }
             log.error(e.getMessage(), e);
             return null;
         }

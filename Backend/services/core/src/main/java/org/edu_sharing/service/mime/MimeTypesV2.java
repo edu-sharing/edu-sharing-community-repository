@@ -245,6 +245,11 @@ public class MimeTypesV2 {
 	 * Returns the guessed node-type (used for the preview files), e.g. file-folder, file-word or file-image
 	 */
 	public static String getNodeType(NodeInfo info, Type type){
+		// elastic delivers short type names, the alfresco node service global ones
+		String nodeTypeLong = CCConstants.getValidGlobalName(info.nodeType());
+		if(nodeTypeLong != null) {
+			info = new NodeInfo(nodeTypeLong, info.properties(), info.aspects());
+		}
 		String regularType = getNodeTypeInternal(info, type);
 		try {
 			return ApplicationContextFactory.getApplicationContext().getBean(MimeTypeMapping.class).getCustomNodeType(info, type, regularType);
@@ -413,10 +418,10 @@ public class MimeTypesV2 {
 		return aspects.contains(CCConstants.CCM_ASPECT_TOOL_DEFINITION);
 	}
 	private static boolean isSavedSearch(String type) {
-		return CCConstants.CCM_TYPE_SAVED_SEARCH.equals(CCConstants.getValidGlobalName(type));
+		return CCConstants.CCM_TYPE_SAVED_SEARCH.equals(type);
 	}
 	private static boolean isLtiInstance(String nodeType) {
-		return CCConstants.CCM_TYPE_TOOL_INSTANCE.equals(CCConstants.getValidGlobalName(nodeType));
+		return CCConstants.CCM_TYPE_TOOL_INSTANCE.equals(nodeType);
 	}
 
 	private static boolean isLTI13ToolObject(List<String> aspects){

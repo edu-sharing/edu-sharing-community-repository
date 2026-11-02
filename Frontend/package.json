@@ -93,7 +93,7 @@
     "ngx-extended-pdf-viewer": "^26.0.0",
     "ngx-monaco-editor-v2": "^21.1.4",
     "ngx-rendering-service-api": "~0.0.69",
-    "ngx-rendering-service-lib": "~0.1.17",
+    "ngx-rendering-service-lib": "~0.1.21",
     "pdfmake": "^0.2.21",
     "rxjs": "^7.8.1",
     "tinymce": "^7.6.0",
@@ -103,6 +103,7 @@
     "zone.js": "~0.15.1"
   },
   "devDependencies": {
+    "@angular-builders/custom-webpack": "~19.0.0",
     "@angular-devkit/build-angular": "^21.2.27",
     "@angular-eslint/builder": "~21.4.0",
     "@angular-eslint/eslint-plugin": "~21.4.0",
@@ -163,6 +164,7 @@
     "lint-staged": "^16.4.0",
     "ng-openapi-gen": "^0.53.0",
     "ng-packagr": "^21.2.7",
+    "ngx-build-plus": "^19.0.0",
     "prettier": "^2.5.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

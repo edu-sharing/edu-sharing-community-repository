@@ -25,6 +25,10 @@ public class User extends Authority {
 		super("USER");
 	}
 
+	public void setUsername(String username) {
+		setAuthorityName(this.username = username);
+	}
+
 	@Override
 	public String getAuthorityDisplayName() {
 		return getGivenName() + " " + getSurname();

@@ -11,6 +11,7 @@ import org.edu_sharing.alfresco.transformer.executors.tools.ZipTool;
 import org.edu_sharing.repository.server.tools.ImageTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 
@@ -23,6 +24,14 @@ public class EduSharingZipThumbnailExecutor extends AbstractCommandExecutor impl
     private static final Logger logger = LoggerFactory.getLogger(EduSharingZipThumbnailExecutor.class);
 
     public static String ID = "EduSharingZipThumbnailExecutor";
+
+    private static final int MAX_BUFFERED_IMAGE_SIZE = 2 * (1024 * 1000);
+
+    /**
+     * false: no preview image is extracted from h5p files
+     */
+    @Value("${edu-sharing.transformer.zip-thumbnail.h5p.enabled:true}")
+    private boolean h5pExtractionEnabled;
 
     @Override
     protected RuntimeExec createTransformCommand() {
@@ -55,6 +64,7 @@ public class EduSharingZipThumbnailExecutor extends AbstractCommandExecutor impl
 
         try {
             InputStream fallback = null;
+            InputStream contentImage = null;
             ArchiveInputStream zip = ZipTool.getZipInputStream(sourceFile);
             while (true) {
                 ArchiveEntry entry = zip.getNextEntry();
@@ -66,29 +76,43 @@ public class EduSharingZipThumbnailExecutor extends AbstractCommandExecutor impl
 
 
                 //fallback image found in root
-                if(!name.contains("/") && (name.endsWith(".jpg") || name.endsWith(".png")) && entry.getSize() > -1 && entry.getSize() < (2 * (1024 * 1000)) ) {
-                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                    byte[] buffer = new byte[1024];
-                    int len;
-                    while ((len = zip.read(buffer)) > 0) {
-                        outputStream.write(buffer, 0, len);
+                if(!name.contains("/") && (name.endsWith(".jpg") || name.endsWith(".png")) && entry.getSize() > -1 && entry.getSize() < MAX_BUFFERED_IMAGE_SIZE ) {
+                    InputStream image = readEntry(zip);
+                    if(image != null) {
+                        fallback = image;
+                        logger.info("found potential fallback:" + name);
                     }
-                   fallback = new ByteArrayInputStream(outputStream.toByteArray());
-                    logger.info("found potential fallback:"+name);
+                }
+
+                //h5p extraction disabled: no thumbnail, repository uses its default preview
+                if(!h5pExtractionEnabled && name.equals("h5p.json")){
+                    logger.info("h5p preview extraction disabled");
+                    return;
                 }
 
                 //h5p
                 if(name.startsWith("content/images") && (name.endsWith(".jpg") || name.endsWith(".png"))){
-
-                    logger.info("found preview in zip");
-                    processImage(targetFile,zip);
-                    return;
+                    if(h5pExtractionEnabled) {
+                        logger.info("found preview in zip");
+                        processImage(targetFile, zip);
+                        return;
+                    }
+                    // might not be a h5p, decide when zip is fully read
+                    if(contentImage == null) {
+                        contentImage = readEntry(zip);
+                        logger.info("found potential content image:" + name);
+                    }
                 }
                 //geogebra
                 if(name.endsWith("geogebra_thumbnail.png")){
                     processImage(targetFile,zip);
                     return;
                 }
+            }
+            if(contentImage != null){
+                logger.info("processing content image");
+                processImage(targetFile,contentImage);
+                return;
             }
             if(fallback != null){
                 logger.info("processing fallback");
@@ -99,6 +123,23 @@ public class EduSharingZipThumbnailExecutor extends AbstractCommandExecutor impl
         }catch(Throwable t){
             logger.error(t.getMessage(),t);
         }
+    }
+
+    /**
+     * buffers the current zip entry, returns null if it exceeds MAX_BUFFERED_IMAGE_SIZE
+     */
+    private InputStream readEntry(ArchiveInputStream zip) throws IOException {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        byte[] buffer = new byte[1024];
+        int len;
+        while ((len = zip.read(buffer)) > 0) {
+            outputStream.write(buffer, 0, len);
+            if(outputStream.size() > MAX_BUFFERED_IMAGE_SIZE) {
+                logger.info("zip entry too large to buffer, skipping");
+                return null;
+            }
+        }
+        return new ByteArrayInputStream(outputStream.toByteArray());
     }
 
     public void processImage(File targetFile, InputStream in) throws IOException {
