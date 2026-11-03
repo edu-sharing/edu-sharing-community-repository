@@ -387,6 +387,12 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 }
             });
         });
+        // the sidebar opened without an option, i.e. via its edge tab, starts at the topic menu
+        effect((): void => {
+            if (this.editorialSidebarService.sidebarOpened()) {
+                untracked((): void => this.topicPageSidebarService.openMenuIfIdle());
+            }
+        });
         this.topicPageShareService.setScrollContainer(
             (): HTMLElement | undefined => this.scrollContainerRef()?.nativeElement,
         );

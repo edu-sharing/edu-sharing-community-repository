@@ -5,7 +5,6 @@ import { ParentList, RestConstants, RestHelper } from '../../../core-module/core
 import { CollectionDetailsService } from '../../../features/collection-info/collection-details.service';
 import {
     hasTopicPage,
-    OPEN_MANAGE_SIDEBAR_PARAM,
     OPEN_MENU_QUERY_PARAM,
     TOPIC_PAGE_VIEW_TYPE,
     VIEW_TYPE_QUERY_PARAM,
@@ -137,10 +136,7 @@ export class CollectionTopicViewService {
         const leavesTopicView = this.selected() && viewType !== 'topicPage';
         this.viewState.viewType.set(viewType);
         if (viewType === 'topicPage') {
-            // switched to by the user, the topic page starts with the list of its pages
-            void this.setTopicViewParam(true, false, false, {
-                [OPEN_MENU_QUERY_PARAM]: OPEN_MANAGE_SIDEBAR_PARAM,
-            });
+            void this.setTopicViewParam(true, false);
         } else if (leavesTopicView) {
             void this.setTopicViewParam(false, false);
         }
@@ -179,11 +175,9 @@ export class CollectionTopicViewService {
         topicView: boolean,
         replaceUrl: boolean,
         resetTopicState = false,
-        topicParams: Params = {},
     ): Promise<void> {
         const queryParams: Params = {
             [VIEW_TYPE_QUERY_PARAM]: topicView ? TOPIC_PAGE_VIEW_TYPE : null,
-            ...topicParams,
         };
         if (!topicView || resetTopicState) {
             TOPIC_STATE_QUERY_PARAMS.forEach((key) => (queryParams[key] = null));

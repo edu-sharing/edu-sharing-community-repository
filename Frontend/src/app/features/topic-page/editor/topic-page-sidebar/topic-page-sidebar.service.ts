@@ -111,6 +111,20 @@ export class TopicPageSidebarService {
     }
 
     /**
+     * Opens the topic menu if the sidebar shows no option and the menu is registered.
+     */
+    openMenuIfIdle(): void {
+        const sidebar = this.editorialSidebarService.editorialSidebar;
+        const registered = this.editorialSidebarService
+            .getCustomOptions()
+            .some((custom) => custom.id === TOPIC_PAGE_SIDEBAR_OPTION);
+        if (!sidebar || sidebar.enabledOption() || !registered) {
+            return;
+        }
+        this.editorialSidebarService.showOption({ option: TOPIC_PAGE_SIDEBAR_OPTION, trap: false });
+    }
+
+    /**
      * Closes the sidebar if it shows the option.
      */
     close(): void {
