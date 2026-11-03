@@ -20,6 +20,7 @@ ENV LC_ALL=en_US.UTF-8
 # security update: spring-*-7.0.2, bc*, cxf, camel, netty, activemq-client, jackson-core/databind/dataformat-yaml, jspecify, plexus-utils, httpclient5/httpcore5, guava, failureaccess, j2objc-annotations jars
 # (+ angus-activation, neethi, qpid-jms-client, proton-j, xmlschema-core as their deps) are removed from alfresco.war and
 # replaced by newer versions from the edu-sharing amp, can be removed again once we switch to a newer alfresco version
+# (exception: spring-tx is re-added by the amp in the original 7.0.2, newer versions are binary incompatible with alfresco)
 RUN set -eux \
     && mkdir -p alf_safe \
     && mkdir -p tomcat/shared/classes/config/defaults \

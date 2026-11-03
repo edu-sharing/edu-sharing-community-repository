@@ -233,6 +233,17 @@
         <scope>import</scope>
       </dependency>
 
+      <!-- spring-tx must stay on the version shipped with alfresco (7.0.2): spring-tx >= 7.0.3 changed the signature of
+           TransactionAspectSupport.completeTransactionAfterThrowing, which is overridden/called by alfresco's
+           SpringAwareUserTransaction and RetryingTransactionInterceptor (NoSuchMethodError on rollback).
+           7.0.3 - 7.0.10 contain no security fixes for spring-tx. declared here (not only in the alfresco module)
+           so that all plugin amps importing this bom ship the same jar, otherwise libcheck.sh fails -->
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-tx</artifactId>
+        <version>7.0.2</version>
+      </dependency>
+
       <dependency>
         <groupId>com.fasterxml.jackson</groupId>
         <artifactId>jackson-bom</artifactId>

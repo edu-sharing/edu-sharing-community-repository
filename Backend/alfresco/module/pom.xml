@@ -380,6 +380,7 @@
       <artifactId>spring-jdbc</artifactId>
     </dependency>
 
+    <!-- version pinned to 7.0.2 in the root pom (binary incompatible with alfresco since 7.0.3) -->
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-tx</artifactId>
