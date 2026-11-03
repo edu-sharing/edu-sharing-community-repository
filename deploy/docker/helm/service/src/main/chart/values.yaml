@@ -204,6 +204,14 @@ ingress:
       ## @param ingress.exact.annotations.nginx.ingress.kubernetes.io/app-root Set app-root on nginx exact ingress
       nginx.ingress.kubernetes.io/app-root: /edu-sharing
 
+  robots:
+    ## @param ingress.robots.enabled Serve /robots.txt (host root) from /edu-sharing/robots.txt
+    enabled: true
+
+    annotations:
+      ## @param ingress.robots.annotations.nginx.ingress.kubernetes.io/rewrite-target Set rewrite-target on nginx robots ingress
+      nginx.ingress.kubernetes.io/rewrite-target: /edu-sharing/robots.txt
+
 ########################################################################################################################
 
 proxy:
