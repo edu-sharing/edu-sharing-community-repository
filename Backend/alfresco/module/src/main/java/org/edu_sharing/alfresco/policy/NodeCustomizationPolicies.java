@@ -841,16 +841,17 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
         }
         Set<String> props = new HashSet<>(Arrays.asList(SAFE_PROPS));
         props.addAll(Arrays.asList(LICENSE_PROPS));
-        props.addAll(MetadataReader.getWidgetsByNode(ref, "de_DE").stream().
+        Collection<MetadataWidget> widgets = MetadataReader.getWidgetsByNode(ref, "de_DE");
+        props.addAll(widgets.stream().
                 map(MetadataWidget::getId).map(CCConstants::getValidGlobalName).
                 collect(Collectors.toList()));
 
-        props.addAll(MetadataReader.getWidgetsByNode(ref, "de_DE").stream().
+        props.addAll(widgets.stream().
                 filter(w ->  "range".equals(w.getType())).
                 flatMap(w -> Stream.of(w.getId() + "_from", w.getId() + "_to")).
                 map(CCConstants::getValidGlobalName).
                 collect(Collectors.toList()));
-        props.addAll(MetadataReader.getWidgetsByNode(ref, "de_DE").stream().
+        props.addAll(widgets.stream().
                 map(MetadataWidget::getSuggestDisplayProperty).filter(Objects::nonNull).map(CCConstants::getValidGlobalName).
                 collect(Collectors.toList()));
 
