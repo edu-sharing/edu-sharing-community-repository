@@ -11,6 +11,7 @@ import {
     SortId,
 } from '../../../editorial-sidebar/create-collection-sidebar/collection-sorts';
 import { TOPIC_PAGE_VIEW_TYPE } from '../../../topic-page/shared/utils/collection-topic-page-util';
+import { NodeHelperService } from '../../../../services/node-helper.service';
 import { CollectionScopeLabelComponent } from '../../collection-scope-label/collection-scope-label.component';
 
 /**
@@ -32,11 +33,17 @@ import { CollectionScopeLabelComponent } from '../../collection-scope-label/coll
 })
 export class CollectionInfoFactsComponent {
     protected readonly details = inject(CollectionDetailsService);
+    private readonly nodeHelper = inject(NodeHelperService);
 
     readonly collection = input.required<Node>();
     /** whether the default view and sorting are shown, which only those who may change them see */
     readonly showSettings = input(false);
 
+    /** icon of the visibility, shown as the leading icon of its row */
+    protected readonly visibilityIcon = computed(() => {
+        const collection = this.collection();
+        return (collection && this.nodeHelper.getCollectionScopeInfo(collection)?.icon) || 'lock';
+    });
     protected readonly defaultViewKey = computed(() =>
         this.collection()?.collection?.viewtype === TOPIC_PAGE_VIEW_TYPE
             ? 'COLLECTIONS.INFO.VIEW_TOPIC_PAGE'

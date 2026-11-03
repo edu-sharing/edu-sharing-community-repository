@@ -15,6 +15,8 @@ export class CollectionScopeLabelComponent {
     private readonly nodeHelper = inject(NodeHelperService);
 
     readonly collection = input.required<Node>();
+    /** whether the icon of the visibility is shown in front of its name */
+    readonly showIcon = input(true);
 
     protected readonly scope = computed(() => {
         const collection = this.collection();

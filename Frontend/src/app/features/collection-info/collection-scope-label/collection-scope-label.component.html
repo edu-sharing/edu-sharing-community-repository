@@ -1,4 +1,5 @@
-@if (scope(); as scope) {
+@if (scope(); as scope) { @if (showIcon()) {
 <i [esIcon]="scope.icon"></i>
+}
 <span>{{ 'COLLECTION.SCOPE.' + scope.scopeName | translate }}</span>
 }

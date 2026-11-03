@@ -28,11 +28,14 @@
 <es-collection-info-section heading="COLLECTIONS.INFO.SECTION_GENERAL">
   <div class="rows">
     <es-collection-info-row
-      icon="lock"
+      [icon]="visibilityIcon()"
       label="COLLECTIONS.INFO.VISIBILITY"
       data-test="collection-info-sharing-state"
     >
-      <es-collection-scope-label [collection]="collection()"></es-collection-scope-label>
+      <es-collection-scope-label
+        [collection]="collection()"
+        [showIcon]="false"
+      ></es-collection-scope-label>
     </es-collection-info-row>
     <es-collection-info-row
       icon="layers"
