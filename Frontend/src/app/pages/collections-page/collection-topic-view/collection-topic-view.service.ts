@@ -13,8 +13,9 @@ import {
 import { ViewToggleItem } from '../../../shared/components/view-toggle-group/view-toggle-group.component';
 import { CollectionViewStateService, CollectionViewType } from '../collection-view-state.service';
 
-// query params only the topic view reads; they are dropped when another view is selected
-const TOPIC_STATE_QUERY_PARAMS = ['variantId', OPEN_MENU_QUERY_PARAM, 'q', 'filters'];
+// query params only the topic view reads; they are dropped when another view is selected, while
+// the search term in `q` is shared by all views
+const TOPIC_STATE_QUERY_PARAMS = ['variantId', OPEN_MENU_QUERY_PARAM, 'filters'];
 
 /**
  * The topic view of the collections page: whether the open collection offers it, when it is shown

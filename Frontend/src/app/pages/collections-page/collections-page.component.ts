@@ -61,6 +61,7 @@ import { CollectionViewStateService, CollectionViewType } from './collection-vie
 import { GlobalCollectionsPageServiceInternal } from './global-collections-page.service';
 import { OptionsHelperService } from 'src/app/services/options-helper.service';
 import { EditorialSidebarService } from '../../features/editorial-sidebar/editorial-sidebar.service';
+import { SEARCH_INPUT_QUERY_PARAM } from '../../features/topic-page/shared/types/custom-definitions';
 import { CollectionScope, CollectionScopesService } from '../../services/collection-scopes.service';
 import { CollectionDetailsService } from '../../features/collection-info/collection-details.service';
 import {
@@ -346,7 +347,7 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
             params.scope = this.tabSelected;
             const query = this.searchState.query();
             if (query) {
-                params.query = query;
+                params[SEARCH_INPUT_QUERY_PARAM] = query;
             }
             if (!this.searchState.includeSubLevels()) {
                 params.subLevels = false;
@@ -509,7 +510,7 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
         this.searchFieldInstance.onSearchTriggered().subscribe((event) => {
             void this.router.navigate([], {
                 relativeTo: this.route,
-                queryParams: { query: event.searchString?.trim() || null },
+                queryParams: { [SEARCH_INPUT_QUERY_PARAM]: event.searchString?.trim() || null },
                 queryParamsHandling: 'merge',
             });
             if (!event.cleared) {
@@ -616,11 +617,13 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
                 this.setupSearchField();
                 this.route.queryParams.subscribe(async (params) => {
                     this.topicView.applyParams(params);
-                    this.searchState.query.set(params.query || null);
+                    this.searchState.query.set(params[SEARCH_INPUT_QUERY_PARAM] || null);
                     this.searchState.includeSubLevels.set(params.subLevels !== 'false');
-                    // the topic view keeps its own search term in the shared search field
+                    // the topic view fills the search field itself, from the same param
                     if (!this.topicView.selected()) {
-                        this.searchFieldInstance?.setSearchString(params.query ?? '');
+                        this.searchFieldInstance?.setSearchString(
+                            params[SEARCH_INPUT_QUERY_PARAM] ?? '',
+                        );
                     }
                     // view type, search term and the topic view's state are applied by the views, the
                     // page stays as it is; a removed param counts as changed as well
@@ -628,7 +631,7 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
                         (key) => this.params?.[key] !== params[key],
                     );
                     const keptKeys = [
-                        'query',
+                        SEARCH_INPUT_QUERY_PARAM,
                         'subLevels',
                         'createCollection',
                         ...this.topicView.queryParamKeys,
