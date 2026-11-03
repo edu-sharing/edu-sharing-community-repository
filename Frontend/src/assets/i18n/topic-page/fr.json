@@ -24,6 +24,10 @@
         "INHERITANCE_DESCRIPTION": "Transmettre les pages thématiques aux sous-collections"
       },
       "MANAGE": {
+        "INTRO": "{{title}} a les pages thématiques suivantes :",
+        "TEMPLATES_DESCRIPTION": "transmis aux sous-collections",
+        "UP_TO_DATE": "à jour, modèle du {{date}}",
+        "MORE_ACTIONS": "Plus d'actions",
         "INHERITED_HEADING": "Hérité de {{title}}",
         "VARIANTS_HEADING": "Pages de cette collection",
         "TEMPLATES_HEADING": "Modèles de cette collection",

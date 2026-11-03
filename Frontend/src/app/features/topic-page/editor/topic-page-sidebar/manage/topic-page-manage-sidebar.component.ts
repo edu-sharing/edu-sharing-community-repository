@@ -7,13 +7,20 @@ import {
     TopicPageManageService,
 } from '../../../shared/services/topic-page-manage.service';
 import { retrieveNodeId } from '../../../shared/utils/template-util';
-import { TopicPageSidebarHost, TopicPageSidebarService } from '../topic-page-sidebar.service';
+import {
+    createOptionLabel,
+    TopicPageSidebarHost,
+    TopicPageSidebarService,
+} from '../topic-page-sidebar.service';
 
 type EntrySection = {
     key: 'inherited' | 'variants' | 'templates';
     entries: TopicPageEntry[];
     heading: string;
     headingParams?: Record<string, string>;
+    description?: string;
+    // the collection's own pages right below the intro need no heading of their own
+    hideHeading?: boolean;
 };
 
 /**
@@ -35,6 +42,7 @@ export class TopicPageManageSidebarComponent {
         'TOPIC_PAGE.SIDE_MENU.CONFIG_PAGE_VARIANT.TEMPLATE_UPDATE.';
     readonly host: TopicPageSidebarHost = this.topicPageSidebarService.host;
     readonly busy = signal(false);
+    readonly createLabel = computed((): string => createOptionLabel(this.host.creationKinds()));
     private readonly revision = signal(0);
     // the shown page changes when it is regenerated, so the list is read again with it
     readonly entries = resource({
@@ -64,9 +72,20 @@ export class TopicPageManageSidebarComponent {
                 },
             },
             { key: 'variants', entries: entries.variants, heading: 'VARIANTS_HEADING' },
-            { key: 'templates', entries: entries.templates, heading: 'TEMPLATES_HEADING' },
+            {
+                key: 'templates',
+                entries: entries.templates,
+                heading: 'TEMPLATES_HEADING',
+                description: 'TEMPLATES_DESCRIPTION',
+            },
         ];
-        return sections.filter((section: EntrySection) => section.entries.length);
+        const shown: EntrySection[] = sections.filter(
+            (section: EntrySection) => section.entries.length,
+        );
+        return shown.map((section: EntrySection, index: number) => ({
+            ...section,
+            hideHeading: index === 0 && section.key === 'variants',
+        }));
     });
 
     isCurrent(entry: TopicPageEntry): boolean {

@@ -235,6 +235,7 @@ import { TopicPageCreateSidebarComponent } from './topic-page-sidebar/create/top
 import { TopicPageInheritanceSidebarComponent } from './topic-page-sidebar/inheritance/topic-page-inheritance-sidebar.component';
 import { TopicPageManageSidebarComponent } from './topic-page-sidebar/manage/topic-page-manage-sidebar.component';
 import {
+    createOptionLabel,
     TOPIC_PAGE_CREATE_OPTION,
     TOPIC_PAGE_INHERITANCE_OPTION,
     TOPIC_PAGE_MANAGE_OPTION,
@@ -3029,9 +3030,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             },
             {
                 id: TOPIC_PAGE_CREATE_OPTION,
-                label: this.creationKinds().includes('template')
-                    ? 'TOPIC_PAGE.SIDEBAR.MENU.CREATE_WITH_TEMPLATE'
-                    : 'TOPIC_PAGE.SIDEBAR.MENU.CREATE',
+                label: createOptionLabel(this.creationKinds()),
                 icon: 'add',
                 component: TopicPageCreateSidebarComponent,
                 offered: canCreate,

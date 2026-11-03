@@ -24,6 +24,10 @@
         "INHERITANCE_DESCRIPTION": "Themenseiten an Untersammlungen weitergeben"
       },
       "MANAGE": {
+        "INTRO": "{{title}} hat folgende Themenseiten:",
+        "TEMPLATES_DESCRIPTION": "werden an die Untersammlungen vererbt",
+        "UP_TO_DATE": "noch aktuell, Vorlage vom {{date}}",
+        "MORE_ACTIONS": "Weitere Aktionen",
         "INHERITED_HEADING": "Geerbt von {{title}}",
         "VARIANTS_HEADING": "Seiten an dieser Sammlung",
         "TEMPLATES_HEADING": "Vorlagen dieser Sammlung",

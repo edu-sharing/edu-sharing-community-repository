@@ -24,6 +24,10 @@
         "INHERITANCE_DESCRIPTION": "Pass topic pages on to sub-collections"
       },
       "MANAGE": {
+        "INTRO": "{{title}} has the following topic pages:",
+        "TEMPLATES_DESCRIPTION": "passed on to the sub-collections",
+        "UP_TO_DATE": "up to date, template from {{date}}",
+        "MORE_ACTIONS": "More actions",
         "INHERITED_HEADING": "Inherited from {{title}}",
         "VARIANTS_HEADING": "Pages of this collection",
         "TEMPLATES_HEADING": "Templates of this collection",

@@ -27,6 +27,13 @@ export const TOPIC_PAGE_SIDEBAR_OPTIONS: readonly string[] = [
 
 export type TopicPageSidebarTab = CreationKind;
 
+/** label of the creation entry, naming templates too while they can be created */
+export function createOptionLabel(kinds: CreationKind[]): string {
+    return kinds.includes('template')
+        ? 'TOPIC_PAGE.SIDEBAR.MENU.CREATE_WITH_TEMPLATE'
+        : 'TOPIC_PAGE.SIDEBAR.MENU.CREATE';
+}
+
 export type TopicPageSidebarConfig = {
     /** the creation tab to show; falls back to the first one available */
     tab?: TopicPageSidebarTab;

@@ -41,6 +41,8 @@ export type TopicPageEntry = {
 };
 
 export type TopicPageEntries = {
+    /** the collection the entries belong to */
+    collection: Node;
     variants: TopicPageEntry[];
     templates: TopicPageEntry[];
     inherited: TopicPageEntry[];
@@ -64,6 +66,7 @@ export class TopicPageManageService {
         const ownTemplatesConfigId: string | null =
             includeTemplates && propagateRef ? convertNodeRefIntoNodeId(propagateRef) : null;
         const entries: TopicPageEntries = {
+            collection,
             variants: [],
             templates: [],
             inherited: [],
