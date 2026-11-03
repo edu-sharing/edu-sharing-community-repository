@@ -21,6 +21,7 @@ public class ScopesSettings {
     private Sort sort;
     private Bulk bulk;
     private ChangeFeed changeFeed;
+    private Relevance relevance;
 
     public SortStrategy getSortStrategyValue() {
         return SortStrategy.valueOf(sort.getStrategy().toUpperCase());
@@ -35,6 +36,12 @@ public class ScopesSettings {
     @Data
     public static class Bulk {
         private int partitionSize;
+    }
+
+    @Data
+    public static class Relevance {
+        /** additional score of the entries recommended inside the active scope, 0 disables it */
+        private double recommendedBoost;
     }
 
     @Data

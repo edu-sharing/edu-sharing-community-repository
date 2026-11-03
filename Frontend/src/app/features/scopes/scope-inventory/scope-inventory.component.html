@@ -6,7 +6,12 @@
   (change)="onChange($event.value)"
 >
   @for (v of widget()?.values ?? []; track v.id) {
-  <mat-radio-button [value]="v.id" color="primary">
+  <mat-radio-button
+    [value]="v.id"
+    color="primary"
+    [matTooltip]="v.description"
+    [matTooltipDisabled]="!v.description"
+  >
     @if (v.icon) {
     <i class="value-icon" [esIcon]="v.icon"></i>
     }

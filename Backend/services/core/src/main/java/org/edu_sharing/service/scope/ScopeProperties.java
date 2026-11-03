@@ -24,6 +24,9 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class ScopeProperties {
 
+    /** properties that are never visible outside the own scope (the inventory decision is a working state) */
+    static final Set<String> INTERNAL_PROPERTIES = Set.of(CCConstants.getValidLocalName(CCConstants.CCM_PROP_EDITORIAL_INVENTORY));
+
     private final DictionaryService dictionaryService;
     private volatile Set<String> scopeOnlyProperties;
 
@@ -52,11 +55,17 @@ public class ScopeProperties {
     }
 
     /**
-     * sets {@link ScopeField#isReplaces()} of every field from the dictionary, a stored or requested value is ignored
+     * fixed settings of the fields, a stored or requested value is ignored:
+     * {@link ScopeField#isReplaces()} from the dictionary, the inventory decision is always internal
      */
-    public List<ScopeField> deriveReplaces(List<ScopeField> fields) {
+    public List<ScopeField> applyFixedSettings(List<ScopeField> fields) {
         if (fields != null) {
-            fields.forEach(field -> field.setReplaces(field.getId() != null && replaces(field.getId())));
+            fields.forEach(field -> {
+                field.setReplaces(field.getId() != null && replaces(field.getId()));
+                if (INTERNAL_PROPERTIES.contains(field.getId())) {
+                    field.setVisibility(ScopeFieldVisibility.INTERNAL);
+                }
+            });
         }
         return fields;
     }

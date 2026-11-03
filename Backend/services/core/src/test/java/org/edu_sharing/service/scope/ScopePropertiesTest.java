@@ -44,10 +44,20 @@ class ScopePropertiesTest {
                 ScopeField.builder().id("ccm:editorial_inventory").replaces(true).build(),
                 ScopeField.builder().id("ccm:editorial_release").build(),
                 ScopeField.builder().id("cclom:title").replaces(false).build());
-        underTest.deriveReplaces(fields);
+        underTest.applyFixedSettings(fields);
         assertFalse(fields.get(0).isReplaces());
         assertFalse(fields.get(1).isReplaces());
         assertTrue(fields.get(2).isReplaces());
+    }
+
+    @Test
+    void theInventoryIsAlwaysInternal() {
+        List<ScopeField> fields = List.of(
+                ScopeField.builder().id("ccm:editorial_inventory").visibility(ScopeFieldVisibility.PUBLIC).build(),
+                ScopeField.builder().id("ccm:editorial_release").visibility(ScopeFieldVisibility.PUBLIC).build());
+        underTest.applyFixedSettings(fields);
+        assertEquals(ScopeFieldVisibility.INTERNAL, fields.get(0).getVisibility());
+        assertEquals(ScopeFieldVisibility.PUBLIC, fields.get(1).getVisibility());
     }
 
     private static AspectDefinition aspect(String property) {

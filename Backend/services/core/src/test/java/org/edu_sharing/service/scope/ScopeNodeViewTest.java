@@ -23,15 +23,23 @@ class ScopeNodeViewTest {
             ScopeField.builder().id("ccm:curriculum").visibility(ScopeFieldVisibility.INTERNAL).replaces(true).build())).build();
 
     private ScopeNodeView underTest;
+    private ScopeDefinitionService definitionService;
     private Map<String, Object> nodeProps;
 
     @BeforeEach
     void setUp() {
-        ScopeDefinitionService definitionService = mock(ScopeDefinitionService.class);
+        definitionService = mock(ScopeDefinitionService.class);
         when(definitionService.getDefinition(anyString())).thenReturn(Optional.empty());
-        when(definitionService.getDefinition(OTHER)).thenReturn(Optional.of(ScopeDefinition.builder().scopeId(OTHER).displayName("Kunde A").build()));
+        when(definitionService.getDefinition(OWN)).thenReturn(Optional.of(DEFINITION));
+        when(definitionService.getDefinition(OTHER)).thenReturn(Optional.of(otherDefinition(ScopeFieldVisibility.PUBLIC)));
         underTest = new ScopeNodeView(new ScopesSettings(), mock(ScopeContextResolver.class), definitionService, mock(ScopeServiceFactory.class));
         nodeProps = new HashMap<>(Map.of(TITLE, "Originaltitel", CCConstants.NODETYPE, CCConstants.CCM_TYPE_IO));
+    }
+
+    private static ScopeDefinition otherDefinition(ScopeFieldVisibility recommendation) {
+        return ScopeDefinition.builder().scopeId(OTHER).displayName("Kunde A").fields(List.of(
+                ScopeField.builder().id("ccm:editorial_inventory").visibility(ScopeFieldVisibility.INTERNAL).build(),
+                ScopeField.builder().id("ccm:editorial_recommendation").visibility(recommendation).build())).build();
     }
 
     private static Optional<ActiveScope> scope(ScopeRole role) {
@@ -113,6 +121,15 @@ class ScopeNodeViewTest {
             assertNull(scope.getOriginals());
         }
         assertEquals("Kunde A", view.scopes().get(1).getDisplayName());
+    }
+
+    @Test
+    void aFieldThatBecameInternalIsHiddenBeforeTheReindex() {
+        // the index still lists the field as public, the definition does not any longer
+        when(definitionService.getDefinition(OTHER)).thenReturn(Optional.of(otherDefinition(ScopeFieldVisibility.INTERNAL)));
+        ScopeNodeView.View view = underTest.view(scope(ScopeRole.EDITOR), data(false, true), nodeProps);
+
+        assertTrue(view.scopes().stream().noneMatch(s -> s.getScopeId().equals(OTHER)));
     }
 
     @Test

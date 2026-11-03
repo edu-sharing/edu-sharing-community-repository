@@ -203,11 +203,15 @@ export class ScopeManagementComponent {
     readonly cardColumnIds = computed(
         () => this.customCardColumns() ?? this.defaultCardColumns().map((c) => c.name),
     );
-    /** every widget of the mds (incl. virtual properties) plus the scope fields */
+    /**
+     * every widget of the mds (incl. virtual properties), the scope fields and the columns of the mds
+     * card list (license, source: they have no widget of their own)
+     */
     readonly cardProperties = computed<ListItem[]>(() => {
         const ids = new Set([
             ...Object.keys(this.widgets()).filter((id) => id.includes(':')),
             ...this.fieldIds(),
+            ...this.defaultCardColumns().map((c) => c.name),
         ]);
         return this.toListItems([...ids]).sort((a, b) => a.label.localeCompare(b.label));
     });

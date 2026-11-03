@@ -915,12 +915,12 @@
       <type>singleoption</type>
       <valuespace_i18n_prefix>ccm_editorial_inventory_</valuespace_i18n_prefix>
       <values>
-        <value icon="block">rejected</value>
+        <value icon="block" description="description_rejected">rejected</value>
         <!-- no decision yet: never stored, choosing it removes the value (see es-scope-inventory) -->
-        <value icon="inbox">inbox</value>
-        <value icon="lightbulb">proposed</value>
-        <value icon="check_circle">accepted</value>
-        <value icon="thumb_up">recommended</value>
+        <value icon="inbox" description="description_inbox">inbox</value>
+        <value icon="lightbulb" description="description_proposed">proposed</value>
+        <value icon="check_circle" description="description_accepted">accepted</value>
+        <value icon="thumb_up" description="description_recommended">recommended</value>
       </values>
     </widget>
     <!-- scopes: tabs (work sets) of the editorial page inside the active scope, see query ngsearch -->

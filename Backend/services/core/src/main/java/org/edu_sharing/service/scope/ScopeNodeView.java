@@ -13,6 +13,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Scope data of a node for the node dto (F5, concept §5.4/§9):
@@ -103,16 +104,20 @@ public class ScopeNodeView {
                 if (!entry.isPublished() || entry.getPublicFields() == null) {
                     continue;
                 }
+                Optional<ScopeDefinition> definition = definitionService.getDefinition(entry.getScopeId());
+                // the public fields of the index are those of the definition when the entry was indexed: a field that
+                // became internal in the meantime must not be shown until the entry is indexed again
+                Set<String> publicFields = definition.map(ScopeNodeView::getPublicFields).orElse(Set.of());
                 Map<String, List<String>> visible = new LinkedHashMap<>();
                 for (String field : entry.getPublicFields()) {
-                    if (values.containsKey(field)) {
+                    if (values.containsKey(field) && publicFields.contains(field)) {
                         visible.put(field, values.get(field));
                     }
                 }
                 if (visible.isEmpty()) {
                     continue;
                 }
-                String displayName = definitionService.getDefinition(entry.getScopeId()).map(ScopeDefinition::getDisplayName).orElse(entry.getScopeId());
+                String displayName = definition.map(ScopeDefinition::getDisplayName).orElse(entry.getScopeId());
                 scopes.add(nodeScope(entry, displayName, visible, null));
             }
         }
@@ -133,6 +138,16 @@ public class ScopeNodeView {
     /**
      * @return cm:modified of the node in milliseconds, 0 if unknown
      */
+    /**
+     * fields of another scope that are visible outside of it: public and not replacing
+     */
+    static Set<String> getPublicFields(ScopeDefinition definition) {
+        return definition.getFields() == null ? Set.of() : definition.getFields().stream()
+                .filter(field -> field.getVisibility() == ScopeFieldVisibility.PUBLIC && !field.isReplaces())
+                .map(ScopeField::getId)
+                .collect(Collectors.toSet());
+    }
+
     static long getModified(Map<String, Object> nodeProps) {
         for (String key : List.of(CCConstants.CM_PROP_C_MODIFIED + CCConstants.LONG_DATE_SUFFIX, CCConstants.CM_PROP_C_MODIFIED)) {
             Object value = nodeProps.get(key);

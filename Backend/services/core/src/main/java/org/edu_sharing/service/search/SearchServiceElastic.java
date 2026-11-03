@@ -58,6 +58,7 @@ import org.edu_sharing.service.scope.ActiveScope;
 import org.edu_sharing.service.scope.ScopeBaseQuery;
 import org.edu_sharing.service.scope.ScopeContextResolver;
 import org.edu_sharing.service.scope.ScopeRole;
+import org.edu_sharing.service.scope.ScopeRelevance;
 import org.edu_sharing.service.scope.ScopeSearchFilter;
 import org.edu_sharing.service.scope.ScopeFacets;
 import org.springframework.beans.factory.ObjectProvider;
@@ -919,7 +920,9 @@ public class SearchServiceElastic implements SearchService {
                                 }
                                 return bool;
                             }))
-                    .must(must -> must.bool(metadataQueryBuilderAsQuery)));
+                    .must(must -> must.bool(metadataQueryBuilderAsQuery))
+                    // scopes: recommended entries of the active scope first (score only, the hits stay the same)
+                    .should(ScopeRelevance.boost().map(List::of).orElse(List.of())));
             if (!queryData.getFunctions().isEmpty()) {
                 return q.functionScore(f ->
                         f.query(q2 -> q2.bool(boolQuery)).
@@ -1176,17 +1179,22 @@ public class SearchServiceElastic implements SearchService {
                 if (stored.getCriteria() != null) {
                     stored.getCriteria().forEach((key, values) -> criteria.put(key, values.toArray(new String[0])));
                 }
-                // like the regular search: parameters (and the mds base query) are split into a filter and a query part
-                BoolQuery filter = MetadataElasticSearchHelper.getElasticSearchQuery(new SearchToken(),
-                        mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, criteria, true).build();
-                BoolQuery query = MetadataElasticSearchHelper.getElasticSearchQuery(new SearchToken(),
-                        mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, criteria, false).build();
-                result.add(Query.of(q -> q.bool(b -> b.filter(f -> f.bool(filter)).must(m -> m.bool(query)))));
+                result.add(toScopeBaseQuery(mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, criteria));
             } catch (Throwable t) {
                 log.warn("could not resolve base query {} of scope {}: {}", stored.getQuery(), scope.getScopeId(), t.getMessage());
             }
         }
         return result;
+    }
+
+    /**
+     * one stored base query of a scope: like the regular search, the parameters (and the mds base query) are split
+     * into a filter part (asFilter, the default) and a query part (asFilter="false", e.g. the full text), both apply
+     */
+    static Query toScopeBaseQuery(MetadataQueries queries, MetadataQuery queryData, Map<String, String[]> criteria) {
+        BoolQuery filter = MetadataElasticSearchHelper.getElasticSearchQuery(new SearchToken(), queries, queryData, criteria, true).build();
+        BoolQuery query = MetadataElasticSearchHelper.getElasticSearchQuery(new SearchToken(), queries, queryData, criteria, false).build();
+        return Query.of(q -> q.bool(b -> b.filter(f -> f.bool(filter)).must(m -> m.bool(query))));
     }
 
     private static void processSpecialFilters(MetadataQuery query, BoolQuery.Builder queryBuilderGlobalConditions) {

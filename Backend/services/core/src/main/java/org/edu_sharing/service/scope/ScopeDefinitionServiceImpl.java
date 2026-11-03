@@ -73,7 +73,7 @@ public class ScopeDefinitionServiceImpl implements ScopeDefinitionService {
                 .scopeId(scopeId)
                 .displayName(alfAuthorityService.getAuthorityDisplayName(scopeId))
                 .mds((String) properties.get(QName.createQName(CCConstants.CCM_PROP_SCOPE_MDS)))
-                .fields(scopeProperties.deriveReplaces(ScopeDefinitionJson.parseFields((String) properties.get(QName.createQName(CCConstants.CCM_PROP_SCOPE_FIELDS)))))
+                .fields(scopeProperties.applyFixedSettings(ScopeDefinitionJson.parseFields((String) properties.get(QName.createQName(CCConstants.CCM_PROP_SCOPE_FIELDS)))))
                 .presentation(ScopeDefinitionJson.parsePresentation((String) properties.get(QName.createQName(CCConstants.CCM_PROP_SCOPE_SETTINGS))))
                 .baseQuery(ScopeDefinitionJson.parseBaseQuery(toStringList(properties.get(QName.createQName(CCConstants.CCM_PROP_SCOPE_BASE_QUERY))),
                         (Long) properties.get(QName.createQName(CCConstants.CCM_PROP_SCOPE_BASE_QUERY_VERSION))))
@@ -220,8 +220,8 @@ public class ScopeDefinitionServiceImpl implements ScopeDefinitionService {
         if (fields == null) {
             return;
         }
-        // replaces is not configurable: regular properties replace, scope only properties don't
-        scopeProperties.deriveReplaces(fields);
+        // replaces and the visibility of the inventory are not configurable
+        scopeProperties.applyFixedSettings(fields);
         Set<String> ids = new HashSet<>();
         for (ScopeField field : fields) {
             if (field.getId() == null || dictionaryService.getProperty(QName.createQName(CCConstants.getValidGlobalName(field.getId()))) == null) {
