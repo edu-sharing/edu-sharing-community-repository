@@ -24,6 +24,9 @@ public class FixSyncCollectionRefProperties extends AbstractJobMapAnnotationPara
     @JobFieldDescription(description = "Custom query to use to find the references to sync. When using an own query, please make sure to filter for aspects of ccm:collection_io_reference", sampleValue = "{\"bool\":{\"must\":[{\"term\":{\"aspects\":\"ccm:collection_io_reference\"}}]}}")
     private String query;
 
+    @JobFieldDescription(description = "Run threaded (default false)")
+    private boolean threaded = false;
+
     @Override
     public void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
@@ -36,25 +39,29 @@ public class FixSyncCollectionRefProperties extends AbstractJobMapAnnotationPara
             if(isInterrupted()) {
                 return;
             }
-            if(nodeService.getAspects(ref).contains(QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))){
-                String original = (String)nodeService.getProperty(ref,QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL));
-                if(original != null && !ref.getId().equals(original)){
-                    NodeRef nodeRefOriginal = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,original);
-                    if(!nodeService.exists(nodeRefOriginal)){
-                        logger.warn("original node " + nodeRefOriginal + " of ref " +ref + " does not exists");
-                        return;
-                    }
-                    try {
-                        logger.info("syncing: "+ref+" nodeRefOriginal:"+nodeRefOriginal);
-                        NodeCustomizationPolicies.syncCollectionRefProps(nodeRefOriginal,ref,nodeService.getProperties(ref), nodeService.getProperties(nodeRefOriginal),false, nodeService);
-                    } catch (Exception e) {
-                        logger.info("error while syncing: "+ref+" nodeRefOriginal:"+nodeRefOriginal + ": " + e.getMessage(), e);
-                    }
+            try {
+                // elastic index may be stale -> node may have been deleted in the meantime
+                if (!nodeService.exists(ref) || !nodeService.hasAspect(ref, QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))) {
+                    return;
                 }
-
+                String original = (String) nodeService.getProperty(ref, QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL));
+                if (original == null || ref.getId().equals(original)) {
+                    return;
+                }
+                NodeRef nodeRefOriginal = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, original);
+                if (!nodeService.exists(nodeRefOriginal)) {
+                    logger.warn("original node " + nodeRefOriginal + " of ref " + ref + " does not exists");
+                    return;
+                }
+                logger.info("syncing: " + ref + " nodeRefOriginal:" + nodeRefOriginal);
+                NodeCustomizationPolicies.syncCollectionRefProps(nodeRefOriginal, ref, nodeService.getProperties(ref), nodeService.getProperties(nodeRefOriginal), false, nodeService);
+            } catch (Exception e) {
+                logger.warn("error while syncing: " + ref + ": " + e.getMessage(), e);
             }
         });
-        nr.setTransaction(NodeRunner.TransactionMode.Local);
+        nr.setThreaded(threaded);
+        // retrying: parallel transactions may run into concurrency failures, which will then be retried instead of failing the node
+        nr.setTransaction(NodeRunner.TransactionMode.LocalRetrying);
         nr.setKeepModifiedDate(true);
         nr.setTypes(Arrays.asList(new String[] { CCConstants.CCM_TYPE_IO }));
         if(StringUtils.isNotBlank(query)) {
