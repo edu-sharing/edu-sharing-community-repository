@@ -67,12 +67,25 @@ public class JobQueueScheduler {
 
     }
 
+    /**
+     * runs the queued jobs one after another until the queue is empty, the interval only applies while it is empty
+     * (otherwise every job, even a tiny one, would wait for the next interval)
+     */
     @Scheduled(fixedDelayString = "${jobs.fetchNextInterval}")
     public void retrieveJobFromJobQueue() {
+        while (runNextJob()) {
+            // next one
+        }
+    }
+
+    /**
+     * @return false if the queue was empty
+     */
+    boolean runNextJob() {
         JobQueueEntry nextJob = jobQueueMapper.getNext();
         if (nextJob == null) {
             log.debug("no next job");
-            return;
+            return false;
         }
         log.debug("next job: {}", nextJob);
         ObjectMapper objectMapper = new ObjectMapper();
@@ -85,7 +98,7 @@ public class JobQueueScheduler {
 
             if (method == null) {
                 log.error("no method found for target: {} method: {}", nextJob.getBean(), nextJob.getMethod());
-                return;
+                return true;
             }
             log.debug("found method: {}", method);
 
@@ -108,6 +121,7 @@ public class JobQueueScheduler {
             jobQueueContext.setDisableQueuing(false);
             jobQueueMapper.delete(nextJob);
         }
+        return true;
     }
 
     record MethodParam(String jsonValue, Class<?> type) {
