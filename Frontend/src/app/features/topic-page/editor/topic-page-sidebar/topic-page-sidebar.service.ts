@@ -111,14 +111,20 @@ export class TopicPageSidebarService {
     }
 
     /**
-     * Opens the topic menu if the sidebar shows no option and the menu is registered.
+     * Opens the topic menu if the sidebar shows no option, the menu is registered and no content
+     * is selected, which the menu does not act on.
      */
     openMenuIfIdle(): void {
         const sidebar = this.editorialSidebarService.editorialSidebar;
         const registered = this.editorialSidebarService
             .getCustomOptions()
             .some((custom) => custom.id === TOPIC_PAGE_SIDEBAR_OPTION);
-        if (!sidebar || sidebar.enabledOption() || !registered) {
+        if (
+            !sidebar ||
+            sidebar.enabledOption() ||
+            !registered ||
+            this.editorialSidebarService.nodes()?.length
+        ) {
             return;
         }
         this.editorialSidebarService.showOption({ option: TOPIC_PAGE_SIDEBAR_OPTION, trap: false });

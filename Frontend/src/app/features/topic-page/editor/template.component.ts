@@ -3016,6 +3016,8 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             id: TOPIC_PAGE_SIDEBAR_OPTION,
             label: 'TOPIC_PAGE.SIDEBAR.TITLE',
             icon: 'edu-page_variant',
+            // the menu acts on the page, not on content selected on it
+            customShowCallback: async (nodes) => !nodes?.length,
         });
         const entries = [
             {
