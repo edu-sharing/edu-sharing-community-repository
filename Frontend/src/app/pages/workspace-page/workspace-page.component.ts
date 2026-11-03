@@ -10,6 +10,7 @@ import {
     OnInit,
     viewChild,
     ViewChild,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { ConnectedPosition } from '@angular/cdk/overlay';
 import { ActivatedRoute, Params, Router } from '@angular/router';
@@ -99,6 +100,7 @@ type NodeWrapper = { node: Node };
         trigger('fromRight', UIAnimation.fromRight()),
     ],
     providers: [OptionsHelperService],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy, AfterViewInit {

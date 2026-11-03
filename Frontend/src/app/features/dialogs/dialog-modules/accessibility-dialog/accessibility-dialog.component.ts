@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { Subject } from 'rxjs';
 import { switchMap, takeUntil, tap } from 'rxjs/operators';
@@ -9,6 +9,7 @@ import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
     selector: 'es-accessibility-dialog',
     templateUrl: './accessibility-dialog.component.html',
     styleUrls: ['./accessibility-dialog.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class AccessibilityDialogComponent implements OnInit, OnDestroy {

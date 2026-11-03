@@ -1,4 +1,12 @@
-import { Component, effect, input, model, signal, inject } from '@angular/core';
+import {
+    Component,
+    effect,
+    input,
+    model,
+    signal,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { SharedModule } from '../../../shared/shared.module';
 import { AssignmentV1Service, SubmissionFile } from 'ngx-edu-sharing-api';
 import { firstValueFrom } from 'rxjs';
@@ -8,6 +16,7 @@ import { SubmissionConfig } from '../submission-sidebar/submission-sidebar.compo
     selector: 'es-manage-assignment-submissions',
     templateUrl: 'manage-submission-nodes.component.html',
     styleUrls: ['manage-submission-nodes.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SharedModule],
 })
 export class ManageSubmissionNodesComponent {

@@ -9,6 +9,7 @@ import { EduSharingUiCommonModule } from '../common/edu-sharing-ui-common.module
 import { OptionItem } from '../types/option-item';
 import { ActionbarComponent } from './actionbar.component';
 import { OptionItemToggle } from 'ngx-edu-sharing-ui';
+import { Subject } from 'rxjs';
 
 let defaultOptions = [
     new OptionItem('Option 1', 'home', () => {}),
@@ -41,7 +42,8 @@ const actionbar: Meta<ActionbarComponent> = {
                 },
                 {
                     provide: ApiRequestConfiguration,
-                    useValue: {},
+                    // The real AuthenticationService subscribes to `apiRequest` on construction.
+                    useValue: { apiRequest: new Subject<void>() },
                 },
                 {
                     provide: TranslateService,

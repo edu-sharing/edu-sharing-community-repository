@@ -9,6 +9,7 @@ import {
     SimpleChanges,
     ViewChild,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
@@ -44,6 +45,7 @@ type PublishedNode = Node & {
     templateUrl: 'publish.component.html',
     styleUrls: ['publish.component.scss'],
     providers: [MdsEditorInstanceService],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy {

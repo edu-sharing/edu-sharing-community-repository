@@ -126,7 +126,7 @@ export enum ValueType {
     selector: 'es-mds-widget',
     templateUrl: 'mds-widget.component.html',
     styleUrls: ['mds-widget.component.scss'],
-    changeDetection: ChangeDetectionStrategy.Default,
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
     animations: [
         trigger('showHideExtended', [

@@ -7,6 +7,7 @@ import {
     QueryList,
     ViewChild,
     ViewChildren,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 import {
@@ -47,6 +48,7 @@ import { MdsWidgetType, ValueType } from 'ngx-edu-sharing-ui';
     selector: 'es-mds-editor-widget-chips',
     templateUrl: './mds-editor-widget-chips.component.html',
     styleUrls: ['./mds-editor-widget-chips.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class MdsEditorWidgetChipsComponent
@@ -388,6 +390,7 @@ export class MdsEditorWidgetChipsComponent
 @Component({
     templateUrl: './mds-editor-widget-chips.component.html',
     styleUrls: ['./mds-editor-widget-chips.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class MdsEditorWidgetChipsRangedValueComponent extends MdsEditorWidgetChipsComponent {}

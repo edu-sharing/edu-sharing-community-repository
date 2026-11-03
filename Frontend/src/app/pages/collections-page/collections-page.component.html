@@ -226,8 +226,8 @@
       >
         <es-search-selection-overlay
           [nodes]="collectionContentRef?.selection || []"
-          [columns]="collectionContentRef?.referencesColumns"
-          [displayType]="collectionContentRef?.referencesDisplayType"
+          [columns]="$safeNavigationMigration(collectionContentRef?.referencesColumns)"
+          [displayType]="$safeNavigationMigration(collectionContentRef?.referencesDisplayType)"
           (deselect)="collectionContentRef?.deselectNode($event)"
         ></es-search-selection-overlay>
       </ng-template>

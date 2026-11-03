@@ -1,4 +1,12 @@
-import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import {
+    Component,
+    ElementRef,
+    EventEmitter,
+    Input,
+    Output,
+    ViewChild,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { FloatLabelType } from '@angular/material/form-field';
 
@@ -6,6 +14,7 @@ import { FloatLabelType } from '@angular/material/form-field';
     selector: 'es-input-password',
     templateUrl: 'input-password.component.html',
     styleUrls: ['input-password.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class InputPasswordComponent {

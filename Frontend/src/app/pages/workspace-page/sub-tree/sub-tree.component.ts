@@ -11,6 +11,7 @@ import {
     ViewChild,
     ViewChildren,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
 import * as rxjs from 'rxjs';
@@ -47,6 +48,7 @@ import { canDropOnNode } from '../workspace-utils';
         trigger('open', UIAnimation.openOverlay()),
     ],
     providers: [OptionsHelperDataService, NodeEntriesService],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class WorkspaceSubTreeComponent implements OnInit, OnDestroy {

@@ -27,7 +27,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { TranslateService } from '@ngx-translate/core';
 import { ConnectorService, Node, NodeService } from 'ngx-edu-sharing-api';
 import { take } from 'rxjs/operators';
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Helper } from '../../core-module/rest/helper';
 import { CordovaService, OnBackBehaviour } from '../../services/cordova.service';
 
@@ -36,6 +36,7 @@ import { CordovaService, OnBackBehaviour } from '../../services/cordova.service'
     templateUrl: 'app-share-page.component.html',
     styleUrls: ['app-share-page.component.scss'],
     animations: [],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class AppSharePageComponent {

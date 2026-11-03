@@ -13,6 +13,7 @@ import {
     TemplateRef,
     ViewChild,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, UntypedFormControl, Validators } from '@angular/forms';
@@ -73,6 +74,7 @@ type WafyEntry = {
     templateUrl: 'login-page.component.html',
     styleUrls: ['login-page.component.scss'],
     animations: [trigger('dialog', UIAnimation.switchDialog(UIAnimation.ANIMATION_TIME_FAST))],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {

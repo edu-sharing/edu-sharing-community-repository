@@ -16,7 +16,7 @@ This agent assists with development tasks in this Angular frontend project.
 
 ## Project Context
 
--   **Framework**: Angular (with `@angular/material` / `@angular/cdk` v21)
+-   **Framework**: Angular (with `@angular/material` / `@angular/cdk` v22)
 -   **Language**: TypeScript
 -   **Test runner**: Jest / Playwright
 -   **Styling**: SCSS
@@ -51,7 +51,7 @@ This agent assists with development tasks in this Angular frontend project.
 
 -   The application contains older components build with old Angular versions, when building new features however, always look for the best current Angular pattern and suggest refactoring if it seems necessary
 -   use custom `esIcon` directive instead of `mat-icon`
--   Prefer signals and computed if feasible and make use of Angular >= 21 features when it makes sense for the task
+-   Prefer signals and computed if feasible and make use of Angular 22 features when it makes sense for the task
 -   Prefer signal view queries (`viewChild()` / `viewChildren()` + `computed()`) over the legacy `@ViewChild` setter-with-`setTimeout` workaround for "ExpressionChangedAfterItHasBeenChecked" — signal queries settle cleanly and can be combined/filtered in a `computed()` that templates read directly (Angular 21). A `viewChild()` signal is itself a callable `() => T | undefined`, so it can be passed straight into a child `@Input()` (type it `Signal<T | undefined>`, not `() => T`) and the child reads it reactively as `this.x?.()` — handy for handing a parent-owned, possibly-`@if`-gated element down to a child without snapshot/timing bugs.
 -   **Template reference variables shadow component members of the same name in template expressions.** A `#foo` ref and a component property `foo` collide: `[input]="foo"` resolves the RHS to the _ref_ (the element/component instance), not the property — e.g. binding a signal property fails with "Type Xxx is not assignable to type Signal<Xxx>". Give the `#ref` a distinct name (e.g. `#fooRef`) and point the `viewChild('fooRef')` locator at it.
 -   A component reused across **query/route param changes** (e.g. tabs or `repo` query param) does **not** re-run its constructor/`ngOnInit`; subscribe to the param/value observable to react. Pages also share state via `providedIn:'root'` / page-level `BehaviorSubject`s (e.g. `SearchPageService.selection` written by multiple sibling result components) — a newly-routed instance inherits the **stale** value, so reset such shared subjects explicitly on init rather than relying on the new instance's empty local state.
@@ -59,7 +59,7 @@ This agent assists with development tasks in this Angular frontend project.
 -   To override `mat-button` label color in a dark/overlay context, use the MDC token `--mdc-text-button-label-text-color` (e.g. `button.mat-mdc-button { --mdc-text-button-label-text-color: #fff; }`). The project uses `angular-material-css-vars.
 -   `NodeHelperService.getOriginalId(node)` (in `src/app/services/node-helper.service.ts`) returns the `ccm:original` property value when present, falling back to `node.ref.id`. Use it to detect collection references and submission file variant content nodes.
 -   Node-list click outputs (`clickItem` / `dblClickItem` on `es-node-entries-wrapper`) emit a **`NodeClickEvent<Node>`** (`{ element, source, ctrlKey?, attribute? }`), and `NodeHelperService.navigateToNode(event)` consumes the whole event (uses `ctrlKey`/`source`). Forward the full `$event`, **not** `$event.element`, when re-emitting to such a handler. `NodeClickEvent` and `ClickSource` are exported from `ngx-edu-sharing-ui` via the `index.ts` wildcard (`export * from './node-entries/entries-model'`), even though they are not listed by name.
--   Do NOT use spread syntax (`[...x]`, `{...x}`) in templates — it is only supported in Angular 21.1+ and this project is on an older version. A `Set`/`Map` won't serialize with the `json` pipe either (renders `{}`); convert to an array in the component if you need to inspect it.
+-   Spread syntax (`[...x]`, `{...x}`) is supported in templates (Angular 21.1+). A `Set`/`Map` won't serialize with the `json` pipe either (renders `{}`); convert to an array in the component if you need to inspect it.
 -   `UIService.editConnector(node, type?, win?, connectorType?)` and `openConnector(...)` return the opened `Window`. Pre-open the window in the user-gesture (synchronously) and pass it in if the connector call follows an `await`, to avoid popup blockers.
 -   Node list overlays: `es-node-entries-wrapper` projects an `<ng-template #overlay let-element="element">` (via `@ContentChild('overlay')`) rendered per card for `Grid`/`SmallGrid` display types. The card's `.card-overlay` provides the positioning context.
 -   `es-node-entries-wrapper` (table view) hides built-in columns via `[checkbox]="false"`, `[showIconColumn]="false"`, `[showActions]="false"`. These flow wrapper → `NodeEntriesService` (`BehaviorSubject`s) → `node-entries-table` `getVisibleColumnNames()`, which builds `select`/`icon`/data-columns/`actions`. Add new column toggles using this same pattern.

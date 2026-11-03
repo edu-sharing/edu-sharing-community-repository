@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { LocalEventsService, OPEN_URL_MODE } from 'ngx-edu-sharing-ui';
@@ -26,6 +26,7 @@ import { firstValueFrom, Observable } from 'rxjs';
     templateUrl: './create-variant-dialog.component.html',
     styleUrls: ['./create-variant-dialog.component.scss'],
     standalone: false,
+    changeDetection: ChangeDetectionStrategy.Eager,
     providers: [BreadcrumbsService],
 })
 export class CreateVariantDialogComponent {

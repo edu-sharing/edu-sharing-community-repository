@@ -3,7 +3,6 @@ import {
     AfterViewInit,
     ApplicationRef,
     Component,
-    ComponentFactoryResolver,
     ElementRef,
     HostBinding,
     inject,
@@ -18,6 +17,7 @@ import {
     Type,
     ViewChild,
     ViewContainerRef,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import {
@@ -99,13 +99,13 @@ type NativeWidgetClass = {
         ]),
     ],
     providers: [ViewInstanceService, MdsViewerService],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class MdsEditorViewComponent
     implements OnInit, AfterViewInit, OnChanges, OnDestroy, MdsEditInterface
 {
     private sanitizer = inject(DomSanitizer);
-    private factoryResolver = inject(ComponentFactoryResolver);
     private containerRef = inject(ViewContainerRef);
     private applicationRef = inject(ApplicationRef);
     private mdsEditorInstance = inject(MdsEditorInstanceService);
@@ -340,7 +340,6 @@ export class MdsEditorViewComponent
         );
         element = replaceElementWithDiv(element);
         UIService.injectAngularComponent(
-            this.factoryResolver,
             this.containerRef,
             MdsEditorWidgetErrorComponent,
             element,

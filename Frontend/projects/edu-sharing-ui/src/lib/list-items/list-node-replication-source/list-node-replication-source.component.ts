@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import * as rxjs from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
@@ -12,6 +12,7 @@ import { ListItem } from '../../types/list-item';
     selector: 'es-list-node-replication-source',
     templateUrl: './list-node-replication-source.component.html',
     providers: [NodeSourcePipe],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class ListNodeReplicationSourceComponent extends ListWidget {

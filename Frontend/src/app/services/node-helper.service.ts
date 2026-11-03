@@ -19,7 +19,7 @@ import { Helper } from '../core-module/rest/helper';
 import { HttpClient } from '@angular/common/http';
 import { MessageType } from '../util/message-type';
 import { Toast } from './toast';
-import { ComponentFactoryResolver, Injectable, ViewContainerRef, inject } from '@angular/core';
+import { Injectable, ViewContainerRef, inject } from '@angular/core';
 import { BridgeService } from './bridge.service';
 import {
     AuthorityProfile,
@@ -86,7 +86,6 @@ export type HandleState = {
 };
 @Injectable({ providedIn: 'root' })
 export class NodeHelperService extends NodeHelperServiceBase {
-    private componentFactoryResolver = inject(ComponentFactoryResolver);
     private authenticationService = inject(AuthenticationService);
     private config = inject(ConfigService);
     private dialogsService = inject(DialogsService);

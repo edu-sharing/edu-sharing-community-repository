@@ -1,4 +1,11 @@
-import { Component, Input, OnChanges, SimpleChanges, inject } from '@angular/core';
+import {
+    Component,
+    Input,
+    OnChanges,
+    SimpleChanges,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { Node, NodeService } from 'ngx-edu-sharing-api';
 import { RestConstants } from '../../../../../core-module/rest/rest-constants';
 
@@ -6,6 +13,7 @@ import { RestConstants } from '../../../../../core-module/rest/rest-constants';
     selector: 'es-share-dialog-restricted-access',
     templateUrl: 'restricted-access.component.html',
     styleUrls: ['restricted-access.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class ShareDialogRestrictedAccessComponent implements OnChanges {

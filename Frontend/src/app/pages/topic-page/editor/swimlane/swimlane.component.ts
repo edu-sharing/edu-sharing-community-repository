@@ -9,6 +9,7 @@ import {
     Output,
     SimpleChanges,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { MdsWidget, Node, NodeEntries } from 'ngx-edu-sharing-api';
 import { Values } from 'ngx-edu-sharing-ui';
@@ -34,6 +35,7 @@ import { SelectWidgetTypeComponent } from './select-widget-type/select-widget-ty
         SelectWidgetTypeComponent,
     ],
     templateUrl: './swimlane.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./swimlane.component.scss'],
 })
 export class SwimlaneComponent implements AfterViewChecked, OnChanges {

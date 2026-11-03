@@ -1,4 +1,4 @@
-import { Component, QueryList, ViewChildren, inject } from '@angular/core';
+import { Component, QueryList, ViewChildren, inject, ChangeDetectionStrategy } from '@angular/core';
 import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
@@ -15,6 +15,7 @@ import { MatSlideToggleChange } from '@angular/material/slide-toggle';
     selector: 'es-mds-editor-core',
     templateUrl: './mds-editor-core.component.html',
     styleUrls: ['./mds-editor-core.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class MdsEditorCoreComponent {

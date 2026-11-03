@@ -1,4 +1,4 @@
-import { Component, computed, input, model, inject } from '@angular/core';
+import { Component, computed, input, model, inject, ChangeDetectionStrategy } from '@angular/core';
 import { SharedModule } from '../../../shared/shared.module';
 import { NodeHelperService, NodesRightMode } from 'ngx-edu-sharing-ui';
 import { MatSelectChange } from '@angular/material/select';
@@ -14,6 +14,7 @@ type Role = 'ASSIGNEE' | 'COORDINATOR';
     selector: 'es-manage-assignment-authorities',
     templateUrl: 'manage-assignment-authorities.component.html',
     styleUrls: ['manage-assignment-authorities.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SharedModule],
 })
 export class ManageAssignmentAuthoritiesComponent {

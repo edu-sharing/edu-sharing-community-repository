@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { DialogButton } from '../../../../core-module/core.module';
 import { CARD_DIALOG_DATA, CardDialogConfig } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
@@ -11,6 +11,7 @@ import {
     selector: 'es-license-agreement-dialog',
     templateUrl: './license-agreement-dialog.component.html',
     styleUrls: ['./license-agreement-dialog.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class LicenseAgreementDialogComponent implements OnInit {

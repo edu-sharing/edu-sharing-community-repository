@@ -11,6 +11,7 @@ import {
     QueryList,
     ViewChild,
     ViewChildren,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { MatSlideToggle, MatSlideToggleChange } from '@angular/material/slide-toggle';
 import * as rxjs from 'rxjs';
@@ -26,6 +27,7 @@ export type TypeResult = {
     selector: 'es-share-dialog-choose-type',
     templateUrl: 'choose-type.component.html',
     styleUrls: ['choose-type.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class ShareDialogChooseTypeComponent implements AfterViewInit, OnDestroy {

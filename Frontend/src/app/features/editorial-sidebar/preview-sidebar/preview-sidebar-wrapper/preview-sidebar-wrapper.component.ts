@@ -1,5 +1,13 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { Component, Input, OnDestroy, TemplateRef, ViewChild, inject } from '@angular/core';
+import {
+    Component,
+    Input,
+    OnDestroy,
+    TemplateRef,
+    ViewChild,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -18,6 +26,7 @@ import { GenericDialogData } from '../../../dialogs/dialog-modules/generic-dialo
     selector: 'es-preview-sidebar-wrapper',
     templateUrl: './preview-sidebar-wrapper.component.html',
     styleUrls: ['./preview-sidebar-wrapper.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class PreviewSidebarWrapperComponent implements OnDestroy {

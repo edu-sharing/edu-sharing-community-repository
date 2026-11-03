@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { PluginStatus } from '../../../core-module/core.module';
 import { RestAdminService } from '../../../core-module/rest/services/rest-admin.service';
 
@@ -9,6 +9,7 @@ declare var Chart: any;
     selector: 'es-admin-plugins',
     templateUrl: 'plugins.component.html',
     styleUrls: ['plugins.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class AdminPluginsComponent {

@@ -68,7 +68,7 @@
         <es-add-collection-sidebar [parent]="parent()"></es-add-collection-sidebar>
         } @if (option === 'VERSION_MANAGEMENT') {
         <es-metadata-sidebar
-          [nodeSidebar]="$any(editorialSidebarService.nodes())?.[0]"
+          [nodeSidebar]="$safeNavigationMigration($any(editorialSidebarService.nodes())?.[0])"
         ></es-metadata-sidebar>
         } @if (option === 'VIEWS_AND_USAGE') {
         <es-usages-preview [nodes]="$any(editorialSidebarService.nodes())"></es-usages-preview>
@@ -84,12 +84,18 @@
         <ng-container *ngComponentOutlet="custom.component"></ng-container>
         } @if (option === 'PREVIEW') {
         <es-preview-sidebar
-          [node]="$any(editorialSidebarService.nodes())?.[0]"
-          [editorMode]="$any(enabledOption()?.optionConfig)?.editorMode || 'viewer'"
-          [groupId]="$any(enabledOption()?.optionConfig)?.groupId || 'preview_sidebar'"
+          [node]="$safeNavigationMigration($any(editorialSidebarService.nodes())?.[0])"
+          [editorMode]="
+            $any($safeNavigationMigration(enabledOption()?.optionConfig))?.editorMode || 'viewer'
+          "
+          [groupId]="
+            $any($safeNavigationMigration(enabledOption()?.optionConfig))?.groupId ||
+            'preview_sidebar'
+          "
           [customOptions]="
-            $any(enabledOption()?.optionConfig)?.customOptions ??
-            editorialSidebarService.previewCustomOptions()[editorialSidebarService.scope()]
+            $safeNavigationMigration(
+              $any($safeNavigationMigration(enabledOption()?.optionConfig))?.customOptions
+            ) ?? editorialSidebarService.previewCustomOptions()[editorialSidebarService.scope()]
           "
           [showStickyBar]="!editorialSidebarService.fullscreenActive()"
         ></es-preview-sidebar>

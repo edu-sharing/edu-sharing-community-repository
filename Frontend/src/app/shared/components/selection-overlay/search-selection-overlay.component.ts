@@ -1,4 +1,12 @@
-import { Component, computed, effect, input, output, viewChild } from '@angular/core';
+import {
+    Component,
+    computed,
+    effect,
+    input,
+    output,
+    viewChild,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { SelectionChange } from '@angular/cdk/collections';
 import { Node } from 'ngx-edu-sharing-api';
 import {
@@ -21,6 +29,7 @@ import {
     templateUrl: './search-selection-overlay.component.html',
     styleUrls: ['./search-selection-overlay.component.scss'],
     standalone: false,
+    changeDetection: ChangeDetectionStrategy.Eager,
     host: {
         '[class.table-mode]': 'effectiveDisplayType() === NodeEntriesDisplayType.Table',
     },

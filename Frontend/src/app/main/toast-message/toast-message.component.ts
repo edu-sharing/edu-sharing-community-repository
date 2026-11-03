@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_SNACK_BAR_DATA } from '@angular/material/snack-bar';
 import { ToastMessage } from '../../services/toast';
 
@@ -6,6 +6,7 @@ import { ToastMessage } from '../../services/toast';
     selector: 'es-toast-message',
     templateUrl: 'toast-message.component.html',
     styleUrls: ['toast-message.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 /**

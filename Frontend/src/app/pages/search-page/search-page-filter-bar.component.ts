@@ -1,4 +1,12 @@
-import { Component, NgZone, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
+import {
+    Component,
+    NgZone,
+    OnDestroy,
+    OnInit,
+    ViewChild,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { AuthenticationService, SavedSearch, SearchService } from 'ngx-edu-sharing-api';
@@ -18,6 +26,7 @@ import { SearchPageRestoreService } from './search-page-restore.service';
     selector: 'es-search-page-filter-bar',
     templateUrl: './search-page-filter-bar.component.html',
     styleUrls: ['./search-page-filter-bar.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class SearchPageFilterBarComponent implements OnInit, OnDestroy {

@@ -1,4 +1,11 @@
-import { Component, ElementRef, OnInit, ViewChild, inject } from '@angular/core';
+import {
+    Component,
+    ElementRef,
+    OnInit,
+    ViewChild,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import {
     AboutService,
     AdminV1Service,
@@ -25,6 +32,7 @@ type variants = 'variables' | 'Language' | '';
     templateUrl: 'context.component.html',
     styleUrls: ['context.component.scss'],
     animations: [trigger('openOverlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class AdminContextComponent implements OnInit {

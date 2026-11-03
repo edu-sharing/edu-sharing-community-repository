@@ -28,6 +28,7 @@ import {
     ViewChildren,
     WritableSignal,
     inject,
+    ChangeDetectionStrategy,
     DestroyRef,
 } from '@angular/core';
 import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
@@ -292,6 +293,7 @@ const isEditableTarget = (target: EventTarget | null): boolean =>
         './template-content.component.scss',
         './template-overrides.component.scss',
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, OnInit {

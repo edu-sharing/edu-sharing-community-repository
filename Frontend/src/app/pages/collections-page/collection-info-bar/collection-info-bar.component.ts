@@ -9,6 +9,7 @@ import {
     SimpleChanges,
     ViewChild,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { Node, NodeService, NodeStats } from 'ngx-edu-sharing-api';
 import { RestHelper } from '../../../core-module/rest/rest-helper';
@@ -28,6 +29,7 @@ import { MdsEditorInstanceService } from '../../../features/mds/mds-editor/mds-e
     templateUrl: 'collection-info-bar.component.html',
     styleUrls: ['collection-info-bar.component.scss'],
     providers: [MdsEditorInstanceService],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class CollectionInfoBarComponent implements OnChanges {

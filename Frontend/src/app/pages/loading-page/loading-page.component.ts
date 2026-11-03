@@ -1,4 +1,4 @@
-import { Component, OnDestroy, inject } from '@angular/core';
+import { Component, OnDestroy, inject, ChangeDetectionStrategy } from '@angular/core';
 import { EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { LoadingScreenComponent } from '../../main/loading-screen/loading-screen.component';
@@ -10,6 +10,7 @@ import { Subject } from 'rxjs';
     templateUrl: 'loading-page.component.html',
     styleUrls: ['loading-page.component.scss'],
     imports: [],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: true,
 })
 export class LoadingPageComponent implements OnDestroy {

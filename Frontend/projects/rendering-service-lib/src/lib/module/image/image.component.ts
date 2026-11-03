@@ -6,6 +6,7 @@ import {
     Input,
     signal,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { RenderingModule } from '../../rendering.module';
 import { RenderModule } from '../RenderModule';
@@ -18,6 +19,7 @@ import { RenderData, AssetStateItem } from '../../dto/RenderData';
     selector: 'rs-module-image',
     imports: [RenderingModule, MatButtonModule, MatIconModule],
     templateUrl: './image.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './image.component.scss',
 })
 export class ImageComponent implements RenderModule, AfterViewInit {

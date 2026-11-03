@@ -91,7 +91,9 @@ function getFormField(canvasElement: HTMLElement, widgetId: string): HTMLElement
     const field = canvasElement.querySelector<HTMLElement>(
         `.widget-form-field-${widgetId.replace(':', '-')}`,
     );
-    expect(field, `form field of ${widgetId}`).toBeTruthy();
+    if (!field) {
+        throw new Error(`form field of ${widgetId} not found`);
+    }
     return field;
 }
 
@@ -196,18 +198,22 @@ export const MdsIOBulkTemplate: Story = {
                 '(Verschiedene Werte)',
             ),
         );
-        expect(title.querySelector('mat-label')).toHaveClass('mdc-floating-label--float-above');
+        await expect(title.querySelector('mat-label')).toHaveClass(
+            'mdc-floating-label--float-above',
+        );
         const category = await waitFor(() => getFormField(canvasElement, 'ccm:tool_category'));
         await waitFor(() => expect(category.textContent).toContain('(Verschiedene Werte)'));
-        expect(category.querySelector('mat-label')).toHaveClass('mdc-floating-label--float-above');
+        await expect(category.querySelector('mat-label')).toHaveClass(
+            'mdc-floating-label--float-above',
+        );
 
         // A tree widget renders values that only some of the nodes carry as indeterminate chips.
         // Enabling the field and clicking such a chip confirms the value for all nodes.
         const taxonId = await waitFor(() => getWidgetContainer(canvasElement, 'ccm:taxonid'));
         await userEvent.click(within(taxonId).getByRole('switch'));
-        const indeterminateChip = await waitFor(() => {
+        const indeterminateChip = await waitFor(async () => {
             const chip = taxonId.querySelector<HTMLElement>('mat-chip-row.indeterminate');
-            expect(chip, 'indeterminate chip').toBeTruthy();
+            await expect(chip, 'indeterminate chip').toBeTruthy();
             return chip;
         });
         await userEvent.click(indeterminateChip);

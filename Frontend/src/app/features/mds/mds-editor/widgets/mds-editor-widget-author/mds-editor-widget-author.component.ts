@@ -1,13 +1,14 @@
 import {
-    ChangeDetectorRef,
     Component,
-    computed,
-    DestroyRef,
     inject,
     Input,
     OnInit,
-    signal,
     ViewChild,
+    ChangeDetectionStrategy,
+    ChangeDetectorRef,
+    computed,
+    DestroyRef,
+    signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatTabGroup } from '@angular/material/tabs';
@@ -39,6 +40,7 @@ enum DefaultTab {
     selector: 'es-mds-editor-widget-author',
     templateUrl: './mds-editor-widget-author.component.html',
     styleUrls: ['./mds-editor-widget-author.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetComponent {

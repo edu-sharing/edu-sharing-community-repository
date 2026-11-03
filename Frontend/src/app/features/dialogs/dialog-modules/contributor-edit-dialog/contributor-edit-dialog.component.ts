@@ -1,5 +1,5 @@
 import { trigger } from '@angular/animations';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { debounceTime, filter, startWith, switchMap } from 'rxjs/operators';
@@ -27,6 +27,7 @@ import {
     templateUrl: './contributor-edit-dialog.component.html',
     styleUrls: ['./contributor-edit-dialog.component.scss'],
     animations: [trigger('overlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class ContributorEditDialogComponent implements OnInit {

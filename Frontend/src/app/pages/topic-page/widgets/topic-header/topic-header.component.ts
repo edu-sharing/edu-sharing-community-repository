@@ -11,6 +11,7 @@ import {
     ViewEncapsulation,
     WritableSignal,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TranslateModule } from '@ngx-translate/core';
@@ -59,6 +60,7 @@ import { ImageWrapperComponent } from '../shared/image-wrapper/image-wrapper.com
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA],
     templateUrl: './topic-header.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./topic-header.component.scss'],
 })
 export class TopicHeaderComponent implements OnChanges, OnInit {

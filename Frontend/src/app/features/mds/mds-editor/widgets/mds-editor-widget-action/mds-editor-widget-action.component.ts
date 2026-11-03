@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, Optional } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { OptionItem, OptionsHelperDataService, Target } from 'ngx-edu-sharing-ui';
 import { BehaviorSubject, Observable } from 'rxjs';
@@ -32,6 +32,7 @@ export interface ResolvedAction {
     selector: 'es-mds-editor-widget-action',
     templateUrl: './mds-editor-widget-action.component.html',
     styleUrls: ['./mds-editor-widget-action.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class MdsEditorWidgetActionComponent implements OnInit, NativeWidgetComponent {
@@ -49,10 +50,8 @@ export class MdsEditorWidgetActionComponent implements OnInit, NativeWidgetCompo
     hasChanges = new BehaviorSubject<boolean>(false);
     action$: Observable<ResolvedAction | null>;
 
-    constructor(
-        private mdsEditorValues: MdsEditorInstanceService,
-        @Optional() private optionsHelper: OptionsHelperDataService,
-    ) {}
+    private mdsEditorValues = inject(MdsEditorInstanceService);
+    private optionsHelper = inject(OptionsHelperDataService, { optional: true });
 
     ngOnInit(): void {
         // switchMap drops the result of a lookup that a newer node already made obsolete

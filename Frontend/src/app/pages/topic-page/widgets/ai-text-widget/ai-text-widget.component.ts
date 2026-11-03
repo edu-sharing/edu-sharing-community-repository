@@ -15,6 +15,7 @@ import {
     ViewEncapsulation,
     WritableSignal,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -69,6 +70,7 @@ import { WidgetConfigurationButtonsComponent } from '../shared/widget-configurat
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA],
     templateUrl: './ai-text-widget.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./ai-text-widget.component.scss'],
 })
 export class AiTextWidgetComponent implements WidgetComponentInterface {

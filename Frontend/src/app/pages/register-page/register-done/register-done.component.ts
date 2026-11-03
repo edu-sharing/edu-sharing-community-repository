@@ -1,4 +1,12 @@
-import { ChangeDetectorRef, Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import {
+    ChangeDetectorRef,
+    Component,
+    EventEmitter,
+    Input,
+    Output,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { ConfigurationService, RestLocatorService } from '../../../core-module/core.module';
 import { Toast } from '../../../services/toast';
 import { PlatformLocation } from '@angular/common';
@@ -12,6 +20,7 @@ import { RegisterService } from 'ngx-edu-sharing-api';
     selector: 'es-register-done',
     templateUrl: 'register-done.component.html',
     styleUrls: ['register-done.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class RegisterDoneComponent {

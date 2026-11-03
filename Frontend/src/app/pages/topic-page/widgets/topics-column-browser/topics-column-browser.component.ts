@@ -11,6 +11,7 @@ import {
     signal,
     WritableSignal,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { MatListModule } from '@angular/material/list';
 import { CollectionEntries, Node } from 'ngx-edu-sharing-api';
@@ -49,6 +50,7 @@ const CHILD_ITEM_SELECTOR = ':scope > .child-list-item';
         WrapObservablePipe,
     ],
     templateUrl: './topics-column-browser.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./topics-column-browser.component.scss'],
 })
 export class TopicsColumnBrowserComponent implements WidgetComponentInterface {

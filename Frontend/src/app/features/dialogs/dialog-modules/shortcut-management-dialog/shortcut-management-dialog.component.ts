@@ -1,4 +1,11 @@
-import { Component, OnDestroy, signal, ViewContainerRef, inject } from '@angular/core';
+import {
+    Component,
+    OnDestroy,
+    signal,
+    ViewContainerRef,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { Subject } from 'rxjs';
 import { SharedModule } from '../../../../shared/shared.module';
@@ -10,6 +17,7 @@ import { ShortcutManagementDialogData } from './shortcut-management-dialog-data'
     selector: 'es-shortcut-management-dialog',
     imports: [ShortcutEntriesComponent, SharedModule],
     templateUrl: './shortcut-management-dialog.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./shortcut-management-dialog.component.scss'],
 })
 export class ShortcutManagementDialogComponent implements OnDestroy {

@@ -1,4 +1,12 @@
-import { AfterViewInit, Component, inject, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import {
+    AfterViewInit,
+    Component,
+    inject,
+    OnInit,
+    TemplateRef,
+    ViewChild,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import * as rxjs from 'rxjs';
 import { delay, filter, first, map } from 'rxjs/operators';
 import { DialogButton, Node, RestConstants } from '../../../../core-module/core.module';
@@ -25,6 +33,7 @@ import {
     templateUrl: './mds-editor-dialog.component.html',
     styleUrls: ['./mds-editor-dialog.component.scss'],
     providers: [MdsEditorInstanceService],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class MdsEditorDialogComponent implements OnInit, AfterViewInit {

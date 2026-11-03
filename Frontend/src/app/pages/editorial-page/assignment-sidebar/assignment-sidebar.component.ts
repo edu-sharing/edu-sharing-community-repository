@@ -1,4 +1,4 @@
-import { Component, computed, model, ViewChild } from '@angular/core';
+import { Component, computed, model, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { ListItem, ListItemsModule, NodeEntriesService, TreeNodeService } from 'ngx-edu-sharing-ui';
 import { SharedModule } from '../../../shared/shared.module';
 import { CommentsListComponent } from '../../../features/mds/mds-editor/widgets/mds-editor-widget-comments/comments-list/comments-list.component';
@@ -15,6 +15,7 @@ import { AssignmentFile, Node, SubmissionFile } from 'ngx-edu-sharing-api';
     templateUrl: 'assignment-sidebar.component.html',
     styleUrls: ['assignment-sidebar.component.scss'],
     imports: [SharedModule, ListItemsModule, TranslateModule],
+    changeDetection: ChangeDetectionStrategy.Eager,
     providers: [NodeEntriesService, TreeNodeService],
 })
 export class AssignmentSidebarComponent {

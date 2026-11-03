@@ -12,6 +12,7 @@ import {
     TemplateRef,
     ViewChild,
     viewChild,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -47,6 +48,7 @@ import { SearchFieldInternalService } from '../../main/navigation/search-field/s
         ]),
         trigger('fromRight', UIAnimation.fromRight()),
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class SearchPageComponent implements OnInit, OnDestroy {

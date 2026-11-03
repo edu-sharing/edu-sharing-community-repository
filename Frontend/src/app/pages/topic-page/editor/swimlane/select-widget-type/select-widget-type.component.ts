@@ -1,4 +1,12 @@
-import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    Input,
+    OnInit,
+    Output,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { EduSharingUiCommonModule, Helper } from 'ngx-edu-sharing-ui';
 import { firstValueFrom } from 'rxjs';
 import { Closable } from '../../../../../features/dialogs/card-dialog/card-dialog-config';
@@ -15,6 +23,7 @@ import { canRenderWidgetType } from '../../../shared/utils/widget-type-util';
     selector: 'es-select-widget-type',
     imports: [EduSharingUiCommonModule, SharedModule],
     templateUrl: './select-widget-type.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./select-widget-type.component.scss'],
 })
 export class SelectWidgetTypeComponent implements OnInit {

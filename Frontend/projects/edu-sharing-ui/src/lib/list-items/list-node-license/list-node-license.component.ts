@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ListWidget } from '../list-widget';
 import { TranslateService } from '@ngx-translate/core';
 import * as rxjs from 'rxjs';
@@ -12,6 +12,7 @@ import { AccessibilityService } from '../../services/accessibility.service';
     selector: 'es-list-node-license',
     templateUrl: './list-node-license.component.html',
     styleUrls: ['./list-node-license.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class ListNodeLicenseComponent extends ListWidget {

@@ -8,6 +8,7 @@ import {
     Output,
     TemplateRef,
     ViewChild,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { BehaviorSubject, firstValueFrom, of, Subject } from 'rxjs';
@@ -30,6 +31,7 @@ import { DialogsService } from '../../dialogs/dialogs.service';
     selector: 'es-preview-sidebar',
     templateUrl: './preview-sidebar.component.html',
     styleUrls: ['./preview-sidebar.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class PreviewSidebarComponent implements OnDestroy {

@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, signal, inject } from '@angular/core';
+import { AfterViewInit, Component, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RenderHelperService, SpinnerComponent } from 'ngx-edu-sharing-ui';
 import { RenderLegacyPageComponent } from '../render-legacy-page/render-legacy-page.component';
 import { Render2PageComponent } from '../render2-page/render2-page.component';
@@ -12,6 +12,7 @@ import { ActivatedRoute, Params } from '@angular/router';
     selector: 'es-render-main-page',
     templateUrl: 'render-main-page.component.html',
     styleUrls: ['render-main-page.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [CommonModule, RenderLegacyPageComponent, Render2PageComponent, SpinnerComponent],
 })
 export class RenderMainPageComponent implements AfterViewInit {

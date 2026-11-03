@@ -8,15 +8,15 @@
     "inlineSources": true,
     "types": []
   },
-  "files": [
-    "src/index.ts"
-  ],
-  "include": [
-    "src/lib/module/pdf/pdf.main.ts"
-  ],
-  "exclude": [
-    "**/*.spec.ts",
-    "src/environments/**",
-    "dist/**"
-  ]
+  "files": ["src/index.ts"],
+  "include": ["src/lib/module/pdf/pdf.main.ts"],
+  "exclude": ["**/*.spec.ts", "src/environments/**", "dist/**"],
+  "angularCompilerOptions": {
+    "extendedDiagnostics": {
+      "checks": {
+        "nullishCoalescingNotNullable": "suppress",
+        "optionalChainNotNullable": "suppress"
+      }
+    }
+  }
 }

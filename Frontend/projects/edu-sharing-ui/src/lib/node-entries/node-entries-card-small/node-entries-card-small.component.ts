@@ -1,4 +1,4 @@
-import { Component, Input, inject } from '@angular/core';
+import { Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Target } from '../../types/option-item';
 import { ClickSource, InteractionType } from '../entries-model';
 
@@ -14,6 +14,7 @@ import { AssignmentPipe } from '../../pipes/assignment.pipe';
     selector: 'es-node-entries-card-small',
     templateUrl: 'node-entries-card-small.component.html',
     styleUrls: ['node-entries-card-small.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class NodeEntriesCardSmallComponent<T extends Node> {

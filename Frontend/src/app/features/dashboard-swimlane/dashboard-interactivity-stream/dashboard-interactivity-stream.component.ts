@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, input, ChangeDetectionStrategy } from '@angular/core';
 import {
     EduSharingUiCommonModule,
     NodeEntriesModule,
@@ -35,6 +35,7 @@ type EventsGrouped = { [key in TimeGroups]?: UserEvent[] };
     templateUrl: './dashboard-interactivity-stream.component.html',
     styleUrls: ['./dashboard-interactivity-stream.component.scss'],
     animations: [trigger('openOverlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
         CommonModule,
         EduSharingUiCommonModule,

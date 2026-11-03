@@ -1,5 +1,5 @@
 import { trigger } from '@angular/animations';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ConfigurationService, DialogButton } from '../../core-module/core.module';
 import { UIAnimation } from 'ngx-edu-sharing-ui';
 import { CordovaService } from '../../services/cordova.service';
@@ -12,6 +12,7 @@ import { CordovaService } from '../../services/cordova.service';
         trigger('fromBottom', UIAnimation.fromBottom(UIAnimation.ANIMATION_TIME_SLOW)),
         trigger('overlay', UIAnimation.openOverlay()),
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class CookieInfoComponent implements OnInit {

@@ -1,4 +1,11 @@
-import { Component, Input, OnChanges, SimpleChanges, inject } from '@angular/core';
+import {
+    Component,
+    Input,
+    OnChanges,
+    SimpleChanges,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { RestConnectorService, RestConstants } from '../../../../../../core-module/core.module';
@@ -9,6 +16,7 @@ import { Values } from '../../../../types/types';
     selector: 'es-license-details',
     templateUrl: 'license-details.component.html',
     styleUrls: ['license-details.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class LicenseDetailsComponent implements OnChanges {

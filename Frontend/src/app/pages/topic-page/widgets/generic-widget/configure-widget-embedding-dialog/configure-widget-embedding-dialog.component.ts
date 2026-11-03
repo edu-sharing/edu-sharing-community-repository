@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { CardDialogRef } from '../../../../../features/dialogs/card-dialog/card-dialog-ref';
 import { SharedModule } from '../../../../../shared/shared.module';
 
@@ -11,6 +11,7 @@ export interface WidgetEmbeddingOption {
     selector: 'es-configure-widget-embedding-dialog',
     imports: [SharedModule],
     templateUrl: 'configure-widget-embedding-dialog.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['configure-widget-embedding-dialog.component.scss'],
 })
 export class ConfigureWidgetEmbeddingDialogComponent {

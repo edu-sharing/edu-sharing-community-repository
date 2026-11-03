@@ -14,6 +14,7 @@ import {
     ViewChild,
     WritableSignal,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { SortDirection } from '@angular/material/sort';
@@ -109,6 +110,7 @@ export const PREVIEW_USE_OR_CANCEL: GenericDialogButton<PageVariantDialogResult>
         { provide: OptionsHelperServiceAbstract, useClass: OptionsHelperService },
     ],
     templateUrl: 'add-page-variant-or-template-dialog.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['add-page-variant-or-template-dialog.component.scss'],
 })
 export class AddPageVariantOrTemplateDialogComponent implements AfterViewInit, OnDestroy, OnInit {

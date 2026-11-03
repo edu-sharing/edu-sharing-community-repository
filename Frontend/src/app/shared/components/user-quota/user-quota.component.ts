@@ -1,10 +1,11 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { UserQuota } from '../../../core-module/core.module';
 
 @Component({
     selector: 'es-user-quota',
     templateUrl: 'user-quota.component.html',
     styleUrls: ['user-quota.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 /**

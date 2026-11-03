@@ -9,6 +9,7 @@ import {
     signal,
     ViewEncapsulation,
     WritableSignal,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { Node } from 'ngx-edu-sharing-api';
@@ -23,6 +24,7 @@ import { WidgetConfigurationButtonsComponent } from '../shared/widget-configurat
     imports: [SpinnerComponent, TranslateModule, WidgetConfigurationButtonsComponent],
     schemas: [CUSTOM_ELEMENTS_SCHEMA],
     templateUrl: './text-widget.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./text-widget.component.scss'],
 })
 export class TextWidgetComponent implements WidgetComponentInterface {

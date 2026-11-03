@@ -6,6 +6,7 @@ import {
     OnInit,
     ViewChild,
     viewChild,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
@@ -49,6 +50,7 @@ export type SearchFilter = {
     templateUrl: './search-page-results.component.html',
     styleUrls: ['./search-page-results.component.scss'],
     providers: [SearchPageResultsService],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class SearchPageResultsComponent implements OnInit, OnDestroy {

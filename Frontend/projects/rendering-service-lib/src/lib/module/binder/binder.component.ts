@@ -1,4 +1,12 @@
-import { Component, Input, OnChanges, signal, SimpleChanges, inject } from '@angular/core';
+import {
+    Component,
+    Input,
+    OnChanges,
+    signal,
+    SimpleChanges,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { RenderingModule } from '../../rendering.module';
 import { RenderModule } from '../RenderModule';
 import { Node } from 'ngx-edu-sharing-api';
@@ -12,6 +20,7 @@ import { MatAnchor } from '@angular/material/button';
     selector: 'rs-module-binder',
     imports: [RenderingModule, FormsModule, MatProgressSpinner, MatAnchor],
     templateUrl: './binder.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './binder.component.scss',
 })
 export class BinderComponent implements RenderModule, OnChanges {

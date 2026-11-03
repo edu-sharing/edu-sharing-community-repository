@@ -1,4 +1,11 @@
-import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    Input,
+    Output,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { DateHelper, UIAnimation } from 'ngx-edu-sharing-ui';
 import { trigger } from '@angular/animations';
@@ -9,6 +16,7 @@ import { DateAdapter } from '@angular/material/core';
     templateUrl: 'calendar.component.html',
     styleUrls: ['calendar.component.scss'],
     animations: [trigger('overlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 /**

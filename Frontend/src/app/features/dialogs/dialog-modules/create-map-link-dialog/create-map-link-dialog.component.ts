@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import {
     DialogButton,
@@ -21,6 +21,7 @@ import { CreateMapLinkDialogData, CreateMapLinkDialogResult } from './create-map
     templateUrl: './create-map-link-dialog.component.html',
     styleUrls: ['./create-map-link-dialog.component.scss'],
     standalone: false,
+    changeDetection: ChangeDetectionStrategy.Eager,
     providers: [BreadcrumbsService],
 })
 export class CreateMapLinkDialogComponent implements OnInit {

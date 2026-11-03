@@ -12,6 +12,7 @@ import {
     TemplateRef,
     ViewChild,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { UniversalNode } from '../../../core-module/rest/definitions';
@@ -37,6 +38,7 @@ import { JumpMark, JumpMarksService } from '../../../services/jump-marks.service
     styleUrls: ['card.component.scss'],
     providers: [JumpMarksService],
     animations: [trigger('cardAnimation', UIAnimation.cardAnimation())],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class CardComponent implements AfterContentInit, OnDestroy {

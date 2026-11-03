@@ -9,6 +9,7 @@ import {
     TemplateRef,
     ViewChild,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { combineLatest, Observable } from 'rxjs';
 import { UntypedFormControl } from '@angular/forms';
@@ -39,6 +40,7 @@ type Status = {
     templateUrl: 'node-search-selector.component.html',
     styleUrls: ['node-search-selector.component.scss'],
     animations: [trigger('switchDialog', UIAnimation.switchDialogBoolean())],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class NodeSearchSelectorComponent implements AfterViewInit {

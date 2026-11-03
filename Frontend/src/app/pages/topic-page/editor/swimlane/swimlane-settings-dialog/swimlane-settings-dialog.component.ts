@@ -1,5 +1,5 @@
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
-import { Component, Input, OnInit, inject, signal } from '@angular/core';
+import { Component, Input, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { UntypedFormGroup } from '@angular/forms';
 import { MatSelect } from '@angular/material/select';
 import { Closable } from '../../../../../features/dialogs/card-dialog/card-dialog-config';
@@ -31,6 +31,7 @@ function patchExample(patch: Record<string, unknown>): string {
     selector: 'es-swimlane-settings-dialog',
     imports: [ConfigureGridComponent, DragDropModule, SelectWidgetTypeComponent, SharedModule],
     templateUrl: './swimlane-settings-dialog.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./swimlane-settings-dialog.component.scss'],
 })
 export class SwimlaneSettingsDialogComponent implements OnInit {

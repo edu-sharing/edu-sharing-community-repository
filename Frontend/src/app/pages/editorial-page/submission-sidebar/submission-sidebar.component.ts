@@ -1,4 +1,13 @@
-import { Component, computed, effect, inject, model, signal, untracked } from '@angular/core';
+import {
+    Component,
+    computed,
+    effect,
+    inject,
+    model,
+    signal,
+    untracked,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import {
     ListItem,
     ListItemsModule,
@@ -64,6 +73,7 @@ export type SubmissionConfig = {
         //CommentsListComponent,
         EditorComponent,
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     providers: [NodeEntriesService, TreeNodeService],
 })
 export class SubmissionSidebarComponent {

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { distinctUntilChanged, filter, map, startWith } from 'rxjs/operators';
 import { NetworkService, Node, RestConstants, UsageV1Service } from 'ngx-edu-sharing-api';
@@ -15,6 +15,7 @@ import {
     selector: 'es-mds-editor-widget-collections',
     templateUrl: './mds-editor-widget-collections.component.html',
     styleUrls: ['./mds-editor-widget-collections.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class MdsEditorWidgetCollectionsComponent implements OnInit, NativeWidgetComponent {

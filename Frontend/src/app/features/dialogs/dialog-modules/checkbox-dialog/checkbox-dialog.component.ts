@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
@@ -11,6 +11,7 @@ import { SharedModule } from '../../../../shared/shared.module';
 @Component({
     imports: [SharedModule],
     templateUrl: './checkbox-dialog.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./checkbox-dialog.component.scss'],
 })
 export class CheckboxDialogComponent {

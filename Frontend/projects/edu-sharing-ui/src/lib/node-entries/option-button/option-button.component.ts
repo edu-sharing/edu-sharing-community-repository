@@ -6,6 +6,7 @@ import {
     OnChanges,
     SimpleChanges,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { OptionItem } from '../../types/option-item';
@@ -33,6 +34,7 @@ import { NodeEntriesDataType } from '../data-type';
             <i esIcon="{{ option.icon }}" [aria]="false"></i>
         </button>
     `,
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class OptionButtonComponent<T extends NodeEntriesDataType>

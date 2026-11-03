@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ListWidget } from '../list-widget';
 import { ListItem } from '../../types/list-item';
 import { NodeHelperService } from '../../services/node-helper.service';
@@ -7,6 +7,7 @@ import { Node, RestConstants } from 'ngx-edu-sharing-api';
 @Component({
     selector: 'es-list-node-workflow',
     templateUrl: './list-node-workflow.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class ListNodeWorkflowComponent extends ListWidget {

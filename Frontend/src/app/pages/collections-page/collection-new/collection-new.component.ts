@@ -7,6 +7,7 @@ import {
     OnInit,
     ViewChild,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
@@ -80,6 +81,7 @@ type Step = 'NEW' | 'GENERAL' | 'METADATA' | 'PERMISSIONS' | 'SETTINGS' | 'EDITO
     templateUrl: 'collection-new.component.html',
     styleUrls: ['collection-new.component.scss'],
     providers: [OptionsHelperService, OptionsHelperDataService],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class CollectionNewComponent implements OnInit, OnDestroy {

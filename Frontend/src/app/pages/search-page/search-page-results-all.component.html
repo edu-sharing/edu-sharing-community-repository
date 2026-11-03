@@ -34,7 +34,9 @@ own OptionsHelperService instance and take exclusive control of the actionbar. -
   [displayType]="NodeEntriesDisplayType.Grid"
   [gridConfig]="{ layout: 'scroll' }"
   [checkbox]="false"
-  [initConfig]="{ customOptions: addToCollectionMode.value?.customOptions }"
+  [initConfig]="{
+    customOptions: $safeNavigationMigration(addToCollectionMode.value?.customOptions)
+  }"
   (clickItem)="onClick(wrapper, $event)"
   (dblClickItem)="onDblClick($event.element)"
 >

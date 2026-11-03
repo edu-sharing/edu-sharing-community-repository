@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { DialogButton, RestAdminService } from '../../../../core-module/core.module';
 import { Toast } from '../../../../services/toast';
 import { CARD_DIALOG_DATA, Closable } from '../../card-dialog/card-dialog-config';
@@ -14,6 +14,7 @@ const MULTILINE_PROPERTIES = ['custom_html_headers', 'public_key'];
     selector: 'es-xml-app-properties-dialog',
     templateUrl: './xml-app-properties-dialog.component.html',
     styleUrls: ['./xml-app-properties-dialog.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class XmlAppPropertiesDialogComponent implements OnInit {

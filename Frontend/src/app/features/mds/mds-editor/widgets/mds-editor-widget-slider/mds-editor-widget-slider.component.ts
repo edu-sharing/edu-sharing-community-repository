@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 import { ChangeContext, Options } from '@angular-slider/ngx-slider';
 import { MdsWidget, MdsWidgetValue } from '../../../types/types';
@@ -10,6 +10,7 @@ import { SuggestionResponseDto } from 'ngx-edu-sharing-api';
 @Component({
     templateUrl: './mds-editor-widget-slider.component.html',
     styleUrls: ['./mds-editor-widget-slider.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class MdsEditorWidgetSliderComponent extends MdsEditorWidgetBase implements OnInit {
@@ -145,6 +146,7 @@ export class MdsEditorWidgetSliderComponent extends MdsEditorWidgetBase implemen
 @Component({
     templateUrl: './mds-editor-widget-slider.component.html',
     styleUrls: ['./mds-editor-widget-slider.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class MdsEditorWidgetSliderRangeComponent extends MdsEditorWidgetSliderComponent {

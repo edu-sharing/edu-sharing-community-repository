@@ -1,4 +1,13 @@
-import { Component, computed, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
+import {
+    Component,
+    computed,
+    ElementRef,
+    inject,
+    OnInit,
+    signal,
+    ViewChild,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { v4 as uuidv4 } from 'uuid';
 import { PluginStatus, RestConstants, UIService } from '../../../core-module/core.module';
 import { SharedModule } from 'src/app/shared/shared.module';
@@ -32,6 +41,7 @@ import { ThemeService } from '../../../services/theme.service';
     templateUrl: 'messages.component.html',
     styleUrls: ['messages.component.scss'],
     standalone: true,
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SharedModule, ContextNamePipe, EditorModule, ShareDialogModule],
 })
 export class AdminMessagesComponent implements OnInit {

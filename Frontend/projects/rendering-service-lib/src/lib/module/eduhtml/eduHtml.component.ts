@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, inject } from '@angular/core';
+import { Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RenderingModule } from '../../rendering.module';
 import { RenderModule } from '../RenderModule';
 import { Node } from 'ngx-edu-sharing-api';
@@ -13,6 +13,7 @@ import { EduSharingUiModule } from 'ngx-edu-sharing-ui';
     selector: 'rs-module-edu-html',
     imports: [RenderingModule, MatButtonModule, MatIconModule, TranslateModule, EduSharingUiModule],
     templateUrl: './eduHtml.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './eduHtml.component.scss',
 })
 export class EduHtmlComponent implements RenderModule, OnInit {

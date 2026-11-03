@@ -1,5 +1,4 @@
 import {
-    ComponentFactoryResolver,
     ComponentRef,
     EmbeddedViewRef,
     Injectable,
@@ -19,7 +18,6 @@ import { Router } from '@angular/router';
 
 @Injectable({ providedIn: 'root' })
 export class UIService {
-    protected componentFactoryResolver = inject(ComponentFactoryResolver);
     protected injector = inject(Injector);
     protected ngZone = inject(NgZone);
 
@@ -169,7 +167,6 @@ export class UIService {
     }
     /**
      * dynamically inject an angular component into a regular html dom element
-     * @param componentFactoryResolver The resolver service
      * @param viewContainerRef The viewContainerRef service
      * @param componentName The name of the angular component (e.g. SpinnerComponent)
      * @param targetElement The target element of the dom. If the element is null (not found), nothing is done
@@ -189,12 +186,9 @@ export class UIService {
         if (targetElement == null) {
             return null;
         }
-        const factory = this.componentFactoryResolver.resolveComponentFactory(componentName);
-        const component: ComponentRef<T> = viewContainerRef.createComponent(
-            factory,
-            undefined,
-            injector || this.injector,
-        );
+        const component: ComponentRef<T> = viewContainerRef.createComponent(componentName, {
+            injector: injector || this.injector,
+        });
         if (bindings) {
             const instance: { [key: string]: any } = component.instance;
             for (const key in bindings) {
@@ -233,7 +227,6 @@ export class UIService {
 
     /**
      * dynamically inject an angular component into a regular html dom element
-     * @param componentFactoryResolver The resolver service
      * @param viewContainerRef The viewContainerRef service
      * @param componentName The name of the angular component (e.g. SpinnerComponent)
      * @param targetElement The target element of the dom. If the element is null (not found), nothing is done
@@ -243,7 +236,6 @@ export class UIService {
      * @param injector (to fetch templates for the component)
      */
     public static injectAngularComponent<T>(
-        componentFactoryResolver: ComponentFactoryResolver,
         viewContainerRef: ViewContainerRef,
         componentName: Type<T>,
         targetElement: Element,
@@ -254,12 +246,9 @@ export class UIService {
         if (targetElement == null) {
             return null;
         }
-        const factory = componentFactoryResolver.resolveComponentFactory(componentName);
-        const component: ComponentRef<T> = viewContainerRef.createComponent(
-            factory,
-            undefined,
+        const component: ComponentRef<T> = viewContainerRef.createComponent(componentName, {
             injector,
-        );
+        });
         if (bindings) {
             const instance: { [key: string]: any } = component.instance;
             for (const key in bindings) {

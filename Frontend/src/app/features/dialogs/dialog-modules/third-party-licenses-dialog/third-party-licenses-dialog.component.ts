@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RestConnectorService } from '../../../../core-module/core.module';
 import { Toast } from '../../../../services/toast';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
@@ -7,6 +7,7 @@ import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
     selector: 'es-third-party-licenses-dialog',
     templateUrl: './third-party-licenses-dialog.component.html',
     styleUrls: ['./third-party-licenses-dialog.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class ThirdPartyLicensesDialogComponent implements OnInit {

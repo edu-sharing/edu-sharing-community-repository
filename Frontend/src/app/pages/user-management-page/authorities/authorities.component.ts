@@ -12,6 +12,7 @@ import {
     TemplateRef,
     ViewChild,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { ConnectedPosition } from '@angular/cdk/overlay';
 import { Router } from '@angular/router';
@@ -99,6 +100,7 @@ import { DomSanitizer } from '@angular/platform-browser';
         trigger('cardAnimation', UIAnimation.cardAnimation()),
     ],
     providers: [BreadcrumbsService, OptionsHelperDataService],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit {

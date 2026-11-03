@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Subject } from 'rxjs';
 import { CardDialogRef } from '../../../../features/dialogs/card-dialog/card-dialog-ref';
 import { DialogButton } from '../../../../util/dialog-button';
@@ -27,6 +27,7 @@ enum NotificationEvents {
     selector: 'es-notification-dialog',
     templateUrl: './notification-dialog.component.html',
     styleUrls: ['./notification-dialog.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class NotificationDialogComponent implements OnInit, OnDestroy {

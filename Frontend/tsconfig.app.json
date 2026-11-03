@@ -3,42 +3,27 @@
   "compilerOptions": {
     "types": ["jquery"],
     "paths": {
-      "ngx-edu-sharing-api": [
-        "dist/edu-sharing-api/edu-sharing-api",
-        "dist/edu-sharing-api"
-      ],
-      "ngx-edu-sharing-b-api": [
-        "dist/b-api/b-api",
-        "dist/b-api"
-      ],
+      "ngx-edu-sharing-api": ["dist/edu-sharing-api/edu-sharing-api", "dist/edu-sharing-api"],
+      "ngx-edu-sharing-b-api": ["dist/b-api/b-api", "dist/b-api"],
       "ngx-rendering-service-api": [
         "dist/rendering-service-api/rendering-service-api",
         "dist/rendering-service-api"
       ],
-      "ngx-rendering-service-lib": [
-        "projects/rendering-service-lib/src"
-      ],
-      "ngx-rendering-service-lib/*": [
-        "projects/rendering-service-lib/src/*"
-      ],
-      "ngx-edu-sharing-ui": [
-        "projects/edu-sharing-ui/src/lib"
-      ],
-      "ngx-edu-sharing-ui/*": [
-        "projects/edu-sharing-ui/src/lib/*"
-      ]
+      "ngx-rendering-service-lib": ["projects/rendering-service-lib/src"],
+      "ngx-rendering-service-lib/*": ["projects/rendering-service-lib/src/*"],
+      "ngx-edu-sharing-ui": ["projects/edu-sharing-ui/src/lib"],
+      "ngx-edu-sharing-ui/*": ["projects/edu-sharing-ui/src/lib/*"]
     }
   },
-  "files": [
-    "src/main.ts",
-    "src/polyfills.ts"
-  ],
-  "include": [
-    "src/main.web-component.ts",
-    "src/**/*.d.ts"
-  ],
-  "exclude": [
-    "src/test.ts",
-    "src/**/*.spec.ts"
-  ]
+  "files": ["src/main.ts", "src/polyfills.ts"],
+  "include": ["src/main.web-component.ts", "src/**/*.d.ts"],
+  "exclude": ["src/test.ts", "src/**/*.spec.ts"],
+  "angularCompilerOptions": {
+    "extendedDiagnostics": {
+      "checks": {
+        "nullishCoalescingNotNullable": "suppress",
+        "optionalChainNotNullable": "suppress"
+      }
+    }
+  }
 }

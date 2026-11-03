@@ -7,6 +7,7 @@ import {
     Output,
     ViewChild,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { MatButtonToggleGroup } from '@angular/material/button-toggle';
 import { Ace, Acl, AuthenticationService, Node, NodeService } from 'ngx-edu-sharing-api';
@@ -44,6 +45,7 @@ class SimpleEditGroupConfig {
         trigger('fade', UIAnimation.fade()),
         trigger('cardAnimation', UIAnimation.cardAnimation()),
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class SimpleEditInviteComponent {

@@ -1,4 +1,12 @@
-import { AfterViewInit, Component, EventEmitter, inject, Output, ViewChild } from '@angular/core';
+import {
+    AfterViewInit,
+    Component,
+    EventEmitter,
+    inject,
+    Output,
+    ViewChild,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import {
@@ -25,6 +33,7 @@ import { DialogsService } from '../../../features/dialogs/dialogs.service';
     selector: 'es-admin-frontpage',
     templateUrl: 'frontpage.component.html',
     styleUrls: ['frontpage.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class AdminFrontpageComponent implements AfterViewInit {

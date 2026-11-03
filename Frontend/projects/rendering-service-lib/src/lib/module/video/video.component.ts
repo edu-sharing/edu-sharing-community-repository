@@ -6,6 +6,7 @@ import {
     signal,
     ViewChild,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { RenderingModule } from '../../rendering.module';
 import { RenderModule } from '../RenderModule';
@@ -31,6 +32,7 @@ import { TrackingService } from '../../../tracking.service';
         EduSharingUiModule,
     ],
     templateUrl: './video.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './video.component.scss',
 })
 export class VideoComponent implements RenderModule, AfterViewInit {

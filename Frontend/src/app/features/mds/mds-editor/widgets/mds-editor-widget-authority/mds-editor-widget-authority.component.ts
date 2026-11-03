@@ -1,5 +1,12 @@
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
-import { ChangeDetectorRef, Component, OnInit, ViewChild, inject } from '@angular/core';
+import {
+    ChangeDetectorRef,
+    Component,
+    OnInit,
+    ViewChild,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 import { MatAutocomplete, MatAutocompleteTrigger } from '@angular/material/autocomplete';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -22,6 +29,7 @@ import { Toast } from '../../../../../services/toast';
     selector: 'es-mds-editor-widget-authority',
     templateUrl: './mds-editor-widget-authority.component.html',
     styleUrls: ['./mds-editor-widget-authority.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class MdsEditorWidgetAuthorityComponent extends MdsEditorWidgetBase implements OnInit {

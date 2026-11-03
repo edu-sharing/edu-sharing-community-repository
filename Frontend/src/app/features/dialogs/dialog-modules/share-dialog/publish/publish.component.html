@@ -280,7 +280,7 @@
         <div>
           <div class="version-date">
             <label>{{ 'WORKSPACE.SHARE.PUBLISH.VERSION_DATE' | translate }}</label>
-            {{ v.properties['ccm:published_date_LONG']?.[0] | formatDate }}
+            {{ $safeNavigationMigration(v.properties['ccm:published_date_LONG']?.[0]) | formatDate }}
           </div>
         </div>
       </div>

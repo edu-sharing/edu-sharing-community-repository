@@ -6,6 +6,7 @@ import {
     InputSignal,
     Output,
     ViewEncapsulation,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -15,6 +16,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     encapsulation: ViewEncapsulation.Emulated,
     imports: [MatIcon, MatTooltipModule],
     templateUrl: './side-menu-item.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./side-menu-item.component.scss'],
 })
 export class SideMenuItemComponent {

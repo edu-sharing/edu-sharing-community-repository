@@ -5,6 +5,7 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { applicationConfig, type Meta, moduleMetadata, type StoryObj } from '@storybook/angular';
 import { ApiRequestConfiguration, EduSharingApiModule } from 'ngx-edu-sharing-api';
+import { Subject } from 'rxjs';
 import { translateProvider } from '../../../../../src/app/features/mds/mds-editor/storybook-utils';
 import { EduSharingUiCommonModule } from '../common/edu-sharing-ui-common.module';
 import { OptionItem } from '../types/option-item';
@@ -56,7 +57,8 @@ const dropdown: Meta<DropdownComponent> = {
             providers: [
                 provideAnimations(),
                 { provide: TranslatePipe, useValue: {} },
-                { provide: ApiRequestConfiguration, useValue: {} },
+                // The real AuthenticationService subscribes to `apiRequest` on construction.
+                { provide: ApiRequestConfiguration, useValue: { apiRequest: new Subject<void>() } },
                 { provide: TranslateService, useClass: translateProvider },
             ],
         }),

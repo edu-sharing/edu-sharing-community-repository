@@ -1,4 +1,4 @@
-@if (data?.items !== undefined) {
+@if ($safeNavigationMigration(data?.items) !== undefined) {
 <div class="h5p-wrapper">
   <iframe
     #iframeEl

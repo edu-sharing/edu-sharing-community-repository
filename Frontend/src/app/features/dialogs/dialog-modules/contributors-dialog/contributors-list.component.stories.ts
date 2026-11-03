@@ -73,10 +73,10 @@ export const BulkMixed: Story = {
     play: async ({ args, canvasElement }) => {
         // Ada is on both nodes, Grace and Alan on one each
         const indeterminate = canvasElement.querySelectorAll('mat-chip-row.indeterminate');
-        expect(indeterminate.length).toBe(2);
+        await expect(indeterminate.length).toBe(2);
         // a hatched chip carries nothing but its label and one keyboard-focusable remove button,
         // like an individual value of the mds multivalue tree
-        expect(indeterminate[0].querySelectorAll('button[matchipremove]').length).toBe(1);
+        await expect(indeterminate[0].querySelectorAll('button[matchipremove]').length).toBe(1);
         await userEvent.click(indeterminate[0].querySelector('[matchipremove]'));
         await waitFor(() => expect(args.remove).toHaveBeenCalled());
     },

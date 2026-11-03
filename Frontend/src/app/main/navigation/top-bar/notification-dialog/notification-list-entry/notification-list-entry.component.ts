@@ -2,7 +2,14 @@
  * Created by Torsten on 13.01.2017.
  */
 
-import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    Input,
+    Output,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { UIService } from '../../../../../core-module/rest/services/ui.service';
 import { Node } from '../../../../../core-module/rest/data-object';
 import { Notification } from 'ngx-edu-sharing-api';
@@ -12,6 +19,7 @@ import { RestConstants } from '../../../../../core-module/rest/rest-constants';
     selector: 'es-notification-list-entry',
     templateUrl: 'notification-list-entry.component.html',
     styleUrls: ['notification-list-entry.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class NotificationListEntryComponent {

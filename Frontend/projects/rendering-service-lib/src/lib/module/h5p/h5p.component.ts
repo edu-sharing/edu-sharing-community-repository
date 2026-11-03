@@ -8,6 +8,7 @@ import {
     ViewChild,
     DOCUMENT,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { RenderingModule } from '../../rendering.module';
 import { RenderModule } from '../RenderModule';
@@ -26,6 +27,7 @@ import {
     selector: 'rs-module-h5p',
     imports: [RenderingModule, MatButtonModule, MatIconModule],
     templateUrl: './h5p.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './h5p.component.scss',
 })
 export class H5pComponent implements RenderModule, OnInit, AfterViewInit {

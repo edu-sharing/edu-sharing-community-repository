@@ -28,7 +28,10 @@
     "
   >
     <ng-container
-      *ngTemplateOutlet="templatesService?.overlay; context: { element: node }"
+      *ngTemplateOutlet="
+        $safeNavigationMigration(templatesService?.overlay);
+        context: { element: node }
+      "
     ></ng-container>
   </div>
   } @if (dropdown) {

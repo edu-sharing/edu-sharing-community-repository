@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { DialogButton } from '../../../../core-module/core.module';
 import { CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
@@ -8,6 +8,7 @@ import { GenericDialogData } from './generic-dialog-data';
     selector: 'es-generic-dialog',
     templateUrl: './generic-dialog.component.html',
     styleUrls: ['./generic-dialog.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class GenericDialogComponent<R extends string> implements OnInit {

@@ -1,5 +1,5 @@
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { BehaviorSubject, forkJoin as observableForkJoin, Observable } from 'rxjs';
 import { distinctUntilChanged, filter } from 'rxjs/operators';
 import { RestConstants } from '../../../../../core-module/rest/rest-constants';
@@ -32,6 +32,7 @@ interface ChildobjectEdit {
     selector: 'es-mds-editor-widget-childobjects',
     templateUrl: './mds-editor-widget-childobjects.component.html',
     styleUrls: ['./mds-editor-widget-childobjects.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidgetComponent {

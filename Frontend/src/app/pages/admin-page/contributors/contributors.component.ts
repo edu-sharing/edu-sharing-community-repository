@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { PageEvent } from '@angular/material/paginator';
 import { Sort } from '@angular/material/sort';
 import { firstValueFrom } from 'rxjs';
@@ -22,6 +22,7 @@ type ContributorIdType = 'ORCID' | 'GND' | 'ROR' | 'WIKIDATA' | 'EMAIL';
     selector: 'es-admin-contributors',
     templateUrl: 'contributors.component.html',
     styleUrls: ['contributors.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class AdminContributorsComponent implements OnInit {

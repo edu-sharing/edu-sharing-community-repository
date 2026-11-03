@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 
 import { TranslateService } from '@ngx-translate/core';
 import {
@@ -19,6 +19,7 @@ import { AddFolderDialogData, AddFolderDialogResult } from './add-folder-dialog-
     selector: 'es-add-folder-dialog',
     templateUrl: './add-folder-dialog.component.html',
     styleUrls: ['./add-folder-dialog.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class AddFolderDialogComponent implements OnInit {

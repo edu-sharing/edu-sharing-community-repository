@@ -388,8 +388,8 @@ export const EntriesHorizontalGridScrollInfiniteScroll: Story = {
         const canvas = within(canvasElement);
         await expectItemCount(canvas, LOAD_MORE_PAGE_SIZE);
         const strip = canvasElement.querySelector<HTMLElement>('.card-grid-layout-scroll');
-        expect(strip).not.toBeNull();
-        expect(strip.scrollWidth).toBeGreaterThan(strip.clientWidth);
+        await expect(strip).not.toBeNull();
+        await expect(strip.scrollWidth).toBeGreaterThan(strip.clientWidth);
         // `esInfiniteScroll` listens on the element itself, outside the Angular zone
         strip.scrollLeft = strip.scrollWidth;
         strip.dispatchEvent(new Event('scroll'));
@@ -407,6 +407,6 @@ export const EntriesHorizontalGridScrollFullyLoaded: Story = {
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
         await expectItemCount(canvas, LOAD_MORE_PAGE_SIZE);
-        expect(queryLoadMoreButton(canvasElement)).toBeNull();
+        await expect(queryLoadMoreButton(canvasElement)).toBeNull();
     },
 };

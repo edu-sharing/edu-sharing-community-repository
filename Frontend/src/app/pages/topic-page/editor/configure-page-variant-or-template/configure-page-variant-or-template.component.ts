@@ -12,6 +12,7 @@ import {
     Signal,
     signal,
     WritableSignal,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { DEFAULT, HOME_REPOSITORY, MdsWidget, Node, RestConstants } from 'ngx-edu-sharing-api';
@@ -25,6 +26,7 @@ import { GenericWidgetGlobalService } from '../../widgets/generic-widget/generic
     selector: 'es-configure-page-variant-or-template',
     imports: [SharedModule, MdsModule],
     templateUrl: 'configure-page-variant-or-template.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['configure-page-variant-or-template.component.scss'],
 })
 export class ConfigurePageVariantOrTemplateComponent implements AfterViewInit, OnInit {

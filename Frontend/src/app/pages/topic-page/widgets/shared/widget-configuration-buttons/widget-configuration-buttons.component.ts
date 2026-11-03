@@ -1,4 +1,12 @@
-import { Component, EventEmitter, input, Input, InputSignal, Output } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    input,
+    Input,
+    InputSignal,
+    Output,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
 import { MatButtonToggle, MatButtonToggleGroup } from '@angular/material/button-toggle';
@@ -24,6 +32,7 @@ import { MediaRenderingDisplayType } from '../../../shared/types/media-rendering
         TranslateModule,
     ],
     templateUrl: './widget-configuration-buttons.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./widget-configuration-buttons.component.scss'],
 })
 export class WidgetConfigurationButtonsComponent {

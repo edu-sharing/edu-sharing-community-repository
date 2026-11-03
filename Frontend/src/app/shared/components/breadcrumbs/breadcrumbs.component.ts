@@ -1,4 +1,12 @@
-import { Component, EventEmitter, HostBinding, Input, Output, inject } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    HostBinding,
+    Input,
+    Output,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { Params, QueryParamsHandling } from '@angular/router';
 import {
     CanDrop,
@@ -19,6 +27,7 @@ import { BreadcrumbsService } from './breadcrumbs.service';
     selector: 'es-breadcrumbs',
     templateUrl: 'breadcrumbs.component.html',
     styleUrls: ['breadcrumbs.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class BreadcrumbsComponent {

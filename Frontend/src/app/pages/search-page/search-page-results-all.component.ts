@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { debounceTime, map } from 'rxjs/operators';
 import { SearchPageResultsAllService } from './search-page-results-all.service';
 import { SearchPageService } from './search-page.service';
@@ -18,6 +18,7 @@ import { SelectionChange } from '@angular/cdk/collections';
     templateUrl: './search-page-results-all.component.html',
     styleUrls: ['./search-page-results-all.component.scss'],
     providers: [SearchPageResultsAllService],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class SearchPageResultsAllComponent implements OnInit {

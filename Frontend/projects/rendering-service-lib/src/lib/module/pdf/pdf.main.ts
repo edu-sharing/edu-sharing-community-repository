@@ -2,7 +2,7 @@ import 'zone.js';
 import { createApplication } from '@angular/platform-browser';
 import { createCustomElement } from '@angular/elements';
 import { PdfComponent } from './pdf.component';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { ApiHelpersService } from 'ngx-edu-sharing-api';
 import { importProvidersFrom } from '@angular/core';
 import { RenderingServiceApiModule } from 'ngx-rendering-service-api';
@@ -14,7 +14,7 @@ void (async () => {
             ApiHelpersService,
             importProvidersFrom(RenderingServiceApiModule.forRoot()),
             importProvidersFrom(TranslateModule.forRoot()),
-            provideHttpClient(withInterceptorsFromDi()),
+            provideHttpClient(withXhr(), withInterceptorsFromDi()),
         ],
     });
 

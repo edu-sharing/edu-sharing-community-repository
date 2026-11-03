@@ -5,6 +5,7 @@ import {
     QueryList,
     TemplateRef,
     ViewChildren,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { MatButton } from '@angular/material/button';
 import { DialogButton } from '../../../../../util/dialog-button';
@@ -13,6 +14,7 @@ import { DialogButton } from '../../../../../util/dialog-button';
     selector: 'es-card-actions',
     templateUrl: './card-actions.component.html',
     styleUrls: ['./card-actions.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class CardActionsComponent {

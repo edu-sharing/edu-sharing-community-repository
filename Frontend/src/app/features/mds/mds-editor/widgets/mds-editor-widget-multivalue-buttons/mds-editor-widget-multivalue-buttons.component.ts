@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
 import { distinctUntilChanged, filter } from 'rxjs/operators';
@@ -11,6 +11,7 @@ import { ValueType } from 'ngx-edu-sharing-ui';
     selector: 'es-mds-editor-widget-multivalue-buttons',
     templateUrl: './mds-editor-widget-multivalue-buttons.component.html',
     styleUrls: ['./mds-editor-widget-multivalue-buttons.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class MdsEditorWidgetMultivalueButtonsComponent

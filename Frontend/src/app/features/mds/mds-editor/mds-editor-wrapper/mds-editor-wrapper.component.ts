@@ -9,6 +9,7 @@ import {
     OnInit,
     Output,
     SimpleChanges,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { Node, SearchService } from 'ngx-edu-sharing-api';
 import { Subject } from 'rxjs';
@@ -44,6 +45,7 @@ import { MdsEditorInstanceServiceAbstract, MdsExtendedValues } from 'ngx-edu-sha
         MdsEditorInstanceService,
         { provide: MdsEditorInstanceServiceAbstract, useExisting: MdsEditorInstanceService },
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class MdsEditorWrapperComponent implements OnInit, OnChanges, OnDestroy {

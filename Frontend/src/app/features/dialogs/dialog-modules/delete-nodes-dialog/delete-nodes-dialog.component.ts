@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, inject } from '@angular/core';
+import { Component, Inject, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Node, NodePermissions, NodeService, SessionStorageService } from 'ngx-edu-sharing-api';
 import { from, Observable, of } from 'rxjs';
 import { catchError, concatMap, map, switchMap, tap, toArray } from 'rxjs/operators';
@@ -22,6 +22,7 @@ import { GlobalCollectionsPageService } from '../../../../pages/collections-page
     selector: 'es-delete-nodes-dialog',
     templateUrl: './delete-nodes-dialog.component.html',
     styleUrls: ['./delete-nodes-dialog.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class DeleteNodesDialogComponent implements OnInit {

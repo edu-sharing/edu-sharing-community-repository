@@ -1,4 +1,12 @@
-import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    Input,
+    OnInit,
+    Output,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import * as rxjs from 'rxjs';
 import { MdsEditorInstanceService } from './mds-editor-instance.service';
 import { EditorMode, Values } from '../types/types';
@@ -21,6 +29,7 @@ interface InitInfo {
     selector: 'es-mds-editor',
     templateUrl: './mds-editor.component.html',
     providers: [MdsEditorInstanceService],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class MdsEditorComponent implements OnInit {

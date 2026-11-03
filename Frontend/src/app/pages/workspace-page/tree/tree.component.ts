@@ -1,4 +1,12 @@
-import { Component, EventEmitter, Input, Output, ViewChild, inject } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    Input,
+    Output,
+    ViewChild,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { HOME_REPOSITORY, Node, RestConstants } from 'ngx-edu-sharing-api';
 import {
     CanDrop,
@@ -21,6 +29,7 @@ import { DialogsService } from '../../../features/dialogs/dialogs.service';
     templateUrl: 'tree.component.html',
     styleUrls: ['tree.component.scss'],
     providers: [NodeEntriesService, OptionsHelperDataService],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class WorkspaceTreeComponent {

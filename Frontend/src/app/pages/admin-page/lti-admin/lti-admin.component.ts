@@ -1,4 +1,11 @@
-import { Component, EventEmitter, OnInit, Output, inject } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    OnInit,
+    Output,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { LTIRegistrationToken, LTIRegistrationTokens } from '../../../core-module/rest/data-object';
 import { RestLtiService } from '../../../core-module/rest/services/rest-lti.service';
 import { Toast } from '../../../services/toast';
@@ -10,6 +17,7 @@ import { DialogsService } from '../../../features/dialogs/dialogs.service';
     selector: 'es-lti-admin',
     templateUrl: './lti-admin.component.html',
     styleUrls: ['./lti-admin.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class LtiAdminComponent implements OnInit {

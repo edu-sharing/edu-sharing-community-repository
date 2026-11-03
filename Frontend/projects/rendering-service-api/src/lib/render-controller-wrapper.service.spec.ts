@@ -1,4 +1,4 @@
-import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
+import { HttpErrorResponse, provideHttpClient, withXhr } from '@angular/common/http';
 import {
     HttpTestingController,
     provideHttpClientTesting,
@@ -43,7 +43,7 @@ describe('RenderControllerWrapperService session gate', () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             providers: [
-                provideHttpClient(),
+                provideHttpClient(withXhr()),
                 provideHttpClientTesting(),
                 { provide: ApiConfiguration, useValue: { rootUrl: '' } },
                 RenderControllerWrapperService,

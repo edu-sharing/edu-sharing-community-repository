@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, inject } from '@angular/core';
+import { Component, OnInit, ViewChild, inject, ChangeDetectionStrategy } from '@angular/core';
 import {
     DialogButton,
     Node,
@@ -15,6 +15,7 @@ import { NodeTemplateDialogData, NodeTemplateDialogResult } from './node-templat
     selector: 'es-node-template-dialog',
     templateUrl: './node-template-dialog.component.html',
     styleUrls: ['./node-template-dialog.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class NodeTemplateDialogComponent implements OnInit {

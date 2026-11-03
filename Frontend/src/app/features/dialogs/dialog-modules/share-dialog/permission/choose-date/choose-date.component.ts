@@ -8,6 +8,7 @@ import {
     OnInit,
     Output,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
@@ -31,6 +32,7 @@ import { SharedModule } from '../../../../../../shared/shared.module';
     templateUrl: 'choose-date.component.html',
     styleUrls: ['choose-date.component.scss'],
     imports: [SharedModule],
+    changeDetection: ChangeDetectionStrategy.Eager,
     providers: [
         {
             provide: NG_VALUE_ACCESSOR,

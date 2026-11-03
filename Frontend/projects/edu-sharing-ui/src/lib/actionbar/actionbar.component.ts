@@ -11,6 +11,7 @@ import {
     OnDestroy,
     SimpleChanges,
     ViewChild,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { UIAnimation } from '../util/ui-animation';
@@ -26,6 +27,7 @@ import { BehaviorSubject } from 'rxjs';
     templateUrl: 'actionbar.component.html',
     styleUrls: ['actionbar.component.scss'],
     animations: [trigger('openOverlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 /**

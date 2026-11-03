@@ -10,6 +10,7 @@ import {
     Signal,
     SimpleChanges,
     ViewChild,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import {
     NodeList,
@@ -77,6 +78,7 @@ import { EditorialSidebarService } from '../../../features/editorial-sidebar/edi
     selector: 'es-workspace-explorer',
     templateUrl: 'explorer.component.html',
     styleUrls: ['explorer.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterViewInit {

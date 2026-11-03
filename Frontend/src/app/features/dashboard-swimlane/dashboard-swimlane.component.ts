@@ -8,6 +8,7 @@ import {
     signal,
     ViewChild,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import {
     ColumnType,
@@ -68,6 +69,7 @@ type ShareDetails = { key: string; result: SearchResultGeneric<NodeShare>; param
     templateUrl: './dashboard-swimlane.component.html',
     styleUrls: ['./dashboard-swimlane.component.scss'],
     animations: [trigger('openOverlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
         CommonModule,
         DashboardInteractivityStreamComponent,

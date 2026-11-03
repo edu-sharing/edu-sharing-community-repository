@@ -12,6 +12,7 @@ import {
     TemplateRef,
     ViewChild,
     ViewContainerRef,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { GlobalPositionStrategy, Overlay, OverlayModule, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
@@ -35,6 +36,7 @@ import { EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
     standalone: true,
     imports: [CommonModule, OverlayModule, TranslateModule, EduSharingUiCommonModule],
     templateUrl: './edge-toggle.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./edge-toggle.component.scss'],
 })
 export class EdgeToggleComponent implements AfterViewInit, OnDestroy {

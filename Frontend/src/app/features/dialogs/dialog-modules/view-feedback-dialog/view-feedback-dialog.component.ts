@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { FeedbackData, FeedbackV1Service } from 'ngx-edu-sharing-api';
 import { EduSharingUiCommonModule, EduSharingUiModule } from 'ngx-edu-sharing-ui';
@@ -12,6 +12,7 @@ import { ViewFeedbackDialogData } from './view-feedback-dialog-data';
     selector: 'es-view-feedback-dialog',
     imports: [EduSharingUiCommonModule, EduSharingUiModule, TranslateModule],
     templateUrl: './view-feedback-dialog.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./view-feedback-dialog.component.scss'],
 })
 export class ViewFeedbackDialogComponent {

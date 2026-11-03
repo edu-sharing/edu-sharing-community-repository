@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { UntypedFormArray, UntypedFormControl, ValidatorFn } from '@angular/forms';
 import { filter } from 'rxjs/operators';
 import { DisplayValues } from '../DisplayValues';
@@ -10,6 +10,7 @@ import { MdsWidgetType, ValueType } from 'ngx-edu-sharing-ui';
     selector: 'es-mds-editor-widget-checkboxes',
     templateUrl: './mds-editor-widget-checkboxes.component.html',
     styleUrls: ['./mds-editor-widget-checkboxes.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class MdsEditorWidgetCheckboxesComponent extends MdsEditorWidgetBase implements OnInit {

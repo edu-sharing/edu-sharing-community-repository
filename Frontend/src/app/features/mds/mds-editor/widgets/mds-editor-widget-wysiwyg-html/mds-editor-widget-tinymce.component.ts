@@ -6,6 +6,7 @@ import {
     signal,
     untracked,
     ViewChild,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 import { MdsEditorWidgetBase } from '../mds-editor-widget-base';
@@ -29,6 +30,7 @@ import { ValueType } from 'ngx-edu-sharing-ui';
             deps: [PlatformLocation],
         },
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class MdsEditorWidgetTinyMCEComponent extends MdsEditorWidgetBase implements AfterViewInit {

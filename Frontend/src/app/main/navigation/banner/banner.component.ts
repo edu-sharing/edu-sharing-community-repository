@@ -2,7 +2,14 @@
  * Created by Torsten on 13.01.2017.
  */
 
-import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    Input,
+    Output,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { ConfigurationHelper } from '../../../core-module/core.module';
 import { ConfigService } from 'ngx-edu-sharing-api';
 import { take } from 'rxjs/operators';
@@ -11,6 +18,7 @@ import { take } from 'rxjs/operators';
     selector: 'es-banner',
     templateUrl: 'banner.component.html',
     styleUrls: ['banner.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class BannerComponent {
