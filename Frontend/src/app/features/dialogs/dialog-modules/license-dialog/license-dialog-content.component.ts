@@ -7,6 +7,7 @@ import {
     Output,
     ViewChild,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { LicenseDialogData, LicenseDialogResult } from './license-dialog-data';
 
@@ -145,6 +146,7 @@ const ALL_COUNTRIES = [
     styleUrls: ['./license-dialog-content.component.scss'],
     providers: [MdsEditorInstanceService, ViewInstanceService],
     animations: [trigger('overlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class LicenseDialogContentComponent implements OnInit {

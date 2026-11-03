@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import {
     NodePermissionsHistory,
@@ -18,6 +18,7 @@ import { ShareHistoryDialogData, ShareHistoryDialogResult } from './share-histor
     selector: 'es-share-history-dialog',
     templateUrl: './share-history-dialog.component.html',
     styleUrls: ['./share-history-dialog.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class ShareHistoryDialogComponent {

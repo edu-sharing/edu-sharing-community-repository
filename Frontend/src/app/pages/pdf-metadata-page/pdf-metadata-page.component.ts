@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { PdfService } from '../../services/pdf.service';
 import { MdsEditorInstanceService } from '../../features/mds/mds-editor/mds-editor-instance.service';
@@ -11,6 +11,7 @@ import { MdsViewerService } from 'ngx-edu-sharing-ui';
     selector: 'es-pdf-metadata-page',
     template: '',
     providers: [PdfService, MdsEditorInstanceService, MdsViewerService],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class PdfMetadataPageComponent implements OnInit {

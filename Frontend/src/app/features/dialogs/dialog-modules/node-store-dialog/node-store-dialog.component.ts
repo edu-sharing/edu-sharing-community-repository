@@ -1,4 +1,12 @@
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
+import {
+    AfterViewInit,
+    Component,
+    OnDestroy,
+    OnInit,
+    ViewChild,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { Node, NodeListService, SortPolicy } from 'ngx-edu-sharing-api';
 import {
@@ -29,6 +37,7 @@ import { CardDialogUtilsService } from '../../card-dialog/card-dialog-utils.serv
     selector: 'es-search-node-store-dialog',
     templateUrl: 'node-store-dialog.component.html',
     styleUrls: ['node-store-dialog.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class SearchNodeStoreDialogComponent implements OnInit, AfterViewInit, OnDestroy {

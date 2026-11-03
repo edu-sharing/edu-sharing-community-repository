@@ -2,7 +2,7 @@
  * Created by Torsten on 13.01.2017.
  */
 
-import { Component, Input, inject } from '@angular/core';
+import { Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { DomSanitizer } from '@angular/platform-browser';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -17,6 +17,7 @@ import { AuthorityNamePipe } from '../pipes/authority-name.pipe';
     selector: 'es-user-avatar',
     templateUrl: 'user-avatar.component.html',
     styleUrls: ['user-avatar.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TranslateModule, EduSharingUiCommonModule, CommonModule],
 })
 export class UserAvatarComponent {

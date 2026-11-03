@@ -15,6 +15,7 @@ import {
     ViewChild,
     WritableSignal,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { ConfigService, Node, SessionStorageService, User } from 'ngx-edu-sharing-api';
@@ -33,6 +34,7 @@ import { ThemeService } from '../../../services/theme.service';
     selector: 'es-top-bar',
     templateUrl: './top-bar.component.html',
     styleUrls: ['./top-bar.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class TopBarComponent implements AfterViewInit {

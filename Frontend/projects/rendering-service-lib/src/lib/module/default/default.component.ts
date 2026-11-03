@@ -1,4 +1,11 @@
-import { Component, Input, OnChanges, SimpleChanges, inject } from '@angular/core';
+import {
+    Component,
+    Input,
+    OnChanges,
+    SimpleChanges,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { RenderingModule } from '../../rendering.module';
 import { RenderModule } from '../RenderModule';
 import { Node } from 'ngx-edu-sharing-api';
@@ -11,6 +18,7 @@ import { EduSharingUiModule, NodeHelperService, NodesRightMode } from 'ngx-edu-s
     selector: 'rs-module-default',
     imports: [RenderingModule, MatButtonModule, MatIconModule, TranslateModule, EduSharingUiModule],
     templateUrl: './default.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './default.component.scss',
 })
 export class DefaultComponent implements RenderModule, OnChanges {

@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { combineLatest, map } from 'rxjs';
 import { Node } from 'ngx-edu-sharing-api';
 import { ListItem } from '../../types/list-item';
@@ -11,6 +11,7 @@ import { LocalEventsService } from '../../services/local-events.service';
     selector: 'es-list-collection-info',
     templateUrl: './list-collection-info.component.html',
     styleUrls: ['./list-collection-info.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class ListCollectionInfoComponent extends ListWidget {

@@ -20,6 +20,7 @@ import {
     ViewContainerRef,
     WritableSignal,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
@@ -65,6 +66,7 @@ export interface BreadcrumbExtensionInterface {
         TranslateModule,
     ],
     templateUrl: './breadcrumb.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./breadcrumb.component.scss'],
 })
 export class BreadcrumbComponent implements OnChanges, OnInit, OnDestroy {

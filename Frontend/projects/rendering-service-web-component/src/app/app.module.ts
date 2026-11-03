@@ -10,7 +10,7 @@ import {
 import { createCustomElement } from '@angular/elements';
 import { AppComponent } from './app.component';
 import { BrowserModule } from '@angular/platform-browser';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { EduSharingApiModule } from 'ngx-edu-sharing-api';
 import {
     EduSharingUiModule,
@@ -62,7 +62,7 @@ export abstract class Toast extends ToastAbstract {
         PdfComponent,
     ],
     providers: [
-        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClient(withXhr(), withInterceptorsFromDi()),
         // we do not read the user profile since we don't have a repository user present in lms contexts
         { provide: I18N_CONFIG, useValue: { readUserProfile: false } as I18nConfig },
         { provide: ToastAbstract, useClass: Toast },

@@ -9,6 +9,7 @@ import {
     OnInit,
     ViewChild,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { ApiStateService, AuthenticationService } from 'ngx-edu-sharing-api';
@@ -39,6 +40,7 @@ import { PlatformLocation } from '@angular/common';
     selector: 'es-app',
     templateUrl: 'app.component.html',
     providers: [],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class AppComponent implements OnInit, DoCheck, AfterViewInit {

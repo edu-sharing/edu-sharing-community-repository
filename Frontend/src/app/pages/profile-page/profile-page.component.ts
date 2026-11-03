@@ -9,6 +9,7 @@ import {
     OnInit,
     signal,
     ViewChild,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import {
     ActionbarComponent,
@@ -62,6 +63,7 @@ import { TranslateService } from '@ngx-translate/core';
     styleUrls: ['profile-page.component.scss'],
     animations: [trigger('overlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))],
     providers: [OptionsHelperDataService],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class ProfilePageComponent implements OnInit, OnDestroy {

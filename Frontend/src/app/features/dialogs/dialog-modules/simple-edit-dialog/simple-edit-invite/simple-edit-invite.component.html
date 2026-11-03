@@ -36,7 +36,7 @@
           organizationGroups; track group) {
           <mat-button-toggle
             class="button-toggle-org"
-            [value]="organization.groups[group]?.authorityName"
+            [value]="$safeNavigationMigration(organization.groups[group]?.authorityName)"
             [disabled]="!organization.groups[group]"
             >{{
               'SIMPLE_EDIT.INVITE.GROUP_TYPES.' + group
@@ -64,7 +64,9 @@
             class="button-toggle-global"
             [disabled]="
               (group.authorityName === 'GROUP_EVERYONE' && !tpInviteEveryone) ||
-              (authenticationService.observeLoginInfo() | async)?.currentScope !== null
+              $safeNavigationMigration(
+                (authenticationService.observeLoginInfo() | async)?.currentScope
+              ) !== null
             "
             [value]="group.authorityName"
           >

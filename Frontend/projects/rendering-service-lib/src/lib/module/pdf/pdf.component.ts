@@ -8,6 +8,7 @@ import {
     signal,
     SimpleChanges,
     ViewChild,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { RenderingModule } from '../../rendering.module';
 import { RenderModule } from '../RenderModule';
@@ -32,6 +33,7 @@ import { NodeHelperService, NodesRightMode } from 'ngx-edu-sharing-ui';
     selector: 'rs-module-pdf',
     imports: [RenderingModule, MatButtonModule, MatIconModule, NgxExtendedPdfViewerModule],
     templateUrl: './pdf.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './pdf.component.scss',
 })
 export class PdfComponent implements RenderModule, OnChanges {

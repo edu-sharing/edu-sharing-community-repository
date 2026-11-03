@@ -18,7 +18,7 @@
             <div class="info-group">
               <label>{{ 'WORKSPACE.SHARE.PUBLISH.VERSION_DATE_ABSOLUTE' | translate }}</label>
               <span
-                >{{ version.properties['ccm:published_date_LONG']?.[0] | formatDate:{relative: false} }}</span
+                >{{ $safeNavigationMigration(version.properties['ccm:published_date_LONG']?.[0]) | formatDate:{relative: false} }}</span
               >
             </div>
             <div class="info-group">

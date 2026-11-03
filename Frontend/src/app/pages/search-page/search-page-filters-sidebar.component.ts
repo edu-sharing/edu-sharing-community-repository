@@ -8,6 +8,7 @@ import {
     computed,
     inject,
     signal,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslateService } from '@ngx-translate/core';
@@ -29,6 +30,7 @@ let nextInstanceId = 0;
     selector: 'es-search-page-filters-sidebar',
     templateUrl: './search-page-filters-sidebar.component.html',
     styleUrls: ['./search-page-filters-sidebar.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class SearchPageFiltersSidebarComponent implements OnInit, OnDestroy {

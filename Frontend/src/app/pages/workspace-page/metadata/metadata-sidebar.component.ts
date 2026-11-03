@@ -1,5 +1,5 @@
 import { trigger } from '@angular/animations';
-import { Component, input, inject } from '@angular/core';
+import { Component, input, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { LocalEventsService, UIAnimation, UIConstants } from 'ngx-edu-sharing-ui';
 import {
@@ -26,6 +26,7 @@ import { WorkspaceMetadataComponent } from './metadata.component';
     templateUrl: './metadata-sidebar.component.html',
     styleUrls: ['./metadata-sidebar.component.scss'],
     animations: [trigger('fromRight', UIAnimation.fromRight())],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [WorkspaceMetadataComponent],
 })
 export class MetadataSidebarComponent {

@@ -12,6 +12,7 @@ import {
     TemplateRef,
     ViewChild,
     WritableSignal,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatTabChangeEvent } from '@angular/material/tabs';
@@ -96,6 +97,7 @@ export type ExtendedAce = Omit<Ace, 'authority'> & {
     templateUrl: './share-dialog.component.html',
     styleUrls: ['./share-dialog.component.scss'],
     animations: [trigger('overlay', UIAnimation.openOverlay())],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class ShareDialogComponent implements OnInit, AfterViewInit {

@@ -1,4 +1,11 @@
-import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    Input,
+    Output,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { UIAnimation } from 'ngx-edu-sharing-ui';
 import { trigger } from '@angular/animations';
 import { TranslateService } from '@ngx-translate/core';
@@ -8,6 +15,7 @@ import { TranslateService } from '@ngx-translate/core';
     templateUrl: 'usage.component.html',
     styleUrls: ['usage.component.scss'],
     animations: [trigger('cardAnimation', UIAnimation.cardAnimation())],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class ShareDialogUsageComponent {

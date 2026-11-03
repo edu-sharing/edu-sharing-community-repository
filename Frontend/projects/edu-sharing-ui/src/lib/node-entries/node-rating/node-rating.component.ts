@@ -1,4 +1,11 @@
-import { ChangeDetectorRef, Component, Input, OnInit, inject } from '@angular/core';
+import {
+    ChangeDetectorRef,
+    Component,
+    Input,
+    OnInit,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import {
     AuthenticationService,
     ConfigService,
@@ -15,6 +22,7 @@ import { RestHelper } from '../../util/rest-helper';
     selector: 'es-node-rating',
     templateUrl: 'node-rating.component.html',
     styleUrls: ['node-rating.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class NodeRatingComponent<T extends Node> implements OnInit {

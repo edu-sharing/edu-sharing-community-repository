@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { MatChip } from '@angular/material/chips';
 import { FacetAggregation, FacetValue } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
@@ -12,6 +12,7 @@ import { MdsWidgetType, ValueType } from 'ngx-edu-sharing-ui';
     selector: 'es-mds-editor-widget-search-suggestions',
     templateUrl: './mds-editor-widget-search-suggestions.component.html',
     styleUrls: ['./mds-editor-widget-search-suggestions.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class MdsEditorWidgetSearchSuggestionsComponent

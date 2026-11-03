@@ -10,6 +10,7 @@ import {
     signal,
     SimpleChanges,
     ViewChild,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import {
     ActionbarComponent,
@@ -47,6 +48,7 @@ import { provideReusableOptionsHelperData } from '../../../services/options-help
         MdsModule,
     ],
     // required for optional mds module
+    changeDetection: ChangeDetectionStrategy.Eager,
     providers: [provideReusableOptionsHelperData(), RenderHelperService],
 })
 export class RenderWrapperComponent implements OnChanges {

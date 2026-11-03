@@ -7,6 +7,7 @@ import {
     OnInit,
     ViewChild,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { ActivatedRoute } from '@angular/router';
@@ -24,6 +25,7 @@ import { NodeEntriesDataType } from './data-type';
     selector: 'es-node-entries',
     templateUrl: 'node-entries.component.html',
     styleUrls: ['node-entries.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class NodeEntriesComponent<T extends NodeEntriesDataType>

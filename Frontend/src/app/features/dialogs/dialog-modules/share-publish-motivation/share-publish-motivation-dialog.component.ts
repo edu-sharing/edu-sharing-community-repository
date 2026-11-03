@@ -1,4 +1,12 @@
-import { Component, NgZone, OnDestroy, OnInit, signal, inject } from '@angular/core';
+import {
+    Component,
+    NgZone,
+    OnDestroy,
+    OnInit,
+    signal,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { ConfigService, HOME_REPOSITORY, IamV1Service, Node, UserStats } from 'ngx-edu-sharing-api';
 import { firstValueFrom, Subject } from 'rxjs';
 import { SharedModule } from '../../../../shared/shared.module';
@@ -27,6 +35,7 @@ export const ConfigMotivationDefaultConfig: MotivationConfig = {
     selector: 'es-share-publish-motivation-dialog',
     imports: [SharedModule, TranslateModule],
     templateUrl: './share-publish-motivation-dialog.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./share-publish-motivation-dialog.component.scss'],
 })
 export class SharePublishMotivationDialogComponent implements OnInit, OnDestroy {

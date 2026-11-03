@@ -1,8 +1,15 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { Node, NodeService } from 'ngx-edu-sharing-api';
-import { LocalEventsService } from 'ngx-edu-sharing-ui';
 import { firstValueFrom } from 'rxjs';
+import {
+    Component,
+    OnInit,
+    inject,
+    ChangeDetectionStrategy,
+    signal,
+    computed,
+} from '@angular/core';
 import { DialogButton, RestConstants } from '../../../../core-module/core.module';
+import { LocalEventsService } from 'ngx-edu-sharing-ui';
 import { Toast } from '../../../../services/toast';
 import { CARD_DIALOG_DATA, CardDialogConfig, Closable } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
@@ -35,6 +42,7 @@ import { ContributorsDialogData, ContributorsDialogResult } from './contributors
     selector: 'es-contributors-dialog',
     templateUrl: './contributors-dialog.component.html',
     styleUrls: ['./contributors-dialog.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class ContributorsDialogComponent implements OnInit {

@@ -2,7 +2,7 @@
  * Created by Torsten on 13.01.2017.
  */
 
-import { Component, Input, inject } from '@angular/core';
+import { Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { DomSanitizer } from '@angular/platform-browser';
 import { AuthorityProfile } from '../../../../../core-module/core.module';
@@ -12,6 +12,7 @@ import { TranslateService } from '@ngx-translate/core';
     selector: 'es-user-tile',
     templateUrl: 'user-tile.component.html',
     styleUrls: ['user-tile.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class UserTileComponent {

@@ -13,6 +13,7 @@ import {
     signal,
     SimpleChanges,
     ViewChild,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { NetworkService, Node } from 'ngx-edu-sharing-api';
 import {
@@ -45,6 +46,7 @@ import { CardDialogRef } from '../../../dialogs/card-dialog/card-dialog-ref';
     // For nested components such as the render wrapper, which reuses an ancestor's instance; the
     // preview's own actionbar keeps a separate one (`optionsHelper`).
     providers: [OptionsHelperDataService],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChanges {

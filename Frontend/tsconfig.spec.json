@@ -3,24 +3,11 @@
   "compilerOptions": {
     "rootDir": "src",
     "outDir": "./dist/out-tsc/spec",
-    "types": [
-      "jquery",
-      "jasmine",
-      "node"
-    ],
+    "types": ["jquery", "jasmine", "node"],
     "paths": {
-      "ngx-edu-sharing-api": [
-        "dist/edu-sharing-api/edu-sharing-api",
-        "dist/edu-sharing-api"
-      ],
-      "ngx-edu-sharing-ui": [
-        "dist/edu-sharing-ui/edu-sharing-ui",
-        "dist/edu-sharing-ui"
-      ],
-      "ngx-edu-sharing-b-api": [
-        "dist/b-api/b-api",
-        "dist/b-api"
-      ],
+      "ngx-edu-sharing-api": ["dist/edu-sharing-api/edu-sharing-api", "dist/edu-sharing-api"],
+      "ngx-edu-sharing-ui": ["dist/edu-sharing-ui/edu-sharing-ui", "dist/edu-sharing-ui"],
+      "ngx-edu-sharing-b-api": ["dist/b-api/b-api", "dist/b-api"],
       "ngx-rendering-service-api": [
         "dist/rendering-service-api/rendering-service-api",
         "dist/rendering-service-api"
@@ -31,12 +18,14 @@
       ]
     }
   },
-  "files": [
-    "src/test.ts",
-    "src/polyfills.ts"
-  ],
-  "include": [
-    "src/**/*.spec.ts",
-    "src/**/*.d.ts"
-  ]
+  "files": ["src/test.ts", "src/polyfills.ts"],
+  "include": ["src/**/*.spec.ts", "src/**/*.d.ts"],
+  "angularCompilerOptions": {
+    "extendedDiagnostics": {
+      "checks": {
+        "nullishCoalescingNotNullable": "suppress",
+        "optionalChainNotNullable": "suppress"
+      }
+    }
+  }
 }

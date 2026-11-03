@@ -1,4 +1,12 @@
-import { Component, Input, OnChanges, SimpleChanges, TemplateRef, inject } from '@angular/core';
+import {
+    Component,
+    Input,
+    OnChanges,
+    SimpleChanges,
+    TemplateRef,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { AVAILABLE_LIST_WIDGETS, ListWidgetType } from '../available-widgets';
 import { ListWidget } from '../list-widget';
 import { NodeEntriesGlobalService } from '../../node-entries/node-entries-global.service';
@@ -7,6 +15,7 @@ import { Node } from 'ngx-edu-sharing-api';
 @Component({
     selector: 'es-list-base',
     templateUrl: './list-base.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class ListBaseComponent extends ListWidget implements OnChanges {

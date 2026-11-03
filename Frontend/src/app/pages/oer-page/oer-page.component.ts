@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import {
@@ -30,6 +30,7 @@ import { Node } from 'ngx-edu-sharing-api';
     selector: 'es-oer-page',
     templateUrl: 'oer-page.component.html',
     styleUrls: ['oer-page.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class OerPageComponent implements OnInit, OnDestroy {

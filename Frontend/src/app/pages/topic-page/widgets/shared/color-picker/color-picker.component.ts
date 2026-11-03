@@ -1,4 +1,12 @@
-import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    Input,
+    OnInit,
+    Output,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
 import { TranslateModule } from '@ngx-translate/core';
@@ -12,6 +20,7 @@ import { TopicPageGlobalService } from '../../../shared/services/topic-page-glob
     selector: 'es-color-picker',
     imports: [FormsModule, MatButton, NgxColorsModule, TranslateModule],
     templateUrl: './color-picker.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./color-picker.component.scss'],
 })
 export class ColorPickerComponent implements OnInit {

@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MAT_BOTTOM_SHEET_DATA, MatBottomSheetRef } from '@angular/material/bottom-sheet';
 import { OptionItem } from '../../types/option-item';
@@ -10,6 +10,7 @@ import { Helper } from '../../util/helper';
     selector: 'es-dropdown-bottom-sheet',
     templateUrl: 'dropdown-bottom-sheet.component.html',
     styleUrls: ['dropdown-bottom-sheet.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class DropdownBottomSheetComponent {

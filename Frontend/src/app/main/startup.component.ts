@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CordovaService } from '../services/cordova.service';
 import { UIConstants } from 'ngx-edu-sharing-ui';
 import { Router } from '@angular/router';
@@ -11,6 +11,7 @@ import { environment } from '../../environments/environment';
 @Component({
     selector: 'es-startup',
     template: '',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class StartupComponent implements OnInit {

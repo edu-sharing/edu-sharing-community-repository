@@ -22,6 +22,7 @@ import {
     ViewChild,
     DOCUMENT,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { Subject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
@@ -116,6 +117,7 @@ type CardState = 'void' | 'enter' | 'exit';
             transition(':enter, :leave', [animate(UIAnimation.ANIMATION_TIME_SLOW + 'ms ease')]),
         ]),
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class CardDialogContainerComponent implements OnInit, OnDestroy {

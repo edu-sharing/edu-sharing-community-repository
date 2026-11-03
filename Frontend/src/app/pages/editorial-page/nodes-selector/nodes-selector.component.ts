@@ -13,6 +13,7 @@ import {
     signal,
     ViewChild,
     WritableSignal,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { MatButtonToggleChange } from '@angular/material/button-toggle';
 import { MatTabChangeEvent } from '@angular/material/tabs';
@@ -247,6 +248,7 @@ type SearchMdsContext = {
         ShareDialogModule,
     ],
     // headless mds instance used to evaluate the search widgets' default values
+    changeDetection: ChangeDetectionStrategy.Eager,
     providers: [MdsEditorInstanceService],
 })
 export class NodesSelectorComponent implements OnInit {

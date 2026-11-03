@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Observable } from 'rxjs';
 import { SkipNavService, SkipTarget } from './skip-nav.service';
 
@@ -13,6 +13,7 @@ import { SkipNavService, SkipTarget } from './skip-nav.service';
     selector: 'es-skip-nav',
     templateUrl: './skip-nav.component.html',
     styleUrls: ['./skip-nav.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class SkipNavComponent implements OnInit {

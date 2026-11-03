@@ -9,6 +9,7 @@ import {
     OnInit,
     SimpleChanges,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RenderingModule } from './rendering.module';
@@ -94,6 +95,7 @@ import { CurrentRenderRootUrlService } from './current-render-root-url.service';
     ],
     providers: [TranslateService, CurrentRenderRootUrlService],
     templateUrl: './render.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './render.component.scss',
 })
 export class RenderComponent implements OnChanges, OnInit {

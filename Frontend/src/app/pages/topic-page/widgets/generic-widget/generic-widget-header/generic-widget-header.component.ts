@@ -1,4 +1,4 @@
-import { Component, computed, input, output } from '@angular/core';
+import { Component, computed, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { SharedModule } from '../../../../../shared/shared.module';
 import { AiTextPromptPipe } from '../../../shared/pipes/ai-text-prompt.pipe';
 import { PromptToTextMapping } from '../../../shared/types/prompt-to-text-mapping';
@@ -22,6 +22,7 @@ export interface TextChangeEvent {
     standalone: true,
     imports: [AiTextPromptPipe, EditableTextComponent, SharedModule],
     templateUrl: './generic-widget-header.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./generic-widget-header.component.scss'],
 })
 export class WidgetHeaderComponent {

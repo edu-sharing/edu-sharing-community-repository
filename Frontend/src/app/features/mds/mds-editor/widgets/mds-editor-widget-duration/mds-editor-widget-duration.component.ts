@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Options } from '@angular-slider/ngx-slider';
 import { MdsEditorWidgetBase } from '../mds-editor-widget-base';
 import { ValueType } from 'ngx-edu-sharing-ui';
@@ -9,6 +9,7 @@ import { SuggestionResponseDto } from 'ngx-edu-sharing-api';
     selector: 'es-mds-editor-widget-duration',
     templateUrl: './mds-editor-widget-duration.component.html',
     styleUrls: ['./mds-editor-widget-duration.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class MdsEditorWidgetDurationComponent extends MdsEditorWidgetBase implements OnInit {

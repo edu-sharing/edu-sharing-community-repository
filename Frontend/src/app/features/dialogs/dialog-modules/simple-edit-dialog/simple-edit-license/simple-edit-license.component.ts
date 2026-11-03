@@ -1,5 +1,14 @@
 import { trigger } from '@angular/animations';
-import { Component, EventEmitter, Input, OnInit, Output, ViewChild, inject } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    Input,
+    OnInit,
+    Output,
+    ViewChild,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { MatButtonToggleGroup } from '@angular/material/button-toggle';
 import { UIAnimation, VCard } from 'ngx-edu-sharing-ui';
 import { Node } from 'ngx-edu-sharing-api';
@@ -25,6 +34,7 @@ import { Values } from '../../../../mds/types/types';
         trigger('fade', UIAnimation.fade()),
         trigger('cardAnimation', UIAnimation.cardAnimation()),
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class SimpleEditLicenseComponent implements OnInit {

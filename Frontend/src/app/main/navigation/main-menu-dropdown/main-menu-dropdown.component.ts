@@ -9,6 +9,7 @@ import {
     SimpleChanges,
     ViewChild,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
 import { combineLatest, Observable, Subject } from 'rxjs';
@@ -22,6 +23,7 @@ import { DropdownComponent, OptionItem } from 'ngx-edu-sharing-ui';
     selector: 'es-main-menu-dropdown',
     templateUrl: './main-menu-dropdown.component.html',
     styleUrls: ['./main-menu-dropdown.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class MainMenuDropdownComponent implements OnChanges, AfterViewInit, OnDestroy {

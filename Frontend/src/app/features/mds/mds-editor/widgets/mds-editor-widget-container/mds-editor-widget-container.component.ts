@@ -13,6 +13,7 @@ import {
     OnInit,
     SimpleChanges,
     ViewChild,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 import { MatRipple } from '@angular/material/core';
@@ -67,6 +68,7 @@ import { UIAnimation, ValueType, ViewInstanceService } from 'ngx-edu-sharing-ui'
             ]),
         ]),
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class MdsEditorWidgetContainerComponent

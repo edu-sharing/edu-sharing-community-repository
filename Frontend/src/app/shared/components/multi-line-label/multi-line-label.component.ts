@@ -6,6 +6,7 @@ import {
     OnInit,
     ViewChild,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatRadioButton } from '@angular/material/radio';
@@ -37,6 +38,7 @@ import { MatSlideToggle } from '@angular/material/slide-toggle';
     selector: 'es-multi-line-label',
     templateUrl: './multi-line-label.component.html',
     styleUrls: ['./multi-line-label.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class MultiLineLabelComponent implements OnInit, AfterViewInit {

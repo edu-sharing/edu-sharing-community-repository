@@ -1,4 +1,4 @@
-import { Component, Input, inject } from '@angular/core';
+import { Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { DialogsService } from '../../services/abstract/dialogs.service';
 import { EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
@@ -11,6 +11,7 @@ import { MatButton, MatButtonModule } from '@angular/material/button';
     templateUrl: './revoked.component.html',
     styleUrls: ['./revoked.component.scss'],
     standalone: true,
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [MatButtonModule, EduSharingUiCommonModule, TranslateModule],
 })
 export class RevokedComponent {

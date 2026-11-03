@@ -10,6 +10,7 @@ import {
     Signal,
     TemplateRef,
     ViewChild,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { SelectionChange } from '@angular/cdk/collections';
 import { TranslateService } from '@ngx-translate/core';
@@ -62,6 +63,7 @@ type RestoreResults = {
     selector: 'es-recycle',
     templateUrl: 'recycle.component.html',
     styleUrls: ['recycle.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class RecycleMainComponent implements OnInit, AfterViewInit, OnDestroy {

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { RestConstants } from '../../../../../core-module/rest/rest-constants';
@@ -10,6 +10,7 @@ import { Toast } from 'ngx-edu-sharing-ui';
     selector: 'es-mds-editor-widget-version',
     templateUrl: './mds-editor-widget-version.component.html',
     styleUrls: ['./mds-editor-widget-version.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class MdsEditorWidgetVersionComponent implements OnInit, NativeWidgetComponent {

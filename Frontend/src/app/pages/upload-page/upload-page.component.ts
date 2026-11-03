@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TranslationsService } from 'ngx-edu-sharing-ui';
 import { Node } from 'ngx-edu-sharing-api';
@@ -14,6 +14,7 @@ import { UploadDialogService } from '../../services/upload-dialog.service';
     selector: 'es-upload-page',
     templateUrl: 'upload-page.component.html',
     styleUrls: ['upload-page.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class UploadPageComponent {

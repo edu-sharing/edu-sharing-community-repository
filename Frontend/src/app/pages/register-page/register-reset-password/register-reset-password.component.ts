@@ -1,4 +1,11 @@
-import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    Input,
+    Output,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { Toast } from '../../../services/toast';
 import { Params, Router } from '@angular/router';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
@@ -9,6 +16,7 @@ import { RegisterService } from 'ngx-edu-sharing-api';
     selector: 'es-register-reset-password',
     templateUrl: 'register-reset-password.component.html',
     styleUrls: ['register-reset-password.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class RegisterResetPasswordComponent {

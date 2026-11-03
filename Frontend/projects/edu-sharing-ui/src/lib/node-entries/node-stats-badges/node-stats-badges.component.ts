@@ -1,4 +1,4 @@
-import { Component, HostBinding, Input, inject } from '@angular/core';
+import { Component, HostBinding, Input, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { ClickSource } from '../entries-model';
 import { NodeEntriesService } from '../../services/node-entries.service';
@@ -7,6 +7,7 @@ import { NodeEntriesService } from '../../services/node-entries.service';
     selector: 'es-node-stats-badges',
     templateUrl: './node-stats-badges.component.html',
     styleUrls: ['./node-stats-badges.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class NodeStatsBadgesComponent {

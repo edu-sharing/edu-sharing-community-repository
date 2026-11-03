@@ -10,6 +10,7 @@ import {
     OnInit,
     Output,
     ViewChild,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { DateRange } from '@angular/material/datepicker';
 import { TranslateService } from '@ngx-translate/core';
@@ -113,6 +114,7 @@ type StatisticsGrouping = 'None' | 'Daily' | 'Monthly' | 'Yearly' | 'Node';
         ]),
         trigger('dialog', UIAnimation.switchDialog()),
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class AdminStatisticsComponent implements OnInit {

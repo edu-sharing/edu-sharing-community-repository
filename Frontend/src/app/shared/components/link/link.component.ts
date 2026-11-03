@@ -1,9 +1,17 @@
-import { Component, EventEmitter, HostBinding, Input, Output } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    HostBinding,
+    Input,
+    Output,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 
 @Component({
     selector: 'es-mat-link',
     templateUrl: 'link.component.html',
     styleUrls: ['link.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 /**

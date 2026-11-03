@@ -1,5 +1,8 @@
 <div #subTreeWrapper class="sub-tree-wrapper" [attr.role]="depth === 0 ? 'tree' : 'group'">
-  <es-dropdown #dropdown [options]="entriesService.options?.[Target.ListDropdown]"></es-dropdown>
+  <es-dropdown
+    #dropdown
+    [options]="$safeNavigationMigration(entriesService.options?.[Target.ListDropdown])"
+  ></es-dropdown>
   <button
     #dropdownTrigger="matMenuTrigger"
     mat-button

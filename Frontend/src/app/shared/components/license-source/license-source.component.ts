@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { trigger } from '@angular/animations';
 import { UIAnimation } from 'ngx-edu-sharing-ui';
 
@@ -11,6 +11,7 @@ import { UIAnimation } from 'ngx-edu-sharing-ui';
         trigger('cardAnimation', UIAnimation.cardAnimation()),
         trigger('dialog', UIAnimation.switchDialog()),
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class LicenseSourceComponent {

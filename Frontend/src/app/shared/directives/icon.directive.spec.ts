@@ -1,4 +1,4 @@
-import { Component, DebugElement } from '@angular/core';
+import { Component, DebugElement, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 
@@ -9,6 +9,7 @@ import { By } from '@angular/platform-browser';
         <i icon="foo" [aria]="false"></i>
         <i icon="foo" aria-label="bar"></i>
     `,
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 class TestComponent {}

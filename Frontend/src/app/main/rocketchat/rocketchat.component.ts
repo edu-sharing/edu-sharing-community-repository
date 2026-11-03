@@ -7,6 +7,7 @@ import {
     NgZone,
     ViewChild,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { UIAnimation } from 'ngx-edu-sharing-ui';
@@ -24,6 +25,7 @@ import { RocketChatService } from './rocket-chat.service';
     templateUrl: 'rocketchat.component.html',
     styleUrls: ['rocketchat.component.scss'],
     animations: [trigger('toggle', UIAnimation.openOverlayBottom())],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 /**

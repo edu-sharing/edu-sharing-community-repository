@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { ApiErrorResponse, SavedSearch, SavedSearchesService } from 'ngx-edu-sharing-api';
@@ -18,6 +18,7 @@ import { SaveSearchDialogData, SaveSearchDialogResult } from './save-search-dial
     selector: 'es-save-search-dialog',
     templateUrl: './save-search-dialog.component.html',
     styleUrls: ['./save-search-dialog.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class SaveSearchDialogComponent implements OnInit {

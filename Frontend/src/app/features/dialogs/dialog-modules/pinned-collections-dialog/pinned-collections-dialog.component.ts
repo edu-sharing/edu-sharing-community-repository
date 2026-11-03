@@ -1,5 +1,5 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import {
     DialogButton,
@@ -24,6 +24,7 @@ import {
     selector: 'es-pinned-collections-dialog',
     templateUrl: './pinned-collections-dialog.component.html',
     styleUrls: ['./pinned-collections-dialog.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class PinnedCollectionsDialogComponent {

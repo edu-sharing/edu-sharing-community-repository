@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { Sort, SortDirection } from '@angular/material/sort';
 import { ListItemSort, SortEvent, SortPanel } from '../../types/list-item';
 
@@ -6,6 +6,7 @@ import { ListItemSort, SortEvent, SortPanel } from '../../types/list-item';
     selector: 'es-sort-select-panel',
     templateUrl: './sort-select-panel.component.html',
     styleUrls: ['./sort-select-panel.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class SortSelectPanelComponent implements SortPanel {

@@ -13,6 +13,7 @@ import {
     inject,
     signal,
     viewChild,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { HOME_REPOSITORY } from 'ngx-edu-sharing-api';
@@ -37,6 +38,7 @@ function containsValues(values: Values): boolean {
     selector: 'es-topic-page-filters-sidebar',
     imports: [SharedModule, MdsModule, ResizableSidenavDirective],
     templateUrl: './topic-page-filters-sidebar.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./topic-page-filters-sidebar.component.scss'],
     host: { '[class.as-dialog]': 'isMobileScreen()' },
 })

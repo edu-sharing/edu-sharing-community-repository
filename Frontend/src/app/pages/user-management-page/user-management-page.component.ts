@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { TranslationsService, UIService } from 'ngx-edu-sharing-ui';
 import {
     ConfigurationService,
@@ -23,6 +23,7 @@ import { PlatformLocation } from '@angular/common';
     templateUrl: 'user-management-page.component.html',
     styleUrls: ['user-management-page.component.scss'],
     animations: [],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class UserManagementPageComponent implements OnInit, OnDestroy {

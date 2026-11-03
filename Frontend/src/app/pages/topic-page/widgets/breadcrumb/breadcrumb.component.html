@@ -27,7 +27,7 @@
             (pageVariantConfigNodes().length === 1 || isProcessing()) &&
             !(isAdmin() && pageTemplateExists() && !templateMode())
           "
-          [value]="pageVariantNode?.ref.id"
+          [value]="$safeNavigationMigration(pageVariantNode?.ref.id)"
           (selectionChange)="selectVariant($event.value)"
         >
           @for (variant of pageVariantConfigNodes(); track variant; let i = $index) {

@@ -6,6 +6,7 @@ import {
     TemplateRef,
     ViewChild,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 import { Node, SavedSearch, SavedSearchesService } from 'ngx-edu-sharing-api';
@@ -32,6 +33,7 @@ import { NodeDataSourceRemote } from 'src/app/pages/search-page/node-data-source
     selector: 'es-saved-searches-dialog',
     templateUrl: './saved-searches-dialog.component.html',
     styleUrls: ['./saved-searches-dialog.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class SavedSearchesDialogComponent implements OnInit, OnDestroy {

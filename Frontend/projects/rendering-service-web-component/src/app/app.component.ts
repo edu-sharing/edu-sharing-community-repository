@@ -10,6 +10,7 @@ import {
     signal,
     SimpleChanges,
     ViewChild,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { RenderHelperService, TranslationsService } from 'ngx-edu-sharing-ui';
 import { RenderDataRequestWithToken } from 'ngx-rendering-service-api';
@@ -19,6 +20,7 @@ import { PdfComponent } from 'ngx-rendering-service-lib';
     selector: 'edu-sharing-render',
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class AppComponent implements OnChanges, AfterViewInit, OnInit {

@@ -3,7 +3,14 @@
  */
 
 import { CommonModule } from '@angular/common';
-import { Component, Input, signal, WritableSignal, inject } from '@angular/core';
+import {
+    Component,
+    Input,
+    signal,
+    WritableSignal,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { ConfigService } from 'ngx-edu-sharing-api';
 import { take } from 'rxjs/operators';
 import { ConfigurationHelper } from '../../../core-module/core.module';
@@ -13,6 +20,7 @@ import { SharedModule } from '../../shared.module';
     selector: 'es-footer',
     templateUrl: 'footer.component.html',
     styleUrls: ['footer.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SharedModule],
 })
 export class FooterComponent {

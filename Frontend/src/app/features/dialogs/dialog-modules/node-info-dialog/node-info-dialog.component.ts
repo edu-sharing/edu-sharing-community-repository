@@ -1,4 +1,11 @@
-import { AfterViewInit, Component, OnInit, ViewChild, inject } from '@angular/core';
+import {
+    AfterViewInit,
+    Component,
+    OnInit,
+    ViewChild,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { ConfigService, Node, NodeService, NodeServiceUnwrapped } from 'ngx-edu-sharing-api';
@@ -42,6 +49,7 @@ type RawPermissions = {
     templateUrl: 'node-info-dialog.component.html',
     styleUrls: ['node-info-dialog.component.scss'],
     providers: [BreadcrumbsService, OptionsHelperDataService],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 /**

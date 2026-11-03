@@ -7,6 +7,7 @@ import {
     viewChild,
     WritableSignal,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Params, Router } from '@angular/router';
@@ -18,6 +19,7 @@ import { TemplateComponent } from './editor/template.component';
     selector: 'es-custom-topic-page',
     templateUrl: './topic-page.component.html',
     styleUrls: ['./topic-page.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class TopicPageComponent {

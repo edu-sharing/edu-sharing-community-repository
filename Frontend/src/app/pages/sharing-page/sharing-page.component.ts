@@ -1,4 +1,4 @@
-import { Component, ViewChild, inject } from '@angular/core';
+import { Component, ViewChild, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import {
     ColumnType,
@@ -42,6 +42,7 @@ import { OptionsHelperService } from '../../services/options-helper.service';
     templateUrl: 'sharing-page.component.html',
     styleUrls: ['sharing-page.component.scss'],
     providers: [OptionsHelperService],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class SharingPageComponent {

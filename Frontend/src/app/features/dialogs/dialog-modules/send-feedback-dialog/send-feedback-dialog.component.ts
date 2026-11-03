@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { delay, first } from 'rxjs/operators';
 import { DialogButton, RestConstants } from '../../../../core-module/core.module';
@@ -15,6 +15,7 @@ import { SendFeedbackDialogData, SendFeedbackDialogResult } from './send-feedbac
     templateUrl: './send-feedback-dialog.component.html',
     styleUrls: ['./send-feedback-dialog.component.scss'],
     providers: [MdsEditorInstanceService],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class SendFeedbackDialogComponent implements OnInit {

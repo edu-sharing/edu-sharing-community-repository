@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ContributorData } from 'ngx-edu-sharing-api';
 import { DialogButton } from '../../../../core-module/core.module';
 import { Toast } from '../../../../services/toast';
@@ -15,6 +15,7 @@ type ContributorModel = Partial<ContributorData>;
     selector: 'es-contributor-registry-edit-dialog',
     templateUrl: './contributor-registry-edit-dialog.component.html',
     styleUrls: ['./contributor-registry-edit-dialog.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class ContributorRegistryEditDialogComponent implements OnInit {

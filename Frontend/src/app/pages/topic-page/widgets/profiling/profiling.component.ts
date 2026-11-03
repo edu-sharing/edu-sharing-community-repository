@@ -11,6 +11,7 @@ import {
     ViewEncapsulation,
     WritableSignal,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { DEFAULT, HOME_REPOSITORY, MdsWidget, SessionStorageService } from 'ngx-edu-sharing-api';
 import { Subject } from 'rxjs';
@@ -29,6 +30,7 @@ import { GenericWidgetGlobalService } from '../generic-widget/generic-widget-glo
     imports: [SharedModule, MdsModule],
     schemas: [CUSTOM_ELEMENTS_SCHEMA],
     templateUrl: './profiling.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./profiling.component.scss'],
 })
 export class ProfilingComponent implements AfterViewInit {

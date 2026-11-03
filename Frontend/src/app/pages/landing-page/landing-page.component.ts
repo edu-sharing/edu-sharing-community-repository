@@ -1,4 +1,11 @@
-import { Component, OnDestroy, OnInit, signal, inject } from '@angular/core';
+import {
+    Component,
+    OnDestroy,
+    OnInit,
+    signal,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthenticationService, ConfigService, DashboardSwimlaneEntry } from 'ngx-edu-sharing-api';
 import {
@@ -22,6 +29,7 @@ import {
     selector: 'es-landing-page',
     templateUrl: 'landing-page.component.html',
     styleUrls: ['landing-page.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class LandingPageComponent implements OnInit, OnDestroy {

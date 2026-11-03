@@ -190,9 +190,9 @@ const openRepositorySelect = (canvasElement: HTMLElement): Promise<void> =>
 
 /** an option of the opened dropdown — its panel lives in the cdk overlay, not in the canvas */
 const repositoryOption = (repository: Repository): Promise<HTMLElement> =>
-    waitFor(() => {
+    waitFor(async () => {
         const element = query(document.body, `nodes-selector-repository-option-${repository.id}`);
-        expect(element).toBeTruthy();
+        await expect(element).toBeTruthy();
         return element;
     });
 
@@ -241,7 +241,7 @@ export const SearchSingleRepository: Story = {
     decorators: [setup([homeRepository])],
     play: async ({ canvasElement }) => {
         await expectResultsOf(canvasElement, homeRepository.id);
-        expect(repositorySelect(canvasElement)).toBeNull();
+        await expect(repositorySelect(canvasElement)).toBeNull();
     },
 };
 
@@ -252,7 +252,7 @@ export const SearchMultipleRepositories: Story = {
         await expectResultsOf(canvasElement, homeRepository.id);
         await openRepositorySelect(canvasElement);
         for (const repository of allRepositories) {
-            expect(await repositoryOption(repository)).toBeTruthy();
+            await expect(await repositoryOption(repository)).toBeTruthy();
         }
         await userEvent.keyboard('{Escape}');
     },
@@ -268,7 +268,7 @@ export const SearchWithoutResults: Story = {
                 timeout: 5000,
             },
         );
-        expect(canvasElement.querySelector('es-spinner')).toBeNull();
+        await expect(canvasElement.querySelector('es-spinner')).toBeNull();
     },
 };
 
@@ -277,7 +277,7 @@ export const SearchLoading: Story = {
     decorators: [setup(allRepositories, 'loading')],
     play: async ({ canvasElement }) => {
         await waitFor(() => expect(canvasElement.querySelector('es-spinner')).toBeTruthy());
-        expect(query(canvasElement, 'nodes-selector-no-results')).toBeNull();
+        await expect(query(canvasElement, 'nodes-selector-no-results')).toBeNull();
     },
 };
 
@@ -289,7 +289,7 @@ export const SearchRemoteRepositoriesDisabled: Story = {
     },
     play: async ({ canvasElement }) => {
         await expectResultsOf(canvasElement, homeRepository.id);
-        expect(repositorySelect(canvasElement)).toBeNull();
+        await expect(repositorySelect(canvasElement)).toBeNull();
     },
 };
 
@@ -301,7 +301,7 @@ export const SearchWithRestrictedTabs: Story = {
     },
     play: async ({ canvasElement }) => {
         await waitFor(() => expect(visibleTabs(canvasElement).length).toBeGreaterThan(0));
-        expect(visibleTabs(canvasElement)).toEqual([TabType.SEARCH, TabType.WORKSPACE]);
+        await expect(visibleTabs(canvasElement)).toEqual([TabType.SEARCH, TabType.WORKSPACE]);
     },
 };
 
@@ -316,12 +316,12 @@ export const TargetModeHomeSelection: Story = {
     },
     play: async ({ canvasElement }) => {
         await waitFor(() => expect(visibleTabs(canvasElement).length).toBeGreaterThan(0));
-        expect(visibleTabs(canvasElement)).toEqual([
+        await expect(visibleTabs(canvasElement)).toEqual([
             TabType.METHODOLOGY,
             TabType.COLLECTIONS,
             TabType.WORKSPACE,
         ]);
-        expect(repositorySelect(canvasElement)).toBeNull();
+        await expect(repositorySelect(canvasElement)).toBeNull();
     },
 };
 
@@ -336,7 +336,7 @@ export const TargetModeRemoteSelection: Story = {
     },
     play: async ({ canvasElement }) => {
         await waitFor(() => expect(visibleTabs(canvasElement).length).toBeGreaterThan(0));
-        expect(visibleTabs(canvasElement)).toEqual([TabType.COLLECTIONS]);
+        await expect(visibleTabs(canvasElement)).toEqual([TabType.COLLECTIONS]);
     },
 };
 
@@ -348,7 +348,7 @@ export const CollectionsTab: Story = {
     play: async ({ canvasElement }) => {
         await waitFor(() => expect(visibleTabs(canvasElement)).toContain(TabType.COLLECTIONS));
         // the repository dropdown belongs to the search tab only
-        expect(repositorySelect(canvasElement)).toBeNull();
+        await expect(repositorySelect(canvasElement)).toBeNull();
     },
 };
 

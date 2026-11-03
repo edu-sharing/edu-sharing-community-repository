@@ -1,4 +1,11 @@
-import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    Input,
+    Output,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { DialogButton } from '../../../core-module/core.module';
 import { Toast } from '../../../services/toast';
@@ -29,6 +36,7 @@ type LuceneTemplates = { [key: string]: LuceneTemplate };
     selector: 'es-lucene-template-memory',
     templateUrl: './lucene-template-memory.component.html',
     styleUrls: ['./lucene-template-memory.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class LuceneTemplateMemoryComponent {

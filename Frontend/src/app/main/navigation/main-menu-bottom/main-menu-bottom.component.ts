@@ -1,4 +1,4 @@
-import { Component, Input, inject } from '@angular/core';
+import { Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ConfigEntry } from '../../../services/node-helper.service';
 import { MainMenuEntriesService } from '../main-menu-entries.service';
@@ -7,6 +7,7 @@ import { MainMenuEntriesService } from '../main-menu-entries.service';
     selector: 'es-main-menu-bottom',
     templateUrl: './main-menu-bottom.component.html',
     styleUrls: ['./main-menu-bottom.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class MainMenuBottomComponent {

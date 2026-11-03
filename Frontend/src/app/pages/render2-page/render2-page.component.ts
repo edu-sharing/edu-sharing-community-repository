@@ -1,4 +1,13 @@
-import { Component, inject, Input, OnDestroy, signal, ViewChild, DestroyRef } from '@angular/core';
+import {
+    Component,
+    inject,
+    Input,
+    OnDestroy,
+    signal,
+    ViewChild,
+    ChangeDetectionStrategy,
+    DestroyRef,
+} from '@angular/core';
 import { LocalEventsService } from 'ngx-edu-sharing-ui';
 import { ActivatedRoute, Router } from '@angular/router';
 import { combineLatest, Subject } from 'rxjs';
@@ -36,6 +45,7 @@ import { ImprintPrivacyService } from '../../shared/components/imprint-privacy-f
     // instance — a page-level provider would make them share one options/selection channel, so the
     // sidebar's setData() would clobber the render wrapper's actionbar options. Each must own its
     // instance instead.
+    changeDetection: ChangeDetectionStrategy.Eager,
     providers: [],
 })
 export class Render2PageComponent implements OnDestroy {

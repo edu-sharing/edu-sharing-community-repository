@@ -6,6 +6,7 @@ import {
     InputSignal,
     Output,
     ViewEncapsulation,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { MatIconButton } from '@angular/material/button';
 import { TranslateModule } from '@ngx-translate/core';
@@ -16,6 +17,7 @@ import { EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
     encapsulation: ViewEncapsulation.Emulated,
     imports: [EduSharingUiCommonModule, MatIconButton, TranslateModule],
     templateUrl: './side-menu-wrapper.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./side-menu-wrapper.component.scss'],
 })
 export class SideMenuWrapperComponent {

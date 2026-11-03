@@ -1,4 +1,12 @@
-import { Component, effect, OnDestroy, signal, ViewChild, inject } from '@angular/core';
+import {
+    Component,
+    effect,
+    OnDestroy,
+    signal,
+    ViewChild,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { MatTabChangeEvent, MatTabGroup } from '@angular/material/tabs';
 import { SharedModule } from '../../../shared/shared.module';
 import { EditorialBreadcrumbService } from '../editorial-breadcrumb/editorial-breadcrumb.service';
@@ -51,6 +59,7 @@ import { GenericDialogButton } from '../../../features/dialogs/dialog-modules/ge
     selector: 'es-assignment-submission',
     templateUrl: 'assignment-submission.component.html',
     styleUrls: ['assignment-submission.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SharedModule, TranslateModule, NgxExtendedPdfViewerModule, RenderWrapperComponent],
 })
 export class AssignmentSubmissionComponent implements OnDestroy {

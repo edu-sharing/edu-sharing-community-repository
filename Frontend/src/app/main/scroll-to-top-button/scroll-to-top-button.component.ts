@@ -1,5 +1,12 @@
 import { trigger } from '@angular/animations';
-import { Component, NgZone, OnDestroy, OnInit, inject } from '@angular/core';
+import {
+    Component,
+    NgZone,
+    OnDestroy,
+    OnInit,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { AppContainerService, UIAnimation } from 'ngx-edu-sharing-ui';
 import { Subject } from 'rxjs';
 
@@ -13,6 +20,7 @@ import { Subject } from 'rxjs';
     templateUrl: './scroll-to-top-button.component.html',
     styleUrls: ['./scroll-to-top-button.component.scss'],
     animations: [trigger('fade', UIAnimation.fade())],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class ScrollToTopButtonComponent implements OnInit, OnDestroy {

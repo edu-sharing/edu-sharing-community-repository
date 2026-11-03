@@ -12,6 +12,7 @@ import {
     ViewContainerRef,
     WritableSignal,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { AuthenticationService, MdsWidget, Node } from 'ngx-edu-sharing-api';
@@ -24,6 +25,7 @@ import { MdsEditorInstanceService } from '../../../mds-editor-instance.service';
     selector: 'es-ai-preview-images-overlay',
     templateUrl: './ai-preview-images-overlay.component.html',
     styleUrls: ['./ai-preview-images-overlay.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class AiPreviewImagesOverlayComponent implements OnInit {

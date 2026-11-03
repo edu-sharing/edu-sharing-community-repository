@@ -1,5 +1,5 @@
 /** This component is also used in extensions and therefore shared! */
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { ListItem } from 'ngx-edu-sharing-ui';
 import { Node } from 'ngx-edu-sharing-api';
 
@@ -7,6 +7,7 @@ import { Node } from 'ngx-edu-sharing-api';
     selector: 'es-small-collection',
     templateUrl: 'small-collection.component.html',
     styleUrls: ['small-collection.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 /**

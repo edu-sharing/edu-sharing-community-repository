@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { ListItem } from '../../types/list-item';
 import { Node } from 'ngx-edu-sharing-api';
 import { NodeEntriesDataType } from '../data-type';
@@ -7,6 +7,7 @@ import { NodeEntriesDataType } from '../data-type';
     selector: 'es-drag-preview',
     templateUrl: './drag-preview.component.html',
     styleUrls: ['./drag-preview.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class DragPreviewComponent<T extends NodeEntriesDataType> {

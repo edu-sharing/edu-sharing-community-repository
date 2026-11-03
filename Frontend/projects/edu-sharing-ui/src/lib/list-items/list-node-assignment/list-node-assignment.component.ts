@@ -1,4 +1,4 @@
-import { Component, computed, Signal, inject } from '@angular/core';
+import { Component, computed, Signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ListWidget } from '../list-widget';
 import { ListItem } from '../../types/list-item';
 import { NodeHelperService } from '../../services/node-helper.service';
@@ -10,6 +10,7 @@ import { SubmissionWithAssignment } from '../../node-entries/data-type';
     selector: 'es-list-node-assignment',
     templateUrl: './list-node-assignment.component.html',
     styleUrls: ['./list-node-assignment.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class ListNodeAssignmentComponent extends ListWidget {

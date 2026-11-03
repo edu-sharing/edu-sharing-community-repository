@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, inject } from '@angular/core';
+import { Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthenticationService } from 'ngx-edu-sharing-api';
 
@@ -6,6 +6,7 @@ import { AuthenticationService } from 'ngx-edu-sharing-api';
     selector: 'app-root',
     templateUrl: './wrapper.component.html',
     styleUrls: ['./wrapper.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class WrapperComponent implements OnInit {

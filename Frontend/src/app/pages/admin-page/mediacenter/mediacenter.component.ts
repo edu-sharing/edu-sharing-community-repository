@@ -1,4 +1,12 @@
-import { Component, EventEmitter, inject, NgZone, Output, ViewChild } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    inject,
+    NgZone,
+    Output,
+    ViewChild,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import {
     Group,
@@ -47,6 +55,7 @@ import { firstValueFrom } from 'rxjs';
     templateUrl: 'mediacenter.component.html',
     styleUrls: ['mediacenter.component.scss'],
     providers: [OptionsHelperService],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class AdminMediacenterComponent {

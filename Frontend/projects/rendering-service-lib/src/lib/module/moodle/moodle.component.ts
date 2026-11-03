@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, inject } from '@angular/core';
+import { Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RenderingModule } from '../../rendering.module';
 import { RenderModule } from '../RenderModule';
 import { Node } from 'ngx-edu-sharing-api';
@@ -17,6 +17,7 @@ import { EduSharingUiModule } from 'ngx-edu-sharing-ui';
     // Without the iframe there is nothing that fills the module box, so the host page can size the
     // module by its preview image (like the url module) instead of the 16/9 frame it reserves for
     // the embedded course.
+    changeDetection: ChangeDetectionStrategy.Eager,
     host: { '[class.link-only]': '!showIframe' },
 })
 export class MoodleComponent implements RenderModule, OnInit {

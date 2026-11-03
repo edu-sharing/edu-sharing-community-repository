@@ -1,5 +1,5 @@
 import { filter } from 'rxjs/operators';
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { ValueType, VCard } from 'ngx-edu-sharing-ui';
 import { MdsEditorWidgetBase } from '../mds-editor-widget-base';
 import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
@@ -15,6 +15,7 @@ export interface AuthorData {
     selector: 'es-mds-editor-widget-vcard',
     templateUrl: './mds-editor-widget-vcard.component.html',
     styleUrls: ['./mds-editor-widget-vcard.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class MdsEditorWidgetVCardComponent extends MdsEditorWidgetBase implements OnInit {

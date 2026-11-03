@@ -1,4 +1,12 @@
-import { Component, inject, Input, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
+import {
+    Component,
+    inject,
+    Input,
+    OnChanges,
+    SimpleChanges,
+    ViewChild,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 import { OptionItem } from '../types/option-item';
 import { Helper } from '../util/helper';
@@ -16,6 +24,7 @@ import { DropdownBottomSheetComponent } from './dropdown-bottom-sheet/dropdown-b
     selector: 'es-dropdown',
     templateUrl: 'dropdown.component.html',
     styleUrls: ['dropdown.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class DropdownComponent implements OnChanges {

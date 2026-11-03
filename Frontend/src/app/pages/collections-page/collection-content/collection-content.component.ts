@@ -12,6 +12,7 @@ import {
     SimpleChanges,
     TemplateRef,
     ViewChild,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PlatformLocation } from '@angular/common';
@@ -91,6 +92,7 @@ import {
     selector: 'es-collection-content',
     templateUrl: 'collection-content.component.html',
     styleUrls: ['collection-content.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy {

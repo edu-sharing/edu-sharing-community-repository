@@ -10,6 +10,7 @@ import {
     SimpleChanges,
     ViewChild,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
@@ -44,6 +45,7 @@ type SuggestionResult = SuggestionGroup[] | 'NO_RECENT' | 'NO_MATCHES';
     templateUrl: 'authority-search-input.component.html',
     styleUrls: ['authority-search-input.component.scss'],
     providers: [PermissionNamePipe],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class AuthoritySearchInputComponent implements AfterViewInit, OnChanges {

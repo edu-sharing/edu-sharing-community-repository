@@ -2,12 +2,13 @@
  * Created by Torsten on 13.01.2017.
  */
 
-import { Component, HostBinding, Input } from '@angular/core';
+import { Component, HostBinding, Input, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
     selector: 'es-powered-by',
     templateUrl: 'powered-by.component.html',
     styleUrls: ['powered-by.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class PoweredByComponent {
