@@ -94,13 +94,13 @@ export class TopicPageSidebarService {
     }
 
     /**
-     * Opens the creation on the given tab. Trapped, it offers no way back to the menu.
+     * Opens the creation on the given tab, with a way back to the menu.
      */
-    open(tab: TopicPageSidebarTab, trap: boolean = true): void {
+    open(tab: TopicPageSidebarTab): void {
         const optionConfig: TopicPageSidebarConfig = { tab };
         this.editorialSidebarService.showOption({
             option: TOPIC_PAGE_CREATE_OPTION,
-            trap,
+            trap: false,
             optionConfig: optionConfig as OptionConfig,
             backTo: { option: TOPIC_PAGE_SIDEBAR_OPTION, trap: false },
         });

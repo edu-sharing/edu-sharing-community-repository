@@ -121,7 +121,7 @@ export class TopicPageManageSidebarComponent {
     }
 
     create(): void {
-        this.topicPageSidebarService.open('variant', false);
+        this.topicPageSidebarService.open('variant');
     }
 
     private async run(action: () => Promise<void>): Promise<void> {
