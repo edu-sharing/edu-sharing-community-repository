@@ -107,15 +107,16 @@ public class SilentLoginModeRedirect {
     }
 
     /**
-     * endpoints that are only consumed by machines, an interactive login makes no sense there
+     * Endpoints that are only consumed by machines, an interactive login makes no sense there.
+     * The servlets are mapped to the exact path (e.g. /eduservlet/sitemap), then the whole path is the servlet path
+     * and there is no path info. With a mapping to a path prefix it is split into both, so they are joined.
      */
     static boolean isMachineEndpoint(String servletPath, String pathInfo) {
-        if (!"/eduservlet".equals(servletPath) || pathInfo == null) {
-            return false;
-        }
-        return pathInfo.equals("/sitemap")
-                || pathInfo.equals("/oembed")
-                || pathInfo.equals("/oai") || pathInfo.startsWith("/oai/");
+        String path = (servletPath == null ? "" : servletPath) + (pathInfo == null ? "" : pathInfo);
+        return path.equals("/eduservlet/sitemap")
+                || path.equals("/eduservlet/oembed")
+                || path.equals("/eduservlet/oai") || path.startsWith("/eduservlet/oai/")
+                || path.equals("/robots.txt");
     }
 
     /**

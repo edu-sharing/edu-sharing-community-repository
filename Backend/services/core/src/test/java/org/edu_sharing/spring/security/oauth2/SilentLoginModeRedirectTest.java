@@ -40,18 +40,31 @@ class SilentLoginModeRedirectTest {
         assertFalse(SilentLoginModeRedirect.isCrawler(null));
     }
 
+    /**
+     * the servlets are mapped to the exact path, so the container reports the whole path as servlet path
+     * and no path info (web.xml: /eduservlet/sitemap, /eduservlet/oembed, /eduservlet/oai/provider)
+     */
+    @ParameterizedTest
+    @ValueSource(strings = {"/eduservlet/sitemap", "/eduservlet/oembed", "/eduservlet/oai/provider", "/robots.txt"})
+    void machineEndpointsWithAnExactMapping(String servletPath) {
+        assertTrue(SilentLoginModeRedirect.isMachineEndpoint(servletPath, null), servletPath);
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {"/sitemap", "/oembed", "/oai", "/oai/", "/oai/sets"})
-    void sitemapOaiAndOembedAreMachineEndpoints(String pathInfo) {
+    void machineEndpointsWithAMappingToAPrefix(String pathInfo) {
         assertTrue(SilentLoginModeRedirect.isMachineEndpoint("/eduservlet", pathInfo), pathInfo);
     }
 
     @Test
     void otherPathsAreNotMachineEndpoints() {
+        assertFalse(SilentLoginModeRedirect.isMachineEndpoint("/eduservlet/download", null));
+        assertFalse(SilentLoginModeRedirect.isMachineEndpoint("/eduservlet/oaifoo", null));
         assertFalse(SilentLoginModeRedirect.isMachineEndpoint("/eduservlet", "/download"));
         assertFalse(SilentLoginModeRedirect.isMachineEndpoint("/eduservlet", "/oaifoo"));
         assertFalse(SilentLoginModeRedirect.isMachineEndpoint("/other", "/sitemap"));
         assertFalse(SilentLoginModeRedirect.isMachineEndpoint("/components", "/start"));
         assertFalse(SilentLoginModeRedirect.isMachineEndpoint("/eduservlet", null));
+        assertFalse(SilentLoginModeRedirect.isMachineEndpoint(null, null));
     }
 }
