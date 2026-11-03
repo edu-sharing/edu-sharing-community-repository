@@ -24,6 +24,8 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <alfresco.transform-core.version>5.1.5</alfresco.transform-core.version>
+        <jackson.version>2.18.12</jackson.version>
+        <tomcat-embed.version>10.1.61</tomcat-embed.version>
     </properties>
 
     <build>
@@ -57,6 +59,45 @@
     </build>
     <dependencyManagement>
         <dependencies>
+            <!-- security overrides of versions managed by the imported alfresco-transform-core / spring-boot BOM.
+                 Spring Framework stays on the 6.1 line that matches Spring Boot 3.3. -->
+            <dependency>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${jackson.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-core</artifactId>
+                <version>${tomcat-embed.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-el</artifactId>
+                <version>${tomcat-embed.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-websocket</artifactId>
+                <version>${tomcat-embed.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>33.7.2-jre</version>
+            </dependency>
+            <dependency>
+                <groupId>org.codehaus.plexus</groupId>
+                <artifactId>plexus-utils</artifactId>
+                <version>3.6.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.activemq</groupId>
+                <artifactId>activemq-client</artifactId>
+                <version>6.2.10</version>
+            </dependency>
             <!-- this is the parent at alfresco project examples get all dependencies by import scope,
            for plugins we need to define separately -->
             <dependency>
