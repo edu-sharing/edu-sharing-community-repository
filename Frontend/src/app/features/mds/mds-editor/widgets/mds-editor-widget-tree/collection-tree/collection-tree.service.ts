@@ -362,19 +362,22 @@ export class CollectionTreeService {
                     return { nodes, total: result.pagination?.total ?? nodes.length };
                 }),
                 catchError((error: unknown) => {
-                    if (!byTitle || !rejectsParameter(error, TITLE_CONTAINS_PARAMETER)) {
+                    // The server hides the details of a rejected request, so the rejected
+                    // parameter cannot be told from the error; the title parameter is only
+                    // remembered as unsupported when the search works without it.
+                    if (!byTitle || (error as { status?: number })?.status !== 400) {
                         return throwError(() => error);
                     }
                     markAsHandled(error);
-                    this.unsupportedParameters.add(`${options.mdsId}|${TITLE_CONTAINS_PARAMETER}`);
-                    return this.requestSearch(term, options);
+                    const key = `${options.mdsId}|${TITLE_CONTAINS_PARAMETER}`;
+                    this.unsupportedParameters.add(key);
+                    return this.requestSearch(term, options).pipe(
+                        catchError((retryError: unknown) => {
+                            this.unsupportedParameters.delete(key);
+                            return throwError(() => retryError);
+                        }),
+                    );
                 }),
             );
     }
-}
-
-/** Whether a request was rejected for naming a parameter the query does not define. */
-function rejectsParameter(error: unknown, parameter: string): boolean {
-    const response = error as { status?: number; error?: unknown };
-    return response?.status === 400 && JSON.stringify(response.error ?? '').includes(parameter);
 }

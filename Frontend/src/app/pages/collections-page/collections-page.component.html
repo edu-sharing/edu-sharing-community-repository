@@ -244,7 +244,7 @@
         class="selection-action-bar"
         cdkOverlayOrigin
         #selectionBar="cdkOverlayOrigin"
-        [class.visible]="collectionContentRef?.selection?.length"
+        [class.visible]="!!collectionContentRef?.selection?.length"
       >
         <button
           mat-icon-button
@@ -282,7 +282,7 @@
         cdkConnectedOverlay
         [cdkConnectedOverlayOrigin]="selectionBar"
         [cdkConnectedOverlayOpen]="
-          collectionContentRef?.selectionOverlayOpen && !!collectionContentRef?.selection?.length
+          !!collectionContentRef?.selectionOverlayOpen && !!collectionContentRef?.selection?.length
         "
         [cdkConnectedOverlayPositions]="overlayPositions"
         [cdkConnectedOverlayWidth]="selectionBar.elementRef.nativeElement.offsetWidth"
