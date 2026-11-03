@@ -41,7 +41,15 @@ export class ScopeSwitcherComponent {
         const role = this.activeScope()?.role;
         return !!role && role !== 'EDITOR';
     });
+    /** the context of the domain sets the scope (repository.scopes.group): no switching */
+    readonly contextBound = computed(() => !!this.activeScope()?.contextId);
     readonly scopes = signal<ScopeInfo[] | null>(null);
+    /** entries of the menu: only the active scope while the domain sets it */
+    readonly menuScopes = computed(() =>
+        this.contextBound()
+            ? (this.scopes() ?? []).filter((s) => s.scopeId === this.activeScope()?.scopeId)
+            : this.scopes(),
+    );
     readonly switching = signal(false);
 
     /** (re)load the switcher entries when the menu is opened, memberships may have changed */

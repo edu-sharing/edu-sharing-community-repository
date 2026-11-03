@@ -1813,7 +1813,8 @@
       "READ_ONLY": "read only",
       "HEADING": "Workspace scope",
       "LOADING": "Loading…",
-      "NONE": "You are not a member of any scope"
+      "NONE": "You are not a member of any scope",
+      "CONTEXT_BOUND": "Set by the domain"
     },
     "ADMIN": {
       "TAB": "Scopes",

@@ -26,6 +26,12 @@
   <div class="menu-heading" mat-menu-item disabled>
     {{ 'SCOPES.SWITCHER.HEADING' | translate }}
   </div>
+  @if (contextBound()) {
+  <div class="context-bound" mat-menu-item disabled data-test="scope-switcher-context-bound">
+    <i esIcon="lock"></i>
+    <span>{{ 'SCOPES.SWITCHER.CONTEXT_BOUND' | translate }}</span>
+  </div>
+  } @else {
   <button
     mat-menu-item
     (click)="select(null)"
@@ -38,9 +44,9 @@
     ></i>
     <span>{{ 'SCOPES.SWITCHER.GLOBAL' | translate }}</span>
   </button>
-  @if (scopes() === null) {
+  } @if (scopes() === null) {
   <div mat-menu-item disabled>{{ 'SCOPES.SWITCHER.LOADING' | translate }}</div>
-  } @for (scope of scopes(); track scope.scopeId) {
+  } @for (scope of menuScopes(); track scope.scopeId) {
   <button
     mat-menu-item
     (click)="select(scope.scopeId)"
@@ -59,7 +65,7 @@
     <span class="read-only">({{ 'SCOPES.SWITCHER.READ_ONLY' | translate }})</span>
     }
   </button>
-  } @if (scopes()?.length === 0) {
+  } @if (scopes()?.length === 0 && !contextBound()) {
   <div mat-menu-item disabled>{{ 'SCOPES.SWITCHER.NONE' | translate }}</div>
   }
 </mat-menu>

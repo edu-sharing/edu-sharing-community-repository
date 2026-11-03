@@ -1813,7 +1813,8 @@
       "READ_ONLY": "nur lesend",
       "HEADING": "Arbeitsbereich",
       "LOADING": "Wird geladen…",
-      "NONE": "Sie sind keiner Redaktion zugeordnet"
+      "NONE": "Sie sind keiner Redaktion zugeordnet",
+      "CONTEXT_BOUND": "Durch die Domain festgelegt"
     },
     "ADMIN": {
       "TAB": "Redaktionen",
