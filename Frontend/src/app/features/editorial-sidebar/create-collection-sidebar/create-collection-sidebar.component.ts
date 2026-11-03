@@ -63,6 +63,8 @@ export type EditCollectionConfig = {
 };
 
 export type Step = 'DESIGN' | 'CONFIGURE' | 'PERMISSIONS';
+/** the metadata group that general collections take their metadata from */
+const GENERAL_METADATA_GROUP = 'collection_general';
 /** who the collection can be given to after it was created */
 type PermissionsKind = 'SHARE' | 'EDITORIAL_GROUPS';
 /**
@@ -168,9 +170,12 @@ export class CreateCollectionSidebarComponent {
             case 'MEDIA_CENTER':
                 return 'collection_media_center';
             case 'EDITORIAL':
-            default:
-                // types without a group of their own share the editorial one
                 return this.editorialConfig.metadataGroup;
+            default:
+                // a set without the group of general collections keeps using the editorial one
+                return this.mdsGroupIds().includes(GENERAL_METADATA_GROUP)
+                    ? GENERAL_METADATA_GROUP
+                    : this.editorialConfig.metadataGroup;
         }
     });
     /** a type without a group, or a set that lacks it, has no metadata to ask for */

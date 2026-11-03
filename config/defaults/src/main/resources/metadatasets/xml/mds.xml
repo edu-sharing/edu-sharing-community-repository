@@ -1204,6 +1204,15 @@
 				]]></html>
     </template>
     <template>
+      <id>collection_general</id>
+      <html><![CDATA[
+					<ccm:educationaltypicalagerange>
+					<ccm:taxonid>
+					<ccm:educationalcontext>
+					<cclom:general_keyword>
+				]]></html>
+    </template>
+    <template>
       <id>material_feedback</id>
       <html><![CDATA[
 					<style>
@@ -1386,6 +1395,13 @@
       <rendering>angular</rendering>
       <views>
         <view>collection_editorial</view>
+      </views>
+    </group>
+    <group>
+      <id>collection_general</id>
+      <rendering>angular</rendering>
+      <views>
+        <view>collection_general</view>
       </views>
     </group>
     <group>
