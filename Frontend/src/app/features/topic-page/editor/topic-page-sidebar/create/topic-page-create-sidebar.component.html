@@ -1,3 +1,4 @@
+@if (tabs().length > 1) {
 <mat-tab-group
   class="tabs"
   [selectedIndex]="selectedIndex()"
@@ -11,23 +12,31 @@
       <span class="tab-label">{{ i18nPrefix + 'TAB.' + (kind | uppercase) | translate }}</span>
     </ng-template>
     <ng-template matTabContent>
-      <es-page-variant-or-template-picker
-        class="picker"
-        [collectionNodeId]="host.collectionNodeId()"
-        [pageConfigRef]="pageConfigRef"
-        [pageVariantNode]="host.pageVariantNode()"
-        [templateMode]="kind === 'template'"
-        [restoredSearchState]="restoredSearchStates[kind]"
-        (selectedNodeChange)="patchState(kind, { node: $event })"
-        (copyOptionChanged)="patchState(kind, { copyOption: $event })"
-        (searchStateChange)="patchState(kind, { searchState: $event })"
-        (editGlobalTemplate)="host.editGlobalTemplate($event)"
-        (globalTemplateDeleted)="host.globalTemplateDeleted($event)"
-      ></es-page-variant-or-template-picker>
+      <ng-container *ngTemplateOutlet="picker; context: { $implicit: kind }"></ng-container>
     </ng-template>
   </mat-tab>
   }
 </mat-tab-group>
+} @else if (tabs().length === 1) {
+<div class="tabs">
+  <ng-container *ngTemplateOutlet="picker; context: { $implicit: tabs()[0] }"></ng-container>
+</div>
+}
+<ng-template #picker let-kind>
+  <es-page-variant-or-template-picker
+    class="picker"
+    [collectionNodeId]="host.collectionNodeId()"
+    [pageConfigRef]="pageConfigRef"
+    [pageVariantNode]="host.pageVariantNode()"
+    [templateMode]="kind === 'template'"
+    [restoredSearchState]="restoredSearchState(kind)"
+    (selectedNodeChange)="patchState(kind, { node: $event })"
+    (copyOptionChanged)="patchState(kind, { copyOption: $event })"
+    (searchStateChange)="patchState(kind, { searchState: $event })"
+    (editGlobalTemplate)="host.editGlobalTemplate($event)"
+    (globalTemplateDeleted)="host.globalTemplateDeleted($event)"
+  ></es-page-variant-or-template-picker>
+</ng-template>
 <es-sidebar-sticky-footer>
   <div class="footer-buttons">
     <button mat-button type="button" (click)="cancel()">

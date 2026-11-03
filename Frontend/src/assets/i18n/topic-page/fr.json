@@ -16,8 +16,10 @@
       "MENU": {
         "MANAGE": "Gérer les pages thématiques",
         "MANAGE_DESCRIPTION": "Afficher, régénérer ou supprimer des pages et des modèles",
-        "CREATE": "Nouvelle page thématique/variante",
-        "CREATE_DESCRIPTION": "Créer une nouvelle page thématique ou un modèle à partir d'une page existante",
+        "CREATE": "Nouvelle page thématique",
+        "CREATE_DESCRIPTION": "Créer une nouvelle page thématique à partir d'une page existante",
+        "CREATE_WITH_TEMPLATE": "Nouvelle page thématique/modèle",
+        "CREATE_WITH_TEMPLATE_DESCRIPTION": "Créer une nouvelle page thématique ou un modèle à partir d'une page existante",
         "INHERITANCE": "Héritage",
         "INHERITANCE_DESCRIPTION": "Transmettre les pages thématiques aux sous-collections"
       },

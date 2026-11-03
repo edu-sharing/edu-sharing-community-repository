@@ -3029,7 +3029,9 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             },
             {
                 id: TOPIC_PAGE_CREATE_OPTION,
-                label: 'TOPIC_PAGE.SIDEBAR.MENU.CREATE',
+                label: this.creationKinds().includes('template')
+                    ? 'TOPIC_PAGE.SIDEBAR.MENU.CREATE_WITH_TEMPLATE'
+                    : 'TOPIC_PAGE.SIDEBAR.MENU.CREATE',
                 icon: 'add',
                 component: TopicPageCreateSidebarComponent,
                 offered: canCreate,

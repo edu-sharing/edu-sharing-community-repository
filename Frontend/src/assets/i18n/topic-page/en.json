@@ -16,8 +16,10 @@
       "MENU": {
         "MANAGE": "Manage topic pages",
         "MANAGE_DESCRIPTION": "Show, regenerate or delete pages and templates",
-        "CREATE": "New topic page/variant",
-        "CREATE_DESCRIPTION": "Create a new topic page or template from an existing one",
+        "CREATE": "New topic page",
+        "CREATE_DESCRIPTION": "Create a new topic page from an existing one",
+        "CREATE_WITH_TEMPLATE": "New topic page/template",
+        "CREATE_WITH_TEMPLATE_DESCRIPTION": "Create a new topic page or template from an existing one",
         "INHERITANCE": "Inheritance",
         "INHERITANCE_DESCRIPTION": "Pass topic pages on to sub-collections"
       },

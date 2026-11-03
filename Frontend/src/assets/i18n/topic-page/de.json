@@ -16,8 +16,10 @@
       "MENU": {
         "MANAGE": "Themenseiten verwalten",
         "MANAGE_DESCRIPTION": "Seiten und Vorlagen anzeigen, neu generieren oder löschen",
-        "CREATE": "Neue Themenseite/Variante",
-        "CREATE_DESCRIPTION": "Neue Themenseite oder Vorlage aus einer bestehenden erstellen",
+        "CREATE": "Neue Themenseite",
+        "CREATE_DESCRIPTION": "Neue Themenseite aus einer bestehenden erstellen",
+        "CREATE_WITH_TEMPLATE": "Neue Themenseite/Vorlage",
+        "CREATE_WITH_TEMPLATE_DESCRIPTION": "Neue Themenseite oder Vorlage aus einer bestehenden erstellen",
         "INHERITANCE": "Vererbung",
         "INHERITANCE_DESCRIPTION": "Themenseiten an Untersammlungen weitergeben"
       },

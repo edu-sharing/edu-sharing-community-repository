@@ -16,8 +16,10 @@
       "MENU": {
         "MANAGE": "Gestisci pagine tematiche",
         "MANAGE_DESCRIPTION": "Mostra, rigenera o elimina pagine e modelli",
-        "CREATE": "Nuova pagina tematica/variante",
-        "CREATE_DESCRIPTION": "Crea una nuova pagina tematica o un modello da una esistente",
+        "CREATE": "Nuova pagina tematica",
+        "CREATE_DESCRIPTION": "Crea una nuova pagina tematica da una esistente",
+        "CREATE_WITH_TEMPLATE": "Nuova pagina tematica/modello",
+        "CREATE_WITH_TEMPLATE_DESCRIPTION": "Crea una nuova pagina tematica o un modello da una esistente",
         "INHERITANCE": "Ereditarietà",
         "INHERITANCE_DESCRIPTION": "Trasmetti le pagine tematiche alle sotto-collezioni"
       },

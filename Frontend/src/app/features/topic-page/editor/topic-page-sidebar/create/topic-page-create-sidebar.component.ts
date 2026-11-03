@@ -29,7 +29,7 @@ const TAB_ICONS: Record<TopicPageSidebarTab, string> = {
 
 /**
  * Entry of the topic page's sidebar menu that creates a page variant or template from an existing
- * one, one tab each.
+ * one, on a tab each while both can be created.
  */
 @Component({
     selector: 'es-topic-page-create-sidebar',
@@ -61,6 +61,12 @@ export class TopicPageCreateSidebarComponent {
     private readonly states = signal<Partial<Record<CreationKind, CreationState>>>({});
     readonly selectedNode = computed(() => this.states()[this.selectedTab()]?.node ?? null);
     readonly busy = signal(false);
+
+    // workaround: the shared picker `ng-template` passes `kind` untyped, which a template cannot
+    // use as a typed `Record` key; the parameter gives it the `CreationKind` type
+    restoredSearchState(kind: CreationKind): PageVariantSearchState | null {
+        return this.restoredSearchStates[kind];
+    }
 
     onTabChange(index: number): void {
         this.selectedTab.set(this.tabs()[index]);
