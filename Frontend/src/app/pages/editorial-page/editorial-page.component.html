@@ -194,6 +194,8 @@
           [allowSelectAllResults]="mode === 'scope'"
           (allResultsSelectedChange)="allResultsSelectedChange($event)"
           [columns]="columns()"
+          [sort]="mode === 'scope' ? scopeSort() : undefined"
+          (sortChange)="scopeSortChange($event)"
           [configureColumns]="mode === 'scope'"
           (columnsChange)="saveScopeColumns($event)"
           [displayType]="editorialPageService.displayType()"

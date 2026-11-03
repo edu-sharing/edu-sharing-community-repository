@@ -1686,6 +1686,19 @@
         <!-- <column>ccm:replicationsource</column> -->
       </columns>
     </sort>
+    <!-- scopes: editorial page inside the active scope (the values inside the scope are sorted, see ScopeSort) -->
+    <sort>
+      <id>editorial_scope</id>
+      <default>
+        <sortBy>cm:modified</sortBy>
+        <sortAscending>false</sortAscending>
+      </default>
+      <columns>
+        <column>cm:modified</column>
+        <column>cm:created</column>
+        <column>cclom:title</column>
+      </columns>
+    </sort>
     <sort>
       <id>collections</id>
       <default>

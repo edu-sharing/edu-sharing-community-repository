@@ -80,7 +80,12 @@
           >{{ 'SCOPES.EDITORIAL.ORIGINAL' | translate }}
           {{ getOriginal(f.field.id).join(', ') || '–' }}</span
         >
-        <button mat-button (click)="resetToOriginal(f.field.id)" [disabled]="saving()">
+        <button
+          mat-button
+          color="primary"
+          (click)="resetToOriginal(f.field.id)"
+          [disabled]="saving()"
+        >
           <i esIcon="undo"></i>
           {{ 'SCOPES.EDITORIAL.RESET_TO_ORIGINAL' | translate }}
         </button>
@@ -163,7 +168,7 @@
       </button>
       }
       <span class="spacer"></span>
-      <button mat-button (click)="discard()" [disabled]="saving()">
+      <button mat-button color="primary" (click)="discard()" [disabled]="saving()">
         {{ 'DISCARD' | translate }}
       </button>
       <button mat-flat-button color="primary" (click)="save()" [disabled]="saving()">

@@ -74,7 +74,12 @@
     <h3 class="card-heading">
       {{ 'SCOPES.ADMIN.CARD.TITLE' | translate }}
       @if (customCardColumns()) {
-      <button mat-button (click)="resetCardColumns()" data-test="scope-management-card-reset">
+      <button
+        mat-button
+        color="primary"
+        (click)="resetCardColumns()"
+        data-test="scope-management-card-reset"
+      >
         <i esIcon="undo"></i>{{ 'SCOPES.ADMIN.CARD.RESET' | translate }}
       </button>
       } @else {
@@ -105,7 +110,7 @@
     </div>
 
     <div class="buttons">
-      <button mat-button (click)="cancel()">{{ 'CANCEL' | translate }}</button>
+      <button mat-button color="primary" (click)="cancel()">{{ 'CANCEL' | translate }}</button>
       <button
         mat-flat-button
         color="primary"

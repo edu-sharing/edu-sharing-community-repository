@@ -1,3 +1,4 @@
+import { SortDirection } from '@angular/material/sort';
 import { PlatformLocation } from '@angular/common';
 import {
     AfterViewInit,
@@ -60,6 +61,8 @@ import {
     Helper,
     InteractionType,
     ListItem,
+    ListItemSort,
+    ListSortConfig,
     MdsHelperService,
     NodeClickEvent,
     NodeDataSource,
@@ -276,6 +279,9 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
         skipCount: number;
         maxItems: number;
     }>(null);
+    /** sort of the scope list: the allowed columns come from the mds sort "editorial_scope" */
+    readonly scopeSort = signal<ListSortConfig | null>(null);
+    private sort$ = new BehaviorSubject<{ active: string; direction: SortDirection } | null>(null);
 
     readonly filtersButtonClicked = this.searchFieldInternalService.filtersButtonClicked;
     readonly filterBarVisible = this.searchFieldInternalService.filterBarVisible;
@@ -750,6 +756,7 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
             this.mainComponent$.pipe(distinctUntilChanged()),
             // first one will be the init of the set
             this.searchValues$.pipe(distinctUntilChanged((a, b) => Helper.objectEquals(a, b))),
+            this.sort$.pipe(distinctUntilChanged((a, b) => Helper.objectEquals(a, b))),
         ])
             .pipe(
                 takeUntil(this.destroyed$),
@@ -757,11 +764,13 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
                 distinctUntilChanged(),
                 debounceTime(50),
             )
-            .subscribe(([_, search, tab, pagination, mainComponent, values]) => {
+            .subscribe(([_, search, tab, pagination, mainComponent, values, sort]) => {
                 const queryParams = {
                     q: search?.searchString,
                     offset: pagination?.skipCount || null,
                     size: pagination?.maxItems || null,
+                    sortBy: sort?.active || null,
+                    sortAscending: sort?.active ? sort.direction === 'asc' : null,
                     mainComponent,
                     filters: JSON.stringify({
                         ...values,
@@ -809,6 +818,14 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
             maxItems: parseInt(params.size) || this.PageCount,
         };
         this.pagination$.next(pagination);
+        if (params.sortBy && this.scopeSort()) {
+            const sort = {
+                active: params.sortBy as string,
+                direction: (params.sortAscending === 'true' ? 'asc' : 'desc') as SortDirection,
+            };
+            this.scopeSort.update((config) => ({ ...config, ...sort }));
+            this.sort$.next(sort);
+        }
         this.tabSelection$.next(this.editorialPageService.resolveTabForCriteria(criteria));
         // deep copy since it is modified via IgnoredSearchFields!
         this.searchValues$.next(Helper.deepCopy(criteria));
@@ -975,6 +992,12 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
                     contentType: 'FILES',
                     // the scope columns read node.properties (effective value of replacing fields)
                     propertyFilter: [PROPERTY_FILTER_ALL],
+                    ...(this.scopeSort()?.active
+                        ? {
+                              sortProperties: [this.scopeSort().active],
+                              sortAscending: [this.scopeSort().direction === 'asc'],
+                          }
+                        : {}),
                     ...pagination,
                     body: {
                         facetLimit: 5,
@@ -1048,6 +1071,7 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
             this.scopeMdsService.observeWidgets(scope?.definition?.mds),
         );
         this.columns.set({ Default: await this.getScopeColumns(scopeWidgets) });
+        this.scopeSort.set(this.getScopeSort(this.mdsDefinition$.value));
         const widget = MdsHelperService.getWidget(
             this.TabWidgetScope,
             null,
@@ -1184,6 +1208,35 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
         }
         this.editorialSidebarService.handleSelection(event);
     }
+    /**
+     * allowed columns and default of the mds sort "editorial_scope", a sort of the url wins
+     */
+    private getScopeSort(mds: MdsDefinition): ListSortConfig | null {
+        const sorts = mds?.sorts?.find((s) => s.id === 'editorial_scope');
+        if (!sorts) {
+            return null;
+        }
+        const params = this.route.snapshot.queryParams;
+        return {
+            allowed: true,
+            columns: (sorts.columns ?? []).map(
+                ({ id, mode }) => new ListItemSort('NODE', id, mode as 'ascending' | 'descending'),
+            ),
+            active: params.sortBy ?? sorts.default?.sortBy,
+            direction: (
+                params.sortBy ? params.sortAscending === 'true' : sorts.default?.sortAscending
+            )
+                ? 'asc'
+                : 'desc',
+        };
+    }
+
+    scopeSortChange(sort: ListSortConfig) {
+        this.scopeSort.set(sort);
+        this.pagination$.next({ ...this.pagination$.value, skipCount: 0 });
+        this.sort$.next({ active: sort.active, direction: sort.direction });
+    }
+
     fetchEvent(event: FetchEvent) {
         this.pagination$.next({
             skipCount: event.offset,
