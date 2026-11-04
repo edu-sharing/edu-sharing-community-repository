@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Logging of the unit tests. logback-classic is on the test classpath (transitively via
+  spring-boot-lti-advantage -> spring-boot-starter-logging) and wins as SLF4J provider; without a
+  config it logs everything at DEBUG, which blows the CI job log beyond its size limit.
+-->
+<configuration>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} -- %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+</configuration>
