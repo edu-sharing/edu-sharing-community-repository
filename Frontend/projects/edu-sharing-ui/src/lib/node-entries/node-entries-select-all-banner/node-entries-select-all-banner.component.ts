@@ -15,6 +15,9 @@ import { NodeEntriesDataType } from '../data-type';
     styleUrls: ['./node-entries-select-all-banner.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false,
+    // without a banner the host takes no space: it sits in the flex row of the empty / loading
+    // list and would push the content (e.g. the loading spinner) together
+    host: { '[class.banner-hidden]': '!state()' },
 })
 export class NodeEntriesSelectAllBannerComponent<T extends NodeEntriesDataType> {
     protected readonly entriesService = inject<NodeEntriesService<T>>(NodeEntriesService);
