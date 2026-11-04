@@ -279,6 +279,19 @@
             [title]="i18nPrefix + 'SIDE_MENU.CONFIG_PAGE_VARIANT.LABEL' | translate"
             (itemClicked)="collapsibleItemClicked($event)"
           ></es-side-menu-item>
+          @if (canManageInheritance()) {
+          <es-side-menu-item
+            [disabled]="
+              selectedMenuItem ===
+                (i18nPrefix + 'SIDE_MENU.CONFIG_PAGE_VARIANT.LABEL' | translate) &&
+              !pageVariantSettingsValid()
+            "
+            icon="account_tree"
+            [selectedMenuItem]="selectedMenuItem"
+            [title]="i18nPrefix + 'SIDEBAR.MENU.INHERITANCE' | translate"
+            (itemClicked)="collapsibleItemClicked($event)"
+          ></es-side-menu-item>
+          }
         </ng-container>
         <ng-container slot="content">
           @if ( selectedMenuItem === (i18nPrefix + 'SIDE_MENU.CONFIG_PAGE_VARIANT.LABEL' |
@@ -318,6 +331,10 @@
               (settingsValidityChanged)="pageVariantSettingsValid.set($event)"
             ></es-configure-page-variant-or-template>
           </div>
+          } @if (selectedMenuItem === (i18nPrefix + 'SIDEBAR.MENU.INHERITANCE' | translate)) {
+          <es-topic-page-inheritance-sidebar
+            [collectionId]="topicCollectionId()"
+          ></es-topic-page-inheritance-sidebar>
           }
         </ng-container>
       </es-side-menu-wrapper>

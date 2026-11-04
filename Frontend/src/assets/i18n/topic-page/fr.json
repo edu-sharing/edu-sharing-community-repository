@@ -1,5 +1,26 @@
 {
   "TOPIC_PAGE": {
+    "SIDEBAR": {
+      "MENU": {
+        "INHERITANCE": "Héritage"
+      },
+      "INHERITANCE": {
+        "INTRO": "Héritage de {{title}}",
+        "INTRO_DESCRIPTION": "Voici comment cette collection et ses sous-collections obtiennent leurs pages thématiques. « Transmettre » décide si les modèles hérités sont transmis plus bas.",
+        "STATE_OWN": "Page thématique propre – aucun héritage nécessaire",
+        "STATE_INHERITS": "hérite de {{title}}",
+        "STATE_STOPPED": "n'hérite de rien – transmission arrêtée à {{title}}",
+        "STATE_NONE": "aucune page thématique",
+        "PASSES_OWN_TEMPLATES": "transmet ses propres modèles aux sous-collections",
+        "PASSES_NOTHING_ON": "ne transmet pas l'héritage aux sous-collections",
+        "SAVED_STATE": "auparavant :",
+        "PASS_ON": "Transmettre",
+        "PASS_ON_TOOLTIP": "Transmettre les modèles hérités aux sous-collections",
+        "CHANGED_COUNT": "{{count}} collections affichées changent",
+        "SAVED": "L'héritage a été enregistré.",
+        "LOAD_ERROR": "L'héritage n'a pas pu être chargé."
+      }
+    },
     "NAVIGATION": {
       "NEW_PAGE_VARIANT": "Nouvelle page thématique",
       "NEW_PAGE_TEMPLATE": "Nouveau modèle de page thématique",

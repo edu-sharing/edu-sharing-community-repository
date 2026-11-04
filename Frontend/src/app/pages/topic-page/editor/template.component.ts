@@ -196,6 +196,7 @@ import {
     retrievePromptFromAiConfig,
     retrieveTopicColor,
 } from '../shared/utils/template-util';
+import { findInheritanceSource } from '../shared/utils/topic-page-inheritance-util';
 import { BreadcrumbComponent } from '../widgets/breadcrumb/breadcrumb.component';
 import { GenericWidgetComponent } from '../widgets/generic-widget/generic-widget.component';
 import { GenericWidgetGlobalService } from '../widgets/generic-widget/generic-widget-global.service';
@@ -219,6 +220,7 @@ import { SwimlaneBackgroundShapeComponent } from './swimlane-background-shape/sw
 import { SwimlaneSettingsDialogComponent } from './swimlane/swimlane-settings-dialog/swimlane-settings-dialog.component';
 import { SwimlaneConfigurationButtonsComponent } from './swimlane-configuration-buttons/swimlane-configuration-buttons.component';
 import { TopicPageFiltersSidebarComponent } from './topic-page-filters-sidebar/topic-page-filters-sidebar.component';
+import { TopicPageInheritanceSidebarComponent } from './topic-page-sidebar/inheritance/topic-page-inheritance-sidebar.component';
 
 @Component({
     imports: [
@@ -248,6 +250,7 @@ import { TopicPageFiltersSidebarComponent } from './topic-page-filters-sidebar/t
         TooltipAriaLabelDirective,
         TopicHeaderComponent,
         TopicPageFiltersSidebarComponent,
+        TopicPageInheritanceSidebarComponent,
         TranslateModule,
         VarDirective,
     ],
@@ -487,6 +490,10 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     // set while a global template is edited in place of the collection's page; the collection
     // only provides the topic and sub-collections the preview is resolved for
     globalTemplateNode: WritableSignal<Node | null> = signal(null);
+    // whether the side menu offers the inheritance of the collection's pages
+    canManageInheritance: Signal<boolean> = computed(
+        (): boolean => this.userHasEditRights() && !this.globalTemplateNode(),
+    );
     editMode: WritableSignal<boolean> = signal(false);
     filterPanelOpen: WritableSignal<boolean> = signal(false);
     readonly sidebarOpen: Signal<boolean> = computed(
@@ -2662,11 +2669,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             const parents: ParentEntries = await this.topicPageHelperService.getNodeParents(
                 retrieveNodeId(node),
             );
-            this.propagatingParentNode = parents.nodes.find(
-                (parent: Node) =>
-                    retrieveNodeId(node) !== retrieveNodeId(parent) &&
-                    !!retrievePageConfigPropagateRef(parent),
-            );
+            this.propagatingParentNode = findInheritanceSource(node, parents.nodes ?? []);
             if (this.propagatingParentNode) {
                 pageRef = retrievePageConfigPropagateRef(this.propagatingParentNode);
             }

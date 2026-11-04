@@ -15,6 +15,7 @@ import { RestConstants } from '../../core-module/rest/rest-constants';
 import { RestHelper } from '../../core-module/rest/rest-helper';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { Closable } from '../../features/dialogs/card-dialog/card-dialog-config';
+import { findInheritanceSource } from '../../pages/topic-page/shared/utils/topic-page-inheritance-util';
 import { OptionsContext } from './options-context';
 import { firstValueFrom, forkJoin } from 'rxjs';
 
@@ -217,16 +218,13 @@ export function createViewOptions({
             if (objects[0].properties?.[RestConstants.CCM_PROP_PAGE_CONFIG_REF]?.[0]) {
                 return true;
             }
-            return (
-                await firstValueFrom(
-                    service.nodeService.getParents(objects[0].ref.id, {
-                        repository: objects[0].ref.repo,
-                        fullPath: false,
-                    }),
-                )
-            ).nodes.some(
-                (n) => n.properties[RestConstants.CCM_PROP_PAGE_CONFIG_PROPAGATE_REF]?.[0],
+            const parents = await firstValueFrom(
+                service.nodeService.getParents(objects[0].ref.id, {
+                    repository: objects[0].ref.repo,
+                    fullPath: false,
+                }),
             );
+            return !!findInheritanceSource(objects[0] as Node, parents.nodes ?? []);
         } catch (e) {
             e.preventDefault();
             return false;
