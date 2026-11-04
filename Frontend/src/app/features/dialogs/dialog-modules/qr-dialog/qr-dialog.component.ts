@@ -1,5 +1,5 @@
 import { Clipboard } from '@angular/cdk/clipboard';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { NodeHelperService } from '../../../../services/node-helper.service';
 import { Toast, ToastType } from '../../../../services/toast';
@@ -14,6 +14,7 @@ export interface QrDialogData {
     selector: 'es-qr-dialog',
     templateUrl: './qr-dialog.component.html',
     styleUrls: ['./qr-dialog.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class QrDialogComponent implements OnInit {

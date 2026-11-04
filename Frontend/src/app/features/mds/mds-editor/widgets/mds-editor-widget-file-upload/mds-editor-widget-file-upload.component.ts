@@ -1,4 +1,11 @@
-import { ChangeDetectorRef, Component, EventEmitter, Output, inject } from '@angular/core';
+import {
+    ChangeDetectorRef,
+    Component,
+    EventEmitter,
+    Output,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
 import { Constraints, InputStatus, Values } from '../../../types/types';
@@ -7,6 +14,7 @@ import { Constraints, InputStatus, Values } from '../../../types/types';
     selector: 'es-mds-editor-widget-file-upload',
     templateUrl: './mds-editor-widget-file-upload.component.html',
     styleUrls: ['./mds-editor-widget-file-upload.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class MdsEditorWidgetFileUploadComponent implements NativeWidgetComponent {

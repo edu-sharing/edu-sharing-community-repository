@@ -1,4 +1,10 @@
-import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import {
+    ChangeDetectorRef,
+    Component,
+    OnInit,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import * as Constants from 'ngx-edu-sharing-api';
 import {
     InviteEvent,
@@ -20,6 +26,7 @@ import { MdsHelperService } from '../../mds/mds-helper.service';
     selector: 'es-list-text',
     templateUrl: './list-text.component.html',
     styleUrls: ['./list-text.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class ListTextComponent extends ListWidget implements OnInit {

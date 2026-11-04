@@ -1,4 +1,12 @@
-import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    Input,
+    OnInit,
+    Output,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { Node, NodeService, NodeVersion, NodeVersionEntries } from 'ngx-edu-sharing-api';
 import { BehaviorSubject } from 'rxjs';
@@ -10,6 +18,7 @@ import { SharedModule } from '../../../shared/shared.module';
     selector: 'es-workspace-metadata',
     templateUrl: 'metadata.component.html',
     styleUrls: ['metadata.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SharedModule],
 })
 export class WorkspaceMetadataComponent implements OnInit {

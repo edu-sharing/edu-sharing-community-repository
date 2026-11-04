@@ -7,6 +7,7 @@ import {
     signal,
     WritableSignal,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { HOME_REPOSITORY, Node, NodeService } from 'ngx-edu-sharing-api';
 import { TranslationsService } from 'ngx-edu-sharing-ui';
@@ -23,6 +24,7 @@ import { Toast } from '../../services/toast';
     selector: 'es-pdf-page',
     templateUrl: 'pdf-page.component.html',
     styleUrls: ['pdf-page.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class PdfPageComponent implements AfterViewInit, OnDestroy, OnInit {

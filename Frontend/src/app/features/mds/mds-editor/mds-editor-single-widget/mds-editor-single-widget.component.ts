@@ -1,7 +1,6 @@
 import {
     ApplicationRef,
     Component,
-    ComponentFactoryResolver,
     ElementRef,
     EventEmitter,
     Injector,
@@ -13,6 +12,7 @@ import {
     ViewChild,
     ViewContainerRef,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { MdsEditorInstanceService, Widget } from '../mds-editor-instance.service';
@@ -53,13 +53,13 @@ export interface MdsEditInterface {
         MdsViewerService,
         ViewInstanceService,
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class MdsEditorSingleWidgetComponent implements OnChanges, OnDestroy, MdsEditInterface {
     mdsEditorInstance = inject(MdsEditorInstanceService);
     mdsService = inject(MdsService);
     private applicationRef = inject(ApplicationRef);
-    private factoryResolver = inject(ComponentFactoryResolver);
     private injector = inject(Injector);
     private containerRef = inject(ViewContainerRef);
 
@@ -118,7 +118,6 @@ export class MdsEditorSingleWidgetComponent implements OnChanges, OnDestroy, Mds
                     bindings.inlineEditing = 'always';
                 }
                 UIService.injectAngularComponent(
-                    this.factoryResolver,
                     this.containerRef,
                     MdsWidgetComponent,
                     this.ref.nativeElement,

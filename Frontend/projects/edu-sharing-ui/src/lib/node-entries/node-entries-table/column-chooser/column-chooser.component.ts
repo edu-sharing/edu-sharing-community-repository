@@ -1,5 +1,5 @@
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { CdkOverlayOrigin } from '@angular/cdk/overlay';
 import { ListItem } from '../../../types/list-item';
 
@@ -7,6 +7,7 @@ import { ListItem } from '../../../types/list-item';
     selector: 'es-column-chooser',
     templateUrl: './column-chooser.component.html',
     styleUrls: ['./column-chooser.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class ColumnChooserComponent {

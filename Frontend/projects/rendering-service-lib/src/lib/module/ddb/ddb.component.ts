@@ -6,6 +6,7 @@ import {
     Input,
     signal,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { RenderingModule } from '../../rendering.module';
 import { RenderModule } from '../RenderModule';
@@ -19,6 +20,7 @@ import { RenderData } from '../../dto/RenderData';
     selector: 'rs-module-ddb',
     imports: [RenderingModule, MatButtonModule, FormsModule, MatIcon],
     templateUrl: './ddb.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './ddb.component.scss',
 })
 export class DdbComponent implements RenderModule, AfterViewInit {

@@ -10,6 +10,7 @@ import {
     signal,
     ViewChild,
     viewChild,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ConnectedPosition } from '@angular/cdk/overlay';
@@ -115,6 +116,7 @@ function getShare(node: unknown): InviteEvent | undefined {
     templateUrl: 'editorial-page.component.html',
     styleUrls: ['editorial-page.component.scss'],
     providers: [OptionsHelperService],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class EditorialPageComponent implements AfterViewInit, OnDestroy {

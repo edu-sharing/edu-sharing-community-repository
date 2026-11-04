@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, inject } from '@angular/core';
+import { Component, OnInit, ViewChild, inject, ChangeDetectionStrategy } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { DialogButton, Node } from '../../../../core-module/core.module';
@@ -12,6 +12,7 @@ import { LicenseDialogData, LicenseDialogResult } from './license-dialog-data';
     selector: 'es-license-dialog',
     templateUrl: './license-dialog.component.html',
     styleUrls: ['./license-dialog.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class LicenseDialogComponent implements OnInit {

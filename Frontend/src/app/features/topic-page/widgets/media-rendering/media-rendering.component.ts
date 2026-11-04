@@ -16,6 +16,7 @@ import {
     ViewEncapsulation,
     WritableSignal,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
@@ -63,6 +64,7 @@ import { WidgetConfigurationButtonsComponent } from '../shared/widget-configurat
     providers: [HighlightSearchPipe, NodeTitlePipe],
     schemas: [CUSTOM_ELEMENTS_SCHEMA],
     templateUrl: './media-rendering.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./media-rendering.component.scss'],
 })
 export class MediaRenderingComponent implements AfterViewInit, OnDestroy, WidgetComponentInterface {

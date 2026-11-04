@@ -1,4 +1,11 @@
-import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    Input,
+    Output,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { v4 as uuidv4 } from 'uuid';
 import { SharedModule } from '../../../../shared/shared.module';
@@ -14,6 +21,7 @@ import { Swimlane } from '../../shared/types/swimlane';
     imports: [SharedModule],
     selector: 'es-add-swimlane-border-button',
     templateUrl: './add-swimlane-border-button.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./add-swimlane-border-button.component.scss'],
 })
 export class AddSwimlaneBorderButtonComponent {

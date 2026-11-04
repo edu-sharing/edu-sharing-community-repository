@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { AuthenticationService, OAuth2Consent } from 'ngx-edu-sharing-api';
 import { ScopeEntry } from './scope-entry';
 import { TranslateService } from '@ngx-translate/core';
@@ -9,6 +9,7 @@ import { Toast, ToastMessage, ToastType } from '../../services/toast';
     selector: 'es-oauth2consent-page',
     templateUrl: './oauth2consent-page.component.html',
     styleUrl: './oauth2consent-page.component.scss',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class Oauth2consentPageComponent {

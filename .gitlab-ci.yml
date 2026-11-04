@@ -49,7 +49,7 @@ deploy:
 
 .frontend_job: &frontend_job
   variables:
-    NODE_VERSION: 24.9
+    NODE_VERSION: 24.18
   stage: test
   image: node:$NODE_VERSION-alpine
   rules:
@@ -92,7 +92,7 @@ npm security audit:
 unittest frontend:
   <<: *frontend_job
   variables:
-    NODE_VERSION: 24.9
+    NODE_VERSION: 24.18
     CHROME_BIN: /usr/bin/chromium-browser
   before_script:
     - apk add chromium
@@ -113,7 +113,7 @@ unittest frontend:
 build storybook:
   <<: *frontend_job
   variables:
-    NODE_VERSION: 24.9
+    NODE_VERSION: 24.18
   before_script:
     - node -v
     - npm -v

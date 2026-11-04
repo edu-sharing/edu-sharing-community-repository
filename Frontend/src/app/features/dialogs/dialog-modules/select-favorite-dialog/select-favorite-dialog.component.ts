@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import {
     HOME_REPOSITORY,
     IamV1Service,
@@ -26,6 +26,7 @@ import {
     selector: 'es-select-favorite-dialog',
     imports: [NodesSelectorComponent],
     templateUrl: './select-favorite-dialog.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./select-favorite-dialog.component.scss'],
 })
 export class SelectFavoriteDialogComponent {

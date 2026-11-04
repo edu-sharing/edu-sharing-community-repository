@@ -10,6 +10,7 @@ import {
     Signal,
     ViewChild,
     ViewChildren,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { SharedModule } from '../../../shared/shared.module';
 import {
@@ -107,6 +108,7 @@ import { ThemeService } from '../../../services/theme.service';
     // instance — it would then setData()/initComponents() on ours and replace the preview
     // actionbar's options with the render page's default options. See render2-page.component.ts
     // for the same trap. The preview actionbar owns a private instance instead.
+    changeDetection: ChangeDetectionStrategy.Eager,
     providers: [],
 })
 export class SubmitAssignmentComponent implements OnDestroy {

@@ -2,7 +2,9 @@
 <div class="likes">
   <button
     (click)="toogleLike()"
-    [disabled]="(authenticationService.observeLoginInfo() | async)?.isGuest"
+    [disabled]="
+      $safeNavigationMigration((authenticationService.observeLoginInfo() | async)?.isGuest)
+    "
     mat-icon-button
     color="primary"
     matTooltip="{{ 'RATING.LIKES' | translate }}"
@@ -19,7 +21,9 @@
     color="primary"
     class="star"
     (click)="setRating(rating)"
-    [disabled]="(authenticationService.observeLoginInfo() | async)?.isGuest"
+    [disabled]="
+      $safeNavigationMigration((authenticationService.observeLoginInfo() | async)?.isGuest)
+    "
     (focus)="hoverStar = rating"
     (mouseenter)="hoverStar = rating"
     (mouseleave)="hoverStar = 0"
@@ -40,7 +44,9 @@
     class="delete"
     matTooltip="{{ 'RATING.DELETE_RATING' | translate }}"
     (click)="deleteRating()"
-    [disabled]="(authenticationService.observeLoginInfo() | async)?.isGuest"
+    [disabled]="
+      $safeNavigationMigration((authenticationService.observeLoginInfo() | async)?.isGuest)
+    "
   >
     <i esIcon="clear"></i>
   </button>

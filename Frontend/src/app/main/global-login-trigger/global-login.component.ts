@@ -1,10 +1,11 @@
-import { Component, NgZone, DOCUMENT, inject } from '@angular/core';
+import { Component, NgZone, DOCUMENT, inject, ChangeDetectionStrategy } from '@angular/core';
 import { AuthenticationService, PrimaryLogin, RestConstants } from 'ngx-edu-sharing-api';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { PlatformLocation } from '@angular/common';
 
 @Component({
     selector: 'es-global-login',
+    changeDetection: ChangeDetectionStrategy.Eager,
     templateUrl: 'global-login.component.html',
 })
 /**

@@ -1,4 +1,11 @@
-import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    Input,
+    Output,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Node, RestConstants, SessionStorageService } from 'ngx-edu-sharing-api';
 import { notNull } from 'ngx-edu-sharing-ui';
@@ -19,6 +26,7 @@ import { SharedModule } from '../../shared/shared.module';
     templateUrl: './location-picker.component.html',
     styleUrls: ['./location-picker.component.scss'],
     providers: [BreadcrumbsService],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SharedModule],
 })
 export class LocationPickerComponent {

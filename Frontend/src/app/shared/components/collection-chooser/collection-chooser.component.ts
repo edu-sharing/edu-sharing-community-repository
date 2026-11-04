@@ -8,6 +8,7 @@ import {
     Output,
     TemplateRef,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { Router } from '@angular/router';
 import {
@@ -43,6 +44,7 @@ import {
     selector: 'es-collection-chooser',
     templateUrl: 'collection-chooser.component.html',
     styleUrls: ['collection-chooser.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class CollectionChooserComponent implements OnInit {

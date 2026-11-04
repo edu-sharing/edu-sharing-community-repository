@@ -8,6 +8,7 @@ import {
     Output,
     SimpleChanges,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { RenderingModule } from '../../rendering.module';
 import { RenderModule } from '../RenderModule';
@@ -36,6 +37,7 @@ import { GlobalStateService } from 'ngx-rendering-service-api';
         EduSharingUiModule,
     ],
     templateUrl: './url.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './url.component.scss',
 })
 export class UrlComponent implements RenderModule, OnInit, OnChanges, OnDestroy {

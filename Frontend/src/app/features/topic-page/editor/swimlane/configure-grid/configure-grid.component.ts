@@ -1,4 +1,11 @@
-import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    Input,
+    Output,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { Helper } from 'ngx-edu-sharing-ui';
 import { firstValueFrom } from 'rxjs';
 import { Closable } from '../../../../dialogs/card-dialog/card-dialog-config';
@@ -13,6 +20,7 @@ import { SelectOption } from '../../../shared/types/select-option';
     selector: 'es-configure-grid',
     imports: [SharedModule],
     templateUrl: './configure-grid.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./configure-grid.component.scss'],
 })
 export class ConfigureGridComponent {

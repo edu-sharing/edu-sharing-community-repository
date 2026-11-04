@@ -19,6 +19,7 @@ import {
     ViewChild,
     WritableSignal,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -53,6 +54,7 @@ import { containsAiTags } from '../../../../shared/utils/ai-util';
     ],
     templateUrl: './self-adjusting-textarea.component.html',
     styleUrls: ['./self-adjusting-textarea.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class SelfAdjustingTextareaComponent implements OnInit, OnChanges {

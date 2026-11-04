@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Data, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { TranslationsService, UIConstants } from 'ngx-edu-sharing-ui';
@@ -7,6 +7,7 @@ import { TranslationsService, UIConstants } from 'ngx-edu-sharing-ui';
     selector: 'es-error-page',
     templateUrl: 'error-page.component.html',
     styleUrls: ['error-page.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class ErrorPageComponent {

@@ -1,4 +1,13 @@
-import { Component, effect, EventEmitter, Input, input, InputSignal, Output } from '@angular/core';
+import {
+    Component,
+    effect,
+    EventEmitter,
+    Input,
+    input,
+    InputSignal,
+    Output,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { FormArray, FormControl, FormGroup, UntypedFormControl } from '@angular/forms';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { MdsExtendedValue } from 'ngx-edu-sharing-ui';
@@ -10,6 +19,7 @@ import { DisplayValue } from '../../DisplayValues';
     selector: 'es-mds-editor-widget-tree-value-selection',
     templateUrl: './mds-editor-widget-tree-value-selection.component.html',
     styleUrls: ['./mds-editor-widget-tree-value-selection.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SharedModule],
 })
 export class MdsEditorWidgetTreeValueSelectionComponent {

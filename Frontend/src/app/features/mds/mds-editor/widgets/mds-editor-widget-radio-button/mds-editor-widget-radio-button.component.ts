@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { AbstractControl, UntypedFormControl, ValidatorFn } from '@angular/forms';
 import { filter } from 'rxjs/operators';
 import { DisplayValue, DisplayValues } from '../DisplayValues';
@@ -11,6 +11,7 @@ import { SuggestionResponseDto } from 'ngx-edu-sharing-api';
     selector: 'es-mds-editor-widget-radio-button',
     templateUrl: './mds-editor-widget-radio-button.component.html',
     styleUrls: ['./mds-editor-widget-radio-button.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class MdsEditorWidgetRadioButtonComponent extends MdsEditorWidgetBase implements OnInit {

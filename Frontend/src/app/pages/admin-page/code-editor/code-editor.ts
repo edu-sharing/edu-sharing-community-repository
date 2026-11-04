@@ -7,6 +7,7 @@ import {
     Output,
     inject,
     signal,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { ConfigService } from 'ngx-edu-sharing-api';
 import { NgxMonacoEditorConfig } from 'ngx-monaco-editor-v2';
@@ -24,6 +25,7 @@ import { ThemeService } from '../../../services/theme.service';
             multi: true,
         },
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class CodeEditorComponent implements ControlValueAccessor {

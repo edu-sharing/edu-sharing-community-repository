@@ -7,6 +7,7 @@ import {
     SimpleChanges,
     ViewChild,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { RenderingModule } from '../../rendering.module';
 import { RenderModule } from '../RenderModule';
@@ -24,6 +25,7 @@ import { PdfComponent } from '../pdf/pdf.component';
     selector: 'rs-module-pdf-iframe',
     imports: [RenderingModule],
     templateUrl: './pdf-iframe.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './pdf-iframe.component.scss',
 })
 export class PdfIframeComponent implements RenderModule, OnChanges {

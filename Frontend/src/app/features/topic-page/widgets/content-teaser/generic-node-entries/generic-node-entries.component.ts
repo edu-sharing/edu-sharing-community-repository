@@ -19,6 +19,7 @@ import {
     ViewEncapsulation,
     WritableSignal,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Sort } from '@angular/material/sort';
@@ -92,6 +93,7 @@ export enum CustomCardRole {
         OptionsHelperService,
     ],
     templateUrl: './generic-node-entries.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./generic-node-entries.component.scss'],
 })
 export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit {

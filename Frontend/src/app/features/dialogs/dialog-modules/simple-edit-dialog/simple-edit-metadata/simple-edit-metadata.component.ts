@@ -1,5 +1,13 @@
 import { trigger } from '@angular/animations';
-import { Component, EventEmitter, Input, Output, ViewChild, inject } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    Input,
+    Output,
+    ViewChild,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { UIAnimation } from 'ngx-edu-sharing-ui';
 import { forkJoin, from, Observable, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
@@ -17,6 +25,7 @@ import { BulkBehavior } from '../../../../../features/mds/types/types';
         trigger('fade', UIAnimation.fade()),
         trigger('cardAnimation', UIAnimation.cardAnimation()),
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class SimpleEditMetadataComponent {

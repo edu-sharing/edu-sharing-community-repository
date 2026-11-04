@@ -8,6 +8,7 @@ import {
     OnInit,
     Output,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { RestConstants, RestIamService } from '../../../core-module/core.module';
 import { UIAnimation, UIConstants } from 'ngx-edu-sharing-ui';
@@ -20,6 +21,7 @@ import { Subject } from 'rxjs';
     templateUrl: './main-menu-sidebar.component.html',
     styleUrls: ['./main-menu-sidebar.component.scss'],
     animations: [trigger('fade', UIAnimation.fade()), trigger('fromLeft', UIAnimation.fromLeft())],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class MainMenuSidebarComponent implements OnInit, OnDestroy {

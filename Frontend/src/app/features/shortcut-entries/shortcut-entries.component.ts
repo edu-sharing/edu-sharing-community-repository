@@ -12,6 +12,7 @@ import {
     ViewChild,
     WritableSignal,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCard } from '@angular/material/card';
@@ -52,6 +53,7 @@ import { ShortcutEntryTitlePipe } from './shortcut-entry-title.pipe';
     providers: [IconDirective, NodeEntriesService, ShortcutEntryTitlePipe],
     templateUrl: './shortcut-entries.component.html',
     styleUrls: ['./shortcut-entries.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
         CommonModule,
         DragDropModule,

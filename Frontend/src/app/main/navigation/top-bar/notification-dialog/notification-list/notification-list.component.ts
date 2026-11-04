@@ -2,7 +2,7 @@
  * Created by Torsten on 13.01.2017.
  */
 
-import { Component, OnInit, ViewChild, inject } from '@angular/core';
+import { Component, OnInit, ViewChild, inject, ChangeDetectionStrategy } from '@angular/core';
 import {
     AboutService,
     AuthenticationService,
@@ -19,6 +19,7 @@ import { NodeDataSource, TranslationsService } from 'ngx-edu-sharing-ui';
     selector: 'es-notification-list',
     templateUrl: 'notification-list.component.html',
     styleUrls: ['notification-list.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class NotificationListComponent implements OnInit {

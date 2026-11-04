@@ -1,10 +1,11 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { RequiredMode } from '../../../../mds/types/types';
 
 @Component({
     selector: 'es-input-fill-progress',
     templateUrl: 'input-fill-progress.component.html',
     styleUrls: ['input-fill-progress.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class InputFillProgressComponent {

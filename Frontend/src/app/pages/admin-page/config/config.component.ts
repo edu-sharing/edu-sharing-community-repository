@@ -1,4 +1,4 @@
-import { Component, HostListener, inject } from '@angular/core';
+import { Component, HostListener, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ConfigService } from 'ngx-edu-sharing-api';
 import { forkJoin } from 'rxjs';
 import { RestAdminService } from '../../../core-module/rest/services/rest-admin.service';
@@ -10,6 +10,7 @@ import { DialogsService } from '../../../features/dialogs/dialogs.service';
     selector: 'es-admin-config',
     templateUrl: 'config.component.html',
     styleUrls: ['config.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class AdminConfigComponent {

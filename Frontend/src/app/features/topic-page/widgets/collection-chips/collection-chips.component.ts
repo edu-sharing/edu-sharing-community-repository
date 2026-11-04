@@ -12,6 +12,7 @@ import {
     ViewEncapsulation,
     WritableSignal,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { Node } from 'ngx-edu-sharing-api';
@@ -42,6 +43,7 @@ import { WidgetConfigurationButtonsComponent } from '../shared/widget-configurat
         WidgetConfigurationButtonsComponent,
     ],
     templateUrl: './collection-chips.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./collection-chips.component.scss'],
 })
 export class CollectionChipsComponent implements WidgetComponentInterface {

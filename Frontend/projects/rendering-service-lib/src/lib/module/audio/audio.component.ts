@@ -6,6 +6,7 @@ import {
     signal,
     ViewChild,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { RenderingModule } from '../../rendering.module';
 import { RenderModule } from '../RenderModule';
@@ -18,6 +19,7 @@ import { TrackingService } from '../../../tracking.service';
     selector: 'rs-module-audio',
     imports: [RenderingModule, FormsModule],
     templateUrl: './audio.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './audio.component.scss',
 })
 export class AudioComponent implements RenderModule, AfterViewInit {

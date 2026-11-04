@@ -8,6 +8,7 @@ import {
     OnInit,
     Output,
     ViewChild,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
@@ -75,6 +76,7 @@ import {
     styleUrls: ['create-menu.component.scss'],
     animations: [trigger('dialog', UIAnimation.switchDialog(UIAnimation.ANIMATION_TIME_FAST))],
     providers: [OptionsHelperDataService, OptionsHelperService],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class CreateMenuComponent implements OnInit, OnDestroy {

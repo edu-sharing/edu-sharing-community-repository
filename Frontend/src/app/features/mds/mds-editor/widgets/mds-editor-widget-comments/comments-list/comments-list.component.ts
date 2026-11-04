@@ -1,5 +1,12 @@
 import { trigger } from '@angular/animations';
-import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    Input,
+    Output,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { HOME_REPOSITORY, NetworkService, Node, RestConstants } from 'ngx-edu-sharing-api';
 import { OptionItem, UIAnimation } from 'ngx-edu-sharing-ui';
 import { SharedModule } from 'src/app/shared/shared.module';
@@ -23,6 +30,7 @@ import { isString } from 'lodash-es';
     templateUrl: 'comments-list.component.html',
     styleUrls: ['comments-list.component.scss'],
     imports: [SharedModule],
+    changeDetection: ChangeDetectionStrategy.Eager,
     animations: [
         trigger('fade', UIAnimation.fade()),
         trigger('cardAnimation', UIAnimation.cardAnimation()),

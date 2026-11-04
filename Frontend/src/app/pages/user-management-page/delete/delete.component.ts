@@ -1,4 +1,12 @@
-import { ApplicationRef, Component, DoCheck, OnInit, ViewChild, inject } from '@angular/core';
+import {
+    ApplicationRef,
+    Component,
+    DoCheck,
+    OnInit,
+    ViewChild,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { SessionStorageService, User } from 'ngx-edu-sharing-api';
 import {
@@ -31,6 +39,7 @@ import { BehaviorSubject } from 'rxjs';
     selector: 'es-permissions-delete',
     templateUrl: 'delete.component.html',
     styleUrls: ['delete.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class PermissionsDeleteComponent implements OnInit, DoCheck {

@@ -1,5 +1,4 @@
 import {
-    ComponentFactoryResolver,
     ElementRef,
     EventEmitter,
     inject,
@@ -156,7 +155,6 @@ export class MdsEditorInstanceService
     private mdsEditorCommonService = inject(MdsEditorCommonService);
     private mdsService = inject(MdsService);
     private aboutService = inject(AboutService);
-    private factoryResolver = inject(ComponentFactoryResolver);
     private injector = inject(Injector);
     private containerRef = inject(ViewContainerRef, { optional: true });
     private ngZone = inject(NgZone);

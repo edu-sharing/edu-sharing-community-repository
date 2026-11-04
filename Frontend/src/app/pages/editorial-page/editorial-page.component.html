@@ -93,7 +93,7 @@
   >
     <div class="es-mat-sidenav-content">
       <es-editorial-sidebar
-        [primaryMode]="(params$ | async)?.primaryMode"
+        [primaryMode]="$safeNavigationMigration((params$ | async)?.primaryMode)"
         [component]="mainComponent$ | async"
         (showComponent)="goToComponent($event)"
         (closeTrigger)="editorialSidebarService.sidebarOpened.set(false)"
@@ -121,7 +121,10 @@
       [class.has-main-component]="mainComponent$ | async"
     >
       <h1 esTitle class="cdk-visually-hidden">
-        {{ 'EDITORIAL.BREADCRUMB.' + editorialBreadcrumbService.mode()?.toUpperCase() | translate }}
+        {{
+          'EDITORIAL.BREADCRUMB.' +
+            $safeNavigationMigration(editorialBreadcrumbService.mode()?.toUpperCase()) | translate
+        }}
       </h1>
       <div class="top-area">
         <es-editorial-breadcrumb
@@ -187,7 +190,9 @@
         >
           <ng-template #empty>
             <div class="empty">
-              {{ 'EDITORIAL.' + mode?.toUpperCase() + '.EMPTY' | translate }}
+              {{
+                'EDITORIAL.' + $safeNavigationMigration(mode?.toUpperCase()) + '.EMPTY' | translate
+              }}
             </div>
           </ng-template>
         </es-node-entries-wrapper>
@@ -250,7 +255,7 @@
 </mat-sidenav-container>
 @if ((isMobile$ | async) === true && editorialSidebarService.sidebarOpened()) {
 <es-editorial-sidebar
-  [primaryMode]="(params$ | async)?.primaryMode"
+  [primaryMode]="$safeNavigationMigration((params$ | async)?.primaryMode)"
   [isModal]="true"
   (closeTrigger)="editorialSidebarService.sidebarOpened.set(false)"
 ></es-editorial-sidebar>

@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import {
     FrameEventsService,
@@ -23,6 +23,7 @@ export type NodeLMS = Node & {
 @Component({
     selector: 'es-apply-to-lms-page',
     templateUrl: 'apply-to-lms-page.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class ApplyToLmsPageComponent {

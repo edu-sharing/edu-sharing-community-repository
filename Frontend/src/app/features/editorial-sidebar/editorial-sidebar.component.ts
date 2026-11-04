@@ -16,6 +16,7 @@ import {
     TemplateRef,
     viewChild,
     ViewChild,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { Node, RestConstants, ROOT } from 'ngx-edu-sharing-api';
 import { RestHelper } from '../../core-module/rest/rest-helper';
@@ -165,6 +166,7 @@ let nextInstanceId = 0;
     standalone: false,
     providers: [provideReusableOptionsHelperData()],
     animations: [trigger('overlay', UIAnimation.openOverlay())],
+    changeDetection: ChangeDetectionStrategy.Eager,
     host: {
         '[class.fullscreen]': 'editorialSidebarService.fullscreenActive()',
     },

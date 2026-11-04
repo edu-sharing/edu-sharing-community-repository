@@ -1,4 +1,12 @@
-import { Component, NgZone, OnDestroy, ViewChild, ViewEncapsulation, inject } from '@angular/core';
+import {
+    Component,
+    NgZone,
+    OnDestroy,
+    ViewChild,
+    ViewEncapsulation,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
 import {
     EventListener,
@@ -43,6 +51,7 @@ import { WIDGETS } from '../../features/topic-page/shared/types/custom-definitio
         }
     `,
     styleUrls: ['embed-page.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class EmbedPageComponent implements EventListener, OnDestroy {

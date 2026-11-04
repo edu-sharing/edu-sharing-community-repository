@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, model } from '@angular/core';
+import { Component, computed, inject, input, model, ChangeDetectionStrategy } from '@angular/core';
 import { AssignmentFile, Node } from 'ngx-edu-sharing-api';
 import { SharedModule } from '../../../shared/shared.module';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
@@ -16,6 +16,7 @@ export type NodeWithRole = Node &
     selector: 'es-manage-assignment-nodes',
     templateUrl: 'manage-assignment-nodes.component.html',
     styleUrls: ['manage-assignment-nodes.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SharedModule],
 })
 export class ManageAssignmentNodesComponent {

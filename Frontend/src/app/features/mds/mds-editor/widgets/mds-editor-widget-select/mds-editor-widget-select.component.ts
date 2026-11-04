@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MdsWidget, MdsWidgetValue } from '../../../types/types';
@@ -12,6 +12,7 @@ import { SuggestionResponseDto } from 'ngx-edu-sharing-api';
     selector: 'es-mds-editor-widget-select',
     templateUrl: './mds-editor-widget-select.component.html',
     styleUrls: ['./mds-editor-widget-select.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class MdsEditorWidgetSelectComponent extends MdsEditorWidgetBase implements OnInit {

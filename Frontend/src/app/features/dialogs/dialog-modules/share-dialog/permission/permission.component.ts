@@ -1,4 +1,12 @@
-import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    Input,
+    OnInit,
+    Output,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { AuthenticationService } from 'ngx-edu-sharing-api';
 import { RestConstants } from '../../../../../core-module/core.module';
@@ -10,6 +18,7 @@ import { fromBeforeToValidator, notInPastValidator } from './timebased.validator
     selector: 'es-share-dialog-permission',
     templateUrl: 'permission.component.html',
     styleUrls: ['permission.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class ShareDialogPermissionComponent implements OnInit {

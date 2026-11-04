@@ -1,4 +1,11 @@
-import { AfterContentInit, Component, computed, Input, signal } from '@angular/core';
+import {
+    AfterContentInit,
+    Component,
+    computed,
+    Input,
+    signal,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { RenderingModule } from '../../rendering.module';
 import { RenderModule } from '../RenderModule';
 import { Node } from 'ngx-edu-sharing-api';
@@ -17,6 +24,7 @@ import { EduSharingUiCommonModule, EduSharingUiModule } from 'ngx-edu-sharing-ui
         EduSharingUiCommonModule,
     ],
     templateUrl: './error.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './error.component.scss',
 })
 export class ErrorComponent implements RenderModule, AfterContentInit {

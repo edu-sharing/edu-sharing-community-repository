@@ -15,6 +15,7 @@ import {
     ViewEncapsulation,
     WritableSignal,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
@@ -76,6 +77,7 @@ import { GenericNodeEntriesComponent } from './generic-node-entries/generic-node
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA],
     templateUrl: './content-teaser.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./content-teaser.component.scss'],
 })
 export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetComponentInterface {

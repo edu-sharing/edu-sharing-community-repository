@@ -1,4 +1,11 @@
-import { Component, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
+import {
+    Component,
+    OnInit,
+    TemplateRef,
+    ViewChild,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { FormatSizePipe } from 'ngx-edu-sharing-ui';
 import {
@@ -35,6 +42,7 @@ type DuplicateDecision = 'keep' | 'overwrite' | 'cancel';
     selector: 'es-file-upload-progress-dialog',
     templateUrl: './file-upload-progress-dialog.component.html',
     styleUrls: ['./file-upload-progress-dialog.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class FileUploadProgressDialogComponent implements OnInit {

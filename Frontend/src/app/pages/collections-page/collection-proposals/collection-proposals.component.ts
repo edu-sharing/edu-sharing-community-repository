@@ -7,6 +7,7 @@ import {
     SimpleChanges,
     ViewChild,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { Node, ProposalNode } from 'ngx-edu-sharing-api';
 import {
@@ -34,6 +35,7 @@ import { MainNavService } from '../../../main/navigation/main-nav.service';
     templateUrl: 'collection-proposals.component.html',
     styleUrls: ['collection-proposals.component.scss'],
     providers: [OptionsHelperDataService],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class CollectionProposalsComponent implements OnChanges {

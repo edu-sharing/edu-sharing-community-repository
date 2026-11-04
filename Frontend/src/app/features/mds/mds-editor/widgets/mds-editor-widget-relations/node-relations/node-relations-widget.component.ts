@@ -1,4 +1,11 @@
-import { Component, Input, OnChanges, SimpleChanges, inject } from '@angular/core';
+import {
+    Component,
+    Input,
+    OnChanges,
+    SimpleChanges,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import {
     NetworkService,
     Node,
@@ -18,6 +25,7 @@ import { SharedModule } from '../../../../../../shared/shared.module';
     selector: 'es-mds-node-relations-widget',
     templateUrl: 'node-relations-widget.component.html',
     styleUrls: ['node-relations-widget.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SharedModule],
 })
 export class MdsNodeRelationsWidgetComponent implements OnChanges {

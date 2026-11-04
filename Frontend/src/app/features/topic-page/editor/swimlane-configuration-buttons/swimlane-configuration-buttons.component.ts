@@ -10,6 +10,7 @@ import {
     signal,
     WritableSignal,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatIconButton } from '@angular/material/button';
@@ -38,6 +39,7 @@ import { SwimlaneBackgroundShapeComponent } from '../swimlane-background-shape/s
         TranslateModule,
     ],
     templateUrl: './swimlane-configuration-buttons.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./swimlane-configuration-buttons.component.scss'],
 })
 export class SwimlaneConfigurationButtonsComponent {

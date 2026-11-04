@@ -6,6 +6,7 @@ import {
     Output,
     ViewChild,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { trigger } from '@angular/animations';
 import { Toast } from '../../../services/toast';
@@ -23,6 +24,7 @@ import { UIAnimation } from 'ngx-edu-sharing-ui';
     templateUrl: 'user-profile.component.html',
     styleUrls: ['user-profile.component.scss'],
     animations: [trigger('overlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class UserProfileComponent {

@@ -101,9 +101,9 @@ export const SingleNode: Story = {
     args: { nodes: singleAuthorNode() },
     play: async ({ canvasElement }) => {
         await waitForWidget(canvasElement);
-        expect(switchOf(canvasElement)).toBeNull();
-        expect(freetextOf(canvasElement).disabled).toBe(false);
-        expect(freetextOf(canvasElement).value).toBe('Free text');
+        await expect(switchOf(canvasElement)).toBeNull();
+        await expect(freetextOf(canvasElement).disabled).toBe(false);
+        await expect(freetextOf(canvasElement).value).toBe('Free text');
     },
 };
 
@@ -112,9 +112,9 @@ export const BulkSameValues: Story = {
     args: { nodes: sameFreetextNodes() },
     play: async ({ canvasElement }) => {
         await waitForWidget(canvasElement);
-        expect(switchOf(canvasElement)).not.toBeNull();
-        expect(freetextOf(canvasElement).value).toBe('Shared author text');
-        expect(freetextOf(canvasElement).disabled).toBe(true);
+        await expect(switchOf(canvasElement)).not.toBeNull();
+        await expect(freetextOf(canvasElement).value).toBe('Shared author text');
+        await expect(freetextOf(canvasElement).disabled).toBe(true);
         await userEvent.click(switchOf(canvasElement));
         await waitFor(() => expect(freetextOf(canvasElement).disabled).toBe(false));
     },
@@ -126,13 +126,13 @@ export const BulkMixedValues: Story = {
     // checks the attribute, as the translations load asynchronously
     play: async ({ canvasElement }) => {
         await waitForWidget(canvasElement);
-        expect(freetextOf(canvasElement).value).toBe('');
-        expect(freetextOf(canvasElement).disabled).toBe(true);
-        expect(freetextOf(canvasElement).placeholder).not.toBe('');
+        await expect(freetextOf(canvasElement).value).toBe('');
+        await expect(freetextOf(canvasElement).disabled).toBe(true);
+        await expect(freetextOf(canvasElement).placeholder).not.toBe('');
         await userEvent.click(switchOf(canvasElement));
         await waitFor(() => expect(freetextOf(canvasElement).disabled).toBe(false));
         await userEvent.type(freetextOf(canvasElement), 'x');
-        expect(freetextOf(canvasElement).placeholder).toBe('');
+        await expect(freetextOf(canvasElement).placeholder).toBe('');
     },
 };
 
@@ -145,11 +145,11 @@ export const BulkOnlyFreetextChanged: Story = {
         await waitFor(() => expect(freetextOf(canvasElement).disabled).toBe(false));
         await userEvent.type(freetextOf(canvasElement), 'New text');
         const values = await collect(canvasElement);
-        expect(values.length).toBe(2);
-        values.forEach((v) => {
-            expect(v[FREETEXT]).toEqual(['New text']);
-            expect(AUTHOR in v).toBe(false);
-        });
+        await expect(values.length).toBe(2);
+        for (const v of values) {
+            await expect(v[FREETEXT]).toEqual(['New text']);
+            await expect(AUTHOR in v).toBe(false);
+        }
     },
 };
 
@@ -166,11 +166,11 @@ export const BulkOnlyMainAuthorChanged: Story = {
         await userEvent.type(canvasElement.querySelector('.surname input'), 'Dijkstra');
         const values = await collect(canvasElement);
         values.forEach((v) => expect(FREETEXT in v).toBe(false));
-        expect(values[0][AUTHOR].length).toBe(2);
-        expect(new VCard(values[0][AUTHOR][0]).surname).toBe('Dijkstra');
-        expect(new VCard(values[0][AUTHOR][1]).surname).toBe('Hopper');
-        expect(values[1][AUTHOR].length).toBe(1);
-        expect(new VCard(values[1][AUTHOR][0]).surname).toBe('Dijkstra');
+        await expect(values[0][AUTHOR].length).toBe(2);
+        await expect(new VCard(values[0][AUTHOR][0]).surname).toBe('Dijkstra');
+        await expect(new VCard(values[0][AUTHOR][1]).surname).toBe('Hopper');
+        await expect(values[1][AUTHOR].length).toBe(1);
+        await expect(new VCard(values[1][AUTHOR][0]).surname).toBe('Dijkstra');
     },
 };
 
@@ -185,9 +185,9 @@ export const BulkSwitchedOffWritesNothing: Story = {
         await userEvent.click(switchOf(canvasElement));
         await waitFor(() => expect(freetextOf(canvasElement).disabled).toBe(true));
         const values = await collect(canvasElement);
-        values.forEach((v) => {
-            expect(FREETEXT in v).toBe(false);
-            expect(AUTHOR in v).toBe(false);
-        });
+        for (const v of values) {
+            await expect(FREETEXT in v).toBe(false);
+            await expect(AUTHOR in v).toBe(false);
+        }
     },
 };

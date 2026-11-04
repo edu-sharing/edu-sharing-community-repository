@@ -1,5 +1,12 @@
 import { trigger } from '@angular/animations';
-import { AfterViewInit, Component, OnDestroy, OnInit, inject } from '@angular/core';
+import {
+    AfterViewInit,
+    Component,
+    OnDestroy,
+    OnInit,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { ActivatedRoute, Params, Router, RoutesRecognized } from '@angular/router';
 import moment from 'moment';
 import { ConnectorService, Node, StreamEntry, StreamV1Service } from 'ngx-edu-sharing-api';
@@ -54,6 +61,7 @@ import {
     styleUrls: ['stream-page.component.scss'],
     animations: [trigger('overlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))],
     providers: [OptionsHelperDataService],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class StreamPageComponent implements OnInit, AfterViewInit, OnDestroy {

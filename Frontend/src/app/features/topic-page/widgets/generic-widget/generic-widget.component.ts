@@ -22,6 +22,7 @@ import {
     ViewContainerRef,
     ViewEncapsulation,
     WritableSignal,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TranslateService } from '@ngx-translate/core';
@@ -106,6 +107,7 @@ export interface WidgetComponentInterface {
     imports: [SharedModule, WidgetHeaderComponent, ConfigureWidgetEmbeddingDialogComponent],
     providers: [SearchService],
     templateUrl: './generic-widget.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./generic-widget.component.scss'],
 })
 export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestroy {

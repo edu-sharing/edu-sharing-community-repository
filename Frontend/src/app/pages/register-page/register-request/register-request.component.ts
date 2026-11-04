@@ -1,4 +1,11 @@
-import { Component, EventEmitter, OnDestroy, Output, inject } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    OnDestroy,
+    Output,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { Toast } from '../../../services/toast';
 import { UntypedFormControl, Validators } from '@angular/forms';
 import { ReplaySubject } from 'rxjs';
@@ -9,6 +16,7 @@ import { RegisterService } from 'ngx-edu-sharing-api';
     selector: 'es-register-request',
     templateUrl: 'register-request.component.html',
     styleUrls: ['register-request.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class RegisterRequestComponent implements OnDestroy {

@@ -7,6 +7,7 @@ import {
     SimpleChanges,
     ViewChild,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { ClickSource, InteractionType } from '../entries-model';
@@ -27,6 +28,7 @@ import { BehaviorSubject } from 'rxjs';
     selector: 'es-node-entries-card',
     templateUrl: 'node-entries-card.component.html',
     styleUrls: ['node-entries-card.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnInit {

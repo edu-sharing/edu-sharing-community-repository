@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import {
     DialogButton,
@@ -20,6 +20,7 @@ import { filter, first } from 'rxjs/operators';
     selector: 'es-share-link-dialog',
     templateUrl: './share-link-dialog.component.html',
     styleUrls: ['./share-link-dialog.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class ShareLinkDialogComponent implements OnInit {

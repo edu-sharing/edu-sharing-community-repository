@@ -9,6 +9,7 @@ import {
     signal,
     TemplateRef,
     ViewChild,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
@@ -96,6 +97,7 @@ type Job = {
     styleUrls: ['admin-page.component.scss'],
     animations: [trigger('openOverlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))],
     standalone: false,
+    changeDetection: ChangeDetectionStrategy.Eager,
     providers: [AdminSystemChecksService],
 })
 export class AdminPageComponent implements OnInit, OnDestroy {
@@ -1098,7 +1100,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
         this.initButtons();
         if (this.buttons.length === 0) {
             this.toast.error(null, 'TOAST.API_FORBIDDEN');
-            UIHelper.goToDefaultLocation(this.router, this.platformLocation, this.config);
+            void UIHelper.goToDefaultLocation(this.router, this.platformLocation, this.config);
             return;
         }
         this.globalProgress = false;

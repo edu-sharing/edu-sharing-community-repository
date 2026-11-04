@@ -1,4 +1,4 @@
-import { Component, ViewChild, inject } from '@angular/core';
+import { Component, ViewChild, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Connector } from 'ngx-edu-sharing-api';
 import { BehaviorSubject } from 'rxjs';
 import { delay, filter, first } from 'rxjs/operators';
@@ -18,6 +18,7 @@ import { CordovaService } from '../../../../services/cordova.service';
     selector: 'es-add-with-connector-dialog',
     templateUrl: './add-with-connector-dialog.component.html',
     styleUrls: ['./add-with-connector-dialog.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class AddWithConnectorDialogComponent {

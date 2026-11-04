@@ -1,11 +1,4 @@
-import {
-    ComponentFactoryResolver,
-    ComponentRef,
-    Injectable,
-    SimpleChange,
-    ViewContainerRef,
-    inject,
-} from '@angular/core';
+import { ComponentRef, Injectable, SimpleChange, ViewContainerRef, inject } from '@angular/core';
 import { NetworkService, Node } from 'ngx-edu-sharing-api';
 import {
     ListItem,
@@ -33,7 +26,6 @@ import { NodeHelperService } from '../../services/node-helper.service';
 
 @Injectable()
 export class RenderHelperService {
-    private componentFactoryResolver = inject(ComponentFactoryResolver);
     private usageApi = inject(RestUsageService);
     private uiService = inject(UIService);
     private optionsHelperService = inject(OptionsHelperDataService);

@@ -6,6 +6,8 @@
   ],
   "compilerOptions": {
     "baseUrl": "./",
+    "ignoreDeprecations": "6.0",
+    "strict": false,
     "noImplicitAny": true,
     "noImplicitReturns": true,
     // paths are handled inside the tsconfig.*.json

@@ -1,4 +1,11 @@
-import { Component, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
+import {
+    Component,
+    ElementRef,
+    inject,
+    OnInit,
+    ViewChild,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { UntypedFormControl, ValidatorFn, Validators } from '@angular/forms';
 import { MAT_FORM_FIELD } from '@angular/material/form-field';
 import { TranslateService } from '@ngx-translate/core';
@@ -19,6 +26,7 @@ import { BehaviorSubject, firstValueFrom, timer } from 'rxjs';
         { provide: MAT_FORM_FIELD, useValue: true },
     ],
     animations: [],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements OnInit {

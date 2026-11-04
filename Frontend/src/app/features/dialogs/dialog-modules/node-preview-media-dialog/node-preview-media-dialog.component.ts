@@ -7,6 +7,7 @@ import {
     ViewChild,
     ViewContainerRef,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { Subject } from 'rxjs';
@@ -38,6 +39,7 @@ import { RenderWrapperComponent } from '../../../../pages/render2-page/render-wr
     templateUrl: './node-preview-media-dialog.component.html',
     styleUrls: ['./node-preview-media-dialog.component.scss'],
     providers: [RenderHelperService, OptionsHelperDataService],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: true,
 })
 export class NodePreviewMediaDialogComponent {

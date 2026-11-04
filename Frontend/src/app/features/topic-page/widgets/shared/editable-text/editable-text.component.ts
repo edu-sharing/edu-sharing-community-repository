@@ -7,6 +7,7 @@ import {
     signal,
     WritableSignal,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { TranslateModule } from '@ngx-translate/core';
@@ -30,6 +31,7 @@ import { SelfAdjustingTextareaComponent } from './self-adjusting-textarea/self-a
     ],
     providers: [HighlightSearchPipe, MarkdownPipe],
     templateUrl: './editable-text.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./editable-text.component.scss'],
 })
 export class EditableTextComponent {

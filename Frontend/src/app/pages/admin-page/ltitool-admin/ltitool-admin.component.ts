@@ -1,4 +1,11 @@
-import { Component, EventEmitter, OnInit, Output, inject } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    OnInit,
+    Output,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { LtiPlatformV13Service, ManualRegistrationData } from 'ngx-edu-sharing-api';
 import { Toast } from '../../../services/toast';
@@ -7,6 +14,7 @@ import { Toast } from '../../../services/toast';
     selector: 'es-ltitool-admin',
     templateUrl: './ltitool-admin.component.html',
     styleUrls: ['./ltitool-admin.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class LtitoolAdminComponent implements OnInit {

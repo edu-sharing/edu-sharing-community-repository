@@ -9,6 +9,7 @@ import {
     OnInit,
     ViewChild,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 import { MatChip } from '@angular/material/chips';
@@ -37,6 +38,7 @@ import { SearchFieldConfig } from './search-field.service';
     selector: 'es-search-field',
     templateUrl: './search-field.component.html',
     styleUrls: ['./search-field.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class SearchFieldComponent implements OnInit, OnDestroy, AfterViewInit {

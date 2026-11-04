@@ -64,7 +64,7 @@
       <mat-select
         [(ngModel)]="currentTemplate"
         (ngModelChange)="applyTemplate($event)"
-        [name]="currentTemplate?.name"
+        [name]="$safeNavigationMigration(currentTemplate?.name)"
       >
         @for (templates of groupModeTemplates; track templates) {
         <mat-option [value]="templates">
@@ -272,7 +272,7 @@
             mat-flat-button
             color="primary"
             (click)="refreshNodes()"
-            [disabled]="nodesDataSource?.isLoading"
+            [disabled]="$safeNavigationMigration(nodesDataSource?.isLoading)"
           >
             {{ 'ADMIN.STATISTICS.NODES_APPLY' | translate }}
           </button>
@@ -360,7 +360,7 @@
         mat-flat-button
         color="primary"
         (click)="refreshNodes()"
-        [disabled]="nodesDataSource?.isLoading"
+        [disabled]="$safeNavigationMigration(nodesDataSource?.isLoading)"
       >
         {{ 'ADMIN.STATISTICS.NODES_APPLY' | translate }}
       </button>

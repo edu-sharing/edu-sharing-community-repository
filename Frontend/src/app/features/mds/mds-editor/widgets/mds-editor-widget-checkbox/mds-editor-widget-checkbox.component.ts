@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, WritableSignal } from '@angular/core';
+import { Component, OnInit, signal, WritableSignal, ChangeDetectionStrategy } from '@angular/core';
 import { AbstractControl, UntypedFormControl, ValidatorFn } from '@angular/forms';
 import { MdsEditorWidgetBase } from '../mds-editor-widget-base';
 import { ValueType } from 'ngx-edu-sharing-ui';
@@ -7,6 +7,7 @@ import { ValueType } from 'ngx-edu-sharing-ui';
     selector: 'es-mds-editor-widget-checkbox',
     templateUrl: './mds-editor-widget-checkbox.component.html',
     styleUrls: ['./mds-editor-widget-checkbox.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class MdsEditorWidgetCheckboxComponent extends MdsEditorWidgetBase implements OnInit {

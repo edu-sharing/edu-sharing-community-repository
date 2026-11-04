@@ -19,6 +19,7 @@ import {
     ViewChild,
     ViewChildren,
     WritableSignal,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { FocusableOption, FocusKeyManager } from '@angular/cdk/a11y';
 import { FormControl, UntypedFormControl } from '@angular/forms';
@@ -64,6 +65,7 @@ export class EsProposalChipDirective implements FocusableOption {
     selector: 'es-mds-editor-widget-tree',
     templateUrl: './mds-editor-widget-tree.component.html',
     styleUrls: ['./mds-editor-widget-tree.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
     // instantiated on first request, which only `collectionTree` widgets make
     providers: [CollectionTreeSource],

@@ -1,4 +1,4 @@
-import { Component, Input, signal } from '@angular/core';
+import { Component, Input, signal, ChangeDetectionStrategy } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { TranslateModule } from '@ngx-translate/core';
 import { IconDirective } from '../directives/icon.directive';
@@ -7,6 +7,7 @@ import { IconDirective } from '../directives/icon.directive';
     selector: 'es-info-message',
     templateUrl: 'info-message.component.html',
     styleUrls: ['info-message.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TranslateModule, IconDirective, MatButtonModule],
 })
 export class InfoMessageComponent {

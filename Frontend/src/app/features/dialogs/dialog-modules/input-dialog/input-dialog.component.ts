@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { DialogButton } from '../../../../core-module/core.module';
 import { CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
@@ -12,6 +12,7 @@ import { InputDialogData, InputDialogResult } from './input-dialog-data';
     selector: 'es-input-dialog',
     templateUrl: './input-dialog.component.html',
     styleUrls: ['./input-dialog.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class InputDialogComponent {

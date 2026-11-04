@@ -16,6 +16,7 @@ import {
     viewChild,
     WritableSignal,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { HOME_REPOSITORY, Node } from 'ngx-edu-sharing-api';
 import { ImagesResponse } from 'ngx-edu-sharing-b-api';
@@ -40,6 +41,7 @@ import { AiLabelComponent } from '../ai-label/ai-label.component';
     selector: 'es-image-wrapper',
     imports: [AiLabelComponent, CommonModule, EduSharingUiCommonModule, MdsModule],
     templateUrl: './image-wrapper.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./image-wrapper.component.scss'],
 })
 export class ImageWrapperComponent implements OnInit {

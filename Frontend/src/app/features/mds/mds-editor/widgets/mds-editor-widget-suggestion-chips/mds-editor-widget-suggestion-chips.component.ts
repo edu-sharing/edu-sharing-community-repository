@@ -1,4 +1,11 @@
-import { Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
+import {
+    Component,
+    Input,
+    OnDestroy,
+    OnInit,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { FacetValue, SearchService } from 'ngx-edu-sharing-api';
 import { combineLatest, Observable, Subject } from 'rxjs';
 import { map, shareReplay, startWith, takeUntil } from 'rxjs/operators';
@@ -9,6 +16,7 @@ import { mapExtendedValues } from '../../mds-editor-wrapper/extended-values-mapp
     selector: 'es-mds-editor-widget-suggestion-chips',
     templateUrl: './mds-editor-widget-suggestion-chips.component.html',
     styleUrls: ['./mds-editor-widget-suggestion-chips.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class MdsEditorWidgetSuggestionChipsComponent implements OnInit, OnDestroy {

@@ -1,4 +1,12 @@
-import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import {
+    Component,
+    ElementRef,
+    EventEmitter,
+    Input,
+    Output,
+    ViewChild,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { trigger } from '@angular/animations';
 import { DialogButton } from '../../../core-module/core.module';
 import { UIAnimation } from 'ngx-edu-sharing-ui';
@@ -10,6 +18,7 @@ import { UIAnimation } from 'ngx-edu-sharing-ui';
     animations: [
         trigger('infobarBottom', UIAnimation.infobarBottom(UIAnimation.ANIMATION_TIME_SLOW)),
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 /**

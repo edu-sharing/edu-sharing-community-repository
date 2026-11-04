@@ -1,4 +1,11 @@
-import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    Input,
+    Output,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
 import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -16,6 +23,7 @@ interface MenuButton {
     selector: 'es-main-menu-buttons',
     templateUrl: './main-menu-buttons.component.html',
     styleUrls: ['./main-menu-buttons.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class MainMenuButtonsComponent {

@@ -1,4 +1,4 @@
-import { Component, input, InputSignal } from '@angular/core';
+import { Component, input, InputSignal, ChangeDetectionStrategy } from '@angular/core';
 import { SharedModule } from '../../../../shared/shared.module';
 import { SwimlaneBackgroundShape } from '../../shared/types/swimlane-background-shape';
 
@@ -6,6 +6,7 @@ import { SwimlaneBackgroundShape } from '../../shared/types/swimlane-background-
     imports: [SharedModule],
     selector: 'es-swimlane-background-shape',
     templateUrl: './swimlane-background-shape.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./swimlane-background-shape.component.scss'],
 })
 export class SwimlaneBackgroundShapeComponent {

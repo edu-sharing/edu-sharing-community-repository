@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { TranslationsService } from 'ngx-edu-sharing-ui';
 import { Closable } from '../../features/dialogs/card-dialog/card-dialog-config';
 import { OK } from '../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
@@ -8,6 +8,7 @@ import { MainNavService } from '../../main/navigation/main-nav.service';
 @Component({
     selector: 'es-lti-page',
     template: '',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class LtiPageComponent implements OnInit {

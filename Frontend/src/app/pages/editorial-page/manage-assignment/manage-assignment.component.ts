@@ -1,4 +1,11 @@
-import { Component, computed, inject, signal, ViewChild } from '@angular/core';
+import {
+    Component,
+    computed,
+    inject,
+    signal,
+    ViewChild,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { SharedModule } from '../../../shared/shared.module';
 import { MatStepper, MatStepperModule } from '@angular/material/stepper';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -55,6 +62,7 @@ export const AssignmentEditorConfig = {
     selector: 'es-manage-assignment',
     templateUrl: 'manage-assignment.component.html',
     styleUrls: ['manage-assignment.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
         SharedModule,
         MatStepperModule,

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, inject } from '@angular/core';
+import { Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject } from 'rxjs';
 import { LocalEventsService, ValueType } from 'ngx-edu-sharing-ui';
@@ -14,6 +14,7 @@ import { Toast } from '../../../../../services/toast';
     selector: 'es-mds-editor-widget-link',
     templateUrl: './mds-editor-widget-link.component.html',
     styleUrls: ['./mds-editor-widget-link.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class MdsEditorWidgetLinkComponent

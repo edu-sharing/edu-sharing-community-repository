@@ -1,6 +1,5 @@
 import {
     Component,
-    ComponentFactoryResolver,
     ElementRef,
     inject,
     Injector,
@@ -13,6 +12,7 @@ import {
     SimpleChanges,
     ViewChildren,
     ViewContainerRef,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import {
@@ -40,12 +40,12 @@ import { BehaviorSubject, Subscription } from 'rxjs';
     templateUrl: 'mds-viewer.component.html',
     styleUrls: ['mds-viewer.component.scss'],
     providers: [MdsViewerService, ViewInstanceService],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class MdsViewerComponent implements OnChanges, OnDestroy {
     private mdsService = inject(MdsService);
     private mdsViewerService = inject(MdsViewerService);
-    private factoryResolver = inject(ComponentFactoryResolver);
     private injector = inject(Injector);
     private containerRef = inject(ViewContainerRef);
     private sanitizer = inject(DomSanitizer);
@@ -154,7 +154,6 @@ export class MdsViewerComponent implements OnChanges, OnDestroy {
                         element = replaceElementWithDiv(element);
 
                         UIService.injectAngularComponent(
-                            this.factoryResolver,
                             this.containerRef,
                             MdsWidgetComponent,
                             element,

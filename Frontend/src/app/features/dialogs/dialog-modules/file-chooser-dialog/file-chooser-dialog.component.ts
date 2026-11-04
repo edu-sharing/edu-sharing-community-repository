@@ -1,4 +1,12 @@
-import { AfterViewInit, Component, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
+import {
+    AfterViewInit,
+    Component,
+    OnInit,
+    TemplateRef,
+    ViewChild,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { MatTabChangeEvent } from '@angular/material/tabs';
 import { TranslateService } from '@ngx-translate/core';
 import * as rxjs from 'rxjs';
@@ -37,6 +45,7 @@ const MULTI_COLUMN_WIDTH = 900;
     templateUrl: './file-chooser-dialog.component.html',
     styleUrls: ['./file-chooser-dialog.component.scss'],
     providers: [BreadcrumbsService],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class FileChooserDialogComponent implements OnInit, AfterViewInit {

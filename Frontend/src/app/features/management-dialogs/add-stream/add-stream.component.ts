@@ -1,4 +1,11 @@
-import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    Input,
+    Output,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import {
     AuthorityProfile,
     DialogButton,
@@ -24,6 +31,7 @@ import { UIAnimation } from 'ngx-edu-sharing-ui';
         trigger('fade', UIAnimation.fade()),
         trigger('cardAnimation', UIAnimation.cardAnimation()),
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class AddStreamComponent {

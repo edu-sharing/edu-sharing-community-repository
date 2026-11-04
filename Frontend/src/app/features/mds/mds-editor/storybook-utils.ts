@@ -166,6 +166,9 @@ export class TranslationsServiceMock {
     getLocale(): string {
         return this.translateProvider.currentLang ?? 'de';
     }
+    getLanguage(): string {
+        return this.translateProvider.currentLang ?? 'de';
+    }
 }
 @Injectable()
 export class MdsEditorInstanceServiceMock extends MdsEditorInstanceService {

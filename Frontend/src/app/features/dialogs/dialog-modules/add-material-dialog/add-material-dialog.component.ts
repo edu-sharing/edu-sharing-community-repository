@@ -12,6 +12,7 @@ import {
     SimpleChanges,
     ViewChild,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl } from '@angular/forms';
@@ -63,6 +64,7 @@ function folderSize(folder: DroppedFolder): number {
         trigger('cardAnimation', UIAnimation.cardAnimation()),
         trigger('openOverlay', UIAnimation.openOverlay()),
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class AddMaterialDialogComponent implements OnInit, OnChanges {

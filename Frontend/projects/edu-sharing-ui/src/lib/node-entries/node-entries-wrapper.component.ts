@@ -21,6 +21,7 @@ import {
     Type,
     ViewChild,
     ViewContainerRef,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { BehaviorSubject, interval, Subject } from 'rxjs';
 import {
@@ -84,6 +85,7 @@ import { TreeNodeService } from './node-entries-tree/tree-node.service';
         NodeEntriesTemplatesService,
         TreeNodeService,
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>

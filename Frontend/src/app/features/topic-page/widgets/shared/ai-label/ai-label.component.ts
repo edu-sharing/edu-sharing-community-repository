@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
 
@@ -6,6 +6,7 @@ import { EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
     selector: 'es-ai-label',
     imports: [EduSharingUiCommonModule, TranslateModule],
     templateUrl: './ai-label.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./ai-label.component.scss'],
 })
 export class AiLabelComponent {

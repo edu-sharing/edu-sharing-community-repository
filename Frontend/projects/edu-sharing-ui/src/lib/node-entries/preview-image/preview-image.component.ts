@@ -6,6 +6,7 @@ import {
     SimpleChanges,
     ViewChild,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { NodeHelperService } from '../../services/node-helper.service';
@@ -21,6 +22,7 @@ import { NodesRightMode } from '../../types/option-item';
     selector: 'es-preview-image',
     templateUrl: './preview-image.component.html',
     styleUrls: ['./preview-image.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class PreviewImageComponent<T extends Node> implements OnChanges {

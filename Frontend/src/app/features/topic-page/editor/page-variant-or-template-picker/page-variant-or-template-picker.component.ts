@@ -14,6 +14,7 @@ import {
     ViewChild,
     WritableSignal,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { SortDirection } from '@angular/material/sort';
@@ -101,6 +102,7 @@ type ListedSearch = Omit<PageVariantSearchState, 'selectedNodeId' | 'nodes'>;
         { provide: OptionsHelperServiceAbstract, useClass: OptionsHelperService },
     ],
     templateUrl: 'page-variant-or-template-picker.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['page-variant-or-template-picker.component.scss'],
 })
 export class PageVariantOrTemplatePickerComponent implements AfterViewInit, OnDestroy, OnInit {

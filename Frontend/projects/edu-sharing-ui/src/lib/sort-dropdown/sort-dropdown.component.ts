@@ -1,5 +1,12 @@
 import { trigger } from '@angular/animations';
-import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    Input,
+    Output,
+    ViewChild,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { MatMenu } from '@angular/material/menu';
 import { UIAnimation } from '../util/ui-animation';
 import { ListItem, SortEvent } from '../types/list-item';
@@ -9,6 +16,7 @@ import { ListItem, SortEvent } from '../types/list-item';
     templateUrl: 'sort-dropdown.component.html',
     styleUrls: ['sort-dropdown.component.scss'],
     animations: [trigger('openOverlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class SortDropdownComponent {

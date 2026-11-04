@@ -8,6 +8,7 @@ import {
     Output,
     TemplateRef,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { Router } from '@angular/router';
 import {
@@ -61,6 +62,7 @@ export interface ManagementEvent {
         trigger('fromLeft', UIAnimation.fromLeft()),
         trigger('fromRight', UIAnimation.fromRight()),
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class WorkspaceManagementDialogsComponent {

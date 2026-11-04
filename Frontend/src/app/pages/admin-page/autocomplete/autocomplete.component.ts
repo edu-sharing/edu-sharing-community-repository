@@ -6,6 +6,7 @@ import {
     Output,
     TemplateRef,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 
@@ -14,6 +15,7 @@ import { TranslateService } from '@ngx-translate/core';
     templateUrl: 'autocomplete.component.html',
     styleUrls: ['autocomplete.component.scss'],
     host: { '(keydown)': 'handleKeyDown($event)' },
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class AutocompleteComponent {

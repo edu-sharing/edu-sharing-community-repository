@@ -1,4 +1,4 @@
-import { Component, NgZone, OnDestroy, inject } from '@angular/core';
+import { Component, NgZone, OnDestroy, inject, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -16,6 +16,7 @@ import { CreateLtiToolDialogData, CreateLtiToolDialogResult } from './create-lti
     selector: 'es-create-lti-tool-dialog',
     imports: [FormsModule, MatFormFieldModule, MatInputModule, TranslateModule],
     templateUrl: './create-lti-tool-dialog.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./create-lti-tool-dialog.component.scss'],
 })
 export class CreateLtiToolDialogComponent implements OnDestroy {

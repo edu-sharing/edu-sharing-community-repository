@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
@@ -16,6 +16,7 @@ import { Node, NodeService } from 'ngx-edu-sharing-api';
     selector: 'es-mds-editor-widget-nodefilter',
     templateUrl: './mds-editor-widget-nodefilter.component.html',
     styleUrls: ['./mds-editor-widget-nodefilter.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class MdsEditorWidgetNodefilterComponent extends MdsEditorWidgetBase implements OnInit {

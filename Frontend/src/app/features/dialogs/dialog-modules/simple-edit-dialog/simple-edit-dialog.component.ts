@@ -1,4 +1,4 @@
-import { Component, ViewChild, inject } from '@angular/core';
+import { Component, ViewChild, inject, ChangeDetectionStrategy } from '@angular/core';
 import { LocalEventsService } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
 import { Observable } from 'rxjs';
@@ -24,6 +24,7 @@ import { SimpleEditMetadataComponent } from './simple-edit-metadata/simple-edit-
     selector: 'es-simple-edit-dialog',
     templateUrl: './simple-edit-dialog.component.html',
     styleUrls: ['./simple-edit-dialog.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class SimpleEditDialogComponent {

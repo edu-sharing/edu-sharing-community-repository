@@ -9,6 +9,7 @@ import {
     ViewChild,
     WritableSignal,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { DEFAULT, SessionStorageService } from 'ngx-edu-sharing-api';
 import { Helper, MdsExtendedValues, OptionItem } from 'ngx-edu-sharing-ui';
@@ -34,6 +35,7 @@ interface Template {
     providers: [],
     templateUrl: './metadata-template-management.component.html',
     styleUrls: ['./metadata-template-management.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SharedModule, MdsModule],
 })
 export class MetadataTemplateManagementComponent implements OnInit {

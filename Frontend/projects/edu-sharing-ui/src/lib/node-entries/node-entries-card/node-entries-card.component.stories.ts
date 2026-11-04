@@ -37,7 +37,7 @@ import { Injectable } from '@angular/core';
 import { NodeEntriesModule } from '../node-entries.module';
 import { ListItem } from '../../types/list-item';
 import { ListOptions } from '../entries-model';
-import { Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 
 @Injectable()
 export class AuthenticationServiceMock implements Partial<AuthenticationService> {
@@ -57,6 +57,8 @@ export class NodeEntriesServiceMock implements Partial<NodeEntriesService<any>> 
     elementInteractionType = InteractionType.Emitter;
     checkbox = true;
     selection = new CustomSelectionModel<any>();
+    // Option buttons re-evaluate their state whenever this stream emits.
+    options$ = new BehaviorSubject<ListOptions>(null);
     get columns(): ListItem[] {
         return DefaultColumns.Default;
     }
@@ -77,6 +79,9 @@ export class NodeEntriesServiceMockApply extends NodeEntriesServiceMock {
 
 @Injectable()
 export class ConfigServiceMockRating implements Partial<ConfigService> {
+    public async get<T = string>(name: string, defaultValue?: T): Promise<T> {
+        return defaultValue;
+    }
     public instant<T = string>(name: string, defaultValue?: T): T {
         return 'stars' as T;
     }

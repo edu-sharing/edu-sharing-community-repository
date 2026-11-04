@@ -1,4 +1,11 @@
-import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    inject,
+    Input,
+    Output,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import {
     DialogButton,
     RestAdminService,
@@ -21,6 +28,7 @@ import { AuthorityNamePipe, UIAnimation } from 'ngx-edu-sharing-ui';
         trigger('fade', UIAnimation.fade()),
         trigger('cardAnimation', UIAnimation.cardAnimation()),
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class ToolpermissionManagerComponent {

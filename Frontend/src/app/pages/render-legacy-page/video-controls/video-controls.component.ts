@@ -1,6 +1,15 @@
 import { catchError, filter, first, map, tap } from 'rxjs/operators';
 import { trigger } from '@angular/animations';
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, inject } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    Input,
+    OnDestroy,
+    OnInit,
+    Output,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { NgxSliderModule, Options } from '@angular-slider/ngx-slider';
 import { of, ReplaySubject } from 'rxjs';
@@ -27,6 +36,7 @@ interface VideoControlsValues {
     templateUrl: 'video-controls.component.html',
     styleUrls: ['video-controls.component.scss'],
     animations: [trigger('fromRight', UIAnimation.fromRight())],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [DurationPipe, SharedModule, NgxSliderModule],
 })
 export class VideoControlsComponent implements OnInit, OnDestroy {

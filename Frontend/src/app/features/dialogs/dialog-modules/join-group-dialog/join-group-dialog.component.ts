@@ -1,4 +1,11 @@
-import { Component, ElementRef, OnInit, ViewChild, inject } from '@angular/core';
+import {
+    Component,
+    ElementRef,
+    OnInit,
+    ViewChild,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import {
     DialogButton,
     Group,
@@ -24,6 +31,7 @@ enum Step {
     selector: 'es-join-group-dialog',
     templateUrl: './join-group-dialog.component.html',
     styleUrls: ['./join-group-dialog.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class JoinGroupDialogComponent implements OnInit {

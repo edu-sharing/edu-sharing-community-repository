@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, inject } from '@angular/core';
+import { Component, Input, OnChanges, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Assignment, GenericAuthority, Node, Submission } from 'ngx-edu-sharing-api';
 import { CustomFieldSpecialType, NodeEntriesGlobalService } from '../node-entries-global.service';
 import { NodeHelperService } from '../../services/node-helper.service';
@@ -14,6 +14,7 @@ import { NodeEntriesDataType } from '../data-type';
     selector: 'es-node-type-badge',
     templateUrl: './node-type-badge.component.html',
     styleUrls: ['./node-type-badge.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class NodeTypeBadgeComponent implements OnChanges {

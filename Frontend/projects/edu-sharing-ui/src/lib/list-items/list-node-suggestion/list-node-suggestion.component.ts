@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ListWidget } from '../list-widget';
 import { ListItem } from '../../types/list-item';
 import { MdsService, NodeSuggestion } from 'ngx-edu-sharing-api';
@@ -8,6 +8,7 @@ import { BehaviorSubject } from 'rxjs';
     selector: 'es-list-node-suggestion',
     templateUrl: './list-node-suggestion.component.html',
     styleUrls: ['./list-node-suggestion.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class ListNodeSuggestionComponent extends ListWidget implements OnInit {

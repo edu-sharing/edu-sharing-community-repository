@@ -1,4 +1,4 @@
-import { Component, ViewChild, inject } from '@angular/core';
+import { Component, ViewChild, inject, ChangeDetectionStrategy } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { Node, NodeService } from 'ngx-edu-sharing-api';
 import {
@@ -35,6 +35,7 @@ type WorkflowReceiver = Authority;
     selector: 'es-workflow-dialog',
     templateUrl: './workflow-dialog.component.html',
     styleUrls: ['./workflow-dialog.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class WorkflowDialogComponent {

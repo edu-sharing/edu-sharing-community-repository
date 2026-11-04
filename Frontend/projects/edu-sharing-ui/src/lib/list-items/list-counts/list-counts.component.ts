@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ListWidget } from '../list-widget';
 import { ListItem } from '../../types/list-item';
 import { StatisticsGroup } from 'ngx-edu-sharing-api';
@@ -7,6 +7,7 @@ import { StatisticsGroup } from 'ngx-edu-sharing-api';
     selector: 'es-list-counts',
     templateUrl: './list-counts.component.html',
     styleUrls: ['./list-counts.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class ListCountsComponent extends ListWidget {

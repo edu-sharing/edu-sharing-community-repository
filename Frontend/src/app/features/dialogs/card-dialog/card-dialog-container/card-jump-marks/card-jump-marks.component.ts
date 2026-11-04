@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { JumpMark } from '../../../../../services/jump-marks.service';
 
 /**
@@ -8,6 +8,7 @@ import { JumpMark } from '../../../../../services/jump-marks.service';
     selector: 'es-card-jump-marks',
     templateUrl: './card-jump-marks.component.html',
     styleUrls: ['./card-jump-marks.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class CardJumpMarksComponent {

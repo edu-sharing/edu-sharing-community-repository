@@ -8,7 +8,10 @@
 </span>
 } @case ('groupType') {
 <span>
-  {{ 'PERMISSIONS.GROUP_TYPE.' + $any(getNode()).profile?.groupType | translate }}
+  {{
+    'PERMISSIONS.GROUP_TYPE.' + $safeNavigationMigration($any(getNode()).profile?.groupType)
+      | translate
+  }}
 </span>
 } @default {
 <span>
@@ -133,7 +136,7 @@
   @if (provideLabel) {
   <span class="cdk-visually-hidden">{{ 'NODE.cclom:duration' | translate }}:</span>
   }
-  {{ $any(getNode()).properties['cclom:duration']?.[0] | formatDuration }}
+  {{ $safeNavigationMigration($any(getNode()).properties['cclom:duration']?.[0]) | formatDuration }}
 </span>
 } @case ('ccm:collection_proposal_status') {
 <span [matTooltip]="provideLabel ? (getI18n(item) | translate) : null">
@@ -142,7 +145,7 @@
   }
   <!-- use node instead of getNode() to access the raw proposal data! -->
   {{
-                    'PROPOSAL_STATUS.' + $any(node).properties['ccm:collection_proposal_status']?.[0]
+                    'PROPOSAL_STATUS.' + $safeNavigationMigration($any(node).properties['ccm:collection_proposal_status']?.[0])
                     | translate: { fallback: '' }
   }}
 </span>

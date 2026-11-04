@@ -1,4 +1,4 @@
-import { Component, Input, inject } from '@angular/core';
+import { Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
 import { WorkflowDefinition } from 'ngx-edu-sharing-ui';
 import { WorkflowEntry } from '../../../../../core-module/rest/data-object';
 import { NodeHelperService } from '../../../../../services/node-helper.service';
@@ -7,6 +7,7 @@ import { NodeHelperService } from '../../../../../services/node-helper.service';
     selector: 'es-workflow-list',
     templateUrl: 'workflow-history.component.html',
     styleUrls: ['workflow-history.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class WorkflowListComponent {

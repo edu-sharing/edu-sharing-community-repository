@@ -12,6 +12,7 @@ import {
     signal,
     ViewEncapsulation,
     WritableSignal,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup } from '@angular/forms';
@@ -33,6 +34,7 @@ export type IframeConfigForm = {
     imports: [SafeUrlPipe, SharedModule, WidgetConfigurationButtonsComponent],
     schemas: [CUSTOM_ELEMENTS_SCHEMA],
     templateUrl: './iframe-widget.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./iframe-widget.component.scss'],
 })
 export class IframeWidgetComponent implements WidgetComponentInterface {

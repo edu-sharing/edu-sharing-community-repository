@@ -7,6 +7,7 @@ import {
     Output,
     ViewChild,
     inject,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
 import { ConfigService, ConfigTutorial } from 'ngx-edu-sharing-api';
@@ -24,6 +25,7 @@ interface Dimensions {
     templateUrl: 'tutorial.component.html',
     styleUrls: ['tutorial.component.scss'],
     animations: [trigger('fade', UIAnimation.fade())],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class TutorialComponent {

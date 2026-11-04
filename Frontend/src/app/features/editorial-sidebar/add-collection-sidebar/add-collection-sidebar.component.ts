@@ -1,4 +1,4 @@
-import { Component, inject, input } from '@angular/core';
+import { Component, inject, input, ChangeDetectionStrategy } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { SharedModule } from '../../../shared/shared.module';
 import {
@@ -22,6 +22,7 @@ type AddCollectionChoice = {
     selector: 'es-add-collection-sidebar',
     templateUrl: 'add-collection-sidebar.component.html',
     styleUrls: ['add-collection-sidebar.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SharedModule],
 })
 export class AddCollectionSidebarComponent {

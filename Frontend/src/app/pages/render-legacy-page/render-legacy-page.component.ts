@@ -3,7 +3,6 @@ import { Location, PlatformLocation } from '@angular/common';
 import {
     AfterViewInit,
     Component,
-    ComponentFactoryResolver,
     ElementRef,
     EventEmitter,
     HostListener,
@@ -16,6 +15,7 @@ import {
     ViewChild,
     ViewContainerRef,
     inject,
+    ChangeDetectionStrategy,
     DestroyRef,
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
@@ -104,6 +104,7 @@ export type SpecialRenderTemplate = 'revoked' | null;
         MdsEditorInstanceService,
         ViewInstanceService,
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     animations: [trigger('fadeFast', UIAnimation.fade(UIAnimation.ANIMATION_TIME_FAST))],
 })
 export class RenderLegacyPageComponent implements EventListener, OnInit, OnDestroy, AfterViewInit {
@@ -127,7 +128,6 @@ export class RenderLegacyPageComponent implements EventListener, OnInit, OnDestr
     private injector = inject(Injector);
     private cardServcie = inject(CardService);
     private viewContainerRef = inject(ViewContainerRef);
-    private componentFactoryResolver = inject(ComponentFactoryResolver);
     private cardDialogService = inject(CardDialogService);
     private dialogsService = inject(DialogsService);
     private frame = inject(FrameEventsService);
