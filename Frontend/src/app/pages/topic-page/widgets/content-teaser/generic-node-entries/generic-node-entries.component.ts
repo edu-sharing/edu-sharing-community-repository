@@ -249,7 +249,6 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
     // criteria extension related fields
     private propertyToTaxonomiesMatching: Map<string, string[]> = new Map<string, string[]>([
         ['ccm:curriculum', [this.TOPICS_TAXONOMY_URL]],
-        ['virtual:collection_id_primary', [this.TOPICS_TAXONOMY_URL]],
         ['virtual:oeh_lrt', [this.LRT_TAXONOMY_URL, this.OEH_LRT_TAXONOMY_URL]],
         [
             'virtual:taxonid',
@@ -463,12 +462,18 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
         const resetDueToSortChange: boolean =
             JSON.stringify(changes.sort?.previousValue ?? null) !==
             JSON.stringify(changes.sort?.currentValue ?? null);
+        // a requested new search may find other or reordered nodes, so it starts over as well
+        const resetDueToSearchUpdate: boolean =
+            !!changes.lastSearchUpdate && !changes.lastSearchUpdate.firstChange;
         // update the criteria if a custom type instance exists
         if (this.customTypeInstance && changes.criteria) {
             this.customTypeInstance.criteria = changes.criteria.currentValue;
         }
         await this.setDataSource(
-            resetOnFirstLoad || resetDueToCriteriaChange || resetDueToSortChange,
+            resetOnFirstLoad ||
+                resetDueToCriteriaChange ||
+                resetDueToSortChange ||
+                resetDueToSearchUpdate,
         );
         // workaround for updating showAlways options: override customOptions variable
         this.customOptions = this.retrieveCustomOptions();

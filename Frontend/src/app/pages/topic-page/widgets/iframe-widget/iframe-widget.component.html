@@ -33,24 +33,47 @@
     <mat-slide-toggle formControlName="confirmation" class="toggle-input">
       {{ i18nPrefix + 'SHOW_CONFIRMATION' | translate }}
     </mat-slide-toggle>
+    <div class="unsaved-changes" role="status">
+      @if (hasUnsavedChanges()) {
+      <es-info-message mode="warning">
+        {{ i18nPrefix + 'UNSAVED_CHANGES' | translate }}
+      </es-info-message>
+      }
+    </div>
     <div class="iframe-buttons">
       <button mat-raised-button type="button" (click)="showPreview()">
-        {{ i18nPrefix + (previewConfig ? 'UPDATE_PREVIEW' : 'SHOW_PREVIEW') | translate }}
+        {{ i18nPrefix + (previewConfig() ? 'UPDATE_PREVIEW' : 'SHOW_PREVIEW') | translate }}
       </button>
-      <button mat-raised-button color="primary" type="submit" (click)="saveConfig()">
+      <button
+        mat-raised-button
+        color="primary"
+        type="submit"
+        [disabled]="!hasUnsavedChanges() || updateInProgress()"
+        (click)="saveConfig()"
+      >
         {{ i18nPrefix + 'SAVE_CONFIG' | translate }}
       </button>
     </div>
   </form>
-  } @if ((!editMode() && iframeConfig) || (editMode() && previewConfig)) {
+  } @if ((!editMode() && iframeConfig) || (editMode() && previewConfig())) {
   <div class="iframe-display" [class.edit-mode]="editMode()">
     @if (editMode()) {
     <div class="preview-title">
       {{ i18nPrefix + 'PREVIEW_TITLE' | translate }}
     </div>
+    <div class="preview-outdated" role="status">
+      @if (previewOutdated()) {
+      <es-info-message mode="info">
+        {{ i18nPrefix + 'PREVIEW_OUTDATED' | translate }}
+      </es-info-message>
+      }
+    </div>
     }
     <ng-container
-      *ngTemplateOutlet="showIframe; context: { config: editMode() ? previewConfig : iframeConfig }"
+      *ngTemplateOutlet="
+        showIframe;
+        context: { config: editMode() ? previewConfig() : iframeConfig }
+      "
     ></ng-container>
   </div>
   }

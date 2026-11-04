@@ -97,6 +97,8 @@
         "UPDATE_PREVIEW": "Vorschau aktualisieren",
         "PREVIEW_TITLE": "Vorschau des iFrames",
         "SAVE_CONFIG": "Konfiguration speichern",
+        "UNSAVED_CHANGES": "Nicht gespeicherte Änderungen – erst nach dem Speichern sind sie auf der Seite sichtbar.",
+        "PREVIEW_OUTDATED": "Die Vorschau zeigt nicht den aktuellen Stand deiner Eingaben.",
         "SHOW_EXTERNAL_CONTENT": {
           "HEADING": "Ja, externen Inhalt anzeigen",
           "MESSAGE": "Sie sind dabei, externe Inhalte zu laden und anzuzeigen. Dabei werden unter Umständen persönliche Daten an diese übermittelt und dort verarbeitet.",
@@ -382,8 +384,7 @@
       "DELETE": {
         "LABEL": "Abschnitt löschen",
         "MESSAGE": "Willst du diesen Abschnitt wirklich löschen?"
-      },
-      "INVALID_OR_UNKNOWN_WIDGET": "Das Widget ist nicht definiert oder unbekannt."
+      }
     },
     "NO_SWIMLANES": "Bisher wurden noch keine Swimlanes mit Inhalten erstellt.",
     "NO_PAGE_CONFIG": {
@@ -446,8 +447,8 @@
       },
       "COLLECTION_FILTER": {
         "LABEL": "Gefiltert:",
-        "CHIP": "Aktuelle Sammlung",
-        "TOOLTIP": "Nur Themenseiten dieser Sammlung anzeigen"
+        "CHIP": "Aktuelle Sammlung inkl. Untersammlungen",
+        "TOOLTIP": "Nur Themenseiten dieser Sammlung und ihrer Untersammlungen anzeigen"
       },
       "SEARCH_PLACEHOLDER": "Durchsuche Themenseiten-Varianten",
       "SEARCH": "Suche",
@@ -488,6 +489,14 @@
       "BACK_TO_SELECTION": "Zur Auswahl",
       "END": "Vorschau beenden",
       "UNAVAILABLE": "„{{title}}“ ist nicht mehr verfügbar."
+    },
+    "SWIMLANE_COMPLETION": {
+      "INFO": "Abschnitte mit Handlungsbedarf:",
+      "UNFINISHED": "{{count}} nicht fertiggestellt (für Leser ausgeblendet)",
+      "PARTIAL": "{{count}} unvollständig",
+      "JUMP": "Zum nächsten Abschnitt",
+      "LABEL_UNFINISHED": "Nicht fertiggestellt – für Leser ausgeblendet",
+      "LABEL_PARTIAL": "Unvollständig – leere Spalten bleiben für Leser frei"
     }
   }
 }

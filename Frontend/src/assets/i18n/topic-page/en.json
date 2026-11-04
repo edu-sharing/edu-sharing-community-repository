@@ -97,6 +97,8 @@
         "UPDATE_PREVIEW": "Update preview",
         "PREVIEW_TITLE": "iframe preview",
         "SAVE_CONFIG": "Save config",
+        "UNSAVED_CHANGES": "Unsaved changes – they only appear on the page once saved.",
+        "PREVIEW_OUTDATED": "The preview does not show the current state of your input.",
         "SHOW_EXTERNAL_CONTENT": {
           "HEADING": "Yes, show external content",
           "MESSAGE": "You are about to load and display external content. This may result in personal data being transmitted to and processed by external services.",
@@ -382,8 +384,7 @@
       "DELETE": {
         "LABEL": "Delete section",
         "MESSAGE": "Do you really want to delete this section?"
-      },
-      "INVALID_OR_UNKNOWN_WIDGET": "The widget is not defined or unknown."
+      }
     },
     "NO_SWIMLANES": "No swimlanes with content have been created yet.",
     "NO_PAGE_CONFIG": {
@@ -446,8 +447,8 @@
       },
       "COLLECTION_FILTER": {
         "LABEL": "Filtered:",
-        "CHIP": "Current collection",
-        "TOOLTIP": "Show only topic pages of this collection"
+        "CHIP": "Current collection incl. subcollections",
+        "TOOLTIP": "Show only topic pages of this collection and its subcollections"
       },
       "SEARCH_PLACEHOLDER": "Search for topic page variant",
       "SEARCH": "Search",
@@ -488,6 +489,14 @@
       "BACK_TO_SELECTION": "Back to selection",
       "END": "End preview",
       "UNAVAILABLE": "\"{{title}}\" is no longer available."
+    },
+    "SWIMLANE_COMPLETION": {
+      "INFO": "Sections requiring action:",
+      "UNFINISHED": "{{count}} unfinished (hidden from readers)",
+      "PARTIAL": "{{count}} incomplete",
+      "JUMP": "Go to next section",
+      "LABEL_UNFINISHED": "Unfinished – hidden from readers",
+      "LABEL_PARTIAL": "Incomplete – empty columns stay blank for readers"
     }
   }
 }

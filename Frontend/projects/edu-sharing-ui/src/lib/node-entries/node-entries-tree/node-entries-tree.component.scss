@@ -1,8 +1,9 @@
 @use 'sass:color';
 @use '../../../../assets/scss/mixins' as mixins;
 @use '../../../../assets/scss/variables-scss' as vars;
+@use '../mixins' as entries;
 
-$rowMinHeight: 48px;
+$rowMinHeight: entries.$treeNodeRowMinHeight;
 
 :host {
     &.is-loading {
@@ -26,12 +27,7 @@ $rowMinHeight: 48px;
 }
 
 mat-tree-node {
-    min-height: $rowMinHeight;
-    transition: background-color 0.15s ease;
-
-    &:not(.selected):hover {
-        background-color: rgb(var(--primaryBackground50));
-    }
+    @include entries.tree-node-row;
 
     &.selected {
         background: var(--listItemSelectedBackground, #f2fafe);
@@ -209,13 +205,10 @@ mat-tree-node {
         gap: 6px;
 
         .node-title {
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            overflow: hidden;
+            @include entries.tree-node-title;
 
             &.font-bold {
-                font-size: 105%;
-                font-weight: bold;
+                @include entries.tree-node-root-title;
             }
         }
 

@@ -89,6 +89,18 @@
         [src]="sanitizedUrl"
       >
       </iframe>
+      @if (url) {
+      <a
+        mat-flat-button
+        color="primary"
+        class="sodix-origin-link"
+        [href]="url"
+        target="_blank"
+        (click)="onLinkClick()"
+      >
+        <div class="link-label">{{ 'SHARING.LINK' | translate }}<i esIcon="open_in_new"></i></div>
+      </a>
+      }
     </div>
     } @if (embedding === UrlEmbeddings.SERLO && externalId !== '') {
     <iframe

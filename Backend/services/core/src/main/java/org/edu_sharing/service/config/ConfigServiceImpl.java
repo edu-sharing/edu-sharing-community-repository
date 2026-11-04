@@ -109,6 +109,9 @@ public class ConfigServiceImpl implements ConfigService, ApplicationListener<Ref
 
     @Override
     public void deleteContext(String id) throws Exception {
+        if (!AuthorityServiceFactory.getInstance().getLocalService().isGlobalAdmin()) {
+            throw new NotAnAdminException();
+        }
         String eduSharingSystemFolderContext = userEnvironmentTool.getEdu_SharingContextFolder();
         nodeService.removeNode(id, eduSharingSystemFolderContext, false);
         ContextRefreshUtils.refreshContext();
@@ -229,6 +232,9 @@ public class ConfigServiceImpl implements ConfigService, ApplicationListener<Ref
 
     @Override
     public Context createOrUpdateContext(Context context) {
+        if (!AuthorityServiceFactory.getInstance().getLocalService().isGlobalAdmin()) {
+            throw new NotAnAdminException();
+        }
         return AuthenticationUtil.runAsSystem(() -> {
             try {
                 if (context.id == null || !nodeService.exists(context.id)) {

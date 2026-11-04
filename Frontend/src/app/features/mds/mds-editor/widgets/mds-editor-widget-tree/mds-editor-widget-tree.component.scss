@@ -9,6 +9,13 @@
 mat-form-field {
     width: 100%;
 }
+// Moves into the bottom margin of the widget container, so the switch stays next to its field and
+// the margin separates it from the next widget instead.
+.include-subcollections {
+    display: block;
+    margin-top: -1.5em;
+    margin-bottom: 1.75em;
+}
 mat-chip-grid {
     max-height: 84px;
     overflow: hidden;

@@ -24,3 +24,33 @@
         filter: var(--invertSvgFilter, none);
     }
 }
+
+// row of es-node-entries-tree (height + hover); reusable for custom entries placed next to a tree
+$treeNodeRowMinHeight: 48px;
+@mixin tree-node-row {
+    min-height: $treeNodeRowMinHeight;
+    transition: background-color 0.15s ease;
+
+    &:not(.selected):hover {
+        background-color: rgb(var(--primaryBackground50));
+    }
+}
+
+// node type badge as shown inside es-node-entries-tree rows
+@mixin tree-node-badge {
+    @include card-top-bar-badge;
+    @include materialShadowSmall();
+}
+
+// single-line, ellipsized node title of es-node-entries-tree
+@mixin tree-node-title {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+// emphasized title of a top-level (level 0) es-node-entries-tree node
+@mixin tree-node-root-title {
+    font-size: 105%;
+    font-weight: bold;
+}

@@ -63,7 +63,6 @@ import { AuthorityAffiliationPipe } from './pipes/authority-affiliation.pipe';
 import { BitwisePipe } from './pipes/bitwise.pipe';
 import { PermissionNamePipe } from './pipes/permission-name.pipe';
 import { RepositoryIconPipe } from './pipes/repository-icon.pipe';
-import { SafeHtmlPipe } from './pipes/safe-html.pipe';
 import { SplitNewLinesPipe } from './pipes/split-new-lines.pipe';
 import { VersionLabelPipe } from './pipes/version-label.pipe';
 import { SmallCollectionComponent } from './components/small-collection/small-collection.component';
@@ -97,7 +96,6 @@ import { extensionUiProviders } from '../extension/extension-ui-providers';
         RepositoryIconPipe,
         PoweredByComponent,
         RegisterCustomPropertyDirective,
-        SafeHtmlPipe,
         SearchSelectionOverlayComponent,
         SkipTargetDirective,
         SmallCollectionComponent,
@@ -199,7 +197,6 @@ import { extensionUiProviders } from '../extension/extension-ui-providers';
         ReactiveFormsModule,
         RegisterCustomPropertyDirective,
         RouterModule,
-        SafeHtmlPipe,
         SearchSelectionOverlayComponent,
         SkipTargetDirective,
         SmallCollectionComponent,

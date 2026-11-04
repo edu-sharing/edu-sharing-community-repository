@@ -160,6 +160,12 @@ mat-sidenav-container {
         font-weight: 500;
         white-space: nowrap;
     }
+    // static label shown instead of the selection count while only the clipboard has content
+    .clipboard-count {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
 }
 
 .nodeRender {

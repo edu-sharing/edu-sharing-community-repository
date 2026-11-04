@@ -345,11 +345,11 @@ export class SearchPageService implements OnDestroy {
 
     private getAddToCollectionOptions(collection: Node): CustomOptions {
         const addTo = new OptionItem('SEARCH.ADD_INTO_COLLECTION_SHORT', 'layers', (_, nodes) => {
-            void this.mainNavService.getDialogs().addToCollectionList(collection, nodes, true, () =>
-                this.router.navigate([UIConstants.ROUTER_PREFIX + 'collections'], {
-                    queryParams: { id: collection.ref.id },
-                }),
-            );
+            void this.mainNavService
+                .getDialogs()
+                .addToCollectionList(collection, nodes, true, () =>
+                    this.leaveAddToCollection(collection),
+                );
         });
         addTo.elementType = OptionsHelperService.ElementTypesAddToCollection;
         addTo.permissions = [RestConstants.ACCESS_CC_PUBLISH];
@@ -358,9 +358,7 @@ export class SearchPageService implements OnDestroy {
         addTo.group = DefaultGroups.Reuse;
         addTo.showAlways = true;
         const cancel = new OptionItem('CANCEL', 'close', () =>
-            this.router.navigate([UIConstants.ROUTER_PREFIX, 'collections'], {
-                queryParams: { id: collection.ref.id },
-            }),
+            this.leaveAddToCollection(collection),
         );
         cancel.group = DefaultGroups.Delete;
         cancel.elementType = [ElementType.NoneOrUnknown];
@@ -368,6 +366,20 @@ export class SearchPageService implements OnDestroy {
             useDefaultOptions: false,
             addOptions: [cancel, addTo],
         };
+    }
+
+    /**
+     * Workaround for 11.0, superseded in 12.0: returns to the topic page the search was opened
+     * from, otherwise to the collection. Only app-internal paths are accepted as return target.
+     */
+    private leaveAddToCollection(collection: Node): Promise<boolean> {
+        const returnUrl = this.route.snapshot.queryParamMap.get('addToCollectionReturnUrl');
+        if (returnUrl?.startsWith('/') && !returnUrl.startsWith('//')) {
+            return this.router.navigateByUrl(returnUrl);
+        }
+        return this.router.navigate([UIConstants.ROUTER_PREFIX + 'collections'], {
+            queryParams: { id: collection.ref.id },
+        });
     }
 
     applySavedSearch(savedSearch: SavedSearch) {

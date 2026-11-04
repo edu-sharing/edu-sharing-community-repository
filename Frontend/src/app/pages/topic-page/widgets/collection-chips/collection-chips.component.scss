@@ -1,8 +1,12 @@
 @use 'mixins' as mixin;
 @use '../../topic-page-variables' as topicPageVars;
+@use '../../topic-page-common-styles' as topicPageStyles;
 
 :host {
     --collection-chip-tile-bg: #{topicPageVars.$surface-container-lowest};
+    ::ng-deep {
+        @include topicPageStyles.search-highlight-styles;
+    }
 }
 
 .list {

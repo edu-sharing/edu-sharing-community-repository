@@ -28,9 +28,8 @@
       (visibleNodesChanged)="changeVisibleNodes($event, i)"
     >
     </es-generic-widget>
-    } @else {
-    <!-- display a form to select it when being in edit mode -->
-    @if (editMode) {
+    } @else if (editMode) {
+    <!-- no (valid) widget type has been selected yet: editors pick one, readers see an empty tile -->
     <div class="w-100">
       <div class="topic-page-grid-border-container">
         <es-select-widget-type
@@ -40,19 +39,14 @@
         ></es-select-widget-type>
       </div>
     </div>
-    } @if (!editMode) {
-    <es-info-message mode="warning">
-      {{ ('TOPIC_PAGE.SWIMLANE.INVALID_OR_UNKNOWN_WIDGET' | translate) + (gridItem.item || '') }}
-    </es-info-message>
-    } }
-    <!-- no (valid) widget type has been selected yet -->
+    }
   </div>
-  } } @else {
+  } } @else if (editMode) {
+  <!-- no grid has been defined yet: only editors get the form to define one -->
   <div class="topic-page-col-span-6 w-100">
     <div class="topic-page-grid-border-container">
       <es-configure-grid [grid]="grid" (gridUpdated)="updatedGrid($event)"></es-configure-grid>
     </div>
   </div>
   }
-  <!-- no grid has been defined yet -->
 </div>

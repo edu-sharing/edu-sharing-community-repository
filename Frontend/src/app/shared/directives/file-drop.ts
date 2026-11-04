@@ -46,6 +46,10 @@ export class FileDropDirective implements OnInit, OnDestroy {
      * the current element belongs to one already superseded and is ignored, a lost leave is never
      * missed because nothing waits for it, and the leave that does match marks the actual end of
      * the drag.
+     *
+     * Targets are normalized to elements (see `toElement`), since Firefox delivers `dragenter` and
+     * `dragleave` — including the final leave when the drag is cancelled with Esc — to the text node
+     * under the cursor, while `dragover` targets its parent element.
      */
     private currentTarget: EventTarget = null;
     private destroyed = new Subject<void>();
@@ -114,7 +118,7 @@ export class FileDropDirective implements OnInit, OnDestroy {
     };
 
     private onDragLeave = (event: DragEvent) => {
-        if (event.target === this.currentTarget) {
+        if (toElement(event.target) === this.currentTarget) {
             this.leaveDragOver();
         }
     };
@@ -133,7 +137,7 @@ export class FileDropDirective implements OnInit, OnDestroy {
      * Marks `target` as the element the drag sits on and enters the drag-over state.
      */
     private enterDragOver(target: EventTarget): void {
-        this.currentTarget = target;
+        this.currentTarget = toElement(target);
         this.emitFileOver(true);
     }
 
@@ -224,4 +228,15 @@ function addEventListenerUntil<T extends Event>(
 ) {
     target.addEventListener(eventName, callback);
     until.subscribe(() => target.removeEventListener(eventName, callback));
+}
+
+/**
+ * Maps a text node to its parent element, so drag events targeting a text node and its enclosing
+ * element are recognized as concerning the same element.
+ */
+function toElement(target: EventTarget): EventTarget {
+    if (target instanceof Node && target.nodeType !== Node.ELEMENT_NODE && target.parentElement) {
+        return target.parentElement;
+    }
+    return target;
 }

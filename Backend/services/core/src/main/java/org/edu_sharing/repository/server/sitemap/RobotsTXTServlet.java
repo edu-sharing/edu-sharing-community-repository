@@ -8,19 +8,25 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.edu_sharing.spring.servlet.SpringHttpServlet;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 
 
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 public class RobotsTXTServlet extends SpringHttpServlet {
 
     private static Logger logger = Logger.getLogger(RobotsTXTServlet.class);
+
+    @Autowired
+    private LightbendConfigLoader lightbendConfigLoader;
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         try {
 
-            String robots = StringUtils.join(LightbendConfigLoader.get().getStringList("angular.robots"), "\n");
+            String robots = StringUtils.join(lightbendConfigLoader.getConfig().getStringList("angular.robots"), "\n");
             robots = robots.replace("{{sitemap}}",req.getRequestURL().toString().replace("robots.txt","eduservlet/sitemap"));
             resp.getOutputStream().print(robots);
         } catch (Throwable t) {

@@ -137,7 +137,12 @@
   <i esIcon="arrow_forward"></i>
 </ng-template>
 <ng-template #collectionTitle let-node="node">
-  {{ node.properties?.['ccm:collectionshorttitle']?.[0] || node.title }}
+  @let title = node.properties?.['ccm:collectionshorttitle']?.[0] || node.title; @if (searchInput())
+  {
+  <span [innerHTML]="title | highlightSearch : searchInput()"></span>
+  } @else {
+  {{ title }}
+  }
 </ng-template>
 } @else {
 <es-spinner></es-spinner>

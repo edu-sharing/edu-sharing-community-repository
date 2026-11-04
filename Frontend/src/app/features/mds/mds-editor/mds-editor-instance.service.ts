@@ -93,6 +93,11 @@ import { MdsEditorWidgetVersionComponent } from './widgets/mds-editor-widget-ver
 import { Helper } from '../../../core-module/rest/helper';
 import { MdsEditorWidgetCore } from './mds-editor-widget-core.directive';
 import { MdsWidgetTree } from './widgets/mds-editor-widget-tree/tree';
+import {
+    COLLECTION_TREE_PRIMARY_PROPERTY,
+    getCollectionTreeSearchProperty,
+    readCollectionTreeValues,
+} from './widgets/mds-editor-widget-tree/collection-tree/collection-tree-config';
 import { MdsEditorWidgetBase } from './widgets/mds-editor-widget-base';
 import { MdsEditorWidgetErrorComponent } from './widgets/mds-editor-widget-error/mds-editor-widget-error.component';
 import {
@@ -172,6 +177,8 @@ export class MdsEditorInstanceService
         readonly focusTrigger = new Subject<void>();
         readonly meetsDynamicCondition = new BehaviorSubject<boolean>(true);
         readonly setValueExternal = new Subject<string[]>();
+        /** Whether a `collectionTree` widget matches material of sub-collections of its picks. */
+        readonly includeSubcollections = new BehaviorSubject<boolean>(true);
         private hasUnsavedDefault: boolean; // fixed after `ready`
         private initialValues: InitialValues;
         private initialDisplayValues = new BehaviorSubject<MdsValueList>(null);
@@ -367,7 +374,16 @@ export class MdsEditorInstanceService
             if (this.relation === 'suggestions') {
                 this.initialValues = { jointValues: [] };
             } else {
-                const value = values?.[this.definition.id];
+                let value = values?.[this.definition.id];
+                if (this.definition.type === MdsWidgetType.CollectionTree) {
+                    const stored = readCollectionTreeValues(
+                        this.definition.id,
+                        values,
+                        this.primaryCollectionHasOwnWidget(),
+                    );
+                    value = stored.value;
+                    this.includeSubcollections.next(stored.includeSubcollections);
+                }
                 this.initialValues = {
                     jointValues:
                         (mapExtendedValues(value) as string[]) ||
@@ -517,6 +533,30 @@ export class MdsEditorInstanceService
             } else {
                 return this.getRemoteSuggestedValues(searchString);
             }
+        }
+
+        /** Whether a `collectionTree` widget offers to leave out sub-collections of its picks. */
+        canLeaveOutSubcollections(): boolean {
+            return (
+                this.definition.type === MdsWidgetType.CollectionTree &&
+                this.mdsEditorInstanceService?.editorMode === 'search' &&
+                this.definition.id !== COLLECTION_TREE_PRIMARY_PROPERTY &&
+                !this.primaryCollectionHasOwnWidget()
+            );
+        }
+
+        /** Whether another widget of the form holds the primary collection property itself. */
+        private primaryCollectionHasOwnWidget(): boolean {
+            return !!this.mdsEditorInstanceService?.widgets.value?.some(
+                (widget) =>
+                    widget !== this && widget.definition.id === COLLECTION_TREE_PRIMARY_PROPERTY,
+            );
+        }
+
+        /** Switches whether sub-collections match, which moves the value to another property. */
+        setIncludeSubcollections(include: boolean): void {
+            this.includeSubcollections.next(include);
+            this.setValue(this.value$.value);
         }
 
         setValue(value: string[], dirty: boolean = true): void {
@@ -1734,13 +1774,20 @@ export class MdsEditorInstanceService
                         acc[`${property}_from`] = [newValue[0]];
                         acc[`${property}_to`] = [newValue[1]];
                     } else {
-                        if (acc[property]) {
+                        const key =
+                            widget.definition.type === MdsWidgetType.CollectionTree
+                                ? getCollectionTreeSearchProperty(
+                                      property,
+                                      widget.includeSubcollections.value,
+                                  )
+                                : property;
+                        if (acc[key]) {
                             console.error(
                                 'Encountered more than one widget setting the same property',
-                                property,
+                                key,
                             );
                         }
-                        acc[property] = newValue;
+                        acc[key] = newValue;
                     }
                 }
                 return acc;

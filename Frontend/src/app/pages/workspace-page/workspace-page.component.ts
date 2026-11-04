@@ -74,7 +74,10 @@ import {
 import { CardService } from '../../services/card.service';
 import { NodeHelperService } from '../../services/node-helper.service';
 import { Toast } from '../../services/toast';
-import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
+import {
+    BreadcrumbsDropHandler,
+    BreadcrumbsService,
+} from '../../shared/components/breadcrumbs/breadcrumbs.service';
 import { WorkspaceExplorerComponent } from './explorer/explorer.component';
 import { WorkspaceTreeComponent } from './tree/tree.component';
 import { canDragDrop, canDropOnNode } from './workspace-utils';
@@ -125,6 +128,10 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy,
     private searchField = inject(SearchFieldService);
     private session = inject(SessionStorageService);
     private storage = inject(TemporaryStorageService);
+    /** Cut/copied nodes; while not empty the bottom bar offers "paste". */
+    readonly clipboard = this.storage.clipboard;
+    /** Whether the clipboard-nodes overlay above the bottom bar is open. */
+    clipboardOverlayOpen = false;
     private userService = inject(UserService);
     private toast = inject(Toast);
     private toolService = inject(RestToolService);
@@ -237,6 +244,11 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy,
     displayType: NodeEntriesDisplayType = null;
     reorderDialog: boolean;
     private readonly destroyed$ = new Subject<void>();
+    /** allow global/custom breadcrumbs (e.g. of extensions) to act as drop targets as well */
+    private readonly breadcrumbsDropHandler: BreadcrumbsDropHandler = {
+        canDropNodes: (dragData) => this.canDropOnBreadcrumb(dragData),
+        dropElement: (target, source) => this.handleDropOnBreadcrumb({ target, source }),
+    };
     private loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed$ });
 
     constructor() {
@@ -250,11 +262,13 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy,
     }
 
     ngOnInit(): void {
+        this.breadcrumbsService.setDropHandler(this.breadcrumbsDropHandler);
         this.registerScroll();
         this.registerUpdateMainNav();
     }
 
     ngOnDestroy(): void {
+        this.breadcrumbsService.clearDropHandler(this.breadcrumbsDropHandler);
         this.destroyed$.next();
         this.destroyed$.complete();
         // the clipboard is kept when leaving the workspace, it is also used by the collections page
@@ -1092,7 +1106,9 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy,
     }
 
     private canPasteInCurrentLocation() {
-        const clip = this.storage.get('workspace_clipboard') as ClipboardObject;
+        const clip = this.storage.get(
+            TemporaryStorageService.WORKSPACE_CLIPBOARD,
+        ) as ClipboardObject;
         return (
             this.currentFolder &&
             !this.searchQuery &&
@@ -1151,6 +1167,20 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy,
     /** Display type of the current view, used by the selection overlay (recycle is always a table). */
     get selectionDisplayType() {
         return this.root === 'RECYCLE' ? NodeEntriesDisplayType.Table : this.displayType;
+    }
+
+    /** Whether the bottom bar is shown without a selection, to offer pasting the clipboard. */
+    showClipboardBar(): boolean {
+        return this.isLoggedIn && this.root !== 'RECYCLE' && !!this.clipboard()?.nodes?.length;
+    }
+
+    clearClipboard() {
+        this.storage.remove(TemporaryStorageService.WORKSPACE_CLIPBOARD);
+        this.clipboardOverlayOpen = false;
+    }
+
+    removeFromClipboard(node: Node) {
+        this.storage.removeFromClipboard(node);
     }
 
     clearSelection() {

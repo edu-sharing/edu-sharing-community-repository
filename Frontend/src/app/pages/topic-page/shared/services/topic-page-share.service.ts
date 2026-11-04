@@ -164,7 +164,13 @@ export class TopicPageShareService {
         if (!this.latestUrlFragment) {
             return false;
         }
-        const element: HTMLElement = document.getElementById(this.latestUrlFragment);
+        return this.scrollToElement(document.getElementById(this.latestUrlFragment));
+    }
+
+    /**
+     * Scrolls the given element of the page into view and focuses it.
+     */
+    scrollToElement(element: HTMLElement | null): boolean {
         const scrollContainer: HTMLElement = this.scrollContainer();
         if (!element || !scrollContainer) {
             return false;

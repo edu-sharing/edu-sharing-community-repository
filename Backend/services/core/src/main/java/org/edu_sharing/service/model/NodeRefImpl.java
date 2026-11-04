@@ -43,6 +43,11 @@ public class NodeRefImpl implements NodeRef {
      * is this node ref publicly accessible, e.g. shared with "GROUP_EVERYONE"
      */
     private Boolean isPublic;
+
+    /**
+     * can anyone besides the owner access this node (incl. inherited permissions), null if unknown (not from the index)
+     */
+    private Boolean sharedWithOthers;
     private List<String> aspects;
 
     private String owner;

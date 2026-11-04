@@ -47,6 +47,10 @@ export class LicenseDetailsComponent implements OnChanges {
     copyrightType: string;
     eduDownload: boolean;
     rightsDescription: string;
+    titleOfWork: string;
+    sourceUrl: string;
+    profileUrl: string;
+
     ngOnChanges(changes: SimpleChanges) {
         // Set the `draggable` attribute when this directive is active.
         if (changes.nodes?.currentValue || changes.properties?.currentValue) {
@@ -91,6 +95,13 @@ export class LicenseDetailsComponent implements OnChanges {
         if (license === 'CUSTOM') this.type = license;
 
         this.rightsDescription = this.getValueForAll(RestConstants.LOM_PROP_RIGHTS_DESCRIPTION);
+        // reference information of the original work, also see @MetadataTemplateRenderer
+        this.titleOfWork = this.getValueForAll(RestConstants.CCM_PROP_LICENSE_TITLE_OF_WORK);
+        this.sourceUrl = this.getValueForAll(RestConstants.CCM_PROP_LICENSE_SOURCE_URL);
+        this.profileUrl = this.getValueForAll(RestConstants.CCM_PROP_LICENSE_PROFILE_URL);
+        if (this.profileUrl && !this.profileUrl.includes('://')) {
+            this.profileUrl = 'http://' + this.profileUrl;
+        }
     }
 
     private getValueForAll(
