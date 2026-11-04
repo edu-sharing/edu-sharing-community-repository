@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Sorting by the values a node has inside the active scope (F3, sort strategy "runtime"): a painless runtime field
+ * Sorting by the values a node has inside the active scope (F3): a painless runtime field
  * takes the value of the scope entry and falls back to the original value. Editors sort by every replaced field,
  * readers only by the public ones of published entries (the same values {@link ScopeNodeView} shows them).
  * <p>
@@ -76,7 +76,7 @@ public class ScopeSort {
     }
 
     boolean applyInternal(SearchRequest.Builder builder, String property, String field, SortOrder order) {
-        if (!scopesSettings.isEnabled() || scopesSettings.getSortStrategyValue() != ScopesSettings.SortStrategy.RUNTIME) {
+        if (!scopesSettings.isEnabled()) {
             return false;
         }
         Optional<ActiveScope> scope = scopeContextResolver.resolve();

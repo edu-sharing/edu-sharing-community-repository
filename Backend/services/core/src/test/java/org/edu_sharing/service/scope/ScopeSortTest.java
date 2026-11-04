@@ -23,9 +23,6 @@ class ScopeSortTest {
     @BeforeEach
     void enable() {
         settings.setEnabled(true);
-        ScopesSettings.Sort sort = new ScopesSettings.Sort();
-        sort.setStrategy("runtime");
-        settings.setSort(sort);
     }
 
     private void activeScope(ScopeRole role) {
@@ -77,7 +74,7 @@ class ScopeSortTest {
         assertFalse(underTest.applyInternal(new SearchRequest.Builder(), "cclom:title", "properties.cclom:title.keyword", SortOrder.Asc));
 
         activeScope(ScopeRole.EDITOR);
-        settings.getSort().setStrategy("merge");
+        settings.setEnabled(false);
         assertFalse(underTest.applyInternal(new SearchRequest.Builder(), "cclom:title", "properties.cclom:title.keyword", SortOrder.Asc));
     }
 }
