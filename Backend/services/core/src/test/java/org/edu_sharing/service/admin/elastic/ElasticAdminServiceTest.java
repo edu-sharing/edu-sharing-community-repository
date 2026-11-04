@@ -31,9 +31,9 @@ import static org.mockito.Mockito.when;
 class ElasticAdminServiceTest {
     private static final String HITS = """
             {"_scroll_id":"scroll1","hits":{"total":{"value":2},"hits":[
-              {"_index":"workspace_11.0","_id":"1","_source":{"nodeRef":{"id":"node-1"},"parentRef":{"id":"parent-1"},"properties":{"cm:name":"a.txt","cclom:general_keyword":["k1","k2"]}}},
-              {"_index":"workspace_11.0","_id":"2","_source":{"nodeRef":{"id":"node-2"},"properties":{"cm:name":"b.txt"}}}
-            ]}}""";
+              {"_index":"%1$s","_id":"1","_source":{"nodeRef":{"id":"node-1"},"parentRef":{"id":"parent-1"},"properties":{"cm:name":"a.txt","cclom:general_keyword":["k1","k2"]}}},
+              {"_index":"%1$s","_id":"2","_source":{"nodeRef":{"id":"node-2"},"properties":{"cm:name":"b.txt"}}}
+            ]}}""".formatted(SearchServiceElastic.WORKSPACE_INDEX);
     private static final String EMPTY = """
             {"_scroll_id":"scroll1","hits":{"total":{"value":2},"hits":[]}}""";
 
@@ -50,7 +50,7 @@ class ElasticAdminServiceTest {
     @BeforeEach
     void setup() throws Exception {
         underTest = new ElasticAdminService(searchServiceElastic, nodeService, notificationService);
-        when(searchServiceElastic.performRawRequest(eq("POST"), startsWith("workspace_11.0/_search?scroll="), anyString())).thenReturn(HITS);
+        when(searchServiceElastic.performRawRequest(eq("POST"), startsWith(SearchServiceElastic.WORKSPACE_INDEX + "/_search?scroll="), anyString())).thenReturn(HITS);
         when(searchServiceElastic.performRawRequest(eq("POST"), eq("_search/scroll"), anyString())).thenReturn(EMPTY);
         when(searchServiceElastic.performRawRequest(eq("DELETE"), eq("_search/scroll"), anyString())).thenReturn("{}");
     }
@@ -125,9 +125,9 @@ class ElasticAdminServiceTest {
 
     @Test
     void exportDump() throws Throwable {
-        when(searchServiceElastic.performRawRequest("GET", "workspace_11.0/_mapping", null)).thenReturn("{\"workspace_11.0\":{\"mappings\":{}}}");
-        when(searchServiceElastic.performRawRequest("GET", "workspace_11.0/_settings", null)).thenReturn("{\"workspace_11.0\":{\"settings\":{}}}");
-        when(searchServiceElastic.performRawRequest("GET", "workspace_11.0/_alias", null)).thenReturn("{\"workspace_11.0\":{\"aliases\":{}}}");
+        when(searchServiceElastic.performRawRequest("GET", SearchServiceElastic.WORKSPACE_INDEX + "/_mapping", null)).thenReturn("{\"" + SearchServiceElastic.WORKSPACE_INDEX + "\":{\"mappings\":{}}}");
+        when(searchServiceElastic.performRawRequest("GET", SearchServiceElastic.WORKSPACE_INDEX + "/_settings", null)).thenReturn("{\"" + SearchServiceElastic.WORKSPACE_INDEX + "\":{\"settings\":{}}}");
+        when(searchServiceElastic.performRawRequest("GET", SearchServiceElastic.WORKSPACE_INDEX + "/_alias", null)).thenReturn("{\"" + SearchServiceElastic.WORKSPACE_INDEX + "\":{\"aliases\":{}}}");
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         underTest.export(request(ElasticExportFormat.dump, null), out);
 
