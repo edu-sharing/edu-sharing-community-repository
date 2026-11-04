@@ -6,7 +6,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 20px;
+    padding: 0 vars.$sidebarPadding;
     gap: 5px;
     height: var(--editorialHeaderHeight);
     @include mixins.materialShadowBottom();
@@ -101,7 +101,7 @@
     position: relative;
 }
 .option {
-    padding: 0 20px;
+    padding: 0 vars.$sidebarPadding;
     height: 100%;
     &.option-VERSION_MANAGEMENT,
     &.option-PREVIEW,

@@ -1,0 +1,15 @@
+:host {
+    display: block;
+    width: 100%;
+    // without a banner no space (see host binding)
+    &.banner-hidden {
+        display: none;
+    }
+}
+
+.content {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}

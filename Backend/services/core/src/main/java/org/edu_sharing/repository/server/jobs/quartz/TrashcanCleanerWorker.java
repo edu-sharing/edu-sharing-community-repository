@@ -11,10 +11,12 @@ import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import com.hazelcast.internal.serialization.SerializableByConvention;
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.model.ContentModel;
+import org.alfresco.repo.node.archive.NodeArchiveService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.checkerframework.checker.units.qual.C;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.service.search.SearchService;
@@ -53,13 +55,16 @@ public class TrashcanCleanerWorker {
         execute(0);
 
         log.info("collected {} nodes to delete", list.size());
+        // purge via the archive service: a plain nodeService.deleteNode in the archive store is ignored by
+        // storesToIgnorePolicies and would skip all purge behaviours (share infos, scope entries)
+        NodeArchiveService nodeArchiveService = AlfAppContextGate.getApplicationContext().getBean("nodeArchiveService", NodeArchiveService.class);
         int deleted = 0;
         int failed = 0;
         for (NodeRef nodeRef : list) {
             log.info("deleteing from archive:{}", nodeRef);
             if (this.execute) {
                 try {
-                    nodeService.deleteNode(nodeRef);
+                    nodeArchiveService.purgeArchivedNode(nodeRef);
                     deleted++;
                 } catch (Exception e) {
                     /*

@@ -1,6 +1,7 @@
 import { OptionData, OptionsHelperComponents } from '../options-helper-data.service';
 import {
     Constrain,
+    DefaultGroups,
     ElementType,
     HideMode,
     OptionItem,
@@ -171,6 +172,14 @@ export abstract class OptionsHelperService {
         objects: Node[] | any[],
         data: OptionData,
     ) {
+        // toggles (view state) are not bound to the selection and stay available
+        if (
+            data?.allResultsSelected &&
+            !option.supportsAllResults &&
+            option.group !== DefaultGroups.Toggles
+        ) {
+            return false;
+        }
         if (
             option.elementType?.length > 0 &&
             !this.getType(objects).every((t) => option.elementType.includes(t))

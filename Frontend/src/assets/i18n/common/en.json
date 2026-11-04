@@ -187,6 +187,7 @@
     "TOOLPERMISSION_METADATA_METHODOLOGY": "Show methodology tab when sorting materials.",
     "TOOLPERMISSION_MANAGE_QA": "Manage quality assurance of materials",
     "TOOLPERMISSION_MANAGE_CONTRIBUTORS": "Manage, add and delete contributors (authors, organizations) with persistent ids.",
+    "TOOLPERMISSION_SCOPE_WRITE": "Create, change and remove scope entries on materials (single and bulk).",
     "TOOLPERMISSION_BAPI": "Access to the Bildungs-API (BAPI) of the repository"
   },
   "NO_WRITE_PERMISSIONS": "No permissions",
@@ -254,7 +255,8 @@
     "SECURE_SHORT": "Safe",
     "PERMISSIONS_SHORT": "Users",
     "LOGIN_SHORT": "Login",
-    "ADMIN_SHORT": "Admin"
+    "ADMIN_SHORT": "Admin",
+    "EDITORIAL_SCOPE": "Editorial office"
   },
   "WORKFLOW": {
     "100_unchecked": "No status",
@@ -268,7 +270,11 @@
     "CONFIGURE_COLUMNS": "Configure columns",
     "COLUMN_ACTIONS": "Actions",
     "ENTRY_COUNT": "{{total}} entries",
-    "ENTRY_COUNT_SELECTED": "{{selected}} of {{total}} selected"
+    "ENTRY_COUNT_SELECTED": "{{selected}} of {{total}} selected",
+    "ALL_LOADED_SELECTED": "All {{count}} displayed items are selected.",
+    "SELECT_ALL_RESULTS": "Select all {{total}} items",
+    "ALL_RESULTS_SELECTED": "All {{total}} items are selected.",
+    "CLEAR_SELECTION": "Clear selection"
   },
   "PAGINATOR": {
     "getRangeLabel": "Page {{page}} of {{pageCount}}",
@@ -335,7 +341,11 @@
     "ccm:taxonid": "Area of ​​Expertise",
     "ccm:educationalintendedenduserrole": "Target group",
     "ccm:eaf_sequence_title": "Title of sequence",
-    "ccm:collection_ordered_position": "Manual sorting"
+    "ccm:collection_ordered_position": "Manual sorting",
+    "scope:id": "Group",
+    "scope:mds": "Metadata set",
+    "scope:fields": "Fields",
+    "scope:baseQueryVersion": "Base query (version)"
   },
   "SHARE": {
     "sharedBy": "Shared by",
@@ -817,6 +827,7 @@
     "LICENSE": "License",
     "WORKFLOW": "workflow state",
     "BULK_EDIT": "Edit",
+    "BULK_APPEND": "Append",
     "LICENSE_LINK": "manage license",
     "TEMPLATE_LINK": "Manage metadata template",
     "CONTRIBUTOR_LINK": "Additional Contributors",
@@ -1041,7 +1052,14 @@
     "ASSIGNMENT_CANCEL": "The assignment has been canceled.",
     "ASSIGNMENT_FINISH": "The assignment has been finished.",
     "ASSIGNMENT_COPY": "The assignment has been copied.",
-    "ASSIGNMENT_DELETE": "The assignment has been deleted."
+    "ASSIGNMENT_DELETE": "The assignment has been deleted.",
+    "SCOPE": {
+      "SAVED": "Saved.",
+      "DELETED": "Entry removed.",
+      "NOTHING_CHANGED": "Nothing was changed.",
+      "BULK_FINISHED": "{{done}} of {{total}} items changed.",
+      "BULK_FINISHED_WITH_ERRORS": "{{done}} of {{total}} items changed, some with errors. See the editorial panel for details."
+    }
   },
   "NODE_SEARCH_SELECTOR": {
     "MORE_FILTERS": "Extended search filters",
@@ -1783,5 +1801,131 @@
   },
   "SHARE_UNREJECT": {
     "TOAST_DONE": "{{count}} share(s) shown again"
+  },
+  "SCOPES": {
+    "VIEW_AS_READER": {
+      "LABEL": "View as reader",
+      "HINT": "The search shows the scope the way users and guests see it: only published content."
+    },
+    "SWITCHER": {
+      "TOOLTIP": "Switch editorial scope",
+      "GLOBAL": "Global (no scope)",
+      "READ_ONLY": "read only",
+      "HEADING": "Workspace scope",
+      "LOADING": "Loading…",
+      "NONE": "You are not a member of any scope",
+      "CONTEXT_BOUND": "Set by the domain"
+    },
+    "ADMIN": {
+      "TAB": "Scopes",
+      "TITLE": "Scopes",
+      "SEARCH": "Search scopes…",
+      "INFO": "Scopes are organizations with their own field list. Members and org admins are managed via the organization.",
+      "CREATE": "Create scope",
+      "CREATE_TITLE": "New scope",
+      "EDIT_TITLE": "Edit scope",
+      "EDIT": "Configure editorial team",
+      "MANAGE_MEMBERS": "Manage members",
+      "NOT_FOUND": "The editorial team was not found.",
+      "NAME": "Name",
+      "NAME_HINT": "Technical name, the group is called GROUP_ORG_<name>",
+      "DISPLAY_NAME": "Display name",
+      "SCOPE_ID": "Group",
+      "MDS": "Metadata set",
+      "MDS_HINT": "Provides widgets, value spaces and translations of the scope properties",
+      "FIELDS": "Field list",
+      "FIELDS_HINT": "Select the properties of the metadata set the scope may maintain",
+      "FIELDS_EMPTY": "No fields yet",
+      "CARD": {
+        "TITLE": "Card metadata",
+        "HINT": "These properties are shown on the cards and in the list of the search and for collection contents in this scope, for all users and guests. Internal fields are only visible to editors.",
+        "DEFAULT": "Default of the metadata set",
+        "RESET": "Reset to default",
+        "EMPTY": "No properties",
+        "PREVIEW": "Preview"
+      },
+      "BASE_QUERY_VERSION": "Base query (version)",
+      "ACTIONS": "Actions",
+      "EMPTY": "No scopes available",
+      "CREATED": "Scope created",
+      "UPDATED": "Scope saved",
+      "VISIBILITY": {
+        "INTERNAL": "Internal",
+        "PUBLIC": "Public"
+      },
+      "FIELD": {
+        "VISIBILITY": "Visibility",
+        "REPLACES": "Replaces original",
+        "REPLACES_HINT": "The value replaces the original value inside the active scope. Applies automatically to all regular properties, editorial properties only exist in the scope.",
+        "MANDATORY": "Mandatory: the inventory decision controls publishing",
+        "REMOVE": "Remove",
+        "FILTER": "Filter properties"
+      },
+      "SORT": {
+        "TITLE": "Sorting",
+        "HINT": "The editorial page and the search inside this editorial team can be sorted by these properties. Values adapted by the editorial team are taken into account. The relevance is only available in the search.",
+        "EMPTY": "No sorting"
+      }
+    },
+    "EDITORIAL": {
+      "NO_SCOPE": "No editorial scope active.",
+      "TAB_EDIT": "Edit",
+      "TAB_HISTORY": "History",
+      "STATE": {
+        "NO_ENTRY": "No entry in this scope yet",
+        "PUBLISHED": "Published",
+        "NOT_PUBLISHED": "Not published",
+        "EXCLUDED": "Rejected"
+      },
+      "PUBLISH": "Release",
+      "EXCLUDE": "Reject",
+      "SECTION_STATUS": "Editorial status",
+      "SECTION_REPLACING": "Adapted metadata",
+      "SECTION_REPLACING_DESCRIPTION": "These values replace the original only within this scope.",
+      "VISIBILITY_PUBLIC": "Publicly visible once published",
+      "FREE_VALUE_PLACEHOLDER": "Type a value and press Enter",
+      "REMOVE_VALUE": "Remove value",
+      "ORIGINAL": "Original:",
+      "RESET_TO_ORIGINAL": "Reset to original",
+      "REASON": "Change comment (optional)",
+      "HINT_NOT_PUBLIC": "This content is not public. Releasing it makes it visible to all users and guests of this scope.",
+      "HINT_EXCLUDED_AND_PUBLISHED": "This content is rejected and released at the same time. It stays visible to guests.",
+      "DELETE": {
+        "ACTION": "Remove entry",
+        "TITLE": "Remove entry?",
+        "MESSAGE": "All information of this scope about this content will be removed. The history is kept."
+      },
+      "BULK": {
+        "TARGET": "{{count}} items",
+        "HINT": "Only changed fields are applied to all items.",
+        "APPLY": "Apply to all",
+        "DELETE": "Remove entries",
+        "CONFIRM_TITLE": "Apply change?",
+        "CONFIRM_MESSAGE": "The change will be applied to {{count}} items.",
+        "CONFIRM_DELETE_TITLE": "Remove entries?",
+        "CONFIRM_DELETE_MESSAGE": "The entries of {{count}} items will be removed from this scope.",
+        "STATE_QUEUED": "Queued…",
+        "STATE_QUEUED_AHEAD": "Waiting for {{jobs}} jobs ahead...",
+        "STATE_RUNNING": "{{done}} of {{total}} processed",
+        "STATE_FINISHED": "Finished: {{done}} of {{total}}",
+        "STATE_FAILED": "Failed after {{done}} of {{total}}",
+        "FAILURES": "{{count}} items could not be changed"
+      },
+      "HISTORY": {
+        "EMPTY": "No changes yet",
+        "ERROR": "The history could not be loaded.",
+        "DELETED": "Entry removed",
+        "ACTOR_BULK": "Bulk change",
+        "ACTOR_SKILL": "Skill",
+        "VERSION": "Version {{version}}"
+      }
+    },
+    "BADGES": {
+      "OWN": "Status in the active scope",
+      "FOREIGN": "Information from other scopes",
+      "NO_ENTRY": "Not in this scope",
+      "PUBLISHED": "Published",
+      "NOT_PUBLISHED": "Not published"
+    }
   }
 }

@@ -15,6 +15,11 @@ mat-radio-group {
         padding: 0 8px;
     }
     mat-radio-button {
+        .value-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+        }
         &.isAiSuggestion {
             --mat-radio-label-text-color: var(--aiColor);
             @include mds.highlightAiText();
@@ -25,6 +30,11 @@ mat-radio-group {
 mat-radio-button.mat-mdc-radio-button {
     margin-right: $button-margin-horizontal;
     ::ng-deep {
+        .mdc-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
         .mdc-radio {
             --mat-radio-state-layer-size: 32px;
         }

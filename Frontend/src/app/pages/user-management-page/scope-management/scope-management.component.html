@@ -1,0 +1,160 @@
+<div class="scope-management">
+  @if (draft(); as d) {
+  <div class="editor" data-test="scope-management-editor">
+    <h2>
+      {{ (d.scopeId ? 'SCOPES.ADMIN.EDIT_TITLE' : 'SCOPES.ADMIN.CREATE_TITLE') | translate }}
+      @if (d.scopeId) {
+      <span class="scope-id">{{ d.scopeId }}</span>
+      }
+    </h2>
+    @if (!d.scopeId) {
+    <div class="row">
+      <mat-form-field subscriptSizing="dynamic">
+        <mat-label>{{ 'SCOPES.ADMIN.NAME' | translate }}</mat-label>
+        <input matInput [(ngModel)]="d.name" required data-test="scope-management-name" />
+        <mat-hint>{{ 'SCOPES.ADMIN.NAME_HINT' | translate }}</mat-hint>
+      </mat-form-field>
+      <mat-form-field subscriptSizing="dynamic">
+        <mat-label>{{ 'SCOPES.ADMIN.DISPLAY_NAME' | translate }}</mat-label>
+        <input matInput [(ngModel)]="d.displayName" />
+      </mat-form-field>
+    </div>
+    }
+    <div class="row">
+      <mat-form-field subscriptSizing="dynamic">
+        <mat-label>{{ 'SCOPES.ADMIN.MDS' | translate }}</mat-label>
+        @if (metadataSets()?.length) {
+        <mat-select [ngModel]="d.mds" (ngModelChange)="setMds($event)">
+          @for (mds of metadataSets(); track mds.id) {
+          <mat-option [value]="mds.id">{{ mds.name || mds.id }} ({{ mds.id }})</mat-option>
+          }
+        </mat-select>
+        } @else {
+        <input matInput [ngModel]="d.mds" (ngModelChange)="setMds($event)" />
+        }
+        <mat-hint>{{ 'SCOPES.ADMIN.MDS_HINT' | translate }}</mat-hint>
+      </mat-form-field>
+    </div>
+
+    <h3>{{ 'SCOPES.ADMIN.FIELDS' | translate }}</h3>
+    <p class="hint">{{ 'SCOPES.ADMIN.FIELDS_HINT' | translate }}</p>
+    <es-scope-property-list
+      testId="scope-management-field"
+      [properties]="fieldProperties()"
+      [selected]="fieldIds()"
+      [locked]="MANDATORY_FIELDS"
+      lockedHint="SCOPES.ADMIN.FIELD.MANDATORY"
+      emptyText="SCOPES.ADMIN.FIELDS_EMPTY"
+      (selectedChange)="setFields($event)"
+    >
+      <ng-template #row let-id>
+        @if (getField(id); as field) {
+        <!-- derived by the backend: regular properties replace the original, scope only ones don't -->
+        @if (field.replaces) {
+        <span class="replaces" [matTooltip]="'SCOPES.ADMIN.FIELD.REPLACES_HINT' | translate">
+          <i esIcon="swap_horiz"></i>{{ 'SCOPES.ADMIN.FIELD.REPLACES' | translate }}
+        </span>
+        }
+        <!-- the inventory decision is always internal -->
+        @if (!MANDATORY_FIELDS.includes(id)) {
+        <mat-form-field class="visibility" subscriptSizing="dynamic">
+          <mat-label>{{ 'SCOPES.ADMIN.FIELD.VISIBILITY' | translate }}</mat-label>
+          <mat-select [(ngModel)]="field.visibility">
+            @for (v of visibilities; track v) {
+            <mat-option [value]="v">{{
+              'SCOPES.ADMIN.VISIBILITY.' + v.toUpperCase() | translate
+            }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        } }
+      </ng-template>
+    </es-scope-property-list>
+
+    <h3 class="card-heading">
+      {{ 'SCOPES.ADMIN.CARD.TITLE' | translate }}
+      @if (customCardColumns()) {
+      <button
+        mat-button
+        color="primary"
+        (click)="resetCardColumns()"
+        data-test="scope-management-card-reset"
+      >
+        <i esIcon="undo"></i>{{ 'SCOPES.ADMIN.CARD.RESET' | translate }}
+      </button>
+      } @else {
+      <span class="default-hint">{{ 'SCOPES.ADMIN.CARD.DEFAULT' | translate }}</span>
+      }
+    </h3>
+    <p class="hint">{{ 'SCOPES.ADMIN.CARD.HINT' | translate }}</p>
+    <es-scope-property-list
+      testId="scope-management-card"
+      [properties]="cardProperties()"
+      [selected]="cardColumnIds()"
+      emptyText="SCOPES.ADMIN.CARD.EMPTY"
+      (selectedChange)="setCardColumns($event)"
+    ></es-scope-property-list>
+    <div class="card-preview" data-test="scope-management-card-preview">
+      <div class="preview-label">{{ 'SCOPES.ADMIN.CARD.PREVIEW' | translate }}</div>
+      <es-node-entries-wrapper
+        [dataSource]="previewDataSource()"
+        [scope]="Scope.Search"
+        [columns]="previewColumns()"
+        [displayType]="NodeEntriesDisplayType.Grid"
+        [checkbox]="false"
+        [showActions]="false"
+        [dragDrop]="{ dragAllowed: false }"
+        [gridConfig]="{ layout: 'scroll' }"
+        [elementInteractionType]="InteractionType.None"
+      ></es-node-entries-wrapper>
+    </div>
+    <h3 class="card-heading">
+      {{ 'SCOPES.ADMIN.SORT.TITLE' | translate }}
+      @if (customSortColumns()) {
+      <button
+        mat-button
+        color="primary"
+        (click)="resetSortColumns()"
+        data-test="scope-management-sort-reset"
+      >
+        <i esIcon="undo"></i>{{ 'SCOPES.ADMIN.CARD.RESET' | translate }}
+      </button>
+      } @else {
+      <span class="default-hint">{{ 'SCOPES.ADMIN.CARD.DEFAULT' | translate }}</span>
+      }
+    </h3>
+    <p class="hint">{{ 'SCOPES.ADMIN.SORT.HINT' | translate }}</p>
+    <es-scope-property-list
+      testId="scope-management-sort"
+      [properties]="sortProperties()"
+      [selected]="sortColumnIds()"
+      emptyText="SCOPES.ADMIN.SORT.EMPTY"
+      (selectedChange)="setSortColumns($event)"
+    ></es-scope-property-list>
+
+    <div class="buttons">
+      <button mat-button color="primary" (click)="cancel()">{{ 'CANCEL' | translate }}</button>
+      <button
+        mat-flat-button
+        color="primary"
+        (click)="save()"
+        [disabled]="!canSave()"
+        data-test="scope-management-save"
+      >
+        {{ 'SAVE' | translate }}
+      </button>
+    </div>
+  </div>
+  } @else {
+  <div class="toolbar">
+    <es-info-message mode="info" class="info">
+      <div>{{ 'SCOPES.ADMIN.INFO' | translate }}</div>
+    </es-info-message>
+    <button mat-flat-button color="primary" (click)="create()" data-test="scope-management-create">
+      <i esIcon="add"></i> {{ 'SCOPES.ADMIN.CREATE' | translate }}
+    </button>
+  </div>
+  <!-- organization list of the scope groups, projected by the page -->
+  <ng-content></ng-content>
+  }
+</div>

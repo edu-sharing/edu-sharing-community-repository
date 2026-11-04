@@ -52,6 +52,8 @@ whether a tab bar will be shown. The body itself always lives in the same place 
     ></es-edge-toggle>
     <es-search-page-filters-sidebar #filtersSidebarEl></es-search-page-filters-sidebar>
     <div class="main-content" esSkipTarget="MAIN_CONTENT">
+      <!-- editing a base query of a scope (scopeBaseQuery query param) -->
+      <es-scope-base-query-banner></es-scope-base-query-banner>
       @if (tabBarIsVisible) {
       <nav mat-tab-nav-bar [tabPanel]="tabPanel">
         @if (availableRepositories.getValue().length > 1) {

@@ -159,6 +159,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     public STATUS_TYPES = RestConstants.VALID_PERSON_STATUS_TYPES;
     public SCOPE_TYPES = RestConstants.VALID_SCOPE_TYPES;
     public ORG_TYPES = RestConstants.VALID_GROUP_TYPES_ORG;
+    readonly GROUP_TYPE_SCOPE = RestConstants.GROUP_TYPE_SCOPE;
     public PRIMARY_AFFILIATIONS = RestConstants.USER_PRIMARY_AFFILIATIONS;
     public edit: {
         authorityName?: string;
@@ -253,6 +254,15 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     }
 
     @Input() embedded = false;
+    /**
+     * ORG mode: only organizations of this group type. For scope groups (`SCOPE`) a click opens
+     * the scope configuration and the menu additionally offers configuration and members
+     */
+    @Input() groupType: string = null;
+    /** scope group to configure (authority name), see `groupType` */
+    @Output() configureScope = new EventEmitter<string>();
+    /** scope group whose members should be managed (authority name), see `groupType` */
+    @Output() manageScopeMembers = new EventEmitter<string>();
     @Output() selection = new EventEmitter<GenericAuthority[]>();
     @Output() setTab = new EventEmitter<number>();
     public editMembers: GenericAuthority | 'ALL';
@@ -453,7 +463,32 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
         } else {
             this.options.supportedOptions = ['OPTIONS.DEBUG'];
             const options: OptionItem[] = [];
-            if (this._mode === 'ORG') {
+            if (this._mode === 'ORG' && this.isScopeList()) {
+                const configureScope = new OptionItem(
+                    'SCOPES.ADMIN.EDIT',
+                    'tune',
+                    (data: Organization) =>
+                        this.configureScope.emit(this.getList(data)[0].authorityName),
+                );
+                configureScope.elementType = [ElementType.Group];
+                configureScope.group = DefaultGroups.Primary;
+                configureScope.priority = 5;
+                configureScope.constrains = [Constrain.NoBulk];
+                configureScope.showAsAction = true;
+                options.push(configureScope);
+                const scopeMembers = new OptionItem(
+                    'SCOPES.ADMIN.MANAGE_MEMBERS',
+                    'group',
+                    (data: Organization) =>
+                        this.manageScopeMembers.emit(this.getList(data)[0].authorityName),
+                );
+                scopeMembers.elementType = [ElementType.Group];
+                scopeMembers.group = DefaultGroups.Primary;
+                scopeMembers.priority = 6;
+                scopeMembers.constrains = [Constrain.NoBulk];
+                options.push(scopeMembers);
+            }
+            if (this._mode === 'ORG' && !this.isScopeList()) {
                 const global = new OptionItem(
                     'PERMISSIONS.MENU_TOOLPERMISSIONS_GLOBAL',
                     'playlist_add_check',
@@ -513,7 +548,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                 options.push(download);
             }
 
-            if (this._mode === 'ORG' && this.orgs && this.orgs.canCreate) {
+            if (this._mode === 'ORG' && this.orgs && this.orgs.canCreate && !this.isScopeList()) {
                 const newOrg = new OptionItem('PERMISSIONS.ADD_ORG', 'add', (data) =>
                     this.createOrg(),
                 );
@@ -1015,7 +1050,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
         if (this._mode === 'ORG') {
             // as non-admin, search only own orgs since these are the once with access
             this.organization
-                .getOrganizations(query, !this.isAdmin, request)
+                .getOrganizations(query, !this.isAdmin, request, undefined, this.groupType)
                 .pipe(takeUntil(this.cancelLoadAuthorities$))
                 .subscribe({
                     next: (orgs: OrganizationOrganizations) => {
@@ -1195,9 +1230,18 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             this.toast.error(null, 'PERMISSIONS.DELETE_ERROR_ADMINISTRATORS');
             return;
         }
+        // deleting a scope group removes its entries and history for good, not only the organization
+        const scopes =
+            this._mode === 'ORG' &&
+            list.some(
+                (l) => (l.groupType ?? l.profile?.groupType) === RestConstants.GROUP_TYPE_SCOPE,
+            );
         const dialogRef = await this.dialogs.openGenericDialog({
             title: 'PERMISSIONS.DELETE_TITLE',
-            message: 'PERMISSIONS.DELETE_' + this._mode + (list.length === 1 ? '_SINGLE' : ''),
+            message:
+                'PERMISSIONS.DELETE_' +
+                (scopes ? 'SCOPE' : this._mode) +
+                (list.length === 1 ? '_SINGLE' : ''),
             messageParameters: {
                 name: this._mode == 'USER' ? list[0].authorityName : list[0].profile.displayName,
             },
@@ -1681,7 +1725,16 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
         return this.nodeHelper.getNodeLink(mode, folder);
     }
 
+    /** list of scope groups (see `groupType`) */
+    isScopeList() {
+        return this.groupType === RestConstants.GROUP_TYPE_SCOPE;
+    }
+
     onClick(event: NodeClickEvent<GenericAuthority>) {
+        if (this._mode === 'ORG' && this.isScopeList()) {
+            this.configureScope.emit((event.element as Organization).authorityName);
+            return;
+        }
         if (this._mode === 'ORG') {
             if (!this.nodeEntries.getSelection().isEmpty() && event.element === this._org) {
                 this._org = null;

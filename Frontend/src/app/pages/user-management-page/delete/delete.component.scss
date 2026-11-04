@@ -1,4 +1,5 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 .wrapper {
     padding: 10px 30px;
     .info-wrapper {
@@ -11,6 +12,7 @@
         min-height: 200px;
         max-height: 35vh;
         overflow-y: auto;
+        @include mixins.materialScrollbarLight();
     }
     .group {
         padding: 10px 20px;

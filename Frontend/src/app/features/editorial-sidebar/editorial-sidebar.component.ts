@@ -18,7 +18,7 @@ import {
     ViewChild,
     ChangeDetectionStrategy,
 } from '@angular/core';
-import { Node, RestConstants, ROOT } from 'ngx-edu-sharing-api';
+import { Node, RestConstants, ROOT, ScopesService } from 'ngx-edu-sharing-api';
 import {
     Constrain,
     CustomOptions,
@@ -52,9 +52,14 @@ import {
 } from '../../pages/editorial-page/submission-sidebar/submission-sidebar.component';
 import { EditorMode } from '../mds/types/types';
 import { MatIconButton } from '@angular/material/button';
+import { ScopeEditorialService } from '../scopes/scope-editorial.service';
 
-export type PrimaryMode = 'activity' | 'share' | 'assignment' | 'suggestions';
-export type MainComponentType = 'manageAssignment' | 'assignmentSubmission' | 'submitAssignment';
+export type PrimaryMode = 'activity' | 'share' | 'assignment' | 'suggestions' | 'scope';
+export type MainComponentType =
+    | 'manageAssignment'
+    | 'assignmentSubmission'
+    | 'submitAssignment'
+    | 'scopeSettings';
 
 export type SidebarContext = PrimaryMode | 'collections' | 'workspace' | 'search' | 'render';
 /**
@@ -81,6 +86,8 @@ export const EDITORIAL_SIDEBAR_OPTIONS = {
     ADD_COLLECTION: { selectionMode: 'none' },
     MANAGE_SUBMISSION: { selectionMode: 'single' },
     VIEW_ASSIGNMENT: { selectionMode: 'single' },
+    /** editorial changes inside the active scope (single node, selection or all hits via bulk) */
+    SCOPE_EDITORIAL: { selectionMode: 'multi' },
 } as const satisfies Record<string, EditorialSidebarOptionDescriptor>;
 
 /**
@@ -138,6 +145,7 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
     private uiService = inject(UIService);
     private nodeHelperService = inject(NodeHelperService);
     editorialSidebarService = inject(EditorialSidebarService);
+    private scopesService = inject(ScopesService);
     private optionsHelperDataService = inject(OptionsHelperDataService);
     private breakpointObserver = inject(BreakpointObserver);
     private loadingScreenService = inject(LoadingScreenService);
@@ -222,6 +230,8 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
             // read synchronously so a registration arriving after the first run is picked up
             // (`initOptions` awaits before it reads them, which would not be tracked)
             this.editorialSidebarService.getCustomOptions();
+            // the scope option depends on the active scope (switcher)
+            this.scopesService.activeScope();
             void this.initOptions();
         });
         // reset fullscreen whenever an option is newly opened / closed / switched
@@ -400,6 +410,25 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         // CCPublish for a collection target or the workspace toolpermission for a folder target
         manageContent.scopes = ['workspace', 'collections', 'search', 'render'];
         options.push(manageContent);
+
+        const scopeEditorial = new OptionItem(
+            'EDITORIAL.OPTIONS.' + ScopeEditorialService.SIDEBAR_OPTION,
+            'fact_check',
+            () =>
+                this.enabledOption.set({
+                    trap: false,
+                    option: ScopeEditorialService.SIDEBAR_OPTION,
+                }),
+        );
+        scopeEditorial.group = DefaultGroups.Edit;
+        scopeEditorial.elementType = [ElementType.Node];
+        scopeEditorial.constrains = [Constrain.HomeRepository];
+        scopeEditorial.toolpermissions = [RestConstants.TOOLPERMISSION_SCOPE_WRITE];
+        scopeEditorial.toolpermissionsMode = HideMode.Hide;
+        // offered in every context, as long as the user works as editor in an active scope
+        scopeEditorial.customShowCallback = async () =>
+            this.scopesService.enabled() && this.scopesService.isEditor();
+        options.push(scopeEditorial);
 
         // options other modules registered — the sidebar knows nothing about them beyond how to
         // offer and render them (see `EditorialSidebarService.registerCustomOption`)

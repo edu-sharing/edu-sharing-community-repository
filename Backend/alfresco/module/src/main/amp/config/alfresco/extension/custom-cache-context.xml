@@ -81,6 +81,11 @@
         <constructor-arg value="cache.eduSharingTransformerCache"/>
     </bean>
 
+    <!-- scopes: "is the node published in the scope" (permission checks), key "<scopeId>|<originalNodeId>" -->
+    <bean name="eduSharingScopePublishedCache" factory-bean="cacheFactory" factory-method="createCache">
+        <constructor-arg value="cache.eduSharingScopePublishedCache"/>
+    </bean>
+
     <bean name="eduSharingPreviewQueue" factory-bean="queueFactory" factory-method="createQueue">
         <constructor-arg value="cache.eduSharingPreviewQueue"/>
     </bean>

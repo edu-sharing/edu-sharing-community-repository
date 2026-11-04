@@ -31,6 +31,7 @@ export * from './lib/wrappers/nodeList.service';
 export * from './lib/wrappers/register.service';
 export * from './lib/wrappers/relation.service';
 export * from './lib/wrappers/saved-searches.service';
+export * from './lib/wrappers/scopes.service';
 export * from './lib/wrappers/search.service';
 export * from './lib/wrappers/session-storage.service';
 export * from './lib/wrappers/user.service';

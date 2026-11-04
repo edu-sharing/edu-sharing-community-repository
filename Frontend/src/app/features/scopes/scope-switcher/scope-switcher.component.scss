@@ -1,0 +1,47 @@
+:host {
+    display: flex;
+    align-items: center;
+}
+.scope-switcher {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    max-width: 260px;
+    border-radius: var(--borderRadiusCards);
+    --mdc-text-button-label-text-color: var(--workspaceTopBarFontColor);
+    --mat-button-text-label-text-color: var(--workspaceTopBarFontColor);
+    color: var(--workspaceTopBarFontColor);
+    &.active {
+        background-color: color-mix(in srgb, var(--workspaceTopBarFontColor), 85% transparent);
+    }
+    .label {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+.read-only {
+    opacity: 0.75;
+    font-size: 90%;
+    margin-left: 4px;
+}
+::ng-deep .scope-switcher-menu {
+    .menu-heading {
+        font-weight: bold;
+    }
+    .selected {
+        font-weight: bold;
+    }
+    // radio icon and label on one line, vertically centered
+    .mat-mdc-menu-item-text {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .radio {
+        color: var(--primary);
+    }
+    .mat-mdc-menu-item[disabled] .radio {
+        color: inherit;
+    }
+}

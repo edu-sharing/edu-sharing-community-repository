@@ -4,6 +4,7 @@ export interface DisplayValue {
     key: string;
     label: string;
     hint?: string;
+    icon?: string;
 }
 
 export class DisplayValues {
@@ -27,6 +28,7 @@ export class DisplayValues {
         return {
             key: value.id,
             label: value.caption,
+            icon: value.icon,
         };
     }
 }

@@ -1,4 +1,5 @@
 import { inject, Injectable, Injector, OnDestroy } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { TranslateService } from '@ngx-translate/core';
 import {
     HOME_REPOSITORY,
@@ -6,6 +7,7 @@ import {
     MdsQueryCriteria,
     MdsService,
     Node,
+    ScopesService,
     SearchService,
 } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
@@ -18,7 +20,7 @@ import {
     map,
     pairwise,
     share,
-    skip,
+    shareReplay,
     startWith,
     switchMap,
     takeUntil,
@@ -43,10 +45,12 @@ import {
     NodeRequestParams,
 } from './node-data-source-remote';
 import { SearchPageRestoreService } from './search-page-restore.service';
+import { ScopeMdsService } from '../../features/scopes/scope-mds.service';
 import { SearchPageService, SearchRequestParams } from './search-page.service';
 import { RestConstants } from '../../core-module/rest/rest-constants';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UserModifiableValuesService } from './user-modifiable-values';
+import { SCOPE_BASE_QUERY_PARAMS } from '../editorial-page/scope-settings/scope-base-query-navigation';
 import { Sort } from '@angular/material/sort';
 
 export abstract class SearchPageResults {
@@ -86,6 +90,9 @@ export class SearchPageResultsService extends SearchPageResults implements OnDes
     private _route = inject(ActivatedRoute);
     private _userModifiableValues = inject(UserModifiableValuesService);
     private _localEvents = inject(LocalEventsService);
+    private _scopes = inject(ScopesService);
+    /** "view as reader" of editors: part of the search parameters, switching it searches again */
+    private _scopeRole = toObservable(this._scopes.searchRole);
 
     readonly searchSort = this._userModifiableValues.createMapped<Sort>({
         fromString: (v) => JSON.parse(v),
@@ -184,6 +191,7 @@ export class SearchPageResultsService extends SearchPageResults implements OnDes
                 // .pipe(tap((value) => console.log('searchFilters changed', value))),
                 this._searchPage.searchString.observeValue(),
                 this.state,
+                this._scopeRole,
                 // .pipe(tap((value) => console.log('searchString changed', value))),
             ])
             .pipe(
@@ -211,13 +219,14 @@ export class SearchPageResultsService extends SearchPageResults implements OnDes
                 ),
                 tap(() => this.loadingParams.next(false)),
                 map(
-                    ([repository, metadataSet, searchFilters, searchString, state]) =>
+                    ([repository, metadataSet, searchFilters, searchString, state, scopeRole]) =>
                         new SearchRequestParams(
                             repository,
                             metadataSet,
                             searchFilters,
                             searchString,
                             state.sortConfig,
+                            scopeRole,
                         ),
                 ),
                 distinctUntilChanged((x, y) => x.equals(y)),
@@ -284,10 +293,18 @@ export class SearchPageResultsService extends SearchPageResults implements OnDes
                     this._mds.getMetadataSet({ repository, metadataSet }),
                 ),
             );
-        // Register columns.
-        mds.pipe(map((mds) => this.mdsHelperService.getColumns(mds, 'search'))).subscribe(
-            this.resultColumns,
-        );
+        // Register columns. Inside a scope its card columns replace the mds list
+        rxjs.combineLatest([mds, this._scopes.observeActiveScope()])
+            .pipe(
+                map(([mds, scope]) =>
+                    ScopeMdsService.applyCardColumns(
+                        this.mdsHelperService.getColumns(mds, 'search'),
+                        scope,
+                        mds,
+                    ),
+                ),
+            )
+            .subscribe(this.resultColumns);
         mds.pipe(
             map((mds) => this.mdsHelperService.getColumns(mds, 'searchCollections')),
         ).subscribe(this.collectionColumns);
@@ -296,78 +313,119 @@ export class SearchPageResultsService extends SearchPageResults implements OnDes
      * switches the default sort based on a present search string or not
      */
     private _registerDefaultSort() {
-        combineLatest([
+        const mds$ = combineLatest([
             this._searchPage.activeMetadataSet.observeValue().pipe(filter((mds) => !!mds)),
             this._searchPage.activeRepository.observeValue(),
-        ])
-            .pipe(
-                switchMap(([metadataSet, repository]) =>
-                    this._mds.getMetadataSet({
-                        repository: repository || HOME_REPOSITORY,
-                        metadataSet,
-                    }),
-                ),
-                filter((mds) => !!mds.sorts.find((s) => s.id === 'search')),
-            )
-            .subscribe((mds) => {
+        ]).pipe(
+            switchMap(([metadataSet, repository]) =>
+                this._mds.getMetadataSet({
+                    repository: repository || HOME_REPOSITORY,
+                    metadataSet,
+                }),
+            ),
+            filter((mds) => !!mds.sorts.find((s) => s.id === 'search')),
+            shareReplay({ bufferSize: 1, refCount: true }),
+        );
+        // per mds: the first value of the search string sets the default, later changes (with / without
+        // a search string) are handled as the user is switching the sort by. switchMap ends the handling of
+        // the previous mds
+        mds$.pipe(
+            switchMap((mds) => {
                 const sorts = mds.sorts.find((s) => s.id === 'search');
-                this._searchPage.searchString
-                    .observeValue()
-                    .pipe(
-                        distinctUntilChanged((a, b) => (a == null ? b == null : b != null)),
-                        first(),
-                    )
-                    .subscribe((searchString) => {
-                        const state =
-                            (searchString ? sorts.defaultSearch : sorts.default) || sorts.default;
-                        let config: Partial<ListSortConfig> = {
-                            allowed: true,
-                            columns: sorts.columns?.map(
-                                ({ id, mode }) =>
-                                    new ListItemSort(
-                                        'NODE',
-                                        id,
-                                        mode as 'ascending' | 'descending',
-                                    ),
-                            ),
-                        };
-                        // first call: only override if NO state is present
-                        // i.e. the state is already set via parameters
-                        if (!this.state.value.sortConfig?.active) {
-                            config = {
-                                ...config,
-                                active: state.sortBy,
-                                direction: state.sortAscending ? 'asc' : 'desc',
-                            };
-                        }
-                        this.patchState({
-                            sortConfig: {
-                                ...this.state.value.sortConfig,
-                                ...config,
-                            },
-                        });
-                    });
-                // observe later changes between the state of the search query and handle them as the user is switching the sort by
-                this._searchPage.searchString
-                    .observeValue()
-                    .pipe(
-                        distinctUntilChanged((a, b) => (a == null ? b == null : b != null)),
-                        skip(1),
-                    )
-                    .subscribe((searchString) => {
-                        const state =
-                            (searchString ? sorts.defaultSearch : sorts.default) || sorts.default;
-                        this.resultsDataSource.sortPanel.active = state.sortBy;
-                        this.resultsDataSource.sortPanel.direction = state.sortAscending
-                            ? 'asc'
-                            : 'desc';
-                        this.resultsDataSource.sortPanel.sortChange.emit({
-                            active: state.sortBy,
-                            direction: state.sortAscending ? 'asc' : 'desc',
-                        });
-                    });
+                return this._searchPage.searchString.observeValue().pipe(
+                    distinctUntilChanged((a, b) => (a == null ? b == null : b != null)),
+                    map((searchString, index) => ({ sorts, searchString, initial: index === 0 })),
+                );
+            }),
+            takeUntil(this._destroyed),
+        ).subscribe(({ sorts, searchString, initial }) => {
+            const state = (searchString ? sorts.defaultSearch : sorts.default) || sorts.default;
+            if (initial) {
+                let config: Partial<ListSortConfig> = {
+                    allowed: true,
+                    columns: sorts.columns?.map(
+                        ({ id, mode }) =>
+                            new ListItemSort('NODE', id, mode as 'ascending' | 'descending'),
+                    ),
+                };
+                // first call: only override if NO state is present
+                // i.e. the state is already set via parameters
+                if (!this.state.value.sortConfig?.active) {
+                    config = {
+                        ...config,
+                        active: state.sortBy,
+                        direction: state.sortAscending ? 'asc' : 'desc',
+                    };
+                }
+                this.patchState({
+                    sortConfig: {
+                        ...this.state.value.sortConfig,
+                        ...config,
+                    },
+                });
+                return;
+            }
+            // the sort columns of the active scope do not offer it
+            if (!this.state.value.sortConfig?.columns?.some((c) => c.name === state.sortBy)) {
+                return;
+            }
+            this.resultsDataSource.sortPanel.active = state.sortBy;
+            this.resultsDataSource.sortPanel.direction = state.sortAscending ? 'asc' : 'desc';
+            this.resultsDataSource.sortPanel.sortChange.emit({
+                active: state.sortBy,
+                direction: state.sortAscending ? 'asc' : 'desc',
+            });
+        });
+        // after the mds default: the columns of the scope win
+        this._registerScopeSort(mds$);
+    }
+    /**
+     * inside a scope with sort columns (ScopePresentation.sortColumns) these replace the columns of the
+     * mds sort "search"; a sort that is not offered any longer falls back to the default of the scope
+     * (`defaultSearch` of the mds sort while a search string is present). Leaving such a scope restores
+     * the columns of the mds sort
+     */
+    private _registerScopeSort(mds$: Observable<MdsDefinition>) {
+        // the columns of a scope are shown, leaving the scope must restore the mds columns
+        let scopeColumnsApplied = false;
+        combineLatest([
+            mds$,
+            this._scopes
+                .observeActiveScope()
+                .pipe(distinctUntilChanged((a, b) => a?.scopeId === b?.scopeId)),
+        ])
+            .pipe(takeUntil(this._destroyed))
+            .subscribe(([mds, scope]) => {
+                const hasScopeColumns = !!scope?.definition?.presentation?.sortColumns?.length;
+                if (!hasScopeColumns && !scopeColumnsApplied) {
+                    // the mds default of _registerDefaultSort applies
+                    return;
+                }
+                scopeColumnsApplied = hasScopeColumns;
+                const config = ScopeMdsService.getSortConfig(mds, 'search', scope, {
+                    withSearchString: !!this._searchPage.searchString.getValue(),
+                });
+                if (!config) {
+                    return;
+                }
+                const current = this.state.value.sortConfig;
+                const offered = config.columns.some((c) => c.name === current?.active);
+                this.patchState({
+                    sortConfig: {
+                        ...current,
+                        allowed: true,
+                        columns: config.columns,
+                        ...(offered
+                            ? {}
+                            : {
+                                  active: config.sortBy,
+                                  direction: config.sortAscending ? 'asc' : 'desc',
+                              }),
+                    },
+                });
             });
     }
+
     patchState(data: Partial<SearchPageState>) {
         this.state.next({ ...this.state.value, ...data });
     }
@@ -388,6 +446,7 @@ export class SearchPageResultsService extends SearchPageResults implements OnDes
                         permissions: this._searchPage.reUrl.value
                             ? [RestConstants.ACCESS_CC_PUBLISH]
                             : [],
+                        scopeRole: params.scopeRole ?? undefined,
                     },
                     maxItems: request.range.endIndex - request.range.startIndex,
                     skipCount: request.range.startIndex,
@@ -398,6 +457,12 @@ export class SearchPageResultsService extends SearchPageResults implements OnDes
                     metadataset: params.metadataSet,
                     query: RestConstants.DEFAULT_QUERY_NAME,
                     propertyFilter: [RestConstants.ALL],
+                    // editing the base query of a scope: search the pool, not the active scope
+                    ignoreScope: this._route.snapshot.queryParamMap.has(
+                        SCOPE_BASE_QUERY_PARAMS.scopeId,
+                    )
+                        ? true
+                        : undefined,
                 })
                 .pipe(
                     tap((r) => {

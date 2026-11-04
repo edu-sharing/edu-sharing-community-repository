@@ -92,6 +92,15 @@
     },
     "ACTION": {
       "APPLYFILTER_DESCRIPTION": "Nutzen Sie die Filterfunktion und filtern Sie die gewünschten Ergebnisse. Anschließend können Sie die Filterung übernehmen"
+    },
+    "SCOPE_BASE_QUERY": {
+      "REGION": "Basisabfrage bearbeiten",
+      "TITLE": "Abfrage der Basisabfrage von {{scope}} bearbeiten",
+      "TITLE_NEW": "Neue Abfrage für die Basisabfrage von {{scope}}",
+      "HINT": "Die aktuellen Suchkriterien werden übernommen. Hier werden vorerst alle Treffer angezeigt, in der Redaktion erscheinen nur öffentliche Inhalte.",
+      "SAVE": "Als Basisabfrage übernehmen",
+      "SAVED": "Basisabfrage gespeichert",
+      "SCOPE_NOT_ACTIVE": "Die Basisabfrage kann nur in der aktiven Redaktion bearbeitet werden."
     }
   }
 }

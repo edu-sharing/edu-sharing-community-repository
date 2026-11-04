@@ -20,6 +20,8 @@ import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.restservices.mds.v1.model.MdsWidget;
 import org.edu_sharing.restservices.search.v1.model.SearchFacet;
 import org.edu_sharing.service.search.ReadableWrapperQueryBuilder;
+import org.edu_sharing.service.scope.ScopeCriteria;
+import org.edu_sharing.service.scope.ScopeFacets;
 import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SharedToMeType;
@@ -119,6 +121,10 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
 
             applyCondition(query, result);
             Query queryBuilderParam = getParameterQuery(queries, query, parameter, values);
+
+            // scopes: criteria on scope properties are applied to the entries of the active scope (or published public
+            // entries outside of it), replaced values only inside the own scope
+            queryBuilderParam = ScopeCriteria.apply(parameter.getName(), queryBuilderParam);
 
             if (query.getJoin().equals("AND")) {
                 result.must(queryBuilderParam);
@@ -493,6 +499,18 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
                 fullFilterQuery
                         .must(must -> must.bool(qbFilter.build()))
                         .must(must -> must.bool(qbNoFilter.build()));
+            }
+
+            // scopes: facets on scope properties use the scope entries, replacing properties the effective values
+            ScopeCriteria.Decision scopeDecision = ScopeCriteria.decide(facet.getProperty());
+            if (ScopeFacets.isScopeFacet(scopeDecision.mode())) {
+                MetadataQueryParameter scopeParameter = query.findParameterByName(facet.getProperty());
+                int size = Optional.ofNullable(scopeParameter).map(MetadataQueryParameter::getFacet)
+                        .map(MetadataQueryParameter.MetadataQueryFacet::getMaxBucketSize)
+                        .orElse(searchToken.getFacetLimit() * FACET_LIMIT_MULTIPLIER);
+                result.put(facet.getProperty(), ScopeFacets.aggregation(scopeDecision.mode(), scopeDecision.scopeId(), facet.getProperty(),
+                        fullFilterQuery.build()._toQuery(), size, searchToken.getFacetsMinCount()));
+                continue;
             }
 
             List<MetadataQueryParameter.MetadataQueryFacetItem> fieldName = Collections.singletonList(

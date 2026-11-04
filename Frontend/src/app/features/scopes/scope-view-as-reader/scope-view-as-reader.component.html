@@ -1,0 +1,13 @@
+@if (visible()) {
+<div class="view-as-reader" [class.active]="viewAsReader()">
+  <mat-slide-toggle
+    color="primary"
+    [checked]="viewAsReader()"
+    (change)="toggle($event.checked)"
+    data-test="scope-view-as-reader"
+  >
+    {{ 'SCOPES.VIEW_AS_READER.LABEL' | translate }}
+  </mat-slide-toggle>
+  <div class="hint">{{ 'SCOPES.VIEW_AS_READER.HINT' | translate }}</div>
+</div>
+}

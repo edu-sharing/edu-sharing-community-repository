@@ -226,3 +226,9 @@ mat-sidenav.es-mat-sidenav[position='start'] {
         margin-left: 0 !important;
     }
 }
+
+// scope mode: name of the active scope and actions on all hits / the base query
+.scope-unavailable {
+    display: block;
+    margin: 16px;
+}

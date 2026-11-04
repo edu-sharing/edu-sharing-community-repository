@@ -1,5 +1,5 @@
 import { SelectionModel } from '@angular/cdk/collections';
-import { EventEmitter, inject, Injectable } from '@angular/core';
+import { EventEmitter, inject, Injectable, signal } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { Node, RestConstants } from 'ngx-edu-sharing-api';
 import {
@@ -120,6 +120,13 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
     configureColumns: boolean;
     displayType: NodeEntriesDisplayType;
     selection = new CustomSelectionModel<T>(true, []);
+    /** whether the host wants to offer "select all results" when the list is only partly loaded */
+    readonly allowSelectAllResults = signal(false);
+    /**
+     * the user chose to select all results (not only the loaded page). Reset on every selection or
+     * data change, since the selection itself still only holds the loaded entries
+     */
+    readonly allResultsSelected = signal(false);
     elementInteractionType: InteractionType;
     options$ = new BehaviorSubject<ListOptions>(null);
     get options() {
@@ -207,6 +214,34 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
             this.selection.clear();
         } else {
             this.selectAll();
+        }
+    }
+
+    /**
+     * all loaded entries are selected, but more results exist (paginated lists only, with an
+     * infinite scroll the user can just load the rest)
+     */
+    canSelectAllResults(): boolean {
+        const dataSource = this.dataSource;
+        return (
+            this.allowSelectAllResults() &&
+            !!dataSource &&
+            this.paginationStrategy !== 'infinite-scroll' &&
+            dataSource.getTotal() > dataSource.getData().length &&
+            this.selection.hasValue() &&
+            this.isAllSelected()
+        );
+    }
+
+    selectAllResults() {
+        if (this.canSelectAllResults()) {
+            this.allResultsSelected.set(true);
+        }
+    }
+
+    resetAllResultsSelected() {
+        if (this.allResultsSelected()) {
+            this.allResultsSelected.set(false);
         }
     }
 

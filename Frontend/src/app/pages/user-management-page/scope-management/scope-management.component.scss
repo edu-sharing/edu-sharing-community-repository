@@ -1,0 +1,90 @@
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
+
+:host {
+    display: block;
+}
+.scope-management {
+    padding: 16px;
+}
+.toolbar {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 16px;
+    .info {
+        flex: 1;
+    }
+}
+.scope-id {
+    font-family: monospace;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.editor {
+    h2 .scope-id {
+        font-size: 70%;
+        margin-left: 8px;
+        font-weight: normal;
+    }
+    .row {
+        display: flex;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 16px;
+        mat-form-field {
+            flex: 0 1 360px;
+            min-width: 260px;
+        }
+    }
+    .hint {
+        color: var(--textLight);
+    }
+}
+.replaces {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--textLight);
+    font-size: var(--fontSizeXSmall);
+    i {
+        font-size: 16px;
+    }
+}
+.visibility {
+    width: 140px;
+}
+.card-heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 32px;
+    .default-hint {
+        font-size: var(--fontSizeSmall);
+        font-weight: normal;
+        color: var(--textLight);
+    }
+}
+.card-preview {
+    margin-top: 16px;
+    padding: 16px;
+    border-radius: var(--borderRadiusCards);
+    background-color: var(--backgroundColor);
+    .preview-label {
+        margin-bottom: 8px;
+        font-size: var(--fontSizeSmall);
+        text-transform: uppercase;
+        color: var(--textLight);
+    }
+    // a single card, not the full width grid
+    es-node-entries-wrapper {
+        display: block;
+        max-width: 320px;
+    }
+}
+.buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 16px;
+}

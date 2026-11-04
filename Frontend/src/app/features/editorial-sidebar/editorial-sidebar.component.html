@@ -82,6 +82,10 @@
         } @if (customOption(); as custom) {
         <!-- an option another module registered; the sidebar only renders what it was handed -->
         <ng-container *ngComponentOutlet="custom.component"></ng-container>
+        } @if (option === 'SCOPE_EDITORIAL') {
+        <es-scope-editorial-panel
+          [nodes]="$any(editorialSidebarService.nodes()) ?? []"
+        ></es-scope-editorial-panel>
         } @if (option === 'PREVIEW') {
         <es-preview-sidebar
           [node]="$safeNavigationMigration($any(editorialSidebarService.nodes())?.[0])"

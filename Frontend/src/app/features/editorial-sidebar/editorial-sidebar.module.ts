@@ -19,6 +19,8 @@ import { UsagesPreviewComponent } from '../../pages/workspace-page/metadata/usag
 import { AssignmentSidebarComponent } from '../../pages/editorial-page/assignment-sidebar/assignment-sidebar.component';
 import { ResizableSidenavDirective } from '../../pages/editorial-page/resizable-sidenav.directive';
 import { AddCollectionSidebarComponent } from './add-collection-sidebar/add-collection-sidebar.component';
+import { ScopeEditorialPanelComponent } from '../scopes/scope-editorial-panel/scope-editorial-panel.component';
+import { ScopeBadgesComponent } from '../scopes/scope-badges/scope-badges.component';
 
 @NgModule({
     declarations: [
@@ -46,6 +48,8 @@ import { AddCollectionSidebarComponent } from './add-collection-sidebar/add-coll
         RenderWrapperComponent,
         ResizableSidenavDirective,
         AddCollectionSidebarComponent,
+        ScopeEditorialPanelComponent,
+        ScopeBadgesComponent,
     ],
     exports: [EditorialSidebarComponent, PreviewSidebarComponent, PreviewSidebarWrapperComponent],
 })

@@ -60,7 +60,22 @@ public class QueryUtils {
             );
         }
         query = replaceSystemFolderPlaceholder(query, replacer);
+        if (query.contains("${scope}")) {
+            // no active scope: a value that matches no scope
+            String scope = activeScopeSupplier.get();
+            query = replacer.replaceString(query, "${scope}", scope == null ? "" : scope.replace("\\", "\\\\").replace("\"", "\\\""));
+        }
         return query;
+    }
+
+    /**
+     * active scope of the current request (authority name of the scope group), null if none.
+     * Registered by services/core (ScopeContextResolver), this module can not depend on it
+     */
+    private static volatile java.util.function.Supplier<String> activeScopeSupplier = () -> null;
+
+    public static void setActiveScopeSupplier(java.util.function.Supplier<String> supplier) {
+        activeScopeSupplier = supplier == null ? () -> null : supplier;
     }
 
     private static String replaceSystemFolderPlaceholder(String query, ReplaceInterface replacer) {

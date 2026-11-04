@@ -79,6 +79,12 @@ public class SearchToken implements Serializable {
 	@Getter
 	@Setter
 	private List<String> permissions;
+	/**
+	 * scopes: role to search the active scope with, null for the own role (see ScopeSearchFilter#searchRole)
+	 */
+	@Getter
+	@Setter
+	private org.edu_sharing.service.scope.ScopeRole scopeRole;
 	@Getter
 	@Setter
 	private boolean resolveCollections = false;

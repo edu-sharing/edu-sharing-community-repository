@@ -906,6 +906,37 @@
       <defaultvalue>true</defaultvalue>
       <type>checkbox</type>
     </widget>
+    <!-- scopes: editorial properties. only stored in scope entries (mongo), edited via the scope api.
+         a scope group selects the ones it uses via ccm:scope_fields; its own mds may override these widgets.
+         further editorial properties are not part of the core, they come with the mds of the scope -->
+    <widget>
+      <id>ccm:editorial_inventory</id>
+      <caption>ccm_editorial_inventory</caption>
+      <type>singleoption</type>
+      <valuespace_i18n_prefix>ccm_editorial_inventory_</valuespace_i18n_prefix>
+      <values>
+        <value icon="block" description="description_rejected">rejected</value>
+        <!-- no decision yet: never stored, choosing it removes the value (see es-scope-inventory) -->
+        <value icon="inbox" description="description_inbox">inbox</value>
+        <value icon="lightbulb" description="description_proposed">proposed</value>
+        <value icon="check_circle" description="description_accepted">accepted</value>
+        <value icon="thumb_up" description="description_recommended">recommended</value>
+      </values>
+    </widget>
+    <!-- scopes: tabs (work sets) of the editorial page inside the active scope, see query ngsearch -->
+    <widget>
+      <id>virtual:scope_view</id>
+      <caption>cp_virtual_scope_view</caption>
+      <valuespace_i18n_prefix>scope_view_</valuespace_i18n_prefix>
+      <values>
+        <entry icon="inbox">inbox</entry>
+        <entry icon="lightbulb">proposed</entry>
+        <entry icon="check_circle">accepted</entry>
+        <entry icon="thumb_up">recommended</entry>
+        <entry icon="list">all</entry>
+        <entry icon="block">rejected</entry>
+      </values>
+    </widget>
   </widgets>
   <templates>
     <template>
@@ -1266,6 +1297,13 @@
 				]]></html>
     </template>
     <template>
+      <id>editorial_scope</id>
+      <html><![CDATA[
+              <ccm:educationallearningresourcetype type="facetList" expandable="expanded" icon="library_books">
+              <cclom:general_keyword type="facetList" expandable="expanded" icon="tag">
+				]]></html>
+    </template>
+    <template>
       <id>editorial_share</id>
       <html><![CDATA[
               <virtual:shareMaxAge expandable="expanded">
@@ -1327,6 +1365,13 @@
           <ccm:page_variant_profiling_target_group type="multivalueFixedBadges" isExtended="false">
           <ccm:educationalcontext type="multivalueFixedBadges" isExtended="false">
       ]]></html>
+    </template>
+    <template>
+      <id>scope_editorial</id>
+      <caption>scope_editorial</caption>
+      <html><![CDATA[
+					<ccm:editorial_inventory>
+				]]></html>
     </template>
   </templates>
   <groups>
@@ -1609,6 +1654,20 @@
         <view>editorial_suggestions</view>
       </views>
     </group>
+    <group>
+      <id>editorial_scope</id>
+      <rendering>angular</rendering>
+      <views>
+        <view>editorial_scope</view>
+      </views>
+    </group>
+    <group>
+      <id>scope_editorial</id>
+      <rendering>angular</rendering>
+      <views>
+        <view>scope_editorial</view>
+      </views>
+    </group>
   </groups>
   <sorts>
     <sort>
@@ -1625,6 +1684,19 @@
         <!-- currently not working (cm:name vs cclom:title) -->
         <!-- <column>cclom:title</column> -->
         <!-- <column>ccm:replicationsource</column> -->
+      </columns>
+    </sort>
+    <!-- scopes: editorial page inside the active scope (the values inside the scope are sorted, see ScopeSort) -->
+    <sort>
+      <id>editorial_scope</id>
+      <default>
+        <sortBy>cm:modified</sortBy>
+        <sortAscending>false</sortAscending>
+      </default>
+      <columns>
+        <column>cm:modified</column>
+        <column>cm:created</column>
+        <column>cclom:title</column>
       </columns>
     </sort>
     <sort>
@@ -2433,6 +2505,26 @@
           {"range":{"properties.cm:longitude.number":{"gte":"${valueRaw[1]}", "lte":"${valueRaw[3]}"}}}
           ]}}</statement>
         <facets type="geo_grid"/>
+      </property>
+      <!-- scopes: work sets inside the active scope (${scope}), see scopes concept §6.2 -->
+      <!-- scopes: tabs of the editorial page (virtual:scope_view) inside the active scope: the inventory decision
+           (ccm:editorial_inventory) of the scope entry, "inbox" = no decision yet (candidates of the base query) -->
+      <property name="virtual:scope_view">
+        <statement value="inbox">{"bool":{"must_not":{"nested":{"path":"scopes","query":{"bool":{"filter":[{"term":{"scopes.scopeId":"${scope}"}},{"exists":{"field":"scopes.properties.ccm:editorial_inventory.keyword"}}]}}}}}}</statement>
+        <statement value="proposed">{"nested":{"path":"scopes","query":{"bool":{"filter":[{"term":{"scopes.scopeId":"${scope}"}},{"term":{"scopes.properties.ccm:editorial_inventory.keyword":"proposed"}}]}}}}</statement>
+        <statement value="accepted">{"nested":{"path":"scopes","query":{"bool":{"filter":[{"term":{"scopes.scopeId":"${scope}"}},{"term":{"scopes.properties.ccm:editorial_inventory.keyword":"accepted"}}]}}}}</statement>
+        <statement value="recommended">{"nested":{"path":"scopes","query":{"bool":{"filter":[{"term":{"scopes.scopeId":"${scope}"}},{"term":{"scopes.properties.ccm:editorial_inventory.keyword":"recommended"}}]}}}}</statement>
+        <statement value="rejected">{"nested":{"path":"scopes","query":{"bool":{"filter":[{"term":{"scopes.scopeId":"${scope}"}},{"term":{"scopes.properties.ccm:editorial_inventory.keyword":"rejected"}}]}}}}</statement>
+        <statement value="all">{"match_all": {}}</statement>
+        <statement>{"match_all": {}}</statement>
+      </property>
+      <!-- scopes: editorial properties only exist in the scope entries. The statements address properties.<p> like
+           any property, ScopeCriteria (MetadataElasticSearchHelper) moves them into the nested scope entries depending on
+           the role: own scope, or published public entries of other scopes (concept §5.4) -->
+      <property name="ccm:editorial_inventory">
+        <multiple>true</multiple>
+        <multiplejoin>OR</multiplejoin>
+        <statement>{"term":{"properties.ccm:editorial_inventory.keyword":"${value}"}}</statement>
       </property>
     </query>
     <query join="AND" id="mediacenter_filter">

@@ -958,7 +958,10 @@
       "DELETED": "Il contesto è stato eliminato",
       "DELETE_TITLE": "Eliminare il contesto?",
       "DELETE_MESSAGE": "Sei sicuro di voler eliminare il contesto (Id: {{id}}, Domini: {{domain}})?",
-      "MISSING_VALUES": "Si prega di compilare tutti i campi."
+      "MISSING_VALUES": "Si prega di compilare tutti i campi.",
+      "SCOPE_GROUP": "Redazione",
+      "SCOPE_GROUP_NONE": "Nessuna redazione",
+      "SCOPE_GROUP_HINT": "I contenuti di questi domini vengono mostrati nella vista di questa redazione. I membri modificano, gli altri vedono le voci pubblicate."
     }
   },
   "Key": "ITALIANO",

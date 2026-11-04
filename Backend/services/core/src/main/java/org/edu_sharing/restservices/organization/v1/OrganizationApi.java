@@ -1,5 +1,7 @@
 package org.edu_sharing.restservices.organization.v1;
 
+import org.apache.commons.lang3.StringUtils;
+
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -67,6 +69,7 @@ public class OrganizationApi  {
     	    @Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
     	    @Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
     	    @Parameter(description = "search only in memberships, false can only be done by admin",schema = @Schema(defaultValue="true")) @QueryParam("onlyMemberships") boolean onlyMemberships,
+    	    @Parameter(description = "only organizations of this group type (e.g. SCOPE)") @QueryParam("groupType") String groupType,
     		@Context HttpServletRequest req) {
     	
     	try {
@@ -82,7 +85,8 @@ public class OrganizationApi  {
 	    			maxItems!=null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS, 
 	    			new SortDefinition(sortProperties,sortAscending),
 	    			false,
-	    			onlyMemberships);
+	    			onlyMemberships,
+	    			StringUtils.isBlank(groupType) ? null : groupType);
 	    	for (EduGroup eduGroup : result.getData()) {
 				try {
 					data.add(new OrganizationDao(repoDao,eduGroup).asOrganization());

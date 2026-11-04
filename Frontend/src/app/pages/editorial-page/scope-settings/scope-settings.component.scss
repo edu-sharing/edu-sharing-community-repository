@@ -1,0 +1,44 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+}
+.scope-settings {
+    padding: 16px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+}
+.version {
+    color: var(--textLight);
+}
+.queries {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.query {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    border-radius: var(--borderRadiusCards);
+    background: var(--primaryBackground50);
+    .criteria {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        word-break: break-word;
+    }
+}
+.empty {
+    color: var(--textLight);
+}

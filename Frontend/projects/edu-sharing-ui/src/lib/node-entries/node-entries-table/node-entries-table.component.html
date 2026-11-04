@@ -233,8 +233,19 @@
       } }
     </mat-cell>
   </ng-container>
-  } @if (entriesService.tableConfig?.headers !== false) {
+  }
+  <ng-container matColumnDef="selectAllBanner">
+    <mat-header-cell *matHeaderCellDef class="select-all-banner-cell">
+      <es-node-entries-select-all-banner></es-node-entries-select-all-banner>
+    </mat-header-cell>
+  </ng-container>
+  @if (entriesService.tableConfig?.headers !== false) {
   <mat-header-row mat-header-row *matHeaderRowDef="visibleColumnNames$ | async"></mat-header-row>
+  <mat-header-row
+    mat-header-row
+    class="select-all-banner-row"
+    *matHeaderRowDef="['selectAllBanner']"
+  ></mat-header-row>
   }
   <mat-row
     mat-row

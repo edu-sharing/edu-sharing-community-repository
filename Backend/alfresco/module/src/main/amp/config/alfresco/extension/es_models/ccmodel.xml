@@ -2239,6 +2239,16 @@
                 <property name="ccm:collection_author_freetext">
                     <type>d:text</type>
                 </property>
+                <!-- scopes: scope group (authority name) this collection belongs to. not inherited by the content -->
+                <property name="ccm:collection_scope_group">
+                    <type>d:text</type>
+                    <multiple>false</multiple>
+                    <index enabled="true">
+                        <atomic>true</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
+                </property>
             </properties>
         </aspect>
         <aspect name="ccm:collection_pinned">
@@ -2531,6 +2541,56 @@
             <properties>
                 <!-- internal configuration storage (json object) of the widget -->
                 <property name="ccm:widget_config">
+                    <type>d:text</type>
+                    <multiple>false</multiple>
+                </property>
+            </properties>
+        </aspect>
+        <aspect name="ccm:scopeGroup">
+            <title>scopes: definition of the scope owned by a group with ccm:groupType = SCOPE</title>
+            <properties>
+                <!-- json list of allowed scope properties: [{"id": "ccm:editorial_inventory", "visibility": "internal|public", "replaces": false, "publishedValues": [], "excludedValues": []}] -->
+                <property name="ccm:scope_fields">
+                    <type>d:text</type>
+                    <multiple>false</multiple>
+                    <index enabled="false"/>
+                </property>
+                <!-- mds providing widgets, valuespaces and i18n for the scope properties -->
+                <property name="ccm:scope_mds">
+                    <type>d:text</type>
+                    <multiple>false</multiple>
+                </property>
+                <!-- one json query per value: {"mds": "mds", "query": "ngsearch", "criteria": {}}. values are OR-combined -->
+                <property name="ccm:scope_base_query">
+                    <type>d:text</type>
+                    <multiple>true</multiple>
+                    <index enabled="false"/>
+                </property>
+                <!-- increased on every change of ccm:scope_base_query -->
+                <property name="ccm:scope_base_query_version">
+                    <type>d:long</type>
+                    <multiple>false</multiple>
+                </property>
+                <!-- shared folder of the scope group -->
+                <property name="ccm:scope_folder">
+                    <type>d:noderef</type>
+                    <multiple>false</multiple>
+                </property>
+                <!-- json object of presentation settings (ScopePresentation), e.g. {"cardColumns": ["cclom:title"]} -->
+                <property name="ccm:scope_settings">
+                    <type>d:text</type>
+                    <multiple>false</multiple>
+                    <index enabled="false"/>
+                </property>
+            </properties>
+        </aspect>
+        <aspect name="ccm:editorialScopeProperties">
+            <title>scopes: editorial properties. only stored in scope assignments (mongo), never applied to nodes.
+                exists for the dictionary (validation, mds widgets) only.
+                custom models add their editorial properties via an own aspect with parent ccm:editorialScopeProperties
+            </title>
+            <properties>
+                <property name="ccm:editorial_inventory">
                     <type>d:text</type>
                     <multiple>false</multiple>
                 </property>
