@@ -368,12 +368,42 @@ export class MdsWidgetComponent implements OnInit, OnDestroy, OnChanges {
      * available via `rawValue`, i.e. when an editor instance with nodes exists. It is left
      * empty otherwise (pure viewer without nodes, or values coming from
      * `getInitialDisplayValues`), in which case the entry renders as plain text.
+     *
+     * Further fields (`icon`, `url`, `description`) are taken from the matching valuespace key.
      */
-    arrayEntries(): { id: string; caption: string }[] {
+    arrayEntries(): MdsValue[] {
         const values = this.value() ?? [];
         // only trust rawValue when it lines up with the displayed values
         const raw = this.rawValue?.length === values.length ? this.rawValue : null;
-        return values.map((caption, i) => ({ id: raw?.[i]?.id ?? '', caption }));
+        return values.map((caption, i) => {
+            const id = raw?.[i]?.id ?? '';
+            // keep the raw id (not the key's id): an id enables the search link, which
+            // requires an editor instance
+            return { ...this.findValuespaceKey(id, caption), id, caption };
+        });
+    }
+
+    /**
+     * Looks up the valuespace key for a displayed value, by id if known, otherwise by caption
+     * (values from `getInitialDisplayValues` only carry the caption).
+     */
+    private findValuespaceKey(id: string, caption: string): MdsValue | undefined {
+        const values = this.getDefinition()?.values;
+        return (
+            (id ? values?.find((v) => v.id === id) : undefined) ??
+            values?.find((v) => v.caption === caption)
+        );
+    }
+
+    /**
+     * Resolves a valuespace `icon` attribute like the backend MetadataTemplateRenderer:
+     * absolute urls are used as is, everything else is relative to `assets/images/`.
+     */
+    getIconUrl(icon: string | undefined): string | undefined {
+        if (!icon) {
+            return undefined;
+        }
+        return /^https?:\/\//.test(icon) ? icon : 'assets/images/' + icon;
     }
 
     formatValue(): string[] {

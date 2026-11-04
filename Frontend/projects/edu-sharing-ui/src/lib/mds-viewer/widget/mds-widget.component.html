@@ -69,17 +69,37 @@
   </div>
   <div *ngIf="basicType() === 'array' || isSearchableOption()">
     @for (entry of arrayEntries(); track $index) {
-    <div class="array-entry">
+    <div class="array-entry" [class.array-entry-with-icon]="!!entry.icon">
       @if (widget.definition.isSearchable && entry.id) {
-      <a [routerLink]="'/' + ROUTER_PREFIX + 'search'" [queryParams]="getSearchParams(entry)">{{
-        entry.caption
-      }}</a>
+      <a [routerLink]="'/' + ROUTER_PREFIX + 'search'" [queryParams]="getSearchParams(entry)">
+        <ng-container *ngTemplateOutlet="arrayEntryContent; context: { entry }"></ng-container>
+      </a>
+      } @else if (entry.url) {
+      <a [href]="entry.url" target="_blank" rel="noopener noreferrer">
+        <ng-container *ngTemplateOutlet="arrayEntryContent; context: { entry }"></ng-container>
+      </a>
       } @else {
-      <span>{{ entry.caption }}</span>
+      <span
+        ><ng-container *ngTemplateOutlet="arrayEntryContent; context: { entry }"></ng-container
+      ></span>
       }
     </div>
     }
   </div>
+  <ng-template #arrayEntryContent let-entry="entry">
+    @if (entry.icon) {
+    <!-- mirrors the backend MetadataTemplateRenderer: icon + caption + description -->
+    <img class="array-entry-image" [src]="getIconUrl(entry.icon)" alt="" />
+    <span class="array-entry-value-group">
+      <span class="array-entry-caption">{{ entry.caption }}</span>
+      @if (entry.description) {
+      <span class="array-entry-description">{{ entry.description }}</span>
+      }
+    </span>
+    } @else {
+    {{ entry.caption }}
+    }
+  </ng-template>
   <div *ngIf="basicType() === 'tree'">
     <div class="tree-entry" *ngFor="let v of rawValue">
       <ng-container *ngTemplateOutlet="treeEntry; context: { path: v.path }"></ng-container>
