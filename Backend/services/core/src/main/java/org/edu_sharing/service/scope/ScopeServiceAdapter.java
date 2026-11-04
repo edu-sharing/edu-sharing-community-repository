@@ -1,5 +1,6 @@
 package org.edu_sharing.service.scope;
 
+import org.edu_sharing.service.permission.annotation.Permission;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +28,7 @@ public class ScopeServiceAdapter implements ScopeService {
     }
 
     @Override
+    @Permission(requiresGlobalAdmin = true)
     public ScopeIndexData getIndexData(String nodeId) {
         return ScopeIndexData.builder()
                 .nodeId(nodeId)
@@ -39,6 +41,7 @@ public class ScopeServiceAdapter implements ScopeService {
     }
 
     @Override
+    @Permission(requiresGlobalAdmin = true)
     public Map<String, ScopeIndexData> getIndexData(Collection<String> nodeIds) {
         Map<String, ScopeIndexData> result = new HashMap<>();
         nodeIds.forEach(nodeId -> result.put(nodeId, getIndexData(nodeId)));
@@ -46,6 +49,7 @@ public class ScopeServiceAdapter implements ScopeService {
     }
 
     @Override
+    @Permission(requiresGlobalAdmin = true)
     public List<ScopeChange> getChanges(Date after, Long afterSeq, Date until, int maxItems) {
         return List.of();
     }
