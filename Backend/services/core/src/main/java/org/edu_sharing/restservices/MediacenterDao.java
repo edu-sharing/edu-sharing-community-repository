@@ -96,6 +96,7 @@ public class MediacenterDao extends AbstractDao{
 
 	public void addManagedGroup(String group) throws DAOException {
 		try {
+			checkAdminAccess();
 			authorityService.addMemberships(this.authorityName, List.of(group));
 		}catch(Throwable t){
 			throw DAOException.mapping(t);
@@ -103,6 +104,7 @@ public class MediacenterDao extends AbstractDao{
 	}
 	public void removeManagedGroup(String group) throws DAOException {
 		try {
+			checkAdminAccess();
 			authorityService.removeMemberships(this.authorityName, List.of(group));
 		}catch(Throwable t){
 			throw DAOException.mapping(t);
