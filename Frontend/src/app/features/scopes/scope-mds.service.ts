@@ -104,23 +104,36 @@ export class ScopeMdsService {
      * sort of a list inside the active scope: the sort columns of the scope (ScopePresentation.sortColumns)
      * instead of the columns of the given mds sort. The default of the mds sort stays if it is still
      * sortable, else the first column
+     *
+     * @param withSearchString a search string is present: the `defaultSearch` of the mds sort is the default
+     * (if set)
+     * @param excluded columns that are not offered (e.g. the relevance on lists without a search string)
      */
     static getSortConfig(
         mds: MdsDefinition | null | undefined,
         mdsSortId: string,
         scope: ActiveScope | null | undefined,
+        {
+            withSearchString = false,
+            excluded = [],
+        }: { withSearchString?: boolean; excluded?: string[] } = {},
     ): ScopeSortConfig | null {
         const sort = mds?.sorts?.find((s) => s.id === mdsSortId);
-        const ids = scope?.definition?.presentation?.sortColumns;
+        const defaultSort = (withSearchString ? sort?.defaultSearch : null) ?? sort?.default;
+        const ids = scope?.definition?.presentation?.sortColumns?.filter(
+            (id) => !excluded.includes(id),
+        );
         if (!ids?.length) {
             return sort
                 ? {
-                      columns: (sort.columns ?? []).map(
-                          ({ id, mode }) =>
-                              new ListItemSort('NODE', id, mode as 'ascending' | 'descending'),
-                      ),
-                      sortBy: sort.default?.sortBy ?? null,
-                      sortAscending: !!sort.default?.sortAscending,
+                      columns: (sort.columns ?? [])
+                          .filter(({ id }) => !excluded.includes(id))
+                          .map(
+                              ({ id, mode }) =>
+                                  new ListItemSort('NODE', id, mode as 'ascending' | 'descending'),
+                          ),
+                      sortBy: defaultSort?.sortBy ?? null,
+                      sortAscending: !!defaultSort?.sortAscending,
                   }
                 : null;
         }
@@ -131,12 +144,12 @@ export class ScopeMdsService {
         const columns = ids.map(
             (id) => new ListItemSort('NODE', id, modes.get(id) as 'ascending' | 'descending'),
         );
-        const keepDefault = !!sort?.default?.sortBy && ids.includes(sort.default.sortBy);
+        const keepDefault = !!defaultSort?.sortBy && ids.includes(defaultSort.sortBy);
         return {
             columns,
-            sortBy: keepDefault ? sort.default.sortBy : ids[0],
+            sortBy: keepDefault ? defaultSort.sortBy : ids[0],
             sortAscending: keepDefault
-                ? !!sort.default.sortAscending
+                ? !!defaultSort.sortAscending
                 : ![ScopeMdsService.SORT_SCORE, 'cm:modified', 'cm:created'].includes(ids[0]),
         };
     }

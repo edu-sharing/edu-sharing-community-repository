@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import org.edu_sharing.service.permission.annotation.Permission;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.transaction.RetryingTransactionHelper;
+import org.alfresco.service.cmr.dictionary.AspectDefinition;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.dictionary.PropertyDefinition;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -177,6 +178,22 @@ class ScopeDefinitionServiceImplTest {
                 ScopePresentation.builder().sortColumns(List.of("ccm:unknown")).build()));
         assertThrows(IllegalArgumentException.class, () -> underTest.updateScope(SCOPE, "mds", List.of(),
                 ScopePresentation.builder().sortColumns(List.of("score", "score")).build()));
+    }
+
+    @Test
+    void scopeOnlyPropertiesAreNotSortable() {
+        groupProperties.put(QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE), CCConstants.GROUP_TYPE_SCOPE);
+        AspectDefinition scopeOnly = mock(AspectDefinition.class);
+        when(scopeOnly.getProperties()).thenReturn(Map.of(
+                QName.createQName(CCConstants.CCM_PROP_EDITORIAL_INVENTORY), mock(PropertyDefinition.class)));
+        when(dictionaryService.getAspect(QName.createQName(CCConstants.CCM_ASPECT_EDITORIAL_SCOPE_PROPERTIES))).thenReturn(scopeOnly);
+        String inventory = CCConstants.getValidLocalName(CCConstants.CCM_PROP_EDITORIAL_INVENTORY);
+
+        assertThrows(IllegalArgumentException.class, () -> underTest.updateScope(SCOPE, "mds", List.of(),
+                ScopePresentation.builder().sortColumns(List.of("cm:modified", inventory)).build()));
+        // card columns may show them
+        assertEquals(List.of(inventory), underTest.updateScope(SCOPE, "mds", List.of(),
+                ScopePresentation.builder().cardColumns(List.of(inventory)).build()).getPresentation().getCardColumns());
     }
 
     @Test

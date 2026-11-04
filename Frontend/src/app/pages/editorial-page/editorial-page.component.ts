@@ -1209,13 +1209,14 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
     }
     /**
      * sortable columns of the active scope (or the mds sort "editorial_scope") and their default, a sort
-     * of the url wins
+     * of the url wins. The relevance is not offered: the editorial lists have no search string
      */
     private getScopeSort(mds: MdsDefinition): ListSortConfig | null {
         const config = ScopeMdsService.getSortConfig(
             mds,
             ScopeMdsService.EDITORIAL_SORT,
             this.scopesService.activeScope(),
+            { excluded: [ScopeMdsService.SORT_SCORE] },
         );
         if (!config) {
             return null;

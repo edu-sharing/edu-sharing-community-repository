@@ -189,7 +189,8 @@ public class ScopeDefinitionServiceImpl implements ScopeDefinitionService {
 
     /**
      * card columns: properties of the dictionary or virtual properties of the mds, each once.
-     * sort columns: properties of the dictionary or the relevance ("score"), each once
+     * sort columns: properties of the dictionary or the relevance ("score"), each once. Scope only properties are
+     * not sortable: their values only exist in the nested scope entries, ScopeSort only sorts the replacing fields
      */
     private void validatePresentation(ScopePresentation presentation) {
         if (presentation == null) {
@@ -197,6 +198,12 @@ public class ScopeDefinitionServiceImpl implements ScopeDefinitionService {
         }
         validateColumns("card column", presentation.getCardColumns(), column -> column.startsWith(VIRTUAL_PREFIX));
         validateColumns("sort column", presentation.getSortColumns(), SORT_SCORE::equals);
+        if (presentation.getSortColumns() != null) {
+            Set<String> scopeOnly = scopeProperties.getScopeOnlyProperties();
+            presentation.getSortColumns().stream().filter(scopeOnly::contains).findFirst().ifPresent(column -> {
+                throw new IllegalArgumentException("sort column " + column + " is a scope only property and can not be sorted");
+            });
+        }
     }
 
     private void validateColumns(String kind, List<String> columns, java.util.function.Predicate<String> additionallyAllowed) {
@@ -223,13 +230,12 @@ public class ScopeDefinitionServiceImpl implements ScopeDefinitionService {
         if (presentation == null) {
             return null;
         }
-        // an empty list is the mds default: not stored
-        ScopePresentation stored = ScopePresentation.builder()
+        // an empty list is the mds default: not stored. All other (future) fields are kept
+        ScopePresentation stored = presentation.toBuilder()
                 .cardColumns(emptyToNull(presentation.getCardColumns()))
                 .sortColumns(emptyToNull(presentation.getSortColumns()))
                 .build();
-        boolean empty = stored.getCardColumns() == null && stored.getSortColumns() == null;
-        return empty ? null : ScopeDefinitionJson.write(stored);
+        return stored.equals(new ScopePresentation()) ? null : ScopeDefinitionJson.write(stored);
     }
 
     private static List<String> emptyToNull(List<String> columns) {

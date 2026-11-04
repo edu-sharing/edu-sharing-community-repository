@@ -1863,7 +1863,7 @@
       },
       "SORT": {
         "TITLE": "Sorting",
-        "HINT": "The editorial page and the search inside this editorial team can be sorted by these properties. Values adapted by the editorial team are taken into account.",
+        "HINT": "The editorial page and the search inside this editorial team can be sorted by these properties. Values adapted by the editorial team are taken into account. The relevance is only available in the search.",
         "EMPTY": "No sorting"
       }
     },

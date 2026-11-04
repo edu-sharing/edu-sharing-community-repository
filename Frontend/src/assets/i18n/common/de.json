@@ -1863,7 +1863,7 @@
       },
       "SORT": {
         "TITLE": "Sortierung",
-        "HINT": "Nach diesen Angaben lassen sich die Redaktionsseite und die Suche in dieser Redaktion sortieren. Angepasste Werte der Redaktion werden dabei berücksichtigt.",
+        "HINT": "Nach diesen Angaben lassen sich die Redaktionsseite und die Suche in dieser Redaktion sortieren. Angepasste Werte der Redaktion werden dabei berücksichtigt. Die Relevanz gibt es nur in der Suche.",
         "EMPTY": "Keine Sortierung"
       }
     },
