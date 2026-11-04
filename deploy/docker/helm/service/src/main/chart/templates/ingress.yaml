@@ -62,6 +62,37 @@ spec:
   {{- end }}
 ---
 {{- end }}
+{{- if .Values.ingress.robots.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "edusharing_common_lib.names.name" . }}-robots
+  labels: {{ include "edusharing_common_lib.labels.app" . | nindent 4 }}
+  {{- with merge .Values.ingress.robots.annotations .Values.ingress.annotations .Values.global.cluster.cert.annotations }}
+  annotations: {{ toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.global.cluster.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.global.cluster.ingress.ingressClassName | quote }}
+  {{- end }}
+  {{- with .Values.ingress.tls }}
+  tls: {{ toYaml . | nindent 4 }}
+  {{- end }}
+  rules:
+  {{- range .Values.ingress.hosts }}
+  - host: {{ . }}
+    http:
+      paths:
+      - path: /robots.txt
+        pathType: Exact
+        backend:
+          service:
+            name: {{ include "edusharing_common_lib.names.name" $ }}{{ if and $.Values.ingress.admin.enabled $.Values.ingress.admin.exclusive }}-role-worker{{ end }}
+            port:
+              number: {{ $.Values.service.port.api.external }}
+  {{- end }}
+---
+{{- end }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
