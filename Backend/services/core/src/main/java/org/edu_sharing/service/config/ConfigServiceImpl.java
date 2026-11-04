@@ -109,7 +109,7 @@ public class ConfigServiceImpl implements ConfigService, ApplicationListener<Ref
 
     @Override
     public void deleteContext(String id) throws Exception {
-        if (!AuthorityServiceFactory.getInstance().getLocalService().isGlobalAdmin()) {
+        if (!AuthorityServiceFactory.getLocalService().isGlobalAdmin()) {
             throw new NotAnAdminException();
         }
         String eduSharingSystemFolderContext = userEnvironmentTool.getEdu_SharingContextFolder();
@@ -232,7 +232,7 @@ public class ConfigServiceImpl implements ConfigService, ApplicationListener<Ref
 
     @Override
     public Context createOrUpdateContext(Context context) {
-        if (!AuthorityServiceFactory.getInstance().getLocalService().isGlobalAdmin()) {
+        if (!AuthorityServiceFactory.getLocalService().isGlobalAdmin()) {
             throw new NotAnAdminException();
         }
         return AuthenticationUtil.runAsSystem(() -> {
