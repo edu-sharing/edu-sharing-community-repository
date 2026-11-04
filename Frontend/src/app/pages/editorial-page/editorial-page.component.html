@@ -121,10 +121,7 @@
       [class.has-main-component]="mainComponent$ | async"
     >
       <h1 esTitle class="cdk-visually-hidden">
-        {{
-          'EDITORIAL.BREADCRUMB.' +
-            $safeNavigationMigration(editorialBreadcrumbService.mode()?.toUpperCase()) | translate
-        }}
+        {{ 'EDITORIAL.BREADCRUMB.' + editorialBreadcrumbService.mode()?.toUpperCase() | translate }}
       </h1>
       <div class="top-area">
         <es-editorial-breadcrumb
@@ -216,9 +213,7 @@
           </ng-template>
           <ng-template #empty>
             <div class="empty">
-              {{
-                'EDITORIAL.' + $safeNavigationMigration(mode?.toUpperCase()) + '.EMPTY' | translate
-              }}
+              {{ 'EDITORIAL.' + mode?.toUpperCase() + '.EMPTY' | translate }}
             </div>
           </ng-template>
         </es-node-entries-wrapper>

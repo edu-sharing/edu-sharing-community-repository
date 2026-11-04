@@ -341,21 +341,13 @@
           <div class="userMode">
             <label>{{ 'ADMIN.MESSAGES.USER_MODES' | translate }}</label>
             <div>
-              {{
-                'ADMIN.MESSAGES.USER_MODE.' +
-                  $safeNavigationMigration(msg.userMode?.toUpperCase()) +
-                  '_TITLE' | translate
-              }}
+              {{ 'ADMIN.MESSAGES.USER_MODE.' + msg.userMode?.toUpperCase() + '_TITLE' | translate }}
             </div>
           </div>
           <div class="mode">
             <label>{{ 'ADMIN.MESSAGES.MODES' | translate }}</label>
             <div>
-              {{
-                'ADMIN.MESSAGES.MODE.' +
-                  $safeNavigationMigration(msg.mode?.toUpperCase()) +
-                  '_TITLE' | translate
-              }}
+              {{ 'ADMIN.MESSAGES.MODE.' + msg.mode?.toUpperCase() + '_TITLE' | translate }}
             </div>
           </div>
           <div class="from">
@@ -372,22 +364,14 @@
           <div class="severity">
             <label>{{ 'ADMIN.MESSAGES.SEVERITIES' | translate }}</label>
             <div>
-              {{
-                'ADMIN.MESSAGES.SEVERITY.' +
-                  $safeNavigationMigration(msg.severity?.toUpperCase()) +
-                  '_TITLE' | translate
-              }}
+              {{ 'ADMIN.MESSAGES.SEVERITY.' + msg.severity?.toUpperCase() + '_TITLE' | translate }}
             </div>
           </div>
           }
           <div class="repeat">
             <label>{{ 'ADMIN.MESSAGES.REPEATS' | translate }}</label>
             <div>
-              {{
-                'ADMIN.MESSAGES.REPEAT.' +
-                  $safeNavigationMigration(msg.repeat?.toUpperCase()) +
-                  '_TITLE' | translate
-              }}
+              {{ 'ADMIN.MESSAGES.REPEAT.' + msg.repeat?.toUpperCase() + '_TITLE' | translate }}
             </div>
           </div>
         </div>
