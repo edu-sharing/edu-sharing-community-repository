@@ -8,11 +8,18 @@ import {
     MdsValue,
     MdsWidget,
 } from 'ngx-edu-sharing-api';
-import { ColumnType, ListItem } from 'ngx-edu-sharing-ui';
+import { ColumnType, ListItem, ListItemSort } from 'ngx-edu-sharing-ui';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
 export type ScopeWidgets = Record<string, MdsWidget>;
+
+/** sortable columns and default sort of a list */
+export interface ScopeSortConfig {
+    columns: ListItemSort[];
+    sortBy: string | null;
+    sortAscending: boolean;
+}
 
 /**
  * Widget definitions (captions, valuespaces) of the scope properties, taken from the scope mds
@@ -29,6 +36,10 @@ export class ScopeMdsService {
      * stored, choosing it removes the value
      */
     static readonly INVENTORY_NONE = 'inbox';
+    /** mds sort of the editorial page inside a scope */
+    static readonly EDITORIAL_SORT = 'editorial_scope';
+    /** the relevance as sort column */
+    static readonly SORT_SCORE = 'score';
 
     private mdsService = inject(MdsService);
 
@@ -87,6 +98,47 @@ export class ScopeMdsService {
             return defaults;
         }
         return { Default: ScopeMdsService.toColumns(ids, defaults?.Default ?? [], mds) };
+    }
+
+    /**
+     * sort of a list inside the active scope: the sort columns of the scope (ScopePresentation.sortColumns)
+     * instead of the columns of the given mds sort. The default of the mds sort stays if it is still
+     * sortable, else the first column
+     */
+    static getSortConfig(
+        mds: MdsDefinition | null | undefined,
+        mdsSortId: string,
+        scope: ActiveScope | null | undefined,
+    ): ScopeSortConfig | null {
+        const sort = mds?.sorts?.find((s) => s.id === mdsSortId);
+        const ids = scope?.definition?.presentation?.sortColumns;
+        if (!ids?.length) {
+            return sort
+                ? {
+                      columns: (sort.columns ?? []).map(
+                          ({ id, mode }) =>
+                              new ListItemSort('NODE', id, mode as 'ascending' | 'descending'),
+                      ),
+                      sortBy: sort.default?.sortBy ?? null,
+                      sortAscending: !!sort.default?.sortAscending,
+                  }
+                : null;
+        }
+        // the fixed direction of a column (e.g. score: descending only) is kept
+        const modes = new Map(
+            (mds?.sorts ?? []).flatMap((s) => s.columns ?? []).map((c) => [c.id, c.mode]),
+        );
+        const columns = ids.map(
+            (id) => new ListItemSort('NODE', id, modes.get(id) as 'ascending' | 'descending'),
+        );
+        const keepDefault = !!sort?.default?.sortBy && ids.includes(sort.default.sortBy);
+        return {
+            columns,
+            sortBy: keepDefault ? sort.default.sortBy : ids[0],
+            sortAscending: keepDefault
+                ? !!sort.default.sortAscending
+                : ![ScopeMdsService.SORT_SCORE, 'cm:modified', 'cm:created'].includes(ids[0]),
+        };
     }
 
     /** the given properties as columns, existing columns (format, label) are reused */

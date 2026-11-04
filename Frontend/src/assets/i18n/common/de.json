@@ -1860,6 +1860,11 @@
         "MANDATORY": "Pflichtfeld: Die Bestandsentscheidung steuert die Veröffentlichung",
         "REMOVE": "Entfernen",
         "FILTER": "Properties filtern"
+      },
+      "SORT": {
+        "TITLE": "Sortierung",
+        "HINT": "Nach diesen Angaben lassen sich die Redaktionsseite und die Suche in dieser Redaktion sortieren. Angepasste Werte der Redaktion werden dabei berücksichtigt.",
+        "EMPTY": "Keine Sortierung"
       }
     },
     "EDITORIAL": {

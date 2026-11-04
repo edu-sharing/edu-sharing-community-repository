@@ -48,7 +48,8 @@
     <!-- the inventory decision: directly selectable -->
     <es-scope-inventory
       [widgets]="widgets()"
-      [value]="getValues(f.field.id)[0]"
+      [value]="isBulk() && !isTouched(f.field.id) ? bulkInventory() : getValues(f.field.id)[0]"
+      [mixed]="isBulk() && !isTouched(f.field.id) && bulkInventory() === undefined"
       (valueChange)="onWidgetChange(f.field.id, $event ? [$event] : [])"
     ></es-scope-inventory>
     } @if (editorFieldIds().length) {

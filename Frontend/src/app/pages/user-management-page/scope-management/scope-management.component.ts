@@ -35,6 +35,7 @@ import { Observable, of } from 'rxjs';
 import { catchError, debounceTime, map, switchMap } from 'rxjs/operators';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { Toast } from '../../../services/toast';
+import { RestConstants as CoreRestConstants } from '../../../core-module/rest/rest-constants';
 import { ScopeMdsService, ScopeWidgets } from '../../../features/scopes/scope-mds.service';
 import { ScopePropertyListComponent } from './scope-property-list/scope-property-list.component';
 
@@ -198,6 +199,30 @@ export class ScopeManagementComponent {
               []
             : [],
     );
+    /** sort columns of the scope, null: the sorts of the mds (editorial page and search have their own) */
+    readonly customSortColumns = signal<string[] | null>(null);
+    /** shown while the mds default applies: the sort of the editorial page */
+    private readonly defaultSortColumns = computed<string[]>(
+        () =>
+            this.mdsDefinition()
+                ?.sorts?.find((s) => s.id === ScopeMdsService.EDITORIAL_SORT)
+                ?.columns?.map((c) => c.id) ?? [],
+    );
+    readonly sortColumnIds = computed(() => this.customSortColumns() ?? this.defaultSortColumns());
+    /**
+     * sortable properties: the allowed node sorts (POSSIBLE_SORT_BY_FIELDS), the columns of the mds sorts
+     * and the relevance of the search
+     */
+    readonly sortProperties = computed<ListItem[]>(() => {
+        const allowed = CoreRestConstants.POSSIBLE_SORT_BY_FIELDS.filter(
+            (s) => s.type === 'NODE',
+        ).map((s) => s.name);
+        const mdsSorts = (this.mdsDefinition()?.sorts ?? []).flatMap((s) =>
+            (s.columns ?? []).map((c) => c.id),
+        );
+        const ids = new Set([ScopeMdsService.SORT_SCORE, ...mdsSorts, ...allowed]);
+        return this.toListItems([...ids]).sort((a, b) => a.label.localeCompare(b.label));
+    });
     /** card columns of the scope, null: the mds default (later mds changes apply) */
     readonly customCardColumns = signal<string[] | null>(null);
     readonly cardColumnIds = computed(
@@ -316,6 +341,7 @@ export class ScopeManagementComponent {
             fields: [this.newField(MANDATORY_FIELD)],
         });
         this.customCardColumns.set(null);
+        this.customSortColumns.set(null);
     }
 
     edit(scope: ScopeDefinition) {
@@ -341,6 +367,8 @@ export class ScopeManagementComponent {
         });
         const cardColumns = scope.presentation?.cardColumns;
         this.customCardColumns.set(cardColumns?.length ? cardColumns : null);
+        const sortColumns = scope.presentation?.sortColumns;
+        this.customSortColumns.set(sortColumns?.length ? sortColumns : null);
     }
 
     isMandatory(id: string): boolean {
@@ -410,6 +438,14 @@ export class ScopeManagementComponent {
         this.customCardColumns.set(null);
     }
 
+    setSortColumns(ids: string[]) {
+        this.customSortColumns.set(ids);
+    }
+
+    resetSortColumns() {
+        this.customSortColumns.set(null);
+    }
+
     private toListItems(ids: string[]): ListItem[] {
         return ids.map((id) =>
             Object.assign(new ListItem('NODE', id), { label: this.getLabel(id) }),
@@ -475,8 +511,12 @@ export class ScopeManagementComponent {
             id: f.id.trim(),
         }));
         const mds = draft.mds?.trim() || null;
-        const custom = this.customCardColumns();
-        const presentation = custom ? { cardColumns: custom } : null;
+        const cardColumns = this.customCardColumns();
+        const sortColumns = this.customSortColumns();
+        const presentation =
+            cardColumns || sortColumns
+                ? { cardColumns: cardColumns ?? undefined, sortColumns: sortColumns ?? undefined }
+                : null;
         this.saving.set(true);
         const request = draft.scopeId
             ? this.scopesService.updateScope(draft.scopeId, { mds, fields, presentation })

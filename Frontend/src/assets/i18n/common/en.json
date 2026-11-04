@@ -1860,6 +1860,11 @@
         "MANDATORY": "Mandatory: the inventory decision controls publishing",
         "REMOVE": "Remove",
         "FILTER": "Filter properties"
+      },
+      "SORT": {
+        "TITLE": "Sorting",
+        "HINT": "The editorial page and the search inside this editorial team can be sorted by these properties. Values adapted by the editorial team are taken into account.",
+        "EMPTY": "No sorting"
       }
     },
     "EDITORIAL": {

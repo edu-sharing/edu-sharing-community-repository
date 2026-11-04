@@ -36,6 +36,8 @@ public class ScopeDefinitionServiceImpl implements ScopeDefinitionService {
 
     private static final int MAX_SCOPES = 10000;
     private static final String VIRTUAL_PREFIX = "virtual:";
+    /** the relevance as sort column */
+    static final String SORT_SCORE = "score";
 
     private final org.alfresco.service.cmr.security.AuthorityService alfAuthorityService;
     private final NodeService nodeService;
@@ -186,21 +188,30 @@ public class ScopeDefinitionServiceImpl implements ScopeDefinitionService {
     }
 
     /**
-     * card columns: properties of the dictionary or virtual properties of the mds, each once
+     * card columns: properties of the dictionary or virtual properties of the mds, each once.
+     * sort columns: properties of the dictionary or the relevance ("score"), each once
      */
     private void validatePresentation(ScopePresentation presentation) {
-        if (presentation == null || presentation.getCardColumns() == null) {
+        if (presentation == null) {
+            return;
+        }
+        validateColumns("card column", presentation.getCardColumns(), column -> column.startsWith(VIRTUAL_PREFIX));
+        validateColumns("sort column", presentation.getSortColumns(), SORT_SCORE::equals);
+    }
+
+    private void validateColumns(String kind, List<String> columns, java.util.function.Predicate<String> additionallyAllowed) {
+        if (columns == null) {
             return;
         }
         Set<String> ids = new HashSet<>();
-        for (String column : presentation.getCardColumns()) {
-            boolean known = column != null && (column.startsWith(VIRTUAL_PREFIX)
+        for (String column : columns) {
+            boolean known = column != null && (additionallyAllowed.test(column)
                     || dictionaryService.getProperty(QName.createQName(CCConstants.getValidGlobalName(column))) != null);
             if (!known) {
-                throw new IllegalArgumentException("card column " + column + " is not known by the dictionary");
+                throw new IllegalArgumentException(kind + " " + column + " is not known by the dictionary");
             }
             if (!ids.add(column)) {
-                throw new IllegalArgumentException("card column " + column + " is configured twice");
+                throw new IllegalArgumentException(kind + " " + column + " is configured twice");
             }
         }
     }
@@ -209,8 +220,20 @@ public class ScopeDefinitionServiceImpl implements ScopeDefinitionService {
      * @return the json of the settings, null if nothing is set (removes the property)
      */
     private static String writePresentation(ScopePresentation presentation) {
-        boolean empty = presentation == null || presentation.getCardColumns() == null || presentation.getCardColumns().isEmpty();
-        return empty ? null : ScopeDefinitionJson.write(presentation);
+        if (presentation == null) {
+            return null;
+        }
+        // an empty list is the mds default: not stored
+        ScopePresentation stored = ScopePresentation.builder()
+                .cardColumns(emptyToNull(presentation.getCardColumns()))
+                .sortColumns(emptyToNull(presentation.getSortColumns()))
+                .build();
+        boolean empty = stored.getCardColumns() == null && stored.getSortColumns() == null;
+        return empty ? null : ScopeDefinitionJson.write(stored);
+    }
+
+    private static List<String> emptyToNull(List<String> columns) {
+        return columns == null || columns.isEmpty() ? null : columns;
     }
 
     /**

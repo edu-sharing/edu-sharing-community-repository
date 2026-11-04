@@ -25,4 +25,10 @@ public class ScopePresentation implements Serializable {
      */
     @Schema(description = "properties of the content cards (search, collection contents), null or empty: the mds default")
     private List<String> cardColumns;
+    /**
+     * properties the lists inside the scope can be sorted by (editorial page and search), in this order, "score" for
+     * the relevance. Null or empty: the sorts of the mds
+     */
+    @Schema(description = "sortable properties inside the scope (editorial page, search), \"score\" for the relevance, null or empty: the mds default")
+    private List<String> sortColumns;
 }

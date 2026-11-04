@@ -8377,6 +8377,14 @@
               "type": "string"
             },
             "type": "array"
+          },
+          "sortColumns": {
+            "description": "sortable properties inside the scope (editorial page, search), \"score\" for the relevance, null or empty: the mds default",
+            "items": {
+              "description": "sortable properties inside the scope (editorial page, search), \"score\" for the relevance, null or empty: the mds default",
+              "type": "string"
+            },
+            "type": "array"
           }
         },
         "type": "object"

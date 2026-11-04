@@ -1,6 +1,6 @@
 <div class="label" [id]="labelId">{{ widget()?.caption || property }}</div>
 <mat-radio-group
-  [value]="value() || NONE"
+  [value]="mixed() ? null : value() || NONE"
   [disabled]="disabled()"
   [attr.aria-labelledby]="labelId"
   (change)="onChange($event.value)"
@@ -19,6 +19,11 @@
   </mat-radio-button>
   }
 </mat-radio-group>
+@if (mixed()) {
+<div class="state">
+  <span class="status">{{ 'MDS.DIFFERENT_VALUES' | translate }}</span>
+</div>
+} @else {
 <div class="state">
   <span class="status" [class.published]="state().published">
     <i [esIcon]="state().published ? 'visibility' : 'visibility_off'"></i>
@@ -35,3 +40,4 @@
   </span>
   }
 </div>
+}

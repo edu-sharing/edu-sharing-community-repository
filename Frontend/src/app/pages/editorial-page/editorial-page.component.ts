@@ -61,7 +61,6 @@ import {
     Helper,
     InteractionType,
     ListItem,
-    ListItemSort,
     ListSortConfig,
     MdsHelperService,
     NodeClickEvent,
@@ -1209,23 +1208,25 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
         this.editorialSidebarService.handleSelection(event);
     }
     /**
-     * allowed columns and default of the mds sort "editorial_scope", a sort of the url wins
+     * sortable columns of the active scope (or the mds sort "editorial_scope") and their default, a sort
+     * of the url wins
      */
     private getScopeSort(mds: MdsDefinition): ListSortConfig | null {
-        const sorts = mds?.sorts?.find((s) => s.id === 'editorial_scope');
-        if (!sorts) {
+        const config = ScopeMdsService.getSortConfig(
+            mds,
+            ScopeMdsService.EDITORIAL_SORT,
+            this.scopesService.activeScope(),
+        );
+        if (!config) {
             return null;
         }
         const params = this.route.snapshot.queryParams;
+        const fromUrl = config.columns.some((c) => c.name === params.sortBy);
         return {
             allowed: true,
-            columns: (sorts.columns ?? []).map(
-                ({ id, mode }) => new ListItemSort('NODE', id, mode as 'ascending' | 'descending'),
-            ),
-            active: params.sortBy ?? sorts.default?.sortBy,
-            direction: (
-                params.sortBy ? params.sortAscending === 'true' : sorts.default?.sortAscending
-            )
+            columns: config.columns,
+            active: fromUrl ? params.sortBy : config.sortBy,
+            direction: (fromUrl ? params.sortAscending === 'true' : config.sortAscending)
                 ? 'asc'
                 : 'desc',
         };

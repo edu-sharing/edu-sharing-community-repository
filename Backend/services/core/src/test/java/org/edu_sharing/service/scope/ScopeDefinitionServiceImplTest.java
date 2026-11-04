@@ -164,6 +164,22 @@ class ScopeDefinitionServiceImplTest {
     }
 
     @Test
+    void sortColumnsAreStoredAndValidated() {
+        groupProperties.put(QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE), CCConstants.GROUP_TYPE_SCOPE);
+        ScopePresentation presentation = ScopePresentation.builder().sortColumns(List.of("score", "cclom:title")).build();
+
+        ScopePresentation stored = underTest.updateScope(SCOPE, "mds", List.of(), presentation).getPresentation();
+        assertEquals(List.of("score", "cclom:title"), stored.getSortColumns());
+        // the card columns stay the mds default
+        assertNull(stored.getCardColumns());
+
+        assertThrows(IllegalArgumentException.class, () -> underTest.updateScope(SCOPE, "mds", List.of(),
+                ScopePresentation.builder().sortColumns(List.of("ccm:unknown")).build()));
+        assertThrows(IllegalArgumentException.class, () -> underTest.updateScope(SCOPE, "mds", List.of(),
+                ScopePresentation.builder().sortColumns(List.of("score", "score")).build()));
+    }
+
+    @Test
     void fieldsMustBeKnownByTheDictionary() {
         List<ScopeField> unknown = List.of(ScopeField.builder().id("ccm:unknown").build());
         List<ScopeField> twice = List.of(ScopeField.builder().id("ccm:a").build(), ScopeField.builder().id("ccm:a").build());

@@ -25,6 +25,8 @@ export class ScopeInventoryComponent {
     readonly widgets = input<ScopeWidgets>();
     /** current decision, null / undefined if there is none yet */
     readonly value = input<string | null>();
+    /** bulk: the selected contents have different decisions (no radio selected) */
+    readonly mixed = input(false);
     readonly disabled = input(false);
     /** the new decision, null for "inbox" (no decision) */
     readonly valueChange = output<string | null>();

@@ -108,6 +108,29 @@
         [elementInteractionType]="InteractionType.None"
       ></es-node-entries-wrapper>
     </div>
+    <h3 class="card-heading">
+      {{ 'SCOPES.ADMIN.SORT.TITLE' | translate }}
+      @if (customSortColumns()) {
+      <button
+        mat-button
+        color="primary"
+        (click)="resetSortColumns()"
+        data-test="scope-management-sort-reset"
+      >
+        <i esIcon="undo"></i>{{ 'SCOPES.ADMIN.CARD.RESET' | translate }}
+      </button>
+      } @else {
+      <span class="default-hint">{{ 'SCOPES.ADMIN.CARD.DEFAULT' | translate }}</span>
+      }
+    </h3>
+    <p class="hint">{{ 'SCOPES.ADMIN.SORT.HINT' | translate }}</p>
+    <es-scope-property-list
+      testId="scope-management-sort"
+      [properties]="sortProperties()"
+      [selected]="sortColumnIds()"
+      emptyText="SCOPES.ADMIN.SORT.EMPTY"
+      (selectedChange)="setSortColumns($event)"
+    ></es-scope-property-list>
 
     <div class="buttons">
       <button mat-button color="primary" (click)="cancel()">{{ 'CANCEL' | translate }}</button>

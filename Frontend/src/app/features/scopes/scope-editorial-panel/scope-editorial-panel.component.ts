@@ -156,6 +156,25 @@ export class ScopeEditorialPanelComponent implements OnDestroy {
         return node ? [this.toEditorNode(node, this.assignment()?.properties, 0)] : [];
     });
 
+    /**
+     * bulk: the common inventory decision of the selected contents (null: none yet), undefined if they differ
+     * or the target is a search (its hits are unknown here)
+     */
+    protected readonly bulkInventory = computed<string | null | undefined>(() => {
+        if (!this.isBulk() || this.searchTarget()) {
+            return undefined;
+        }
+        const values = new Set(
+            this.targetNodes().map(
+                (node) =>
+                    this.scopesService.getNodeScope(node)?.properties?.[
+                        RestConstants.CCM_PROP_EDITORIAL_INVENTORY
+                    ]?.[0] ?? null,
+            ),
+        );
+        return values.size === 1 ? [...values][0] : undefined;
+    });
+
     /** the entry of the single node, null if it has none yet */
     protected readonly assignment = signal<ScopeAssignment | null>(null);
     protected readonly loading = signal(false);
@@ -370,7 +389,8 @@ export class ScopeEditorialPanelComponent implements OnDestroy {
             const multi = !!widget.definition.type?.startsWith('multivalue');
             const indeterminate = widget.getIndeterminateValues() ?? [];
             if (mode === 'append') {
-                properties[id] = values;
+                // only the added values: the values of a part of the nodes stay on exactly these nodes
+                properties[id] = values.filter((v) => !indeterminate.includes(v));
                 appendProperties.push(id);
             } else if (multi && (indeterminate.length || nodes.length > 1)) {
                 const initial = [...new Set(nodes.flatMap((n) => n.properties?.[id] ?? []))];
