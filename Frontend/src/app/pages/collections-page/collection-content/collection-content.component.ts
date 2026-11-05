@@ -64,6 +64,7 @@ import {
     OptionsHelperDataService,
     Scope,
     UIConstants,
+    Values,
     VirtualNode,
 } from 'ngx-edu-sharing-ui';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
@@ -92,6 +93,7 @@ import { MainNavService } from '../../../main/navigation/main-nav.service';
 import { BridgeService } from '../../../services/bridge.service';
 import { CollectionViewStateService, CollectionViewType } from '../collection-view-state.service';
 import { CollectionSearchService } from '../collection-search.service';
+import { sameSearchFilters } from '../../../features/topic-page/shared/utils/search-hit-util';
 import { CollectionSearchStateService } from '../collection-search-state.service';
 import { InfobarService } from '../infobar/infobar.service';
 import { SelectionChange } from '@angular/cdk/collections';
@@ -312,6 +314,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     private shownViewType = this.viewState.viewType();
     private shownQuery = this.searchState.query();
     private shownIncludeSubLevels = this.searchState.includeSubLevels();
+    private shownFilters = this.searchState.filters();
     /** The collections that lead to the hits of the search, which are no hits themselves. */
     private searchAncestors: Node[] = [];
     private searchAncestorIds = new Set<string>();
@@ -341,7 +344,8 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         effect(() => {
             const query = this.searchState.query();
             const includeSubLevels = this.searchState.includeSubLevels();
-            untracked(() => this.onQueryChange(query, includeSubLevels));
+            const filters = this.searchState.filters();
+            untracked(() => this.onQueryChange(query, includeSubLevels, filters));
         });
         // the header bar is rendered independently of the content, so its actionbar can appear
         // after the options were set up
@@ -1144,12 +1148,17 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     }
 
     /** Reloads the content when the search term changed, e.g. when it was typed or cleared. */
-    private onQueryChange(query: string | null, includeSubLevels: boolean) {
-        if (query === this.shownQuery && includeSubLevels === this.shownIncludeSubLevels) {
+    private onQueryChange(query: string | null, includeSubLevels: boolean, filters: Values) {
+        if (
+            query === this.shownQuery &&
+            includeSubLevels === this.shownIncludeSubLevels &&
+            sameSearchFilters(filters, this.shownFilters)
+        ) {
             return;
         }
         this.shownQuery = query;
         this.shownIncludeSubLevels = includeSubLevels;
+        this.shownFilters = filters;
         if (this.collection) {
             this.refreshContent();
         }
@@ -1159,11 +1168,13 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     private searchContent() {
         this.dataSourceCollections.isLoading = true;
         this.dataSourceReferences.isLoading = false;
-        const query = this.searchState.query().trim();
+        const query = this.searchState.query()?.trim() ?? '';
         const includeSubLevels = this.searchState.includeSubLevels();
+        const filters = this.searchState.filters();
         this.collectionSearch
             .search(query, {
                 includeSubLevels,
+                filters,
                 scope: this.isRootLevel ? this.scope : undefined,
                 parentId: this.isRootLevel ? undefined : this.collection.ref.id,
             })
@@ -1171,8 +1182,9 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 next: (result) => {
                     // a stale answer must not replace the one of a newer search
                     if (
-                        query !== this.searchState.query()?.trim() ||
-                        includeSubLevels !== this.searchState.includeSubLevels()
+                        query !== (this.searchState.query()?.trim() ?? '') ||
+                        includeSubLevels !== this.searchState.includeSubLevels() ||
+                        !sameSearchFilters(filters, this.searchState.filters())
                     ) {
                         return;
                     }

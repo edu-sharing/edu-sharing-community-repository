@@ -1,4 +1,5 @@
 import {
+    ChangeDetectorRef,
     Component,
     EventEmitter,
     HostBinding,
@@ -50,6 +51,7 @@ import { MdsEditorInstanceServiceAbstract, MdsExtendedValues } from 'ngx-edu-sha
 })
 export class MdsEditorWrapperComponent implements OnInit, OnChanges, OnDestroy {
     mdsEditorInstance = inject(MdsEditorInstanceService);
+    private changeDetectorRef = inject(ChangeDetectorRef);
     private toast = inject(Toast);
     private search = inject(SearchService);
 
@@ -349,6 +351,8 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges, OnDestroy {
             this.handleError(error);
         } finally {
             this.isLoading = false;
+            // hosts that are not checked on every change would keep showing the loading state
+            this.changeDetectorRef.markForCheck();
         }
     }
 

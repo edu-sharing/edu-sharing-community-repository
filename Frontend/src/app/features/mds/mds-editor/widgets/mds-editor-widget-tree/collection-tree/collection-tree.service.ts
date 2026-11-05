@@ -32,6 +32,17 @@ export interface CollectionSearchOptions {
     propertyFilter?: string[];
     sortProperties?: string[];
     sortAscending?: boolean[];
+    /**
+     * Criteria of the metadata set that narrow the search further, e.g. metadata filters. They are
+     * answered by the `collection_search` query, so a metadata set without it ignores them.
+     */
+    criteria?: SearchCriterion[];
+}
+
+/** A search criterion: a property of the query and the values it has to match. */
+export interface SearchCriterion {
+    property: string;
+    values: string[];
 }
 
 /** A collection with the id of the collection above it, `null` for a top-level collection. */
@@ -53,6 +64,8 @@ const PROPERTY_FILTER = [
 const PARENT_RECURSIVE_PARAMETER = 'virtual:parent_recursive';
 const NODE_ID_PARAMETER = 'virtual:node_id';
 const TITLE_CONTAINS_PARAMETER = 'virtual:title_contains';
+/** Query of the collections search that accepts metadata criteria beside the search term. */
+const COLLECTION_SEARCH_QUERY = 'collection_search';
 /** A node id, which the search matches against ids rather than titles. */
 const NODE_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const ANCESTORS_CACHE_DURATION_MS = 5 * 60 * 1000;
@@ -273,6 +286,34 @@ export class CollectionTreeService {
         term: string,
         options: CollectionSearchOptions,
     ): Observable<CollectionPage> {
+        const { criteria, ...plainOptions } = options;
+        const mdsId = options.mdsId || DEFAULT;
+        const queryKey = `${mdsId}|${COLLECTION_SEARCH_QUERY}`;
+        if (!criteria?.length || this.unsupportedParameters.has(queryKey)) {
+            return this.searchPlainCollectionsPage(term, plainOptions);
+        }
+        const rootId = this.unsupportedParameters.has(`${mdsId}|${PARENT_RECURSIVE_PARAMETER}`)
+            ? null
+            : options.rootId;
+        return this.requestSearch(term, { ...options, mdsId, rootId }).pipe(
+            catchError((error: unknown) => {
+                if ((error as { status?: number })?.status !== 400) {
+                    return throwError(() => error);
+                }
+                markAsHandled(error);
+                // A metadata set without the query rejects the request; its collections are
+                // listed without the criteria then, which is remembered once that works.
+                return this.searchPlainCollectionsPage(term, plainOptions).pipe(
+                    tap(() => this.unsupportedParameters.add(queryKey)),
+                );
+            }),
+        );
+    }
+
+    private searchPlainCollectionsPage(
+        term: string,
+        options: CollectionSearchOptions,
+    ): Observable<CollectionPage> {
         const mdsId = options.mdsId || DEFAULT;
         const unrestricted = { ...options, rootId: null as string | null, mdsId: DEFAULT };
         if (
@@ -332,8 +373,12 @@ export class CollectionTreeService {
         term: string,
         options: CollectionSearchOptions,
     ): Observable<CollectionPage> {
-        const criteria = [{ property: RestConstants.PRIMARY_SEARCH_CRITERIA, values: [term] }];
+        const hasTerm = !!term.trim();
+        const criteria: SearchCriterion[] = hasTerm
+            ? [{ property: RestConstants.PRIMARY_SEARCH_CRITERIA, values: [term] }]
+            : [];
         const byTitle =
+            hasTerm &&
             !NODE_ID_PATTERN.test(term.trim()) &&
             !this.unsupportedParameters.has(`${options.mdsId}|${TITLE_CONTAINS_PARAMETER}`);
         if (byTitle) {
@@ -342,12 +387,15 @@ export class CollectionTreeService {
         if (options.rootId) {
             criteria.push({ property: PARENT_RECURSIVE_PARAMETER, values: [options.rootId] });
         }
+        criteria.push(...(options.criteria ?? []));
         // `requestSearch` leaves the search state of the hosting search page untouched
         return this.searchService
             .requestSearch({
                 repository: HOME_REPOSITORY,
                 metadataset: options.mdsId,
-                query: RestConstants.QUERY_NAME_COLLECTIONS,
+                query: options.criteria?.length
+                    ? COLLECTION_SEARCH_QUERY
+                    : RestConstants.QUERY_NAME_COLLECTIONS,
                 contentType: 'COLLECTIONS',
                 propertyFilter: options.propertyFilter ?? PROPERTY_FILTER,
                 sortProperties: options.sortProperties,

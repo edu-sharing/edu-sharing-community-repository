@@ -32,16 +32,16 @@
       <h2 class="filter-bar-title" [id]="titleId">{{ 'SEARCH.FILTERS' | translate }}</h2>
     </div>
     <div class="filter-bar-body">
-      <ng-container *ngTemplateOutlet="filterContent"></ng-container>
+      <ng-container *ngTemplateOutlet="filterContent; context: { inDialog: false }"></ng-container>
     </div>
   </div>
 </div>
 
 <ng-template #dialogContent>
-  <ng-container *ngTemplateOutlet="filterContent"></ng-container>
+  <ng-container *ngTemplateOutlet="filterContent; context: { inDialog: true }"></ng-container>
 </ng-template>
 
-<ng-template #filterContent>
+<ng-template #filterContent let-inDialog="inDialog">
   <mat-slide-toggle
     data-test="collection-search-filter-sub-levels"
     [ngModel]="includeSubLevels()"
@@ -57,4 +57,23 @@
       ) | translate
     }}
   </p>
+  @if (paramsApplied() && inDialog === isMobileLayout()) {
+  <es-mds-editor-wrapper
+    class="filter-editor"
+    groupId="collection_search"
+    [embedded]="true"
+    mode="search"
+    [currentValues]="filters()"
+    (currentValuesChange)="onFiltersChange($event)"
+  ></es-mds-editor-wrapper>
+  } @if (hasFilters()) {
+  <button
+    mat-button
+    class="filter-reset"
+    data-test="collection-search-filter-reset"
+    (click)="resetFilters()"
+  >
+    {{ 'CLEAR_FILTERS' | translate }}
+  </button>
+  }
 </ng-template>

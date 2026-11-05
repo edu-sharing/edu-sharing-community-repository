@@ -153,9 +153,13 @@
               @if (!topicView.selected()) { @if (searchState.active()) {
               <h2 class="root-bar-title mat-heading-3 search-in-collection">
                 {{
-                  (searchState.hitCount() === null
-                    ? 'COLLECTIONS.SEARCH_RESULTS_IN_COLLECTION'
-                    : 'COLLECTIONS.SEARCH_RESULTS_IN_COLLECTION_COUNT'
+                  (searchState.query()?.trim()
+                    ? searchState.hitCount() === null
+                      ? 'COLLECTIONS.SEARCH_RESULTS_IN_COLLECTION'
+                      : 'COLLECTIONS.SEARCH_RESULTS_IN_COLLECTION_COUNT'
+                    : searchState.hitCount() === null
+                    ? 'COLLECTIONS.FILTER_RESULTS_IN_COLLECTION'
+                    : 'COLLECTIONS.FILTER_RESULTS_IN_COLLECTION_COUNT'
                   ) | translate : { query: searchState.query(), count: searchState.hitCount() }
                 }}
               </h2>
@@ -171,9 +175,13 @@
                 <h2 class="root-bar-title mat-heading-3">
                   @if (searchState.active()) {
                   {{
-                    (searchState.hitCount() === null
-                      ? 'COLLECTIONS.SEARCH_RESULTS'
-                      : 'COLLECTIONS.SEARCH_RESULTS_COUNT'
+                    (searchState.query()?.trim()
+                      ? searchState.hitCount() === null
+                        ? 'COLLECTIONS.SEARCH_RESULTS'
+                        : 'COLLECTIONS.SEARCH_RESULTS_COUNT'
+                      : searchState.hitCount() === null
+                      ? 'COLLECTIONS.FILTER_RESULTS'
+                      : 'COLLECTIONS.FILTER_RESULTS_COUNT'
                     )
                       | translate
                         : {

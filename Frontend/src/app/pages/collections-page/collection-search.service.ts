@@ -1,5 +1,13 @@
 import { inject, Injectable } from '@angular/core';
-import { DEFAULT, Node, PROPERTY_FILTER_ALL } from 'ngx-edu-sharing-api';
+import {
+    DEFAULT,
+    HOME_REPOSITORY,
+    MdsService,
+    MdsWidget,
+    Node,
+    PROPERTY_FILTER_ALL,
+} from 'ngx-edu-sharing-api';
+import { SearchHelperService, Values } from 'ngx-edu-sharing-ui';
 import { firstValueFrom, from, Observable } from 'rxjs';
 import {
     CollectionTreeService,
@@ -19,6 +27,8 @@ export interface CollectionSearchRequest {
     parentId?: string;
     /** Whether collections below the searched level are hits as well; defaults to `true`. */
     includeSubLevels?: boolean;
+    /** Metadata filters the hits have to match, keyed by property. */
+    filters?: Values;
     sortProperties?: string[];
     sortAscending?: boolean[];
 }
@@ -51,14 +61,19 @@ export interface CollectionSearchResult {
 export class CollectionSearchService {
     private readonly treeService = inject(CollectionTreeService);
     private readonly collectionScopesService = inject(CollectionScopesService);
+    private readonly mdsService = inject(MdsService);
+    private readonly searchHelper = inject(SearchHelperService);
     /** Ids of the top-level collections per category, loaded once until `reset`. */
     private readonly topLevelIds = new Map<string, Promise<Set<string>>>();
+    /** The widgets of the default metadata set, which tell how filter values become criteria. */
+    private widgets: Promise<MdsWidget[]> | null = null;
 
     /** Forgets the loaded top-level collections, e.g. after a collection was created. */
     reset(): void {
         this.topLevelIds.clear();
     }
 
+    /** Searches by `term`, which may be empty when `request.filters` narrow the search instead. */
     search(term: string, request: CollectionSearchRequest): Observable<CollectionSearchResult> {
         return from(this.load(term, request));
     }
@@ -67,8 +82,12 @@ export class CollectionSearchService {
         term: string,
         request: CollectionSearchRequest,
     ): Promise<CollectionSearchResult> {
+        const criteria = Object.keys(request.filters ?? {}).length
+            ? this.searchHelper.convertCritieria(request.filters, await this.getWidgets(), true)
+            : [];
         const page = await firstValueFrom(
             this.treeService.searchCollectionsPage(term, {
+                criteria,
                 rootId: request.parentId ?? null,
                 mdsId: DEFAULT,
                 maxItems: COLLECTION_SEARCH_MAX_HITS,
@@ -156,6 +175,19 @@ export class CollectionSearchService {
             parentIds,
             truncated: page.total > page.nodes.length,
         };
+    }
+
+    private getWidgets(): Promise<MdsWidget[]> {
+        if (!this.widgets) {
+            this.widgets = firstValueFrom(
+                this.mdsService.getMetadataSet({ repository: HOME_REPOSITORY }),
+            ).then((mds) => mds.widgets);
+            // a failed request must not be remembered
+            this.widgets.catch((): void => {
+                this.widgets = null;
+            });
+        }
+        return this.widgets;
     }
 
     private getTopLevelIds(scope: string): Promise<Set<string>> {

@@ -69,7 +69,14 @@ import {
     SearchFieldService,
 } from '../../main/navigation/search-field/search-field.service';
 import { CollectionSearchService } from './collection-search.service';
-import { CollectionSearchStateService } from './collection-search-state.service';
+import {
+    COLLECTION_SEARCH_FILTERS_PARAM,
+    CollectionSearchStateService,
+} from './collection-search-state.service';
+import {
+    parseSearchFilters,
+    sameSearchFilters,
+} from '../../features/topic-page/shared/utils/search-hit-util';
 import { CollectionViewSlotsService } from './collection-view-slots.service';
 import { CollectionTopicViewService } from './collection-topic-view/collection-topic-view.service';
 
@@ -352,6 +359,11 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
             if (!this.searchState.includeSubLevels()) {
                 params.subLevels = false;
             }
+            if (Object.keys(this.searchState.filters()).length) {
+                params[COLLECTION_SEARCH_FILTERS_PARAM] = JSON.stringify(
+                    this.searchState.filters(),
+                );
+            }
             if (id && id !== '-root-') {
                 params.id = id;
             }
@@ -619,6 +631,11 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
                     this.topicView.applyParams(params);
                     this.searchState.query.set(params[SEARCH_INPUT_QUERY_PARAM] || null);
                     this.searchState.includeSubLevels.set(params.subLevels !== 'false');
+                    const filters = parseSearchFilters(params[COLLECTION_SEARCH_FILTERS_PARAM]);
+                    if (!sameSearchFilters(filters, this.searchState.filters())) {
+                        this.searchState.filters.set(filters);
+                    }
+                    this.searchState.paramsApplied.set(true);
                     // the topic view fills the search field itself, from the same param
                     if (!this.topicView.selected()) {
                         this.searchFieldInstance?.setSearchString(
@@ -633,6 +650,7 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
                     const keptKeys = [
                         SEARCH_INPUT_QUERY_PARAM,
                         'subLevels',
+                        COLLECTION_SEARCH_FILTERS_PARAM,
                         'createCollection',
                         ...this.topicView.queryParamKeys,
                     ];
