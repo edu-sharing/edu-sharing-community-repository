@@ -11,7 +11,12 @@ import { HistoryStep } from '../../shared/types/history-step';
 import { CreationKind, VariantPreview } from '../../shared/types/variant-preview';
 
 // the page states the bar stands for, which exclude each other
-export type TopicPageStatusBarMode = 'preview' | 'globalTemplate' | 'template' | 'edit';
+export type TopicPageStatusBarMode =
+    | 'preview'
+    | 'globalTemplate'
+    | 'template'
+    | 'edit'
+    | 'inherited';
 
 export interface SwimlaneCompletionCounts {
     unfinished: number;
@@ -45,12 +50,16 @@ export class TopicPageStatusBarComponent {
     editing: InputSignal<boolean> = input(false);
     busy: InputSignal<boolean> = input(false);
     globalTemplateNode: InputSignal<Node | null> = input(null);
+    // the ancestor whose templates the page is inherited from, and whether the user may edit them
+    inheritedFrom: InputSignal<Node | null> = input(null);
+    inheritedFromEditable: InputSignal<boolean> = input(false);
     completion: InputSignal<SwimlaneCompletionCounts | null> = input(null);
     stepLabel: InputSignal<(step: HistoryStep) => string> = input.required();
 
     readonly jumpToIncomplete = output<void>();
     readonly leave = output<void>();
     readonly backToSelection = output<CreationKind>();
+    readonly editInheritedTemplates = output<void>();
 
     protected preview: Signal<VariantPreview | null> = this.variantPreviewService.preview;
     protected previewNode: Signal<Node | null> = this.variantPreviewService.node;

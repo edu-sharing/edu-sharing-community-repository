@@ -56,6 +56,20 @@
           | translate
       }}
     </span>
+    } @case ('inherited') {
+    <span
+      #inheritedTitle
+      class="status-bar-title-text"
+      esCheckTextOverflow
+      #inheritedTitleOverflow="esCheckTextOverflow"
+      [matTooltip]="
+        inheritedTitleOverflow.hasTextOverflow() ? inheritedTitle.textContent?.trim() : null
+      "
+    >
+      {{
+        i18nPrefix + 'INHERITED_PAGE.INFO' | translate : { title: (inheritedFrom() | nodeTitle) }
+      }}
+    </span>
     } @default {
     <span class="status-bar-title-text">{{ i18nPrefix + 'HISTORY.BAR.TITLE' | translate }}</span>
     } }
@@ -183,5 +197,9 @@
   <button mat-flat-button color="primary" (click)="leave.emit()">
     {{ i18nPrefix + 'TEMPLATE_MODE_ACTIVE.END' | translate }}
   </button>
-  } }
+  } @case ('inherited') { @if (inheritedFromEditable()) {
+  <button mat-stroked-button color="primary" (click)="editInheritedTemplates.emit()">
+    {{ i18nPrefix + 'INHERITED_PAGE.EDIT_TEMPLATES' | translate }}
+  </button>
+  } } }
 </div>

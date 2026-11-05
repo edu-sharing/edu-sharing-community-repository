@@ -564,6 +564,10 @@
       "END": "Vorlagen-Modus beenden"
     },
     "GLOBAL_TEMPLATE_UNAVAILABLE": "Die globale Vorlage existiert nicht mehr.",
+    "INHERITED_PAGE": {
+      "INFO": "Diese Themenseite ist von „{{title}}“ geerbt. Änderungen hier erzeugen eine eigene Kopie für diese Sammlung.",
+      "EDIT_TEMPLATES": "Vorlagen dort bearbeiten"
+    },
     "GLOBAL_TEMPLATE_MODE_ACTIVE": {
       "TITLE": "Globale Vorlage „{{title}}“",
       "VIEW": "Du siehst die globale Vorlage „{{title}}“.",

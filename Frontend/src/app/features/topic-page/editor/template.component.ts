@@ -148,6 +148,7 @@ import {
     DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP,
     DEFAULT_WIDGET_CONFIG_PROP,
     DEFAULT_WIDGET_NAME_PREFIX,
+    OPEN_PAGE_TEMPLATE_QUERY_PARAM,
     SEARCH_FILTERS_QUERY_PARAM,
     SEARCH_INPUT_QUERY_PARAM,
     SWIMLANE_TYPE_OPTIONS,
@@ -604,7 +605,15 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     private inheritedPageConfigCopy: Promise<void> | null = null;
     collectionNodePagePropagateConfigRef: string;
     parentEntries: WritableSignal<ParentEntries> = signal(null);
-    propagatingParentNode: Node;
+    // the ancestor whose templates the shown page is inherited from
+    propagatingParentNode: WritableSignal<Node | null> = signal(null);
+    // whether the user may edit the templates the shown page is inherited from
+    propagatingParentEditable: Signal<boolean> = computed((): boolean => {
+        const node: Node | null = this.propagatingParentNode();
+        return !!node && checkUserAccess(node);
+    });
+    // the collection's templates open once it is loaded, as asked for by an inheriting collection
+    private pageTemplateRequested: boolean = false;
     convertedBreadcrumbNodeId: Signal<string> = computed((): string =>
         convertNodeRefIntoNodeId(this.breadcrumbNodeId()),
     );
@@ -695,7 +704,11 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             if (this.templateMode()) {
                 return 'template';
             }
-            return this.editMode() ? 'edit' : null;
+            if (this.editMode()) {
+                return 'edit';
+            }
+            // editors learn where an inherited page comes from
+            return this.userHasEditRights() && this.propagatingParentNode() ? 'inherited' : null;
         },
     );
     // the collection's own page variant, also while a preview is shown in its place
@@ -800,6 +813,8 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * page config and statistics.
      */
     async ngOnInit(): Promise<void> {
+        this.pageTemplateRequested =
+            !!this.route.snapshot.queryParams[OPEN_PAGE_TEMPLATE_QUERY_PARAM];
         // @TODO
         // retrieve the custom sidebar options (note: options with the same name are filtered out)
         // note:
@@ -1111,6 +1126,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             }
             // retrieve the page config node and select the proper variant to define the breadcrumbNodeId, headerNodeId + swimlanes
             await this.retrievePageConfigAndSelectVariant(variantId);
+            await this.openRequestedPageTemplate();
 
             // initial load finished (page structure loaded)
             this.initialLoadSuccessfully.set(true);
@@ -2785,6 +2801,57 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     }
 
     /**
+     * Opens the templates the shown page is inherited from, in the collection they belong to.
+     */
+    async editInheritedTemplates(): Promise<void> {
+        const source: Node | null = this.propagatingParentNode();
+        if (!source) {
+            return;
+        }
+        const url: string | null =
+            this.topicPageGlobalService.getCustomUrlFunction()?.(source) || null;
+        this.pageTemplateRequested = true;
+        // a host opening the topic may render a new page, which reads the request from the URL
+        if (this.openTopic()) {
+            await this.router.navigate([], {
+                relativeTo: this.route,
+                queryParams: { [OPEN_PAGE_TEMPLATE_QUERY_PARAM]: 'true' },
+                queryParamsHandling: 'merge',
+                replaceUrl: true,
+            });
+        }
+        if (this.openTopicInPlace(retrieveNodeId(source), url)) {
+            return;
+        }
+        this.pageTemplateRequested = false;
+        if (url) {
+            const target: URL = new URL(url, window.location.href);
+            target.searchParams.set(OPEN_PAGE_TEMPLATE_QUERY_PARAM, 'true');
+            window.location.assign(target.toString());
+        }
+    }
+
+    /**
+     * Switches into the template mode once if the page was opened to edit the collection's
+     * templates and the user may do so.
+     */
+    private async openRequestedPageTemplate(): Promise<void> {
+        if (!this.pageTemplateRequested) {
+            return;
+        }
+        this.pageTemplateRequested = false;
+        await this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { [OPEN_PAGE_TEMPLATE_QUERY_PARAM]: null },
+            queryParamsHandling: 'merge',
+            replaceUrl: true,
+        });
+        if (this.userHasEditRights() && this.collectionNodePagePropagateConfigRef) {
+            await this.switchIntoTemplateMode();
+        }
+    }
+
+    /**
      * Called by es-topic-page-breadcrumb navigateToTemplate output event.
      */
     async switchIntoTemplateMode(reloadNecessary: boolean = false): Promise<void> {
@@ -3187,14 +3254,15 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             pageRef = retrievePageConfigPropagateRef(node);
         }
         this.collectionNodePageConfigRef = pageRef;
+        this.propagatingParentNode.set(null);
         // otherwise, iterate the parents to retrieve the pageConfigPropagateRef if set
         if (!pageRef) {
             const parents: ParentEntries = await this.topicPageHelperService.getNodeParents(
                 retrieveNodeId(node),
             );
-            this.propagatingParentNode = findInheritanceSource(node, parents.nodes ?? []);
-            if (this.propagatingParentNode) {
-                pageRef = retrievePageConfigPropagateRef(this.propagatingParentNode);
+            this.propagatingParentNode.set(findInheritanceSource(node, parents.nodes ?? []));
+            if (this.propagatingParentNode()) {
+                pageRef = retrievePageConfigPropagateRef(this.propagatingParentNode());
             }
             this.pageVariantReloadNecessary = true;
         }
@@ -3617,6 +3685,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         this.collectionNodePageConfigRef = prependWorkspacePrefix(
             retrieveNodeId(this.pageConfigNode),
         );
+        this.propagatingParentNode.set(null);
     }
 
     /**

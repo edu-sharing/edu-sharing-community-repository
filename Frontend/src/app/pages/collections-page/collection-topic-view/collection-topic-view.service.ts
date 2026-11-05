@@ -3,6 +3,7 @@ import { ActivatedRoute, Params, Router } from '@angular/router';
 import { Node, ParentEntries } from 'ngx-edu-sharing-api';
 import { ParentList, RestConstants, RestHelper } from '../../../core-module/core.module';
 import { CollectionDetailsService } from '../../../features/collection-info/collection-details.service';
+import { OPEN_PAGE_TEMPLATE_QUERY_PARAM } from '../../../features/topic-page/shared/types/custom-definitions';
 import {
     hasTopicPage,
     OPEN_MENU_QUERY_PARAM,
@@ -14,7 +15,12 @@ import { CollectionViewStateService, CollectionViewType } from '../collection-vi
 
 // query params only the topic view reads; they are dropped when another view is selected, while
 // the search term in `q` is shared by all views
-const TOPIC_STATE_QUERY_PARAMS = ['variantId', OPEN_MENU_QUERY_PARAM, 'filters'];
+const TOPIC_STATE_QUERY_PARAMS = [
+    'variantId',
+    OPEN_MENU_QUERY_PARAM,
+    OPEN_PAGE_TEMPLATE_QUERY_PARAM,
+    'filters',
+];
 
 /**
  * The topic view of the collections page: whether the open collection offers it, when it is shown
@@ -78,12 +84,14 @@ export class CollectionTopicViewService {
 
     /**
      * Applies the view type of new query params, before the page loads anything for them. A
-     * collection opened from the topic view chooses its view itself.
+     * collection opened from the topic view chooses its view itself, unless its templates are
+     * asked for.
      */
     applyParams(params: Params): void {
         const openedFromTopicView =
             params.id !== this.params?.id &&
-            this.params?.[VIEW_TYPE_QUERY_PARAM] === TOPIC_PAGE_VIEW_TYPE;
+            this.params?.[VIEW_TYPE_QUERY_PARAM] === TOPIC_PAGE_VIEW_TYPE &&
+            !params[OPEN_PAGE_TEMPLATE_QUERY_PARAM];
         this.params = params;
         if (params[VIEW_TYPE_QUERY_PARAM] === TOPIC_PAGE_VIEW_TYPE && !openedFromTopicView) {
             this.viewState.viewType.set('topicPage');

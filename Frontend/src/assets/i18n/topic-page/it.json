@@ -528,6 +528,10 @@
       "EDIT": "Modalità di modifica del modello",
       "END": "Esci dalla modalità modello"
     },
+    "INHERITED_PAGE": {
+      "INFO": "Questa pagina tematica è ereditata da «{{title}}». Le modifiche apportate qui creano una copia propria per questa collezione.",
+      "EDIT_TEMPLATES": "Modifica i modelli lì"
+    },
     "SWIMLANE_COMPLETION": {
       "UNFINISHED_ONE": "1 sezione non completata",
       "UNFINISHED": "{{count}} sezioni non completate",

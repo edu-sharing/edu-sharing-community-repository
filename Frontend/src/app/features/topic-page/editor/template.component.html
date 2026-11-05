@@ -23,11 +23,14 @@
       [editing]="editMode()"
       [busy]="requestInProgress()"
       [globalTemplateNode]="globalTemplateNode()"
+      [inheritedFrom]="propagatingParentNode()"
+      [inheritedFromEditable]="propagatingParentEditable()"
       [completion]="editMode() && userHasEditRights() ? swimlaneCompletionCounts() : null"
       [stepLabel]="historyStepLabel"
       (jumpToIncomplete)="scrollToNextIncompleteSwimlane()"
       (leave)="mode === 'globalTemplate' ? leaveGlobalTemplateMode() : leaveTemplateMode()"
       (backToSelection)="openCreationSidebar($event)"
+      (editInheritedTemplates)="editInheritedTemplates()"
     ></es-topic-page-status-bar>
     }
   </div>
