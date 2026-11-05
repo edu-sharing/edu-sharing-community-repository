@@ -112,6 +112,7 @@
         [isProcessing]="requestInProgress()"
         [nodeId]="convertedBreadcrumbNodeId()"
         [propagatedNodeId]="convertedPropagatedBreadcrumbNodeId()"
+        [canManagePageTemplate]="userHasEditRights()"
         [pageTemplateExists]="!!collectionNodePagePropagateConfigRef"
         [pageVariantNode]="pageVariantNode()"
         [pageVariantConfigNodes]="pageVariantConfigs?.nodes || []"
