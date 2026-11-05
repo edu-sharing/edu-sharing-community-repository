@@ -16,6 +16,7 @@ public class MdsValue {
 	@JsonProperty(required = true)
 	private String id;
 	private String caption;
+	private String icon;
 	private String description;
 	private String parent;
 	private String url;
@@ -29,6 +30,7 @@ public class MdsValue {
 		alternativeIds = key.getAlternativeKeys();
 		abbreviation = key.getAbbreviation();
 		url = key.getUrl();
+		icon = key.getIcon();
 		description=key.getDescription();
 		parent=key.getParent();
 	}

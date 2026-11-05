@@ -7,6 +7,7 @@ import lombok.Getter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
+import org.alfresco.repo.transaction.AlfrescoTransactionSupport;
 import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.*;
@@ -998,23 +999,7 @@ public class NodeDao {
                         // apply thread variables to keep state of thread
                         Context.setInstance(context);
                         NodeServiceInterceptor.setEduSharingScope(scope);
-                        try {
-                            NodeDao nodeDao = NodeDao.getNode(repoDao, nodeRef.getId(), propFilter);
-                            if (transform != null) {
-                                nodeDao = transform.apply(nodeDao);
-                            }
-                            return nodeDao.asNode();
-                            // do not remove; might be thrown by interceptors
-                        } catch(DAOSecurityException e) {
-                            logger.debug(e.getMessage(), e);
-                            return NodeDao.createEmptyDummy(Node.class, nodeRef, CCConstants.CCM_TYPE_IO);
-                        }
-                    } catch (DAOMissingException daoException) {
-                        logger.warn("Missing node " + nodeRef.getId() + " tried to fetch, skipping fetch", daoException);
-                        return null;
-                    } catch (DAOToolPermissionException daoException) {
-                        logger.info("Toolpermission exception for node " + nodeRef.getId() + " tried to fetch, skipping fetch", daoException);
-                        return null;
+                        return convertInTransaction(repoDao, () -> convertSingleNode(repoDao, nodeRef, propFilter, transform));
                     } finally {
                         if (prevContext != null) {
                             Context.setInstance(prevContext);
@@ -1039,6 +1024,59 @@ public class NodeDao {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * converts a single node for {@link #convertToRest(RepositoryDao, List, Filter, Function)}.
+     * the expected DAO exceptions are handled here, inside the transaction callback, because the
+     * RetryingTransactionHelper would wrap checked exceptions into an AlfrescoRuntimeException
+     *
+     * @return the converted node, a dummy if not readable, or null if it should be skipped
+     */
+    private static Node convertSingleNode(RepositoryDao repoDao, NodeRef nodeRef, Filter propFilter, Function<NodeDao, NodeDao> transform) throws Exception {
+        try {
+            try {
+                NodeDao nodeDao = NodeDao.getNode(repoDao, nodeRef.getId(), propFilter);
+                if (transform != null) {
+                    nodeDao = transform.apply(nodeDao);
+                }
+                return nodeDao.asNode();
+                // do not remove; might be thrown by interceptors
+            } catch (DAOSecurityException e) {
+                logger.debug(e.getMessage(), e);
+                return NodeDao.createEmptyDummy(Node.class, nodeRef, CCConstants.CCM_TYPE_IO);
+            }
+        } catch (DAOMissingException daoException) {
+            logger.warn("Missing node " + nodeRef.getId() + " tried to fetch, skipping fetch", daoException);
+            return null;
+        } catch (DAOToolPermissionException daoException) {
+            logger.info("Toolpermission exception for node " + nodeRef.getId() + " tried to fetch, skipping fetch", daoException);
+            return null;
+        }
+    }
+
+    /**
+     * runs the conversion of one node in one transaction: otherwise every public service call
+     * (permissions, properties, aspects, owner, content, ...) opens its own transaction
+     * (connection borrow/validate, begin, commit) for each node.
+     * read-write: costs the same as read-only as long as nothing is written.
+     * the transaction is only per node, so a db connection is held only for the conversion of this node.
+     *
+     * not used for remote repositories (the connection would be held during the remote http calls)
+     * and not if a transaction is already running (CallerRunsPolicy executes on the calling thread)
+     */
+    private static Node convertInTransaction(RepositoryDao repoDao, RetryingTransactionHelper.RetryingTransactionCallback<Node> work) throws Exception {
+        if (!repoDao.isHomeRepo()
+                || AlfrescoTransactionSupport.getTransactionReadState() != AlfrescoTransactionSupport.TxnReadState.TXN_NONE) {
+            try {
+                return work.execute();
+            } catch (Exception | Error e) {
+                throw e;
+            } catch (Throwable t) {
+                throw new RuntimeException(t);
+            }
+        }
+        return getRetryingTransactionHelper().doInTransaction(work, false);
     }
 
     public static List<NodeRef> sortApiNodeRefs(RepositoryDao repoDao, List<NodeRef> refList, List<String> filter, SortDefinition sortDefinition) {
