@@ -47,7 +47,7 @@
       <button
         mat-stroked-button
         [color]="templateUpdateAvailable() ? 'warn' : 'primary'"
-        [disabled]="!templateUpdateAvailable()"
+        [disabled]="!templateNode()"
         (click)="triggerRegenerate()"
       >
         <i esIcon="sync"></i>

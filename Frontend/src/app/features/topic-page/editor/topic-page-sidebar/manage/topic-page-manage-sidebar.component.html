@@ -106,7 +106,7 @@
           mat-stroked-button
           type="button"
           [color]="entry.templateStatus === 'updateAvailable' ? 'warn' : undefined"
-          [disabled]="busy() || entry.templateStatus !== 'updateAvailable'"
+          [disabled]="busy() || !entry.templateNode"
           (click)="regenerate(entry)"
         >
           <i esIcon="autorenew"></i>

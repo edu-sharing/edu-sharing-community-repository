@@ -3992,7 +3992,10 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         }
         this.templateVariantNode.set(templateNode);
 
-        const i18nExtension: string = 'SIDE_MENU.CONFIG_PAGE_VARIANT.TEMPLATE_UPDATE.';
+        // without a newer template, regenerating resets the variant to the template it is based on
+        const i18nExtension: string =
+            'SIDE_MENU.CONFIG_PAGE_VARIANT.TEMPLATE_UPDATE.' +
+            (this.templateUpdateAvailable() ? '' : 'RESET_');
         const dialogRef = await this.dialogs.openGenericDialog({
             title: this.i18nPrefix + i18nExtension + 'HEADING',
             message: this.i18nPrefix + i18nExtension + 'MESSAGE',
