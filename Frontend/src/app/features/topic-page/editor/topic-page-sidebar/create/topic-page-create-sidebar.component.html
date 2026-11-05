@@ -29,6 +29,7 @@
     [pageConfigRef]="pageConfigRef"
     [pageVariantNode]="host.pageVariantNode()"
     [templateMode]="kind === 'template'"
+    [pageTemplateExists]="pageTemplateExists"
     [restoredSearchState]="restoredSearchState(kind)"
     (selectedNodeChange)="patchState(kind, { node: $event })"
     (copyOptionChanged)="patchState(kind, { copyOption: $event })"

@@ -254,7 +254,7 @@
         "LABEL": "Einstellungen",
         "HEADING": "Einstellungen der Themenseiten-Variante",
         "WARN_TEXT": "Nicht alle erforderlichen Parameter-Felder sind ausgefüllt. Du kannst den Vorgang nicht abbrechen.",
-        "DUPLICATE_WARN_TEXT": "Es existiert bereits eine Themenseiten-Variante mit den gleichen Parametern.",
+        "DUPLICATE_WARN_TEXT": "Eine andere Variante dieser Themenseite hat bereits dieselben Parameter. Wähle andere Werte, damit eindeutig ist, wem welche Variante angezeigt wird.",
         "TITLE": "Titel der Variante",
         "TITLE_PLACEHOLDER": "Themenseiten-Variante für xyz",
         "EDUCATION_LEVEL_LABEL": "Bildungsstufe",
@@ -272,10 +272,12 @@
         "ADD_TO_GLOBAL_TEMPLATES": "Zu globalen Vorlagen hinzufügen",
         "EDIT_GLOBAL_TEMPLATE": "Globale Vorlage bearbeiten",
         "DEFINE_PARAMETERS": "Definiere Parameter",
-        "DUPLICATE_PARAMETERS": "Duplikat in existierender Variante erkannt"
+        "DUPLICATE_PARAMETERS": "Gleiche Parameter wie eine andere Variante"
       },
       "CONFIG_PAGE_TEMPLATE": {
         "HEADING": "Einstellungen der Themenseiten-Vorlage",
+        "DUPLICATE_WARN_TEXT": "Eine andere Vorlage dieser Sammlung hat bereits dieselben Parameter. Wähle andere Werte, damit eindeutig ist, welche Vorlage die Unterebenen für wen erhalten.",
+        "DUPLICATE_PARAMETERS": "Gleiche Parameter wie eine andere Vorlage",
         "TITLE": "Titel der Vorlage",
         "TITLE_PLACEHOLDER": "Themenseiten-Vorlage für xyz",
         "DELETE_VARIANT": "Vorlage löschen",
@@ -495,6 +497,10 @@
     "DEFAULT_PAGE_TEMPLATE_NAME": "Seiten-Vorlage",
     "CREATE_PAGE_TEMPLATE": {
       "HEADING": "Neue Themenseiten-Vorlage erstellen",
+      "EXISTING_TEMPLATE": {
+        "INFO_HEADING": "Diese Sammlung hat bereits Seiten-Vorlagen.",
+        "INFO_TEXT": "Lege eine weitere Vorlage nur für eine andere Zielgruppe oder Bildungsstufe an. Eine bestehende Vorlage lässt sich auch direkt anpassen."
+      },
       "PENDING_MESSAGE": "Eine neue Seiten-Vorlage wird erstellt und geladen.",
       "SUCCESS_MESSAGE": "Die Seiten-Vorlage wurde erfolgreich erstellt"
     },

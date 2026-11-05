@@ -1,4 +1,4 @@
-import { Component, input, InputSignal, output } from '@angular/core';
+import { Component, computed, input, InputSignal, output, Signal } from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { TranslateModule } from '@ngx-translate/core';
@@ -27,6 +27,11 @@ export class VariantSelectComponent {
     pageVariantConfigNodes: InputSignal<Node[]> = input<Node[]>([]);
     pageVariantNode: InputSignal<Node | null> = input<Node | null>(null);
     templateMode: InputSignal<boolean> = input<boolean>(false);
+    // the page template can be switched to, unless it is already shown
+    templateSwitchable: Signal<boolean> = computed(
+        (): boolean =>
+            this.canManagePageTemplate() && this.pageTemplateExists() && !this.templateMode(),
+    );
     readonly navigateToTemplate = output<void>();
     readonly variantSelected = output<string>();
 

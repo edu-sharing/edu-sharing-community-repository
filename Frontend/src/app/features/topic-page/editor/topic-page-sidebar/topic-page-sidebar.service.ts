@@ -49,6 +49,8 @@ export interface TopicPageSidebarHost {
     pageVariantNode: Signal<Node | null>;
     // the page config of the collection, if it has one
     pageConfigRef(): string | null;
+    // whether the collection already passes page templates on to its sub-collections
+    pageTemplateExists(): boolean;
     // what can be created on the page right now, in the order of the tabs
     creationKinds: Signal<CreationKind[]>;
     // the search of a running preview of the given kind, to continue with

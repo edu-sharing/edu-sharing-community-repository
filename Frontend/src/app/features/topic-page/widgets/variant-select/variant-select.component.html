@@ -1,14 +1,11 @@
-@if (pageVariantConfigNodes().length || (canManagePageTemplate() && pageTemplateExists())) {
+@if (pageVariantConfigNodes().length || templateSwitchable()) {
 <mat-form-field class="select-config-field" appearance="outline" subscriptSizing="dynamic">
   <mat-label>
     {{ i18nPrefix + 'PAGE_VARIANT_LABEL' | translate }}
   </mat-label>
   <!-- hint: use default mat-select over es-dropdown due to being implemented as mat-menu -->
   <mat-select
-    [disabled]="
-      (pageVariantConfigNodes().length === 1 || isProcessing()) &&
-      !(canManagePageTemplate() && pageTemplateExists() && !templateMode())
-    "
+    [disabled]="(pageVariantConfigNodes().length === 1 || isProcessing()) && !templateSwitchable()"
     [value]="pageVariantNode()?.ref.id"
     (selectionChange)="selectVariant($event.value)"
   >
@@ -20,7 +17,7 @@
           : (i18nPrefix + 'PAGE_VARIANT_LABEL' | translate) + ' ' + (i + 1)
       }}
     </mat-option>
-    } @if (canManagePageTemplate() && pageTemplateExists()) {
+    } @if (templateSwitchable()) {
     <mat-option class="navigate-to-template" [value]="navigateToTemplateValue">
       {{ i18nPrefix + 'NAVIGATE_TO_PAGE_TEMPLATE' | translate }}
     </mat-option>

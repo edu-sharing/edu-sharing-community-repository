@@ -251,17 +251,19 @@
         "LABEL": "Impostazioni",
         "HEADING": "Impostazioni della variante di pagina tematica",
         "WARN_TEXT": "Non tutti i campi dei parametri obbligatori sono stati compilati. Non potete annullare l'operazione.",
-        "DUPLICATE_WARN_TEXT": "Esiste già una variante di pagina tematica con gli stessi parametri.",
+        "DUPLICATE_WARN_TEXT": "Un'altra variante di questa pagina tematica ha già gli stessi parametri. Scegliete altri valori, affinché sia chiaro a chi viene mostrata quale variante.",
         "TITLE": "Titolo della variante",
         "TITLE_PLACEHOLDER": "Variante di pagina tematica per xyz",
         "EDUCATION_LEVEL_LABEL": "Livello di istruzione",
         "TARGET_GROUP_LABEL": "Gruppo target",
         "DELETE_VARIANT": "Elimina variante",
         "DEFINE_PARAMETERS": "Definisci parametri",
-        "DUPLICATE_PARAMETERS": "Rilevato duplicato in una variante esistente"
+        "DUPLICATE_PARAMETERS": "Stessi parametri di un'altra variante"
       },
       "CONFIG_PAGE_TEMPLATE": {
         "HEADING": "Impostazioni del modello di pagina tematica",
+        "DUPLICATE_WARN_TEXT": "Un altro modello di questa collezione ha già gli stessi parametri. Scegliete altri valori, affinché sia chiaro quale modello ricevono le sottocollezioni e per chi.",
+        "DUPLICATE_PARAMETERS": "Stessi parametri di un altro modello",
         "TITLE": "Titolo del modello",
         "TITLE_PLACEHOLDER": "Modello di pagina tematica per xyz",
         "DELETE_VARIANT": "Elimina modello"
@@ -475,6 +477,12 @@
     "SAVE_CONFIG_ERROR_MESSAGE": "Si è verificato un errore durante il caricamento di una risorsa. Ricaricate la pagina.",
     "DEFAULT_PAGE_TEMPLATE_NAME": "Modello di pagina",
     "DEFAULT_PAGE_VARIANT_NAME": "Variante di pagina",
+    "CREATE_PAGE_TEMPLATE": {
+      "EXISTING_TEMPLATE": {
+        "INFO_HEADING": "Questa collezione ha già dei modelli di pagina.",
+        "INFO_TEXT": "Aggiungete un altro modello solo per un altro gruppo target o livello di istruzione. Un modello esistente può anche essere adattato direttamente."
+      }
+    },
     "CREATE_PAGE_VARIANT": {
       "HEADING": "Crea nuova pagina tematica",
       "EXISTING_VARIANT": {

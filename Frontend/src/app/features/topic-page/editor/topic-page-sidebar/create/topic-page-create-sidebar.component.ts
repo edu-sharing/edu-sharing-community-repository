@@ -54,6 +54,7 @@ export class TopicPageCreateSidebarComponent {
     readonly selectedIndex = computed(() => this.tabs().indexOf(this.selectedTab()));
     // the inputs of the pickers are read once they are created, so they take the state of opening
     readonly pageConfigRef: string | null = this.host.pageConfigRef();
+    readonly pageTemplateExists: boolean = this.host.pageTemplateExists();
     readonly restoredSearchStates: Record<CreationKind, PageVariantSearchState | null> = {
         variant: this.host.restoredSearchState('variant'),
         template: this.host.restoredSearchState('template'),

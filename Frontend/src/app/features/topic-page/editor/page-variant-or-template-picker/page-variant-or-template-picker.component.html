@@ -29,7 +29,15 @@
     {{ i18nPrefix + 'NEW_TOPIC_PAGE.INFO_TEXT' | translate }}
     }
   </es-info-message>
-  } }
+  } } @else if (pageTemplateExists()) {
+  <es-info-message mode="warning">
+    <strong>
+      {{ templateI18nPrefix + 'EXISTING_TEMPLATE.INFO_HEADING' | translate }}
+    </strong>
+    <br />
+    {{ templateI18nPrefix + 'EXISTING_TEMPLATE.INFO_TEXT' | translate }}
+  </es-info-message>
+  }
 
   <div class="select-copy-option">
     {{ i18nPrefix + 'CREATE_COPY_OF_LABEL' | translate }}
