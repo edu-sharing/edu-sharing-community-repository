@@ -426,8 +426,8 @@
         "INFO_LIST_ITEM_TWO": "Un modèle existant peut-il être adapté ?"
       },
       "EXISTING_TOPIC_PAGE": {
-        "INFO_HEADING": "Il existe déjà une page thématique pour cette collection.",
-        "INFO_TEXT": "Vous pouvez en créer une copie et l'adapter, supprimer ses filtres et choisir une autre page thématique comme base, ou créer une nouvelle variante à partir d'un modèle."
+        "INFO_HEADING": "Cette collection hérite sa page thématique d'une collection parente.",
+        "INFO_TEXT": "Les variantes héritées sont reprises sous forme de copies et la nouvelle variante est ajoutée. Les mises à jour du modèle pourront être appliquées ultérieurement."
       },
       "CREATE_COPY_OF_LABEL": "Créer une copie de :",
       "COPY_OPTIONS": {

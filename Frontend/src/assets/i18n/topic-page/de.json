@@ -458,8 +458,8 @@
         "INFO_LIST_ITEM_TWO": "Kann eine vorhandene Vorlage angepasst werden?"
       },
       "EXISTING_TOPIC_PAGE": {
-        "INFO_HEADING": "Es gibt bereits eine Themenseite zu dieser Sammlung.",
-        "INFO_TEXT": "Du kannst diese anpassen, um eine Kopie davon zu erstellen oder eine neue Variante aus einer Vorlage erstellen."
+        "INFO_HEADING": "Diese Sammlung erbt ihre Themenseite von einer übergeordneten Sammlung.",
+        "INFO_TEXT": "Die geerbten Varianten werden als Kopie übernommen und die neue Variante kommt hinzu. Aktualisierungen der Vorlage lassen sich später übernehmen."
       },
       "CREATE_COPY_OF_LABEL": "Erstelle Kopie von:",
       "COPY_OPTIONS": {
