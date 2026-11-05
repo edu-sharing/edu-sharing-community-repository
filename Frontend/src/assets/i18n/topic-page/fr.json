@@ -462,6 +462,10 @@
       "EDIT": "Vous vous trouvez actuellement en mode édition du modèle.",
       "END": "Quitter le mode modèle"
     },
+    "INHERITED_PAGE": {
+      "INFO": "Cette page thématique est héritée de « {{title}} ». Les modifications effectuées ici créent une copie propre à cette collection.",
+      "EDIT_TEMPLATES": "Modifier les modèles là-bas"
+    },
     "SWIMLANE_COMPLETION": {
       "INFO": "Sections nécessitant une action :",
       "UNFINISHED": "{{count}} non terminée(s) (masquée(s) pour les lecteurs)",

@@ -41,6 +41,8 @@ export const DEFAULT_WIDGET_CONFIG_PROP: string = 'ccm:widget_config';
 // query params carrying the page-wide search state
 export const SEARCH_FILTERS_QUERY_PARAM: string = 'filters';
 export const SEARCH_INPUT_QUERY_PARAM: string = 'q';
+// query param asking the topic page to open the templates of its collection
+export const OPEN_PAGE_TEMPLATE_QUERY_PARAM: string = 'openPageTemplate';
 
 // GENERAL SETTINGS
 export const DEFAULT_BG_COLOR: string = '#F4F4F4';

@@ -499,6 +499,10 @@
       "END": "Leave template mode"
     },
     "GLOBAL_TEMPLATE_UNAVAILABLE": "The global template no longer exists.",
+    "INHERITED_PAGE": {
+      "INFO": "This topic page is inherited from “{{title}}”. Changes made here create a copy of its own for this collection.",
+      "EDIT_TEMPLATES": "Edit the templates there"
+    },
     "GLOBAL_TEMPLATE_MODE_ACTIVE": {
       "VIEW": "You are viewing the global template \"{{title}}\".",
       "EDIT": "You are editing the global template \"{{title}}\". Topic pages created from it can take over the changes via \"Regenerate\".",

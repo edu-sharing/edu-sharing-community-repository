@@ -83,6 +83,18 @@
       {{ i18nPrefix + 'TEMPLATE_MODE_ACTIVE.END' | translate }}
     </button>
   </es-info-message>
+  } @else if (userHasEditRights() && propagatingParentNode()) {
+  <es-info-message mode="info" class="template-mode">
+    {{
+      i18nPrefix + 'INHERITED_PAGE.INFO'
+        | translate : { title: (propagatingParentNode() | nodeTitle) }
+    }}
+    @if (propagatingParentEditable()) {
+    <button mat-flat-button color="primary" (click)="editInheritedTemplates()">
+      {{ i18nPrefix + 'INHERITED_PAGE.EDIT_TEMPLATES' | translate }}
+    </button>
+    }
+  </es-info-message>
   } @if (editMode() && userHasEditRights() && swimlaneCompletionCounts(); as counts) {
   <es-info-message mode="warning" class="template-mode swimlane-completion">
     <span>
