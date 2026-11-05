@@ -135,7 +135,11 @@ function areaColumns(
  * columns the user never saw keep their config default and stay at their config position.
  * Entries of the stored layout that are no longer available are dropped.
  */
-function applyUserLayout(columns: ListItem[], customColumns?: ListItem[] | null): ListItem[] {
+/** applies a stored user layout (visibility, order) of the column chooser to the given columns */
+export function applyUserLayout(
+    columns: ListItem[],
+    customColumns?: ListItem[] | null,
+): ListItem[] {
     if (!Array.isArray(customColumns) || !customColumns.length) {
         return columns;
     }

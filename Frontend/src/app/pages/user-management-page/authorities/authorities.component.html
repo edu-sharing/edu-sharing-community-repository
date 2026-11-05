@@ -254,12 +254,18 @@
         </mat-form-field>
         <mat-form-field floatLabel="always">
           <mat-label>{{ 'ORG.groupType' | translate }}</mat-label>
+          <!-- a scope group keeps its type: it is created and changed via the scope management only -->
           <mat-select
             name="orgType"
             [(ngModel)]="edit.profile.groupType"
+            [disabled]="edit.profile.groupType === GROUP_TYPE_SCOPE"
             placeholder="{{ 'PERMISSIONS.GROUP_TYPE.null' | translate }}"
           >
-            @for (type of ORG_TYPES; track $index) {
+            @if (edit.profile.groupType === GROUP_TYPE_SCOPE) {
+            <mat-option [value]="GROUP_TYPE_SCOPE"
+              >{{ 'PERMISSIONS.GROUP_TYPE.' + GROUP_TYPE_SCOPE | translate }}
+            </mat-option>
+            } @for (type of ORG_TYPES; track $index) {
             <mat-option [value]="type"
               >{{ 'PERMISSIONS.GROUP_TYPE.' + type | translate }}
             </mat-option>

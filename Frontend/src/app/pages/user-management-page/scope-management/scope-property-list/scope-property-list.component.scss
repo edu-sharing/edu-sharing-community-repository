@@ -1,0 +1,87 @@
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
+
+.property-list {
+    display: grid;
+    grid-template-columns: minmax(240px, 1fr) 2fr;
+    gap: 24px;
+    align-items: start;
+}
+.property-picker {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    .property-filter {
+        width: 100%;
+    }
+}
+.properties {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    max-height: 360px;
+    overflow-y: auto;
+    @include mixins.materialScrollbarLight();
+}
+.property-label,
+.label {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.25;
+}
+.property-id {
+    font-size: 75%;
+    color: var(--textLight);
+    opacity: 0.8;
+}
+@mixin row() {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--borderLight);
+    .handle {
+        cursor: move;
+        opacity: 0.3;
+        display: flex;
+        align-items: center;
+    }
+    .label {
+        flex: 1;
+        min-width: 180px;
+    }
+    .actions {
+        display: flex;
+        margin-left: auto;
+        // same width as the remove button of the other rows
+        .locked {
+            display: flex;
+            justify-content: center;
+            width: 40px;
+            color: var(--textLight);
+        }
+    }
+}
+.row {
+    @include row();
+}
+.cdk-drag-preview {
+    @include row();
+    @include mixins.materialShadowSmall();
+    background: var(--cardLightBackground);
+    padding: 8px;
+}
+.cdk-drag-placeholder {
+    opacity: 0.3;
+}
+.selected.cdk-drop-list-dragging .row:not(.cdk-drag-placeholder) {
+    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+.empty {
+    color: var(--textLight);
+}
+@media screen and (max-width: 900px) {
+    .property-list {
+        grid-template-columns: 1fr;
+    }
+}

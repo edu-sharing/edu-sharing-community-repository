@@ -184,6 +184,7 @@ $addToWidth: 450px;
     flex: 1;
     min-height: 0;
     overflow-y: auto;
+    @include mixins.materialScrollbarLight();
 }
 
 // Static footer pinned at the bottom of the card; the card's overflow:hidden rounds its corners.
@@ -269,6 +270,7 @@ label.search {
             height: auto;
             flex-grow: 1;
             overflow-y: auto;
+            @include mixins.materialScrollbarLight();
         }
     }
 }

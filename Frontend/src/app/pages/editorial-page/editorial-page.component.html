@@ -121,10 +121,7 @@
       [class.has-main-component]="mainComponent$ | async"
     >
       <h1 esTitle class="cdk-visually-hidden">
-        {{
-          'EDITORIAL.BREADCRUMB.' +
-            $safeNavigationMigration(editorialBreadcrumbService.mode()?.toUpperCase()) | translate
-        }}
+        {{ 'EDITORIAL.BREADCRUMB.' + editorialBreadcrumbService.mode()?.toUpperCase() | translate }}
       </h1>
       <div class="top-area">
         <es-editorial-breadcrumb
@@ -151,13 +148,19 @@
       <es-assignment-submission></es-assignment-submission>
       } @case ('submitAssignment') {
       <es-submit-assignment></es-submit-assignment>
+      } @case ('scopeSettings') {
+      <es-scope-settings></es-scope-settings>
       } @default {
       <span> Component "{{ component }}" not implemented </span>
       } } } @if ((mainComponent$ | async) === null) {
       <!-- Scroll region below the header: the tab bar sticks to its top while the option row
         (filter button) and the list scroll beneath it. -->
       <div class="content-scroll">
-        @if ((editorialPageService.observeTabs() | async)?.length) { @if ((params$ |
+        @if (isScopeMode() && !scopeAvailable()) {
+        <es-info-message mode="info" class="scope-unavailable">
+          <div class="message">{{ 'EDITORIAL.SCOPE.NO_ACTIVE_SCOPE' | translate }}</div>
+        </es-info-message>
+        } @else { @if ((editorialPageService.observeTabs() | async)?.length) { @if ((params$ |
         async).primaryMode !== 'suggestions') {
         <mat-tab-group
           [selectedIndex]="tabSelection$ | async"
@@ -173,7 +176,7 @@
           }
         </mat-tab-group>
         } } @if ((params$ | async)?.primaryMode; as mode) { @if ( mode === 'activity' || mode ===
-        'share' || mode === 'assignment' || mode === 'suggestions' ) {
+        'share' || mode === 'assignment' || mode === 'suggestions' || mode === 'scope' ) {
         <es-node-entries-wrapper
           [primaryInstance]="true"
           [dataSource]="dataSource"
@@ -185,28 +188,47 @@
           (dblClickItem)="openItem($event)"
           (fetchData)="fetchEvent($event)"
           (selectionChange)="selectionChange($event)"
+          [allowSelectAllResults]="mode === 'scope'"
+          (allResultsSelectedChange)="allResultsSelectedChange($event)"
           [columns]="columns()"
+          [sort]="mode === 'scope' ? scopeSort() : undefined"
+          (sortChange)="scopeSortChange($event)"
+          [configureColumns]="mode === 'scope'"
+          (columnsChange)="saveScopeColumns($event)"
           [displayType]="editorialPageService.displayType()"
         >
+          <!-- actions for the whole result set: bottom left, next to the paginator -->
+          <ng-template #footer>
+            @if (mode === 'scope' && scopesService.isOrgAdmin() && scopeInboxTab()) {
+            <button
+              mat-button
+              color="primary"
+              data-test="button-scope-settings"
+              (click)="goToComponent('scopeSettings')"
+            >
+              <i esIcon="manage_search"></i>
+              {{ 'EDITORIAL.SCOPE.BASE_QUERY.OPEN' | translate }}
+            </button>
+            }
+          </ng-template>
           <ng-template #empty>
             <div class="empty">
-              {{
-                'EDITORIAL.' + $safeNavigationMigration(mode?.toUpperCase()) + '.EMPTY' | translate
-              }}
+              {{ 'EDITORIAL.' + mode?.toUpperCase() + '.EMPTY' | translate }}
             </div>
           </ng-template>
         </es-node-entries-wrapper>
-        } }
+        } } }
       </div>
       @if ((params$ | async)?.primaryMode; as mode) { @if ( mode === 'activity' || mode === 'share'
-      || mode === 'assignment' || mode === 'suggestions' ) {
+      || mode === 'assignment' || mode === 'suggestions' || (mode === 'scope' && scopeAvailable()) )
+      {
       <!-- Full-width selection bar pinned at the bottom of the card (outside the scroll region);
         mirrors the search-page selection layout. Node actions render in #selectionActionbarRef. -->
       <div
         class="selection-action-bar"
         cdkOverlayOrigin
         #selectionBar="cdkOverlayOrigin"
-        [class.visible]="selectedNodes.length"
+        [class.visible]="selectionCount"
       >
         <button
           mat-icon-button
@@ -221,10 +243,13 @@
           mat-button
           color="primary"
           class="count"
+          [disabled]="allResultsSelected()"
           (click)="selectionOverlayOpen = !selectionOverlayOpen"
         >
-          {{ 'SEARCH.N_SELECTED' | translate : { count: selectedNodes.length || 0 } }}
+          {{ 'SEARCH.N_SELECTED' | translate : { count: selectionCount } }}
+          @if (!allResultsSelected()) {
           <i [esIcon]="selectionOverlayOpen ? 'expand_more' : 'expand_less'"></i>
+          }
         </button>
         <es-actionbar
           #selectionActionbarRef
@@ -253,6 +278,13 @@
     </div>
   </mat-sidenav-content>
 </mat-sidenav-container>
+<!-- cell of the scope status columns (registered as custom field rendering, see SCOPE_COLUMNS) -->
+<ng-template #scopeStatusTemplateRef let-node="node" let-item="item">
+  <es-scope-status-cell
+    [node]="node"
+    [property]="getScopeColumnProperty(item)"
+  ></es-scope-status-cell>
+</ng-template>
 @if ((isMobile$ | async) === true && editorialSidebarService.sidebarOpened()) {
 <es-editorial-sidebar
   [primaryMode]="$safeNavigationMigration((params$ | async)?.primaryMode)"

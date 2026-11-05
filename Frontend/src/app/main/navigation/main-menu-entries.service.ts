@@ -1,4 +1,4 @@
-import { first, map, shareReplay, switchMap } from 'rxjs/operators';
+import { first, map, shareReplay, switchMap, tap } from 'rxjs/operators';
 import { Injectable, inject } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import * as rxjs from 'rxjs';
@@ -18,7 +18,13 @@ import {
 import { OPEN_URL_MODE } from 'ngx-edu-sharing-ui';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { ConfigEntry } from '../../services/node-helper.service';
-import { AuthenticationService, LoginInfo, Mediacenter } from 'ngx-edu-sharing-api';
+import {
+    ActiveScope,
+    AuthenticationService,
+    LoginInfo,
+    Mediacenter,
+    ScopesService,
+} from 'ngx-edu-sharing-api';
 
 type Target = { type: 'path'; path: string } | { type: 'url'; url: string; openInNew: boolean };
 
@@ -56,6 +62,7 @@ export class MainMenuEntriesService {
     private route = inject(ActivatedRoute);
     private router = inject(Router);
     private ui = inject(UIService);
+    private scopes = inject(ScopesService);
 
     entries$: Observable<ConfigEntry[]>;
 
@@ -66,6 +73,7 @@ export class MainMenuEntriesService {
         stream?: { enabled: boolean };
     };
     private loginInfo: LoginInfo;
+    private activeScope: ActiveScope | null = null;
 
     // Conditionally initialized on update.
     private hasAccessToSafeScope: boolean;
@@ -119,6 +127,14 @@ export class MainMenuEntriesService {
                 ),
         },
         {
+            name: 'SIDEBAR.EDITORIAL_SCOPE',
+            icon: 'newspaper',
+            target: { type: 'path', path: 'editorial/scope' },
+            scope: 'editorial_scope',
+            // only inside an active scope the user is an editor of (see ScopesService)
+            isVisible: () => !this.loginInfo.isGuest && this.activeScope?.role === 'EDITOR',
+        },
+        {
             name: 'SIDEBAR.STREAM',
             icon: 'event',
             target: { type: 'path', path: 'stream' },
@@ -163,11 +179,18 @@ export class MainMenuEntriesService {
     ];
 
     constructor() {
-        this.entries$ = this.authentication.observeLoginInfo().pipe(
-            switchMap(() => rxjs.from(this.initInformation())),
-            map(() => this.createEntries()),
-            shareReplay(1),
-        );
+        this.entries$ = rxjs
+            .combineLatest([
+                this.authentication.observeLoginInfo(),
+                // the scope entry depends on the active scope, which changes without a new login
+                this.scopes.observeActiveScope(),
+            ])
+            .pipe(
+                tap(([, activeScope]) => (this.activeScope = activeScope)),
+                switchMap(() => rxjs.from(this.initInformation())),
+                map(() => this.createEntries()),
+                shareReplay(1),
+            );
     }
 
     private async initInformation() {

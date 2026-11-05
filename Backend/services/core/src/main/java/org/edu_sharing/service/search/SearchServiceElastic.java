@@ -54,6 +54,15 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.generated.repository.backend.services.rest.client.model.ShareInfo;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.metadataset.v2.tools.MetadataElasticSearchHelper;
+import org.edu_sharing.service.scope.ActiveScope;
+import org.edu_sharing.service.scope.ScopeBaseQuery;
+import org.edu_sharing.service.scope.ScopeContextResolver;
+import org.edu_sharing.service.scope.ScopeRole;
+import org.edu_sharing.service.scope.ScopeRelevance;
+import org.edu_sharing.service.scope.ScopeSearchFilter;
+import org.edu_sharing.service.scope.ScopeFacets;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.repository.client.rpc.ACE;
@@ -117,7 +126,7 @@ import java.util.stream.Stream;
 @Service
 @RequiredArgsConstructor
 public class SearchServiceElastic implements SearchService {
-    public static final String WORKSPACE_INDEX = "workspace_11.0";
+    public static final String WORKSPACE_INDEX = "workspace_12.0";
 
     public static String loadScript(String resource) {
         try (java.io.InputStream is = SearchServiceElastic.class.getClassLoader().getResource(resource).openStream()) {
@@ -126,7 +135,7 @@ public class SearchServiceElastic implements SearchService {
             throw new RuntimeException("Failed to load Painless script: " + resource, e);
         }
     }
-    public static final String AUTHORITIES_INDEX = "authorities_11.0";
+    public static final String AUTHORITIES_INDEX = "authorities_12.0";
     public static int MAX_RESPONSE_ENTITY_SIZE = -1;
 
     static volatile RestClient restClient;
@@ -148,6 +157,9 @@ public class SearchServiceElastic implements SearchService {
     private final AuthenticationToolAPI authTool;
     private final Repository repositoryHelper;
     private final UserCache userCache;
+    // scopes: lazy, the resolver depends on this service via the scope definitions
+    @Autowired(required = false)
+    private ObjectProvider<ScopeContextResolver> scopeContextResolver;
 
 
     @PostConstruct
@@ -441,7 +453,7 @@ public class SearchServiceElastic implements SearchService {
 
         MetadataQuery queryData = mds.findQuery(query, MetadataReader.QUERY_SYNTAX_DSL);
         Query globalConditions = new Query.Builder()
-                .bool(getGlobalConditions(searchToken.getAuthorityScope(), searchToken.getPermissions(), queryData).build())
+                .bool(getGlobalConditions(searchToken.getAuthorityScope(), searchToken.getPermissions(), queryData, null, true, searchToken.getScopeRole()).build())
                 .build();
 
         Set<MetadataQueryParameter> excludeOwnFacets = MetadataElasticSearchHelper.getExcludeOwnFacets(queryData, new HashMap<>(), searchToken.getFacets());
@@ -513,6 +525,12 @@ public class SearchServiceElastic implements SearchService {
         for (Map.Entry<String, Aggregate> a : resp.aggregations().entrySet()) {
             if (a.getValue().isFilter()) {
                 FilterAggregate pf = a.getValue().filter();
+                // scopes: facet on scope entries (nested + filter), replacing properties merged with the original values
+                StringTermsAggregate scopeTerms = ScopeFacets.getTerms(a.getKey(), pf.aggregations());
+                if (scopeTerms != null) {
+                    facetsResult.add(getFacet(mds, queryData, a.getKey(), scopeTerms, aggregations.get(a.getKey())));
+                    continue;
+                }
                 for (Map.Entry<String, Aggregate> aggregation : pf.aggregations().entrySet()) {
                     if (isCombinedSuggestionFacet(aggregation.getValue())) {
                         facetsResult.add(getCombinedSuggestionFacet(mds, queryData, aggregation.getKey(), aggregation.getValue().filter()));
@@ -697,7 +715,7 @@ public class SearchServiceElastic implements SearchService {
 
         BoolQuery.Builder metadataQueryBuilderFilter = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, criterias, true);
         BoolQuery.Builder metadataQueryBuilderAsQuery = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, criterias, false);
-        BoolQuery.Builder queryBuilderGlobalConditions = getGlobalConditions(searchToken.getAuthorityScope(), searchToken.getPermissions(), queryData);
+        BoolQuery.Builder queryBuilderGlobalConditions = getGlobalConditions(searchToken.getAuthorityScope(), searchToken.getPermissions(), queryData, null, true, searchToken.getScopeRole());
 
         SearchRequest.Builder searchRequest = new SearchRequest.Builder()
                 .index(WORKSPACE_INDEX)
@@ -821,7 +839,7 @@ public class SearchServiceElastic implements SearchService {
         BoolQuery metadataQueryBuilderAsQuery = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, criteria, false).build();
         StoreRef storeRef = (searchToken.getStoreName() != null && searchToken.getStoreProtocol() != null) ? new StoreRef(searchToken.getStoreProtocol(), searchToken.getStoreName()) : null;
         BoolQuery queryBuilderGlobalConditions = includeGlobalConditions
-                ? getGlobalConditions(searchToken.getAuthorityScope(), searchToken.getPermissions(), queryData, storeRef, true).build()
+                ? getGlobalConditions(searchToken.getAuthorityScope(), searchToken.getPermissions(), queryData, storeRef, true, searchToken.getScopeRole()).build()
                 : null;
 
         // add collapse builder
@@ -902,7 +920,9 @@ public class SearchServiceElastic implements SearchService {
                                 }
                                 return bool;
                             }))
-                    .must(must -> must.bool(metadataQueryBuilderAsQuery)));
+                    .must(must -> must.bool(metadataQueryBuilderAsQuery))
+                    // scopes: recommended entries of the active scope first (score only, the hits stay the same)
+                    .should(ScopeRelevance.boost().map(List::of).orElse(List.of())));
             if (!queryData.getFunctions().isEmpty()) {
                 return q.functionScore(f ->
                         f.query(q2 -> q2.bool(boolQuery)).
@@ -1075,6 +1095,14 @@ public class SearchServiceElastic implements SearchService {
     }
 
     BoolQuery.Builder getGlobalConditions(List<String> authorityScope, List<String> permissions, MetadataQuery query, StoreRef storeRef, boolean scoped) {
+        return getGlobalConditions(authorityScope, permissions, query, storeRef, scoped, null);
+    }
+
+    /**
+     * @param scopeRole role to search the active scope with (SearchToken.scopeRole), null for the own role
+     */
+    BoolQuery.Builder getGlobalConditions(List<String> authorityScope, List<String> permissions, MetadataQuery query, StoreRef storeRef, boolean scoped,
+                                          ScopeRole scopeRole) {
 
         String storeRefProtocol = (storeRef == null) ? "workspace" : storeRef.getProtocol();
         Function<BoolQuery.Builder, BoolQuery.Builder> queryGlobalConditionsFactory = (builder) ->
@@ -1088,7 +1116,22 @@ public class SearchServiceElastic implements SearchService {
 
 
         BoolQuery.Builder queryBuilderGlobalConditions = queryGlobalConditionsFactory.apply(QueryBuilders.bool());
-        if (permissions != null) {
+        // an empty list requests no additional permissions (the search page always sends one): same as none
+        boolean extraPermissions = permissions != null && !permissions.isEmpty();
+        // scopes: mds searches inside an active scope see only this scope, the scope filter replaces the acl filter
+        Optional<ActiveScope> activeScope = query != null && authorityScope == null && !extraPermissions ? getActiveScope() : Optional.empty();
+        if (activeScope.isPresent()) {
+            ActiveScope scope = activeScope.get();
+
+            ScopeRole role = ScopeSearchFilter.searchRole(scope, scopeRole);
+            Query scopeFilter = ScopeSearchFilter.build(scope, role,
+                    () -> Query.of(q -> q.bool(getReadPermissionsQuery(QueryBuilders.bool()).build())),
+                    role == ScopeRole.EDITOR ? getScopeBaseQueries(scope) : List.of());
+            queryBuilderGlobalConditions = QueryBuilders.bool()
+                    .must(must -> must.match(match -> match.field("nodeRef.storeRef.protocol").query(storeRefProtocol)))
+                    .filter(scopeFilter);
+        }
+        if (extraPermissions) {
             BoolQuery.Builder permissionsFilter = QueryBuilders.bool().must(must -> must.bool(queryGlobalConditionsFactory::apply));
             String user = authenticationService.getCurrentUserName();
             permissionsFilter.should(should -> should.match(match -> match.field("owner").query(user)));
@@ -1110,6 +1153,48 @@ public class SearchServiceElastic implements SearchService {
             processSpecialFilters(query, queryBuilderGlobalConditions);
         }
         return queryBuilderGlobalConditions;
+    }
+
+    private Optional<ActiveScope> getActiveScope() {
+        ScopeContextResolver resolver = scopeContextResolver == null ? null : scopeContextResolver.getIfAvailable();
+        return resolver == null ? Optional.empty() : resolver.resolve();
+    }
+
+    /**
+     * the stored base queries of the scope as elastic queries (OR-combined by the caller). A broken query is skipped
+     * and logged instead of breaking every search of the scope
+     */
+    private List<Query> getScopeBaseQueries(ActiveScope scope) {
+        ScopeBaseQuery baseQuery = scope.getDefinition().getBaseQuery();
+        if (baseQuery == null || baseQuery.getQueries() == null) {
+            return List.of();
+        }
+        List<Query> result = new ArrayList<>();
+        for (ScopeBaseQuery.Query stored : baseQuery.getQueries()) {
+            try {
+                MetadataSet mds = MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(),
+                        StringUtils.defaultIfBlank(stored.getMds(), CCConstants.metadatasetdefault_id));
+                MetadataQuery queryData = mds.findQuery(stored.getQuery(), MetadataReader.QUERY_SYNTAX_DSL);
+                Map<String, String[]> criteria = new HashMap<>();
+                if (stored.getCriteria() != null) {
+                    stored.getCriteria().forEach((key, values) -> criteria.put(key, values.toArray(new String[0])));
+                }
+                result.add(toScopeBaseQuery(mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, criteria));
+            } catch (Throwable t) {
+                log.warn("could not resolve base query {} of scope {}: {}", stored.getQuery(), scope.getScopeId(), t.getMessage());
+            }
+        }
+        return result;
+    }
+
+    /**
+     * one stored base query of a scope: like the regular search, the parameters (and the mds base query) are split
+     * into a filter part (asFilter, the default) and a query part (asFilter="false", e.g. the full text), both apply
+     */
+    static Query toScopeBaseQuery(MetadataQueries queries, MetadataQuery queryData, Map<String, String[]> criteria) {
+        BoolQuery filter = MetadataElasticSearchHelper.getElasticSearchQuery(new SearchToken(), queries, queryData, criteria, true).build();
+        BoolQuery query = MetadataElasticSearchHelper.getElasticSearchQuery(new SearchToken(), queries, queryData, criteria, false).build();
+        return Query.of(q -> q.bool(b -> b.filter(f -> f.bool(filter)).must(m -> m.bool(query))));
     }
 
     private static void processSpecialFilters(MetadataQuery query, BoolQuery.Builder queryBuilderGlobalConditions) {
@@ -2518,7 +2603,7 @@ public class SearchServiceElastic implements SearchService {
         result.setFacets(queryResult.getFacets());
 
         if (searchToken.getFacets() != null) {
-            BoolQuery.Builder queryBuilderGlobalConditions = getGlobalConditions(searchToken.getAuthorityScope(), searchToken.getPermissions(), queryData, null, true);
+            BoolQuery.Builder queryBuilderGlobalConditions = getGlobalConditions(searchToken.getAuthorityScope(), searchToken.getPermissions(), queryData, null, true, searchToken.getScopeRole());
             queryBuilderGlobalConditions.must(
                     childQuery
             );
@@ -3380,6 +3465,11 @@ public class SearchServiceElastic implements SearchService {
 
     @Override
     public SearchResult<EduGroup> searchOrganizations(String pattern, int skipCount, int maxValues, SortDefinition sort, boolean scoped, boolean onlyMemberShips) {
+        return searchOrganizations(pattern, skipCount, maxValues, sort, scoped, onlyMemberShips, null);
+    }
+
+    @Override
+    public SearchResult<EduGroup> searchOrganizations(String pattern, int skipCount, int maxValues, SortDefinition sort, boolean scoped, boolean onlyMemberShips, String groupType) {
         try {
             String searchPattern = pattern == null ? "" : pattern;
 
@@ -3418,6 +3508,11 @@ public class SearchServiceElastic implements SearchService {
                                             .field("properties.ccm:edu_homedir.keyword")
                                             .value("workspace://*")
                                     ));
+                    if (groupType != null) {
+                        finalQuery.filter(filter -> filter.term(term -> term
+                                .field("properties.ccm:groupType.keyword")
+                                .value(groupType)));
+                    }
 
                     //only search organisations the curren user is in,except: its adminuser and onlyMemberShips == true
                     if (onlyMemberShips) {

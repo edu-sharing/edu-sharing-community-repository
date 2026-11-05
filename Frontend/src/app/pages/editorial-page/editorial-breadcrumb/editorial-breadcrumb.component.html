@@ -14,6 +14,9 @@
         [attr.aria-current]="editorialBreadcrumbService.path().length === 0 ? 'page' : null"
       >
         {{ 'EDITORIAL.BREADCRUMB.' + editorialBreadcrumbService.mode().toUpperCase() | translate }}
+        @if (editorialBreadcrumbService.mode() === 'scope' && activeScope(); as scope) { ({{
+          scope.definition?.displayName || scope.scopeId
+        }}) }
       </a>
     </li>
     } @for (e of editorialBreadcrumbService.path(); track e; let last = $last) {

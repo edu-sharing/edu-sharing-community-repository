@@ -36,6 +36,7 @@ import {
     ROOT,
     SessionStorageService,
     Store,
+    ScopesService,
 } from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
@@ -104,6 +105,7 @@ import {
     NodesSelectorConfig,
     TabType,
 } from '../../editorial-page/nodes-selector/nodes-selector.component';
+import { ScopeMdsService } from '../../../features/scopes/scope-mds.service';
 
 /** Client-side property holding the title of the collection a search hit is placed in. */
 const SEARCH_PARENT_TITLE_PROPERTY = 'virtual:es_search_parent_title';
@@ -117,6 +119,7 @@ const SEARCH_PARENT_TITLE_PROPERTY = 'virtual:es_search_parent_title';
 })
 export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy {
     private authenticationService = inject(AuthenticationService);
+    private scopesService = inject(ScopesService);
     private localEventsService = inject(LocalEventsService);
     private editorialSidebarService = inject(EditorialSidebarService);
     private bridge = inject(BridgeService);
@@ -446,7 +449,17 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         const set = await firstValueFrom(
             this.mdsService.getMetadataSet({ metadataSet: mdsSets[0].id }),
         );
-        this.referencesColumns = this.mdsHelperService.getColumns(set, 'collectionReferences');
+        // inside a scope its card columns replace the mds list
+        this.scopesService
+            .observeActiveScope()
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe((scope) => {
+                this.referencesColumns = ScopeMdsService.applyCardColumns(
+                    this.mdsHelperService.getColumns(set, 'collectionReferences'),
+                    scope,
+                    set,
+                );
+            });
 
         // check: this sometimes caused missing actionbar data, why is it here?
         //this.optionsService.clearComponents(this.actionbarReferences);

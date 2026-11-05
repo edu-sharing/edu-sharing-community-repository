@@ -22,6 +22,8 @@ import { AddCollectionSidebarComponent } from './add-collection-sidebar/add-coll
 import { CreateCollectionSidebarComponent } from './create-collection-sidebar/create-collection-sidebar.component';
 import { ShareCollectionSidebarComponent } from './share-collection-sidebar/share-collection-sidebar.component';
 import { CollectionInfoSidebarComponent } from '../collection-info/collection-info-sidebar/collection-info-sidebar.component';
+import { ScopeEditorialPanelComponent } from '../scopes/scope-editorial-panel/scope-editorial-panel.component';
+import { ScopeBadgesComponent } from '../scopes/scope-badges/scope-badges.component';
 
 @NgModule({
     declarations: [
@@ -52,6 +54,8 @@ import { CollectionInfoSidebarComponent } from '../collection-info/collection-in
         CreateCollectionSidebarComponent,
         CollectionInfoSidebarComponent,
         ShareCollectionSidebarComponent,
+        ScopeEditorialPanelComponent,
+        ScopeBadgesComponent,
     ],
     exports: [EditorialSidebarComponent, PreviewSidebarComponent, PreviewSidebarWrapperComponent],
 })

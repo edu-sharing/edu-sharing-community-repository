@@ -1,0 +1,62 @@
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
+
+// highlighted block (same as the active entry of the stream page): primary stripe, light background
+:host {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px vars.$sidebarPadding;
+    border-left: 4px solid var(--primary);
+    border-radius: 0 var(--borderRadiusCards) var(--borderRadiusCards) 0;
+    background-color: var(--backgroundColor);
+}
+.label {
+    font-weight: bold;
+}
+mat-radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 12px;
+    flex-direction: column;
+}
+mat-radio-button ::ng-deep {
+    // left aligned with the label: no space for the state layer in front of the circle
+    .mdc-radio {
+        --mat-radio-state-layer-size: 32px;
+        padding-left: 0;
+    }
+    .mdc-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding-left: 0;
+    }
+}
+.value-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+
+.state {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+    .status {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: var(--fontSizeXSmall);
+        color: var(--textLight);
+        i {
+            font-size: 16px;
+        }
+        &.published {
+            color: var(--colorStatusPositiveText);
+        }
+        &.excluded {
+            color: var(--colorStatusNegative);
+        }
+    }
+}

@@ -1,0 +1,49 @@
+@if (entries() === null) {
+<es-spinner></es-spinner>
+} @else if (error()) {
+<es-info-message
+  mode="error"
+  [message]="'SCOPES.EDITORIAL.HISTORY.ERROR' | translate"
+></es-info-message>
+} @else if (!entries().length) {
+<div class="empty">{{ 'SCOPES.EDITORIAL.HISTORY.EMPTY' | translate }}</div>
+} @else {
+<ol class="history">
+  @for (entry of entries(); track $index) {
+  <li class="entry">
+    <div class="change">
+      @if (entry.property) {
+      <span class="property">{{ label(entry.property) }}</span>
+      <span class="values">
+        <span class="from">{{ values(entry.property, entry.from) || '–' }}</span>
+        <i esIcon="arrow_forward" class="arrow"></i>
+        <span class="to">{{ values(entry.property, entry.to) || '–' }}</span>
+      </span>
+      } @else {
+      <span class="property">{{ 'SCOPES.EDITORIAL.HISTORY.DELETED' | translate }}</span>
+      }
+    </div>
+    <div class="meta">
+      <span class="actor">
+        @if (actor(entry.actor); as kind) {
+        {{ 'SCOPES.EDITORIAL.HISTORY.ACTOR_' + kind | translate }}
+        } @else {
+        {{ entry.actor }}
+        }
+      </span>
+      <span class="at">{{ entry.at | formatDate : { time: true } }}</span>
+      @if (entry.contentVersion) {
+      <span class="version">{{
+        'SCOPES.EDITORIAL.HISTORY.VERSION' | translate : { version: entry.contentVersion }
+      }}</span>
+      }
+    </div>
+    @if (entry.reason) {
+    <div class="reason" [title]="'SCOPES.EDITORIAL.REASON' | translate">
+      <i esIcon="comment"></i>{{ entry.reason }}
+    </div>
+    }
+  </li>
+  }
+</ol>
+}

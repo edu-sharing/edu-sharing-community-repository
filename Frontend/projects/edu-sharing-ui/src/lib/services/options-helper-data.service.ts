@@ -31,6 +31,11 @@ export interface OptionData {
     scope: Scope | string;
     activeObjects?: Node[] | any[];
     selectedObjects?: Node[] | any[];
+    /**
+     * the user selected all results of the list (not only the loaded entries). Only options with
+     * `supportsAllResults` are available then
+     */
+    allResultsSelected?: boolean;
     allObjects?: Node[] | any[];
     parent?: Node | any;
     customDownloadUrl?: string;

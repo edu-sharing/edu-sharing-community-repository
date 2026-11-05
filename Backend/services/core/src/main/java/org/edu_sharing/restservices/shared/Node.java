@@ -10,6 +10,7 @@ import org.edu_sharing.restservices.collection.v1.model.Collection;
 import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.model.NodeRefImpl;
 import org.edu_sharing.service.rating.RatingDetails;
+import org.edu_sharing.service.scope.NodeScope;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
@@ -124,6 +125,9 @@ public class Node implements Serializable {
 
     @Schema(description = "Relations to other nodes")
     private Map<NodeRefImpl.Relation, Node> relations;
+
+    @Schema(description = "Scope entries of the node visible for the current user. Inside the active scope, properties contains the replaced (effective) values")
+    private List<NodeScope> scopes;
 
     @Schema(description = "Contributors (authors, publishers) for the node")
     private List<Contributor> contributors;

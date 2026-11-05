@@ -9,6 +9,7 @@ import {
     Node,
     Repository,
     SavedSearch,
+    SearchParameters,
 } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
@@ -43,6 +44,8 @@ export class SearchRequestParams {
         public readonly searchFilters: { [key: string]: string[] },
         public readonly searchString: string,
         public readonly sort: Sort,
+        /** scopes: role to search the active scope with, null for the own role */
+        public readonly scopeRole: SearchParameters['scopeRole'] = null,
     ) {}
 
     equals(other: SearchRequestParams) {

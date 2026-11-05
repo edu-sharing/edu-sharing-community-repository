@@ -5,6 +5,7 @@ import { PermissionsDeleteComponent } from './delete/delete.component';
 import { ToolpermissionManagerComponent } from './toolpermission-manager/toolpermission-manager.component';
 import { UserManagementPageRoutingModule } from './user-management-page-routing.module';
 import { UserManagementPageComponent } from './user-management-page.component';
+import { ScopeManagementComponent } from './scope-management/scope-management.component';
 
 @NgModule({
     declarations: [
@@ -13,6 +14,6 @@ import { UserManagementPageComponent } from './user-management-page.component';
         ToolpermissionManagerComponent,
         PermissionsDeleteComponent,
     ],
-    imports: [SharedModule, UserManagementPageRoutingModule],
+    imports: [SharedModule, UserManagementPageRoutingModule, ScopeManagementComponent],
 })
 export class UserManagementPageModule {}

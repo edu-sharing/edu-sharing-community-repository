@@ -108,7 +108,7 @@ es-render-wrapper-component {
     gap: 8px;
     min-height: $secondaryBarHeight;
     box-sizing: border-box;
-    padding: 0 20px;
+    padding: 0 $sidebarPadding;
     background: var(--roundedContainerBackground);
     @include mixins.materialShadowTop();
     flex-shrink: 0;

@@ -1,0 +1,62 @@
+<div class="property-list">
+  <div class="property-picker">
+    <mat-form-field class="property-filter" subscriptSizing="dynamic">
+      <mat-label>{{ 'SCOPES.ADMIN.FIELD.FILTER' | translate }}</mat-label>
+      <input matInput [ngModel]="filter()" (ngModelChange)="filter.set($event)" />
+    </mat-form-field>
+    <div class="properties" [attr.data-test]="testId() + '-properties'">
+      @for (property of visibleProperties(); track property.name) {
+      <mat-checkbox
+        [checked]="selectedSet().has(property.name)"
+        [disabled]="isLocked(property.name)"
+        (change)="toggle(property.name, $event.checked)"
+      >
+        <span class="property-label">
+          <span class="caption">{{ property.label || property.name }}</span>
+          <!--<span class="property-id">{{ property.name }}</span>-->
+        </span>
+      </mat-checkbox>
+      }
+    </div>
+  </div>
+  <div
+    class="selected"
+    cdkDropList
+    [cdkDropListData]="selected()"
+    (cdkDropListDropped)="drop($event)"
+  >
+    @for (id of selected(); track id; let i = $index) {
+    <div class="row" cdkDrag [attr.data-test]="testId() + '-' + i">
+      <div class="handle" cdkDragHandle><i esIcon="reorder"></i></div>
+      <div class="label">
+        <span class="caption">{{ getLabel(id) }}</span>
+        <span class="property-id">{{ id }}</span>
+      </div>
+      @if (rowTemplate(); as row) {
+      <ng-container *ngTemplateOutlet="row; context: { $implicit: id, index: i }"></ng-container>
+      }
+      <div class="actions">
+        @if (isLocked(id)) {
+        <i
+          esIcon="lock"
+          class="locked"
+          [matTooltip]="lockedHint() | translate"
+          [attr.aria-label]="lockedHint() | translate"
+        ></i>
+        } @else {
+        <button
+          mat-icon-button
+          (click)="remove(i)"
+          color="warn"
+          [attr.aria-label]="'SCOPES.ADMIN.FIELD.REMOVE' | translate"
+        >
+          <i esIcon="delete"></i>
+        </button>
+        }
+      </div>
+    </div>
+    } @empty {
+    <p class="empty">{{ emptyText() | translate }}</p>
+    }
+  </div>
+</div>

@@ -1,0 +1,21 @@
+<div class="effective">
+  @if (chips()) { @for (value of values(); track value.label) {
+  <span class="value chip" [attr.title]="caption() + ': ' + value.label">
+    @if (value.icon) {
+    <i class="value-icon" [esIcon]="value.icon" aria-hidden="true"></i>
+    }
+    {{ value.label }}
+  </span>
+  } @empty {
+  <span class="empty" aria-hidden="true">–</span>
+  } } @else {
+  <span class="value text" [attr.title]="labels().join(', ')">{{
+    labels().join(', ') || '–'
+  }}</span>
+  }
+</div>
+@if (originals().length) {
+<div class="original" [attr.title]="originals().join(', ')">
+  {{ 'SCOPES.EDITORIAL.ORIGINAL' | translate }} {{ originals().join(', ') }}
+</div>
+}

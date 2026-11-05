@@ -1,3 +1,4 @@
+
 package org.edu_sharing.service.search.model;
 
 import co.elastic.clients.elasticsearch._types.Script;
@@ -18,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.service.scope.ScopeSort;
 import org.edu_sharing.spring.ApplicationContextFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
@@ -261,6 +263,8 @@ public class SortDefinition implements Serializable {
 								)
 								.order(sortOrder).unmappedType(FieldType.Keyword)));
 
+					} else if (ScopeSort.apply(builder, sortDefintionEntry.getProperty(), name, sortOrder)) {
+						// sorted by the values inside the active scope
 					} else {
 						// currently, we use a dynamic model which might cause that fields not yet exists. We want to ignore this errors to let the request
 						builder.sort(sort -> sort.field(field -> field.field(name).order(sortOrder).unmappedType(FieldType.Keyword)));

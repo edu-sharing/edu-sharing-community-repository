@@ -1,6 +1,7 @@
 package org.edu_sharing.service.nodeservice;
 
 import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
+import org.edu_sharing.service.scope.ScopePermissionChecker;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.repo.transaction.RetryingTransactionHelper;
@@ -295,10 +296,21 @@ public class NodeServiceInterceptor implements MethodInterceptor {
         ) {
             return permissions.stream().filter(p -> CCConstants.getUsagePermissions().contains(p)).collect(Collectors.toList());
         }
+        // scopes: published entries in the active scope grant the usage (consumer) permissions, also for child objects via the parent
+        List<String> scopePermissions = getScopePermissions(nodeId, permissions);
+        if (!scopePermissions.isEmpty()) {
+            return scopePermissions;
+        }
         if (recursionDepth == 0) {
             return hasCollectionPermissions(nodeId, permissions);
         }
         return Collections.emptyList();
+    }
+
+    public static List<String> getScopePermissions(String nodeId, List<String> permissions) {
+        return ScopePermissionChecker.getInstance()
+                .map(checker -> checker.getGrantedPermissions(nodeId, permissions))
+                .orElse(Collections.emptyList());
     }
 
     private static boolean accessableViaCustomization(String nodeId, int recursionDepth) {

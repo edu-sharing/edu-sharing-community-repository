@@ -272,7 +272,7 @@
             mat-flat-button
             color="primary"
             (click)="refreshNodes()"
-            [disabled]="$safeNavigationMigration(nodesDataSource?.isLoading)"
+            [disabled]="nodesDataSource?.isLoading"
           >
             {{ 'ADMIN.STATISTICS.NODES_APPLY' | translate }}
           </button>
@@ -360,7 +360,7 @@
         mat-flat-button
         color="primary"
         (click)="refreshNodes()"
-        [disabled]="$safeNavigationMigration(nodesDataSource?.isLoading)"
+        [disabled]="nodesDataSource?.isLoading"
       >
         {{ 'ADMIN.STATISTICS.NODES_APPLY' | translate }}
       </button>

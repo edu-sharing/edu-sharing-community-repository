@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AuthenticationService } from 'ngx-edu-sharing-api';
+import { AuthenticationService, ScopesService } from 'ngx-edu-sharing-api';
 import { Observable, of } from 'rxjs';
 import { BridgeService } from '../../services/bridge.service';
 import {
@@ -104,6 +104,11 @@ describe('MainMenuEntriesService', () => {
                 {
                     provide: UIService,
                     useValue: uiStub,
+                },
+                {
+                    // no active scope (the scope entry is covered by its own visibility)
+                    provide: ScopesService,
+                    useValue: { observeActiveScope: () => of(null) },
                 },
             ],
         });

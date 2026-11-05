@@ -52,6 +52,8 @@ $workspaceNewBackground: $itemSelectedBackground !default;
 // unified height of all secondary bars (workspace topbar, search-page tab nav, collections tab
 // header, sidebar headers and the bottom selection/footer bars)
 $secondaryBarHeight: 72px !default;
+// horizontal padding of the sidebars (header, options, footer bars) and blocks inside them
+$sidebarPadding: 20px !default;
 $listItemSelectedBackground: var(--primaryBackground50) !default;
 $workspaceSelectedBackgroundEffect: linear-gradient(
         to right,

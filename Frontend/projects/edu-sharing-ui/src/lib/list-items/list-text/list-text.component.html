@@ -8,10 +8,7 @@
 </span>
 } @case ('groupType') {
 <span>
-  {{
-    'PERMISSIONS.GROUP_TYPE.' + $safeNavigationMigration($any(getNode()).profile?.groupType)
-      | translate
-  }}
+  {{ 'PERMISSIONS.GROUP_TYPE.' + $any(getNode()).profile?.groupType | translate }}
 </span>
 } @default {
 <span>
@@ -145,7 +142,7 @@
   }
   <!-- use node instead of getNode() to access the raw proposal data! -->
   {{
-                    'PROPOSAL_STATUS.' + $safeNavigationMigration($any(node).properties['ccm:collection_proposal_status']?.[0])
+                    'PROPOSAL_STATUS.' + $any(node).properties['ccm:collection_proposal_status']?.[0]
                     | translate: { fallback: '' }
   }}
 </span>

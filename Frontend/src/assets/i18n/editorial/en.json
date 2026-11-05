@@ -15,7 +15,8 @@
       "ACTIVITY": "Search activities...",
       "ASSIGNMENT": "Search assignments...",
       "SUGGESTIONS": "Search contents...",
-      "SHARE": "Search shares..."
+      "SHARE": "Search shares...",
+      "SCOPE": "Search content of the editorial office..."
     },
     "SIDEBAR": {
       "TITLE_SHARE": "Shares",
@@ -227,7 +228,9 @@
       "COLLECTION_EDIT_CONFIGURE_DESCRIPTION": "Set the type, metadata and default sorting of the collection",
       "EDIT_COLLECTION_MENU": "Edit collection",
       "COLLECTION_SHARE": "Share",
-      "COLLECTION_SHARE_DESCRIPTION": "Manage access rights"
+      "COLLECTION_SHARE_DESCRIPTION": "Manage access rights",
+      "SCOPE_EDITORIAL": "Editorial review",
+      "SCOPE_EDITORIAL_DESCRIPTION": "Set status, release and adapted metadata in the active editorial scope"
     },
     "TITLE": "Manage",
     "TITLE_ASSIGNMENT": "Assignments",
@@ -237,7 +240,8 @@
       "ACTIVITY": "Activities",
       "SUGGESTIONS": "Content-Checking",
       "ASSIGNMENT": "Assignments",
-      "SHARE": "Shares"
+      "SHARE": "Shares",
+      "SCOPE": "Editorial office"
     },
     "ACTIVITY": {
       "EMPTY": "No recent activities found"
@@ -361,6 +365,26 @@
     },
     "SHARE": {
       "EMPTY": "No shares found"
+    },
+    "TITLE_SCOPE": "Editorial office",
+    "SCOPE": {
+      "EMPTY": "No content in this view.",
+      "NO_ACTIVE_SCOPE": "No editorial office is active in which you are an editor. Select one via the switcher in the header.",
+      "OPTION": {
+        "EDIT": "Edit editorial status"
+      },
+      "BASE_QUERY": {
+        "OPEN": "Base query",
+        "TITLE": "Base query of {{scope}}",
+        "INFO": "Hits of the base queries appear as candidates in the editorial office (public content only). Queries are edited in the search.",
+        "VERSION": "Version {{version}}",
+        "NO_CRITERIA": "No criteria (all content)",
+        "EDIT": "Edit",
+        "REMOVE": "Remove",
+        "EMPTY": "No base query defined yet.",
+        "ADD": "Add query",
+        "REMOVED": "Query removed"
+      }
     }
   }
 }

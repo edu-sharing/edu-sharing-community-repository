@@ -67,6 +67,8 @@
     "DELETE_GROUP": "Êtes-vous sûr de vouloir supprimer les groupes sélectionnés ?",
     "DELETE_GROUP_SINGLE": "Êtes-vous sûr de vouloir supprimer le groupe {{name}} ?",
     "DELETE_ORG_SINGLE": "Êtes-vous sûr de vouloir supprimer l'organisation {{name}} ? Tous les utilisateur-trices restent et le magasin de données de l'organisation ne sera pas supprimé.",
+    "DELETE_SCOPE_SINGLE": "Êtes-vous sûr de vouloir supprimer la rédaction {{name}} ? Toutes les entrées et l'historique de la rédaction seront supprimés immédiatement et définitivement. Les utilisateur-trices, les groupes et le magasin de données de l'organisation sont conservés.",
+    "DELETE_SCOPE": "Êtes-vous sûr de vouloir supprimer les organisations sélectionnées ? Pour les rédactions, toutes les entrées et l'historique seront supprimés immédiatement et définitivement.",
     "DELETE_ERROR_ADMINISTRATORS": "Administrateur-trices - Les groupes ne peuvent pas être supprimés",
     "DELETED_USER": "Utilisateur-trice(s) supprimé-e(s) avec succès",
     "DELETED_GROUP": "Groupe(s) supprimé(s) avec succès",
@@ -96,6 +98,7 @@
       "CLASS": "Classe",
       "WORKING_GROUP": "Groupe de travail",
       "LESSON": "Instruction",
+      "SCOPE": "Rédaction (scope)",
       "SCHOOL_NATIONAL": "École publique",
       "SCHOOL_MUNICIPAL": "École municipale",
       "SCHOOL_PRIVATE": "École privée"

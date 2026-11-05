@@ -1,5 +1,7 @@
 package org.edu_sharing.restservices;
 
+import org.edu_sharing.service.scope.ScopeNodeView;
+import org.edu_sharing.service.scope.NodeScope;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.core.util.Json;
@@ -594,6 +596,8 @@ public class NodeDao {
     private final String nodeId;
 
     private Map<String, Object> nodeProps;
+    /** scope entries visible for the current user, null without scopes */
+    private List<NodeScope> scopes;
     private Map<String, Map<String, Object>> nodeHistory;
 
     private Map<String, Boolean> hasPermissions;
@@ -806,6 +810,7 @@ public class NodeDao {
             if (nodeRef instanceof CollectionRef) {
                 this.collectionRef = (CollectionRef) nodeRef;
             }
+            applyScopes();
             this.previewData = nodeRef.getPreview();
 
             if (nodeRef.getContributors() != null) {
@@ -1534,6 +1539,26 @@ public class NodeDao {
         return this.aspects;
     }
 
+    /**
+     * scopes: replaced values of the active scope become the node's (effective) properties, so every consumer of the
+     * native properties (dto, rendering, metadata templates) shows them. Never fails the node itself
+     */
+    private void applyScopes() {
+        if (!repoDao.isHomeRepo()) {
+            return;
+        }
+        try {
+            ScopeNodeView.getInstance()
+                    .flatMap(view -> view.apply(nodeId, nodeProps))
+                    .ifPresent(view -> {
+                        this.nodeProps = view.properties();
+                        this.scopes = view.scopes();
+                    });
+        } catch (Throwable t) {
+            logger.warn("could not apply scopes to node " + nodeId + ": " + t.getMessage(), t);
+        }
+    }
+
     public Node asNode() throws DAOException {
         return asNode(true);
     }
@@ -1645,6 +1670,7 @@ public class NodeDao {
         data.setMetadataset(getMetadataSet());
 
         data.setProperties(getProperties());
+        data.setScopes(scopes);
 
         data.setInherited(inherited);
         data.setAccess(access);

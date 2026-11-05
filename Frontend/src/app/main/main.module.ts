@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { extensionDeclarationsMap } from '../extension/extension-declarations-map';
 import { MdsModule } from '../features/mds/mds.module';
+import { ScopeSwitcherComponent } from '../features/scopes/scope-switcher/scope-switcher.component';
 import { SharedModule } from '../shared/shared.module';
 import { CookieInfoComponent } from './cookie-info/cookie-info.component';
 import { LoadingScreenComponent } from './loading-screen/loading-screen.component';
@@ -44,7 +45,7 @@ import { ToastMessageComponent } from './toast-message/toast-message.component';
         UserProfileComponent,
         extensionDeclarationsMap['MainModule'] || [],
     ],
-    imports: [SharedModule, MdsModule, NotificationDialogModule],
+    imports: [SharedModule, MdsModule, NotificationDialogModule, ScopeSwitcherComponent],
     exports: [
         CookieInfoComponent,
         CreateMenuComponent,

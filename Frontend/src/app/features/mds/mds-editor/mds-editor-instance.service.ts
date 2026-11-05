@@ -169,6 +169,13 @@ export class MdsEditorInstanceService
     private config = inject(ConfigService);
     private networkService = inject(NetworkService);
 
+    /** id of the group built from `customWidgetIds` instead of an mds group */
+    static readonly CUSTOM_GROUP_ID = '_custom_widgets';
+    /** widgets of the custom group (set before init, see MdsEditorWrapperComponent.widgetIds) */
+    customWidgetIds: string[] | null = null;
+    /** all widgets optional (set before init, see MdsEditorWrapperComponent.ignoreRequired) */
+    ignoreRequired = false;
+
     static Widget = class implements GeneralWidget, MdsViewerWidget {
         readonly addValue = new EventEmitter<MdsWidgetValue>();
         readonly status = new BehaviorSubject<InputStatus>(null);
@@ -233,6 +240,7 @@ export class MdsEditorInstanceService
                             case 'no-change':
                                 return false;
                             case 'replace':
+                            case 'append':
                             case null:
                                 return (
                                     !!this.initialValues.individualValues ||
@@ -346,8 +354,10 @@ export class MdsEditorInstanceService
             // Set initial values, so the initial completion status is calculated correctly.
             this.value$.next([...this.initialValues.jointValues]);
             if (
-                this.mdsEditorInstanceService.getIsBulk(nodes) &&
-                this.bulkMode.value !== 'replace'
+                (this.mdsEditorInstanceService.editorBulkMode?.isBulk ||
+                    this.mdsEditorInstanceService.getIsBulk(nodes)) &&
+                this.bulkMode.value !== 'replace' &&
+                this.bulkMode.value !== 'append'
             ) {
                 this.bulkMode.next('no-change');
             }
@@ -1119,7 +1129,10 @@ export class MdsEditorInstanceService
                     // disable required fields validation in bulk since they might be filled with individual values
                     this.isValid$.next(
                         c.mandatory.fields.every(
-                            (f) => f.isCompleted || f.widget?.getBulkMode() !== 'replace',
+                            (f) =>
+                                f.isCompleted ||
+                                (f.widget?.getBulkMode() !== 'replace' &&
+                                    f.widget?.getBulkMode() !== 'append'),
                         ),
                     );
                 } else {
@@ -1227,11 +1240,17 @@ export class MdsEditorInstanceService
             refetch = true,
             bulkBehavior = BulkBehavior.Default,
             editorMode = 'nodes',
+            forceBulk = false,
+            allowAppend = false,
         }: {
             groupId?: string;
             refetch?: boolean;
             bulkBehavior?: BulkBehavior;
             editorMode?: EditorMode;
+            /** bulk mode even for a single node */
+            forceBulk?: boolean;
+            /** offer "append" for multi value widgets in bulk mode */
+            allowAppend?: boolean;
         } = {},
     ): Promise<EditorType> {
         this.editorMode = editorMode;
@@ -1252,8 +1271,11 @@ export class MdsEditorInstanceService
                 console.warn('Could not fetch suggestion data', e);
             }
         }
-        if (this.getIsBulk(this.nodes$.value)) {
-            this.editorBulkMode = { isBulk: true, bulkBehavior };
+        if (forceBulk || this.getIsBulk(this.nodes$.value)) {
+            this.editorBulkMode =
+                bulkBehavior === BulkBehavior.Default
+                    ? { isBulk: true, bulkBehavior, allowAppend }
+                    : { isBulk: true, bulkBehavior };
         } else {
             this.editorBulkMode = { isBulk: false };
         }
@@ -1920,6 +1942,19 @@ export class MdsEditorInstanceService
                 .getMetadataSet({ metadataSet: mdsId || DEFAULT, repository })
                 .toPromise();
         }
+        if (groupId === MdsEditorInstanceService.CUSTOM_GROUP_ID) {
+            mdsDefinition = this.withCustomGroup(mdsDefinition, this.customWidgetIds ?? []);
+        }
+        if (this.ignoreRequired) {
+            // a copy: the cached definition of the mds service stays untouched
+            mdsDefinition = {
+                ...mdsDefinition,
+                widgets: mdsDefinition.widgets.map((widget) => ({
+                    ...widget,
+                    isRequired: RequiredMode.Optional,
+                })),
+            };
+        }
         const group = this.getGroup(mdsDefinition, groupId);
         if (!group) {
             throw new Error(`no such group "${groupId}"`);
@@ -1927,6 +1962,25 @@ export class MdsEditorInstanceService
         const views = this.getViews(mdsDefinition, group);
         const widgets = await this.generateWidgets(mdsDefinition, views);
         return { mdsId, repository, groupId, mdsDefinition, views, widgets };
+    }
+
+    /**
+     * a copy of the definition with a group of exactly the given widgets (the cached definition of
+     * the mds service stays untouched)
+     */
+    private withCustomGroup(mdsDefinition: MdsDefinition, widgetIds: string[]): MdsDefinition {
+        const viewId = MdsEditorInstanceService.CUSTOM_GROUP_ID;
+        return {
+            ...mdsDefinition,
+            groups: [
+                ...mdsDefinition.groups.filter((g) => g.id !== viewId),
+                { id: viewId, rendering: 'angular', views: [viewId] },
+            ],
+            views: [
+                ...mdsDefinition.views.filter((v) => v.id !== viewId),
+                { id: viewId, html: widgetIds.map((id) => `<${id}>`).join('\n') },
+            ],
+        };
     }
 
     private getIsBulk(nodes: Node[] | any[]): boolean {
@@ -2198,6 +2252,8 @@ export class MdsEditorInstanceService
             switch (widget.getBulkMode()) {
                 case 'no-change':
                     return null;
+                case 'append':
+                    return removeDuplicates([...(oldPropertyValue ?? []), ...widget.getValue()]);
                 case 'replace':
                     return removeDuplicates([
                         ...(oldPropertyValue ?? []).filter((value) =>

@@ -13,6 +13,11 @@ export class NodeEntriesTemplatesService {
     entriesTopMatter: TemplateRef<unknown>;
 
     /**
+     * custom content at the bottom left, next to the paginator (i.e. actions for the whole result set)
+     */
+    footer: TemplateRef<unknown>;
+
+    /**
      * custom container in case the data source is empty
      */
     empty: TemplateRef<any>;

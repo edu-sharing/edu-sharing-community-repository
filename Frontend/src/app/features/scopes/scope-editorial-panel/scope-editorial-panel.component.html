@@ -1,0 +1,181 @@
+@if (!scope()) {
+<es-info-message mode="info" [message]="'SCOPES.EDITORIAL.NO_SCOPE' | translate"></es-info-message>
+} @else { @if (isBulk()) {
+<div class="scope-heading">
+  <i esIcon="fact_check"></i>
+  <span class="target">{{
+    'SCOPES.EDITORIAL.BULK.TARGET' | translate : { count: bulkCount() }
+  }}</span>
+</div>
+<ng-container *ngTemplateOutlet="editor"></ng-container>
+} @else {
+<mat-tab-group class="tabs">
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <i esIcon="edit" class="tab-icon"></i>
+      <span class="tab-label">{{ 'SCOPES.EDITORIAL.TAB_EDIT' | translate }}</span>
+    </ng-template>
+    <ng-container *ngTemplateOutlet="editor"></ng-container>
+  </mat-tab>
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <i esIcon="history" class="tab-icon"></i>
+      <span class="tab-label">{{ 'SCOPES.EDITORIAL.TAB_HISTORY' | translate }}</span>
+    </ng-template>
+    <ng-template matTabContent>
+      @if (nodeId()) {
+      <es-scope-history
+        [scopeId]="scope().scopeId"
+        [nodeId]="nodeId()"
+        [widgets]="widgets()"
+        [reload]="historyReload()"
+      ></es-scope-history>
+      }
+    </ng-template>
+  </mat-tab>
+</mat-tab-group>
+} }
+
+<ng-template #editor>
+  <div class="editor">
+    @if (loading()) {
+    <es-spinner></es-spinner>
+    } @else { @if (isBulk()) {
+    <div class="entry-state">
+      <span class="state">{{ 'SCOPES.EDITORIAL.BULK.HINT' | translate }}</span>
+    </div>
+    } @if (inventoryField(); as f) {
+    <!-- the inventory decision: directly selectable -->
+    <es-scope-inventory
+      [widgets]="widgets()"
+      [value]="isBulk() && !isTouched(f.field.id) ? bulkInventory() : getValues(f.field.id)[0]"
+      [mixed]="isBulk() && !isTouched(f.field.id) && bulkInventory() === undefined"
+      (valueChange)="onWidgetChange(f.field.id, $event ? [$event] : [])"
+    ></es-scope-inventory>
+    } @if (editorFieldIds().length) {
+    <!-- all other fields: the mds editor in form mode (bulk: keep / replace / append per field),
+      re-created (track) when the values change from outside -->
+    @for (key of [editorKey()]; track key) {
+    <es-mds-editor-wrapper
+      class="fields-editor"
+      [embedded]="true"
+      [editorMode]="'form'"
+      [widgetIds]="editorFieldIds()"
+      [nodes]="editorNodes()"
+      [nodeRefetch]="false"
+      [forceBulk]="isBulk()"
+      [bulkAppend]="true"
+      [ignoreRequired]="true"
+    ></es-mds-editor-wrapper>
+    } } @if (!isBulk() && overriddenFields().length) {
+    <!-- replaced values of this scope: the original stays untouched -->
+    <section class="originals">
+      <h3 class="section-title">{{ 'SCOPES.EDITORIAL.SECTION_REPLACING' | translate }}</h3>
+      <p class="section-description">
+        {{ 'SCOPES.EDITORIAL.SECTION_REPLACING_DESCRIPTION' | translate }}
+      </p>
+      @for (f of overriddenFields(); track f.field.id) {
+      <div class="original">
+        <span class="original-label">{{ f.label }}:</span>
+        <span class="original-value"
+          >{{ 'SCOPES.EDITORIAL.ORIGINAL' | translate }}
+          {{ getOriginal(f.field.id).join(', ') || '–' }}</span
+        >
+        <button
+          mat-button
+          color="primary"
+          (click)="resetToOriginal(f.field.id)"
+          [disabled]="saving()"
+        >
+          <i esIcon="undo"></i>
+          {{ 'SCOPES.EDITORIAL.RESET_TO_ORIGINAL' | translate }}
+        </button>
+      </div>
+      }
+    </section>
+    }
+
+    <mat-form-field class="reason" subscriptSizing="dynamic">
+      <mat-label>{{ 'SCOPES.EDITORIAL.REASON' | translate }}</mat-label>
+      <input
+        matInput
+        [value]="reason()"
+        (input)="reason.set($any($event.target).value)"
+        maxlength="1000"
+      />
+    </mat-form-field>
+
+    @if (hintNotPublic()) {
+    <es-info-message
+      mode="warning"
+      [message]="'SCOPES.EDITORIAL.HINT_NOT_PUBLIC' | translate"
+    ></es-info-message>
+
+    } @if (bulkStatus(); as status) {
+    <div class="bulk-status">
+      @if (status.state === 'QUEUED' && status.queue?.jobsAhead) {
+      <!-- bulk jobs run one after another: progress of the jobs ahead -->
+      <div class="bulk-status-text">
+        {{
+          'SCOPES.EDITORIAL.BULK.STATE_QUEUED_AHEAD'
+            | translate
+              : {
+                  jobs: status.queue.jobsAhead,
+                  done: status.queue.done,
+                  total: status.queue.total
+                }
+        }}
+      </div>
+      <mat-progress-bar
+        [mode]="status.queue.total ? 'determinate' : 'indeterminate'"
+        [value]="queueProgress(status)"
+      ></mat-progress-bar>
+      } @else {
+      <div class="bulk-status-text">
+        {{
+          'SCOPES.EDITORIAL.BULK.STATE_' + status.state
+            | translate : { done: status.done ?? 0, total: status.total ?? 0 }
+        }}
+      </div>
+      <mat-progress-bar
+        [mode]="status.state === 'QUEUED' ? 'indeterminate' : 'determinate'"
+        [value]="bulkProgress(status)"
+      ></mat-progress-bar>
+      } @if (status.failed?.length) {
+      <details class="bulk-failures">
+        <summary>
+          {{ 'SCOPES.EDITORIAL.BULK.FAILURES' | translate : { count: status.failed.length } }}
+        </summary>
+        <ul>
+          @for (failure of status.failed; track failure.nodeId) {
+          <li>
+            <code>{{ failure.nodeId }}</code
+            >: {{ failure.message }}
+          </li>
+          }
+        </ul>
+      </details>
+      }
+    </div>
+    }
+
+    <div class="actions">
+      @if (isBulk() || assignment()) {
+      <button mat-button color="warn" (click)="deleteEntries()" [disabled]="saving()">
+        <i esIcon="delete"></i>
+        {{
+          (isBulk() ? 'SCOPES.EDITORIAL.BULK.DELETE' : 'SCOPES.EDITORIAL.DELETE.ACTION') | translate
+        }}
+      </button>
+      }
+      <span class="spacer"></span>
+      <button mat-button color="primary" (click)="discard()" [disabled]="saving()">
+        {{ 'DISCARD' | translate }}
+      </button>
+      <button mat-flat-button color="primary" (click)="save()" [disabled]="saving()">
+        {{ (isBulk() ? 'SCOPES.EDITORIAL.BULK.APPLY' : 'SAVE') | translate }}
+      </button>
+    </div>
+    }
+  </div>
+</ng-template>

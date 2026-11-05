@@ -150,6 +150,31 @@
         },
         "type": "object"
       },
+      "ActiveScope": {
+        "properties": {
+          "contextId": {
+            "type": "string"
+          },
+          "definition": {
+            "$ref": "#/components/schemas/ScopeDefinition"
+          },
+          "orgAdmin": {
+            "type": "boolean"
+          },
+          "role": {
+            "enum": [
+              "EDITOR",
+              "GUEST",
+              "TEMPORARY_READER"
+            ],
+            "type": "string"
+          },
+          "scopeId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "AddToCollectionEventDTO": {
         "allOf": [
           {
@@ -1134,6 +1159,13 @@
             "description": "Repository type of the repository this node is originated from",
             "type": "string"
           },
+          "scopes": {
+            "description": "Scope entries of the node visible for the current user. Inside the active scope, properties contains the replaced (effective) values",
+            "items": {
+              "$ref": "#/components/schemas/NodeScope"
+            },
+            "type": "array"
+          },
           "size": {
             "description": "Size of the node in bytes",
             "type": "string"
@@ -1723,6 +1755,10 @@
               "$ref": "#/components/schemas/Language"
             },
             "type": "array"
+          },
+          "scopeGroup": {
+            "description": "Scope group (authority name, groupType SCOPE) that is the active scope (editorial team) of this context",
+            "type": "string"
           },
           "values": {
             "$ref": "#/components/schemas/Values"
@@ -2627,7 +2663,8 @@
             "enum": [
               "handleService",
               "doiService",
-              "dataprotection"
+              "dataprotection",
+              "scopes"
             ],
             "type": "string"
           }
@@ -4303,6 +4340,15 @@
           },
           "returnSuggestions": {
             "type": "boolean"
+          },
+          "scopeRole": {
+            "description": "scopes: search the active scope with this role instead of the own one. Only reduces: an editor may request a reader role (\"view as reader\": only published content), other roles are never changed",
+            "enum": [
+              "EDITOR",
+              "GUEST",
+              "TEMPORARY_READER"
+            ],
+            "type": "string"
           }
         },
         "required": [
@@ -5176,6 +5222,13 @@
             "description": "Repository type of the repository this node is originated from",
             "type": "string"
           },
+          "scopes": {
+            "description": "Scope entries of the node visible for the current user. Inside the active scope, properties contains the replaced (effective) values",
+            "items": {
+              "$ref": "#/components/schemas/NodeScope"
+            },
+            "type": "array"
+          },
           "size": {
             "description": "Size of the node in bytes",
             "type": "string"
@@ -5354,6 +5407,13 @@
           "repositoryType": {
             "description": "Repository type of the repository this node is originated from",
             "type": "string"
+          },
+          "scopes": {
+            "description": "Scope entries of the node visible for the current user. Inside the active scope, properties contains the replaced (effective) values",
+            "items": {
+              "$ref": "#/components/schemas/NodeScope"
+            },
+            "type": "array"
           },
           "size": {
             "description": "Size of the node in bytes",
@@ -5692,6 +5752,42 @@
           "node",
           "remote"
         ],
+        "type": "object"
+      },
+      "NodeScope": {
+        "description": "Scope entries of the node visible for the current user. Inside the active scope, properties contains the replaced (effective) values",
+        "properties": {
+          "displayName": {
+            "type": "string"
+          },
+          "excluded": {
+            "type": "boolean"
+          },
+          "originals": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "properties": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "published": {
+            "type": "boolean"
+          },
+          "scopeId": {
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "NodeShare": {
@@ -7739,6 +7835,479 @@
         ],
         "type": "object"
       },
+      "ScopeAssignment": {
+        "properties": {
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "excluded": {
+            "type": "boolean"
+          },
+          "modified": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "modifiedBy": {
+            "type": "string"
+          },
+          "nodeId": {
+            "type": "string"
+          },
+          "properties": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "published": {
+            "type": "boolean"
+          },
+          "scopeId": {
+            "type": "string"
+          },
+          "source": {
+            "enum": [
+              "USER",
+              "UPLOAD",
+              "SKILL",
+              "BULK"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ScopeAssignmentRequestDTO": {
+        "properties": {
+          "properties": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ScopeBaseQuery": {
+        "properties": {
+          "queries": {
+            "items": {
+              "$ref": "#/components/schemas/ScopeQuery"
+            },
+            "type": "array"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ScopeBulkFailure": {
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "nodeId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ScopeBulkQueue": {
+        "properties": {
+          "done": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "jobsAhead": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ScopeBulkRequest": {
+        "properties": {
+          "appendProperties": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "delete": {
+            "type": "boolean"
+          },
+          "nodeIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "properties": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "removeValues": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "search": {
+            "$ref": "#/components/schemas/ScopeQuery"
+          }
+        },
+        "type": "object"
+      },
+      "ScopeBulkStatus": {
+        "properties": {
+          "done": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "failed": {
+            "items": {
+              "$ref": "#/components/schemas/ScopeBulkFailure"
+            },
+            "type": "array"
+          },
+          "finishedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "jobId": {
+            "type": "string"
+          },
+          "queue": {
+            "$ref": "#/components/schemas/ScopeBulkQueue"
+          },
+          "scopeId": {
+            "type": "string"
+          },
+          "startedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "startedBy": {
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "QUEUED",
+              "RUNNING",
+              "FINISHED",
+              "FAILED"
+            ],
+            "type": "string"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ScopeChange": {
+        "properties": {
+          "at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "nodeIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "scopeId": {
+            "type": "string"
+          },
+          "seq": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "type": {
+            "enum": [
+              "UPSERT",
+              "DELETE",
+              "SCOPE_DELETED"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "at",
+          "seq",
+          "type"
+        ],
+        "type": "object"
+      },
+      "ScopeCreateRequestDTO": {
+        "properties": {
+          "displayName": {
+            "type": "string"
+          },
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/ScopeField"
+            },
+            "type": "array"
+          },
+          "mds": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "presentation": {
+            "$ref": "#/components/schemas/ScopePresentation"
+          }
+        },
+        "type": "object"
+      },
+      "ScopeDefinition": {
+        "properties": {
+          "baseQuery": {
+            "$ref": "#/components/schemas/ScopeBaseQuery"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/ScopeField"
+            },
+            "type": "array"
+          },
+          "folderId": {
+            "type": "string"
+          },
+          "mds": {
+            "type": "string"
+          },
+          "presentation": {
+            "$ref": "#/components/schemas/ScopePresentation"
+          },
+          "scopeId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ScopeField": {
+        "properties": {
+          "excludedValues": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "id": {
+            "type": "string"
+          },
+          "publishedValues": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "replaces": {
+            "description": "derived: true for regular node properties, false for scope only properties",
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "uploadValues": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "visibility": {
+            "enum": [
+              "internal",
+              "public"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ScopeHistoryEntry": {
+        "properties": {
+          "actor": {
+            "type": "string"
+          },
+          "at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "baseQueryVersion": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "contentVersion": {
+            "type": "string"
+          },
+          "from": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "nodeId": {
+            "type": "string"
+          },
+          "property": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "scopeId": {
+            "type": "string"
+          },
+          "to": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ScopeIndexData": {
+        "properties": {
+          "nodeId": {
+            "type": "string"
+          },
+          "scopeIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "scopeIdsExcluded": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "scopeIdsPublished": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "scopeOverrides": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "scopes": {
+            "items": {
+              "$ref": "#/components/schemas/ScopeIndexEntry"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ScopeIndexEntry": {
+        "properties": {
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "excluded": {
+            "type": "boolean"
+          },
+          "modified": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "modifiedBy": {
+            "type": "string"
+          },
+          "properties": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "publicFields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "published": {
+            "type": "boolean"
+          },
+          "scopeId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ScopeInfo": {
+        "properties": {
+          "displayName": {
+            "type": "string"
+          },
+          "role": {
+            "enum": [
+              "EDITOR",
+              "GUEST",
+              "TEMPORARY_READER"
+            ],
+            "type": "string"
+          },
+          "scopeId": {
+            "type": "string"
+          },
+          "temporary": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
       "ScopeLogin": {
         "properties": {
           "admin": {
@@ -7797,6 +8366,72 @@
           "isValidLogin",
           "sessionTimeout"
         ],
+        "type": "object"
+      },
+      "ScopePresentation": {
+        "properties": {
+          "cardColumns": {
+            "description": "properties of the content cards (search, collection contents), null or empty: the mds default",
+            "items": {
+              "description": "properties of the content cards (search, collection contents), null or empty: the mds default",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "sortColumns": {
+            "description": "sortable properties inside the scope (editorial page, search), \"score\" for the relevance, null or empty: the mds default",
+            "items": {
+              "description": "sortable properties inside the scope (editorial page, search), \"score\" for the relevance, null or empty: the mds default",
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ScopeQuery": {
+        "properties": {
+          "criteria": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "mds": {
+            "type": "string"
+          },
+          "query": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ScopeSelectionRequestDTO": {
+        "properties": {
+          "scopeId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ScopeUpdateRequestDTO": {
+        "properties": {
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/ScopeField"
+            },
+            "type": "array"
+          },
+          "mds": {
+            "type": "string"
+          },
+          "presentation": {
+            "$ref": "#/components/schemas/ScopePresentation"
+          }
+        },
         "type": "object"
       },
       "SearchFacet": {
@@ -7860,6 +8495,15 @@
           },
           "returnSuggestions": {
             "type": "boolean"
+          },
+          "scopeRole": {
+            "description": "scopes: search the active scope with this role instead of the own one. Only reduces: an editor may request a reader role (\"view as reader\": only published content), other roles are never changed",
+            "enum": [
+              "EDITOR",
+              "GUEST",
+              "TEMPORARY_READER"
+            ],
+            "type": "string"
           }
         },
         "required": [
@@ -41530,6 +42174,14 @@
               "default": true,
               "type": "boolean"
             }
+          },
+          {
+            "description": "only organizations of this group type (e.g. SCOPE)",
+            "in": "query",
+            "name": "groupType",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -44093,6 +44745,1280 @@
         ]
       }
     },
+    "/scope/v1/{repository}/admin/scopeOnlyProperties": {
+      "get": {
+        "description": "Every other property of a field list replaces the original value inside the scope (ScopeField.replaces). Admin only.",
+        "operationId": "getScopeOnlyProperties",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          }
+        },
+        "summary": "Properties that only exist in scope entries",
+        "tags": [
+          "SCOPE v1"
+        ]
+      }
+    },
+    "/scope/v1/{repository}/admin/scopes": {
+      "get": {
+        "description": "Admin only.",
+        "operationId": "getAllScopes",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ScopeDefinition"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          }
+        },
+        "summary": "All scope groups",
+        "tags": [
+          "SCOPE v1"
+        ]
+      },
+      "post": {
+        "description": "Creates the group like an organization (org admins, shared folder) and marks it as scope group. Admin only.",
+        "operationId": "createScope",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScopeCreateRequestDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScopeDefinition"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          }
+        },
+        "summary": "Create a scope group",
+        "tags": [
+          "SCOPE v1"
+        ]
+      }
+    },
+    "/scope/v1/{repository}/admin/scopes/{scopeId}": {
+      "put": {
+        "description": "Admin only. presentation = null removes the settings.",
+        "operationId": "updateScope",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "authority name of the scope group",
+            "in": "path",
+            "name": "scopeId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScopeUpdateRequestDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScopeDefinition"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          }
+        },
+        "summary": "Change mds, field list and presentation settings of a scope group",
+        "tags": [
+          "SCOPE v1"
+        ]
+      }
+    },
+    "/scope/v1/{repository}/changes": {
+      "get": {
+        "description": "Entries ordered by (at, seq). Same cursor contract as the share info oplog. Admin / system user only.",
+        "operationId": "getChanges",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Date to filter changes from (exclusive)",
+            "in": "query",
+            "name": "after",
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Without 'after', a standalone seq cursor. Together with 'after', a tiebreaker for changes sharing the exact same 'after' timestamp.",
+            "in": "query",
+            "name": "afterSeq",
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Date to filter changes until (inclusive)",
+            "in": "query",
+            "name": "until",
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "maximum items per page",
+            "in": "query",
+            "name": "maxItems",
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ScopeChange"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          }
+        },
+        "summary": "Change feed for the scope tracker",
+        "tags": [
+          "SCOPE v1"
+        ]
+      }
+    },
+    "/scope/v1/{repository}/index": {
+      "post": {
+        "description": "Keyed by node id. Admin / system user only.",
+        "operationId": "getIndexDataBulk",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ScopeIndexData"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          }
+        },
+        "summary": "Index fragments of several nodes for the scope tracker",
+        "tags": [
+          "SCOPE v1"
+        ]
+      }
+    },
+    "/scope/v1/{repository}/index/{node}": {
+      "get": {
+        "description": "Child objects get the fragment of their parent. Admin / system user only.",
+        "operationId": "getIndexData",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "ID of node",
+            "in": "path",
+            "name": "node",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScopeIndexData"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          }
+        },
+        "summary": "Index fragment of a node for the scope tracker",
+        "tags": [
+          "SCOPE v1"
+        ]
+      }
+    },
+    "/scope/v1/{repository}/scopes": {
+      "get": {
+        "description": "Scopes of all scope groups of the current user, plus the temporary (read only) scope of the current domain.",
+        "operationId": "getScopes",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ScopeInfo"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          }
+        },
+        "summary": "Scopes for the scope switcher",
+        "tags": [
+          "SCOPE v1"
+        ]
+      }
+    },
+    "/scope/v1/{repository}/scopes/current": {
+      "get": {
+        "description": "Active scope including field list and role. 204 if the user works globally.",
+        "operationId": "getCurrentScope",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActiveScope"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "204": {
+            "description": "no active scope"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          }
+        },
+        "summary": "Active scope",
+        "tags": [
+          "SCOPE v1"
+        ]
+      },
+      "put": {
+        "description": "Only scopes of the user's own scope groups. scopeId = null switches to global.",
+        "operationId": "setCurrentScope",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScopeSelectionRequestDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          }
+        },
+        "summary": "Switch the active scope",
+        "tags": [
+          "SCOPE v1"
+        ]
+      }
+    },
+    "/scope/v1/{repository}/scopes/{scopeId}/baseQuery": {
+      "put": {
+        "description": "Requires the org admin role of the scope group. Increases the version.",
+        "operationId": "setBaseQuery",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "authority name of the scope group",
+            "in": "path",
+            "name": "scopeId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScopeBaseQuery"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScopeBaseQuery"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          }
+        },
+        "summary": "Set the base query of a scope",
+        "tags": [
+          "SCOPE v1"
+        ]
+      }
+    },
+    "/scope/v1/{repository}/scopes/{scopeId}/bulk": {
+      "post": {
+        "description": "Sets properties for (or removes the entries of) a list of nodes or all hits of a search. Runs asynchronously, returns the initial state of the job (jobId).",
+        "operationId": "startBulk",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "authority name of the scope group",
+            "in": "path",
+            "name": "scopeId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScopeBulkRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScopeBulkStatus"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          }
+        },
+        "summary": "Start a bulk change",
+        "tags": [
+          "SCOPE v1"
+        ]
+      }
+    },
+    "/scope/v1/{repository}/scopes/{scopeId}/bulk/{jobId}": {
+      "get": {
+        "operationId": "getBulkStatus",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "authority name of the scope group",
+            "in": "path",
+            "name": "scopeId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "id of the bulk job",
+            "in": "path",
+            "name": "jobId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScopeBulkStatus"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          }
+        },
+        "summary": "State of a bulk job",
+        "tags": [
+          "SCOPE v1"
+        ]
+      }
+    },
+    "/scope/v1/{repository}/scopes/{scopeId}/nodes/{node}": {
+      "delete": {
+        "description": "The history keeps a deletion record.",
+        "operationId": "deleteAssignment_1",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "authority name of the scope group",
+            "in": "path",
+            "name": "scopeId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ID of node",
+            "in": "path",
+            "name": "node",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "optional reason, stored in the history",
+            "in": "query",
+            "name": "reason",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          }
+        },
+        "summary": "Remove the entry of a node from a scope",
+        "tags": [
+          "SCOPE v1"
+        ]
+      },
+      "get": {
+        "operationId": "getAssignment_1",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "authority name of the scope group",
+            "in": "path",
+            "name": "scopeId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ID of node",
+            "in": "path",
+            "name": "node",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScopeAssignment"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          }
+        },
+        "summary": "Get the entry of a node in a scope",
+        "tags": [
+          "SCOPE v1"
+        ]
+      },
+      "put": {
+        "description": "Creates the entry if missing. An empty value list removes the property. Requires membership, TOOLPERMISSION_SCOPE_WRITE and Read on the original.",
+        "operationId": "setAssignment",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "authority name of the scope group",
+            "in": "path",
+            "name": "scopeId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ID of node",
+            "in": "path",
+            "name": "node",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScopeAssignmentRequestDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScopeAssignment"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          }
+        },
+        "summary": "Set properties of the entry of a node in a scope",
+        "tags": [
+          "SCOPE v1"
+        ]
+      }
+    },
+    "/scope/v1/{repository}/scopes/{scopeId}/nodes/{node}/history": {
+      "get": {
+        "description": "Newest first. Members of the scope group only.",
+        "operationId": "getHistory",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "authority name of the scope group",
+            "in": "path",
+            "name": "scopeId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ID of node",
+            "in": "path",
+            "name": "node",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ScopeHistoryEntry"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          }
+        },
+        "summary": "History of the entry of a node in a scope",
+        "tags": [
+          "SCOPE v1"
+        ]
+      }
+    },
+    "/scope/v1/{repository}/scopes/{scopeId}/suggest/{property}": {
+      "get": {
+        "description": "Only values of this scope. Members of the scope group only.",
+        "operationId": "suggest",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "authority name of the scope group",
+            "in": "path",
+            "name": "scopeId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "local property name",
+            "in": "path",
+            "name": "property",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "prefix of the value",
+            "in": "query",
+            "name": "value",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "maximum number of values",
+            "in": "query",
+            "name": "maxItems",
+            "schema": {
+              "default": 10,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          }
+        },
+        "summary": "Autocomplete for values of a scope property",
+        "tags": [
+          "SCOPE v1"
+        ]
+      }
+    },
     "/search/v1/custom/{repository}": {
       "get": {
         "description": "e.g. property=cm:name, value:*Test*",
@@ -44947,6 +46873,14 @@
                 "type": "string"
               },
               "type": "array"
+            }
+          },
+          {
+            "description": "scopes: search all public content instead of the active scope, to edit the base query of the scope. Org admins of the active scope group only",
+            "in": "query",
+            "name": "ignoreScope",
+            "schema": {
+              "type": "boolean"
             }
           }
         ],

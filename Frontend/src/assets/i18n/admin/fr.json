@@ -958,7 +958,10 @@
       "DELETED": "Le contexte a été supprimé.",
       "DELETE_TITLE": "Supprimer le contexte ?",
       "DELETE_MESSAGE": "Êtes-vous sûr de vouloir supprimer le contexte (Id : {{id}}, Domaines : {{domain}}) ?",
-      "MISSING_VALUES": "Veuillez remplir tous les champs."
+      "MISSING_VALUES": "Veuillez remplir tous les champs.",
+      "SCOPE_GROUP": "Rédaction",
+      "SCOPE_GROUP_NONE": "Aucune rédaction",
+      "SCOPE_GROUP_HINT": "Le contenu de ces domaines est affiché dans la vue de cette rédaction. Les membres modifient, les autres voient les entrées publiées."
     }
   },
   "Key": "FRANÇAIS",

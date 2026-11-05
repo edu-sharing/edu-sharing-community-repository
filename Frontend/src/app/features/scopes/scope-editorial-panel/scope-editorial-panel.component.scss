@@ -1,0 +1,143 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.scope-heading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 20px 20px 0 20px;
+    min-width: 0;
+    .scope-name {
+        font-weight: bold;
+        white-space: nowrap;
+    }
+    .target {
+        color: var(--textLight);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+.editor {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-top: 12px;
+}
+.entry-state {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    padding-left: 20px;
+    .state {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        color: var(--textLight);
+        &.published {
+            color: var(--colorStatusPositiveText);
+        }
+        &.excluded {
+            color: var(--colorStatusNegative);
+        }
+    }
+}
+.primary-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.fields {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+.section-title {
+    margin: 0;
+    font-size: var(--fontSizeSmall);
+    text-transform: uppercase;
+    color: var(--textLight);
+}
+.section-description {
+    margin: 0;
+    color: var(--textLight);
+    font-size: var(--fontSizeXSmall);
+}
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-left: 8px;
+    border-left: 3px solid transparent;
+    &.touched {
+        border-left-color: var(--primary);
+    }
+    .field-hint {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: var(--fontSizeXSmall);
+        color: var(--textLight);
+        i {
+            font-size: 16px;
+        }
+    }
+}
+.reason {
+    width: 100%;
+}
+.original {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+    font-size: var(--fontSizeXSmall);
+    color: var(--textLight);
+    .original-label {
+        font-weight: bold;
+    }
+}
+.bulk-status {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    .bulk-failures ul {
+        margin: 6px 0 0;
+        padding-left: 18px;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+}
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    .spacer {
+        flex: 1;
+    }
+}
+// the mds widgets keep a bottom margin for the next widget of a form; here the field list's gap
+// separates the fields, so the original value / hint sits directly below its widget
+.field ::ng-deep es-mds-editor-single-widget .widget-container {
+    margin-bottom: 0;
+}
+// two line tabs (icon above the label), same as the nodes selector of the editorial page
+.tabs ::ng-deep {
+    mat-tab-header {
+        --mat-tab-container-height: 55px;
+    }
+    .mdc-tab__text-label {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    // the sidebar scrolls as a whole, no second scrollbar inside the tabs
+    .mat-mdc-tab-body-wrapper,
+    .mat-mdc-tab-body,
+    .mat-mdc-tab-body-content {
+        overflow: visible;
+    }
+}
