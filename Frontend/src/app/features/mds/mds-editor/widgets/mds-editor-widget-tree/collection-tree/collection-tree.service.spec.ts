@@ -245,14 +245,17 @@ describe('CollectionTreeService', () => {
     it('searches unrestricted right away once the subtree search was rejected', () => {
         spyOn(console, 'warn');
         const options = { rootId: 'root', mdsId: DEFAULT, maxItems: 25 };
+        // the first search is rejected with and without the title criterion, so the subtree is
+        // what the metadata set does not support
         searchService.requestSearch.and.returnValues(
+            throwError(() => ({ status: 400 })),
             throwError(() => ({ status: 400 })),
             of({ nodes: [], pagination: { total: 0 } } as never),
             of({ nodes: [], pagination: { total: 0 } } as never),
         );
         result(service.searchCollections('phys', options));
         result(service.searchCollections('physik', options));
-        void expect(searchService.requestSearch).toHaveBeenCalledTimes(3);
+        void expect(searchService.requestSearch).toHaveBeenCalledTimes(4);
         const last = searchService.requestSearch.calls.mostRecent().args[0];
         void expect(last.body.criteria).toEqual([
             { property: 'ngsearchword', values: ['physik'] },
