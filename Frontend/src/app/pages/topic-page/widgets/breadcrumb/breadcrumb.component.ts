@@ -32,7 +32,6 @@ import { Node, ParentEntries } from 'ngx-edu-sharing-api';
 import { EduSharingUiCommonModule, UIService } from 'ngx-edu-sharing-ui';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { RestConnectorService } from '../../../../core-module/rest/services/rest-connector.service';
 import { TopicPageEventsService } from '../../shared/services/topic-page-events.service';
 import { TopicLinkDirective } from '../../shared/directives/topic-link.directive';
 import { TopicPageGlobalService } from '../../shared/services/topic-page-global.service';
@@ -70,7 +69,6 @@ export interface BreadcrumbExtensionInterface {
     styleUrls: ['./breadcrumb.component.scss'],
 })
 export class BreadcrumbComponent implements OnChanges, OnInit, OnDestroy {
-    private connector = inject(RestConnectorService);
     private topicPageEventsService = inject(TopicPageEventsService);
     private topicPageGlobalService = inject(TopicPageGlobalService);
     private topicPageHelperService = inject(TopicPageHelperService);
@@ -81,6 +79,8 @@ export class BreadcrumbComponent implements OnChanges, OnInit, OnDestroy {
     readonly navigateToTemplateValue: string = 'NAVIGATE_TO_TEMPLATE';
 
     // INPUTS
+    // whether the user may open the page template of the collection
+    canManagePageTemplate: InputSignal<boolean> = input<boolean>(false);
     @Input() contextNodeId: string;
     editMode: InputSignal<boolean> = input<boolean>(false);
     isProcessing: InputSignal<boolean> = input<boolean>(false);
@@ -103,7 +103,6 @@ export class BreadcrumbComponent implements OnChanges, OnInit, OnDestroy {
     editorialMemberNodeIds: string[] = [];
     hasBreadcrumbExtension: WritableSignal<boolean> = signal(false);
     initialized: WritableSignal<boolean> = signal(false);
-    isAdmin: WritableSignal<boolean> = signal(false);
     // reverse Array to get the correct order for breadcrumb
     processedNodes: Signal<Node[]> = computed((): Node[] => {
         return this.parentEntries()?.nodes?.slice()?.reverse() || [];
@@ -126,11 +125,6 @@ export class BreadcrumbComponent implements OnChanges, OnInit, OnDestroy {
             if (this.customExtensionComponentRef) {
                 this.customExtensionComponentRef.setInput('editMode', currentEditMode);
             }
-        });
-        // wait for the login to be ready
-        this.connector.isLoggedIn().subscribe((): void => {
-            // check for administration privileges
-            this.isAdmin.set(this.connector.getCurrentLogin()?.isAdmin ?? false);
         });
         this.hasBreadcrumbExtension.set(this.topicPageGlobalService.hasCustomBreadcrumbExtension());
         if (this.topicPageGlobalService.getCustomUrlFunction()) {
