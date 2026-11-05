@@ -687,6 +687,7 @@
   <!-- a global template or a previewed node is no variant of the collection's page -->
   @if (initialLoadSuccessfully() && !globalTemplateNode() && !variantPreview()) {
   <es-topic-page-variant-select
+    [canManagePageTemplate]="userHasEditRights()"
     [isProcessing]="requestInProgress()"
     [pageTemplateExists]="!!collectionNodePagePropagateConfigRef"
     [pageVariantNode]="pageVariantNode()"

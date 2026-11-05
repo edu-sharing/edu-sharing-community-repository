@@ -713,7 +713,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         if (offered.includes(this.createPageVariantTitle)) {
             kinds.push('variant');
         }
-        if (offered.includes(this.createPageTemplateTitle) && this.isAdmin()) {
+        if (offered.includes(this.createPageTemplateTitle)) {
             kinds.push('template');
         }
         return kinds;
@@ -1363,15 +1363,18 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         // no (loadable) page template exists, so creating one starts a new propagate config
         else {
             this.collectionNodePagePropagateConfigRef = null;
-            await this.topicPageCreateOptionsService.add(
-                this.createPageTemplateTitle,
-                'edu-add_page_template',
-                () => {
-                    void this.createPageTemplate();
-                },
-                11,
-                Constrain.Admin,
-            );
+            // whoever may edit the collection decides whether its sub-collections inherit a page
+            if (this.userHasEditRights()) {
+                await this.topicPageCreateOptionsService.add(
+                    this.createPageTemplateTitle,
+                    'edu-add_page_template',
+                    () => {
+                        void this.createPageTemplate();
+                    },
+                    11,
+                    Constrain.User,
+                );
+            }
         }
         // idea: if "collectionNode" already has a page config, there is no need to search further
         if (this.collectionNode.properties[DEFAULT_PAGE_CONFIG_PROP] && !this.templateMode()) {
@@ -2947,7 +2950,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         editGlobalTemplate: (node: Node): Promise<void> => this.openGlobalTemplateFromSidebar(node),
         globalTemplateDeleted: (node: Node): Promise<void> => this.onGlobalTemplateDeleted(node),
         templateMode: this.templateMode,
-        canEditTemplates: this.isAdmin,
+        canEditTemplates: this.userHasEditRights,
         canManage: this.canManage,
         showEntry: (entry: TopicPageEntry): Promise<void> => this.showEntry(entry),
         regenerateEntry: async (entry: TopicPageEntry): Promise<void> => {
