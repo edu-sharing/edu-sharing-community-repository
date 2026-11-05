@@ -77,6 +77,7 @@ import { Closable } from '../../dialogs/card-dialog/card-dialog-config';
 import {
     DELETE_OR_CANCEL,
     GenericDialogButton,
+    OK_OR_CANCEL,
     YES_OR_NO,
 } from '../../dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { QrDialogModule } from '../../dialogs/dialog-modules/qr-dialog/qr-dialog.module';
@@ -2579,9 +2580,31 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         if (this.variantPreview()) {
             return;
         }
+        if (!this.editMode() && !(await this.confirmEditingInheritedPage())) {
+            return;
+        }
         this.editMode.set(!this.editMode());
         this.checkAccordionExpansionState();
         this.closeSideMenus();
+    }
+
+    /**
+     * Asks before an inherited page is edited, as the first change gives the collection a copy of
+     * its own. Resolves true right away for any other page.
+     */
+    private async confirmEditingInheritedPage(): Promise<boolean> {
+        const source: Node | null = this.propagatingParentNode();
+        if (!source || this.templateMode() || this.globalTemplateNode()) {
+            return true;
+        }
+        const dialogRef = await this.dialogs.openGenericDialog({
+            title: this.i18nPrefix + 'INHERITED_PAGE.EDIT_HEADING',
+            message: this.i18nPrefix + 'INHERITED_PAGE.EDIT_MESSAGE',
+            messageParameters: { title: source.title || source.name },
+            buttons: OK_OR_CANCEL,
+            closable: Closable.Casual,
+        });
+        return (await firstValueFrom(dialogRef.afterClosed())) === 'OK';
     }
 
     /**

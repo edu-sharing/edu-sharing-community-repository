@@ -566,7 +566,9 @@
     "GLOBAL_TEMPLATE_UNAVAILABLE": "The global template no longer exists.",
     "INHERITED_PAGE": {
       "INFO": "This topic page is inherited from “{{title}}”. Changes made here create a copy of its own for this collection.",
-      "EDIT_TEMPLATES": "Edit the templates there"
+      "EDIT_TEMPLATES": "Edit the templates there",
+      "EDIT_HEADING": "Edit inherited topic page?",
+      "EDIT_MESSAGE": "Your changes create a copy of its own of the page from “{{title}}”. However, “Regenerate” lets you sync it with the template manually, which discards your adjustments."
     },
     "GLOBAL_TEMPLATE_MODE_ACTIVE": {
       "TITLE": "Global template \"{{title}}\"",

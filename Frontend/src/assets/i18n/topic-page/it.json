@@ -530,7 +530,9 @@
     },
     "INHERITED_PAGE": {
       "INFO": "Questa pagina tematica è ereditata da «{{title}}». Le modifiche apportate qui creano una copia propria per questa collezione.",
-      "EDIT_TEMPLATES": "Modifica i modelli lì"
+      "EDIT_TEMPLATES": "Modifica i modelli lì",
+      "EDIT_HEADING": "Modificare la pagina tematica ereditata?",
+      "EDIT_MESSAGE": "Le vostre modifiche creano una copia propria della pagina di «{{title}}». Con «Rigenera» potete tuttavia sincronizzarla manualmente con il modello, perdendo i vostri adattamenti."
     },
     "SWIMLANE_COMPLETION": {
       "UNFINISHED_ONE": "1 sezione non completata",
