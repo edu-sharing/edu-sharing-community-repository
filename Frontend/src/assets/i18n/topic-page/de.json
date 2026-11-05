@@ -501,7 +501,9 @@
     "GLOBAL_TEMPLATE_UNAVAILABLE": "Die globale Vorlage existiert nicht mehr.",
     "INHERITED_PAGE": {
       "INFO": "Diese Themenseite ist von „{{title}}“ geerbt. Änderungen hier erzeugen eine eigene Kopie für diese Sammlung.",
-      "EDIT_TEMPLATES": "Vorlagen dort bearbeiten"
+      "EDIT_TEMPLATES": "Vorlagen dort bearbeiten",
+      "EDIT_HEADING": "Geerbte Themenseite bearbeiten?",
+      "EDIT_MESSAGE": "Deine Änderungen erzeugen eine eigene Kopie der Seite von „{{title}}“. Per „Neu generieren“ lässt sie sich jedoch manuell mit der Vorlage abgleichen, deine Anpassungen gehen dabei verloren."
     },
     "GLOBAL_TEMPLATE_MODE_ACTIVE": {
       "VIEW": "Du siehst die globale Vorlage „{{title}}“.",
