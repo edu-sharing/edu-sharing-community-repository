@@ -1,4 +1,5 @@
 import { Node, RestConstants } from 'ngx-edu-sharing-api';
+import { findInheritanceSource } from './topic-page-inheritance-util';
 
 /** Query param of the collections page naming its view type; only the topic view is stored. */
 export const VIEW_TYPE_QUERY_PARAM = 'viewType';
@@ -15,18 +16,14 @@ export function getTopicPageQueryParams(collectionId: string): Record<string, st
 }
 
 /**
- * Whether a topic page is configured for the collection: by its own page config or by one a
- * parent propagates to its sub-collections.
+ * Whether a topic page is configured for the collection: by its own page config or by one it
+ * inherits, see {@link findInheritanceSource}.
  *
- * @param parents ancestors of the collection; the collection itself may be included
+ * @param parents ancestors of the collection, nearest first; the collection itself may be included
  */
 export function hasTopicPage(collection: Node, parents: Node[]): boolean {
     if (collection.properties?.[RestConstants.CCM_PROP_PAGE_CONFIG_REF]?.[0]) {
         return true;
     }
-    return parents.some(
-        (parent) =>
-            parent.ref.id !== collection.ref.id &&
-            !!parent.properties?.[RestConstants.CCM_PROP_PAGE_CONFIG_PROPAGATE_REF]?.[0],
-    );
+    return !!findInheritanceSource(collection, parents);
 }

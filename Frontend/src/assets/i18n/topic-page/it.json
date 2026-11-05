@@ -41,7 +41,20 @@
         "LOAD_ERROR": "Non è stato possibile caricare le pagine tematiche."
       },
       "INHERITANCE": {
-        "PLACEHOLDER": "La trasmissione delle pagine tematiche alle sotto-collezioni sarà aggiunta a breve."
+        "INTRO": "Ereditarietà di {{title}}",
+        "INTRO_DESCRIPTION": "Così questa collezione e le sue sotto-collezioni ricevono le loro pagine tematiche. «Trasmetti» decide se i modelli ereditati vengono passati più in basso.",
+        "STATE_OWN": "Pagina tematica propria – nessuna ereditarietà necessaria",
+        "STATE_INHERITS": "eredita da {{title}}",
+        "STATE_STOPPED": "non eredita nulla – trasmissione interrotta presso {{title}}",
+        "STATE_NONE": "nessuna pagina tematica",
+        "PASSES_OWN_TEMPLATES": "trasmette i propri modelli alle sotto-collezioni",
+        "PASSES_NOTHING_ON": "non trasmette l'ereditato alle sotto-collezioni",
+        "SAVED_STATE": "finora:",
+        "PASS_ON": "Trasmetti",
+        "PASS_ON_TOOLTIP": "Trasmetti i modelli ereditati alle sotto-collezioni",
+        "CHANGED_COUNT": "{{count}} collezioni mostrate cambiano",
+        "SAVED": "L'ereditarietà è stata salvata.",
+        "LOAD_ERROR": "Non è stato possibile caricare l'ereditarietà."
       }
     },
     "AI": {

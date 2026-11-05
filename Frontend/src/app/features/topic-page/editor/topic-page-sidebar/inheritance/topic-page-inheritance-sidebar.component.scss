@@ -1,0 +1,140 @@
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
+
+:host {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 100%;
+}
+
+.loading {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+}
+
+.intro {
+    padding: 16px 20px;
+}
+
+.intro-heading {
+    font-size: vars.$fontSizeXLarge;
+    font-weight: bold;
+    color: var(--textMain);
+}
+
+.intro-description {
+    margin-top: 6px;
+    font-size: var(--fontSizeXSmall);
+    color: var(--textLight);
+}
+
+.tree {
+    flex: 1;
+    padding: 0 20px 20px;
+    background: none;
+}
+
+// sub-collections indent by their depth below the collection of the page
+.row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 8px 8px calc(8px + (var(--depth) - 1) * 24px);
+    border-left: 3px solid transparent;
+    border-bottom: 1px solid var(--genericSeperatorLineColor);
+    min-height: 0;
+    color: inherit;
+    font: inherit;
+    &:focus-visible {
+        @include mixins.setGlobalKeyboardFocus();
+    }
+    &.root {
+        margin-bottom: 8px;
+        padding: 16px 12px 16px 20px;
+        border: 1px solid var(--borderLightPrimary);
+        border-radius: var(--borderRadiusBadges);
+        background: var(--cardLightBackground);
+    }
+    &.changed {
+        border-left-color: var(--primary);
+        background: var(--primaryBackground50);
+    }
+}
+
+// as wide as an icon button, so rows with and without one align
+.expand-slot {
+    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+    width: 48px;
+}
+
+.row-icon {
+    flex-shrink: 0;
+    color: var(--textLight);
+}
+
+.row-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+}
+
+.row-title {
+    @include mixins.limitLineCount(2, 1.25);
+    font-weight: bold;
+    color: var(--textMain);
+}
+
+.row-state,
+.row-hint,
+.row-saved {
+    font-size: var(--fontSizeXSmall);
+    color: var(--textLight);
+}
+
+.state-inherits {
+    color: var(--colorStatusPositiveText);
+}
+
+.state-stopped {
+    color: var(--warn);
+}
+
+.row-saved {
+    font-style: italic;
+}
+
+.row-toggle,
+.row-loading {
+    flex-shrink: 0;
+}
+
+// pinned to the bottom of the scrolling panel while unsaved changes are pending
+.footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+    padding: 12px 16px;
+    border-top: 1px solid var(--borderLight);
+    background: var(--roundedContainerBackground);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.footer-summary {
+    font-size: var(--fontSizeXSmall);
+    color: var(--textLight);
+}
+
+.footer-actions {
+    display: flex;
+    gap: 8px;
+}

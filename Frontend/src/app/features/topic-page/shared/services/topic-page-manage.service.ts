@@ -10,6 +10,7 @@ import {
     retrievePageConfigPropagateRef,
     retrievePageConfigRef,
 } from '../utils/template-util';
+import { findInheritanceSource } from '../utils/topic-page-inheritance-util';
 import { checkUserAccess } from '../utils/node-util';
 import { TopicPageGlobalTemplatesService } from './topic-page-global-templates.service';
 import { TopicPageHelperService } from './topic-page-helper.service';
@@ -79,15 +80,10 @@ export class TopicPageManageService {
                 ownTemplatesConfigId,
             );
         } else {
-            // a collection without a page of its own shows the templates of the nearest ancestor
+            // a collection without a page of its own shows the templates it inherits
             const parents: Node[] =
                 (await this.topicPageHelperService.getNodeParents(collectionId)).nodes ?? [];
-            entries.inheritedFrom =
-                parents.find(
-                    (parent: Node) =>
-                        retrieveNodeId(parent) !== collectionId &&
-                        !!retrievePageConfigPropagateRef(parent),
-                ) ?? null;
+            entries.inheritedFrom = findInheritanceSource(collection, parents);
             if (entries.inheritedFrom) {
                 entries.inherited = await this.loadConfigEntries(
                     retrievePageConfigPropagateRef(entries.inheritedFrom),

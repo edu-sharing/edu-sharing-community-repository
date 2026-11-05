@@ -433,7 +433,12 @@ export class TopicPageHelperService {
     getSubcollections(
         collectionId: string,
         fetchCounts: boolean = false,
-        options: { orderBy?: string; ascending?: boolean; maxItems?: number } = {},
+        options: {
+            orderBy?: string;
+            ascending?: boolean;
+            maxItems?: number;
+            propertyFilter?: string[];
+        } = {},
     ): Observable<CollectionEntries> {
         return this.collectionApi.getSubcollections({
             repository: HOME_REPOSITORY,
@@ -447,6 +452,7 @@ export class TopicPageHelperService {
                 | 'RECENT',
             fetchCounts,
             maxItems: options.maxItems > 0 ? options.maxItems : 500,
+            propertyFilter: options.propertyFilter,
             ...(options.orderBy
                 ? {
                       sortProperties: [options.orderBy],

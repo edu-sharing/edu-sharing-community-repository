@@ -232,6 +232,7 @@ import { SwimlaneSettingsDialogComponent } from './swimlane/swimlane-settings-di
 import { SwimlaneConfigurationButtonsComponent } from './swimlane-configuration-buttons/swimlane-configuration-buttons.component';
 import { TopicPageFiltersSidebarComponent } from './topic-page-filters-sidebar/topic-page-filters-sidebar.component';
 import { OPEN_MANAGE_SIDEBAR_PARAM } from '../shared/utils/collection-topic-page-util';
+import { findInheritanceSource } from '../shared/utils/topic-page-inheritance-util';
 import { TopicPageCreateSidebarComponent } from './topic-page-sidebar/create/topic-page-create-sidebar.component';
 import { TopicPageInheritanceSidebarComponent } from './topic-page-sidebar/inheritance/topic-page-inheritance-sidebar.component';
 import { TopicPageManageSidebarComponent } from './topic-page-sidebar/manage/topic-page-manage-sidebar.component';
@@ -3171,11 +3172,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             const parents: ParentEntries = await this.topicPageHelperService.getNodeParents(
                 retrieveNodeId(node),
             );
-            this.propagatingParentNode = parents.nodes.find(
-                (parent: Node) =>
-                    retrieveNodeId(node) !== retrieveNodeId(parent) &&
-                    !!retrievePageConfigPropagateRef(parent),
-            );
+            this.propagatingParentNode = findInheritanceSource(node, parents.nodes ?? []);
             if (this.propagatingParentNode) {
                 pageRef = retrievePageConfigPropagateRef(this.propagatingParentNode);
             }
