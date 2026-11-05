@@ -1577,15 +1577,12 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         // the goal is to add another page variant to the existing (propagated) page config
         this.startEditing(this.i18nPrefix + 'CREATE_PAGE_VARIANT.PENDING_MESSAGE');
 
-        // a collection without an own page config (none or only an inherited one) gets a new page
-        // config holding just the variant built from the selected source
-        const ownPageConfigMissing: boolean =
-            !this.collectionNodePageConfigRef || !this.pageVariantConfigs?.nodes?.length;
-        if (ownPageConfigMissing) {
+        // a collection without any page gets a new page config holding just the new variant
+        if (!this.pageVariantConfigs?.nodes?.length) {
             await this.createCustomConfig(sourceNode);
             return;
         }
-        // check for custom page node existence and create it if necessary
+        // an inherited page is copied first, so the new variant is added next to its variants
         await this.checkForCustomPageNodeExistence();
         // check for pageConfigNode existence
         if (!retrieveNodeId(this.pageConfigNode)) {
