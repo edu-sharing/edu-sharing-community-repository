@@ -1,0 +1,18 @@
+<mat-button-toggle-group
+  hideSingleSelectionIndicator
+  [value]="value()"
+  [disabled]="disabled()"
+  [attr.aria-label]="groupLabel() ? (groupLabel() | translate) : null"
+  (change)="value.set($event.value)"
+>
+  @for (item of items(); track item.id) {
+  <mat-button-toggle
+    [value]="item.id"
+    [disabled]="item.disabled"
+    [aria-label]="item.label | translate"
+    [matTooltip]="item.label | translate"
+  >
+    <i [esIcon]="item.icon"></i>
+  </mat-button-toggle>
+  }
+</mat-button-toggle-group>

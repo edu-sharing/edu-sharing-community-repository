@@ -1,0 +1,19 @@
+<es-collection-info-section heading="COLLECTIONS.INFO.SECTION_PARTICIPANTS">
+  <ul class="participants" data-test="collection-info-participants">
+    @for (participant of participants(); track participant.key) {
+    <li class="participant">
+      <es-user-avatar [user]="participant.source" size="xsmall"></es-user-avatar>
+      <span class="name">
+        @if (participant.isOwner && authorFreetext()) {
+        {{ authorFreetext() }}
+        } @else {
+        {{ participant.profile | authorityName }}
+        }
+      </span>
+      <span class="role">
+        {{ (participant.isOwner ? 'COLLECTIONS.INFO.OWNER' : participant.roleKey) | translate }}
+      </span>
+    </li>
+    }
+  </ul>
+</es-collection-info-section>

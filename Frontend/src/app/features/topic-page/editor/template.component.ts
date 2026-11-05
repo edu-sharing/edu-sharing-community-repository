@@ -1,0 +1,4162 @@
+import { CdkAccordionItem, CdkAccordionModule } from '@angular/cdk/accordion';
+import { moveItemInArray } from '@angular/cdk/drag-drop';
+import { PlatformLocation } from '@angular/common';
+import {
+    AfterViewInit,
+    booleanAttribute,
+    Component,
+    computed,
+    CUSTOM_ELEMENTS_SCHEMA,
+    effect,
+    ElementRef,
+    HostBinding,
+    Injector,
+    input,
+    Input,
+    InputSignal,
+    OnChanges,
+    OnDestroy,
+    OnInit,
+    output,
+    QueryList,
+    Signal,
+    signal,
+    SimpleChanges,
+    TemplateRef,
+    untracked,
+    viewChild,
+    ViewChild,
+    ViewChildren,
+    WritableSignal,
+    inject,
+    ChangeDetectionStrategy,
+    DestroyRef,
+} from '@angular/core';
+import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import { ActivatedRoute, Params, Router, UrlTree } from '@angular/router';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import {
+    HOME_REPOSITORY,
+    MdsService,
+    MdsWidget,
+    Node,
+    NodeEntries,
+    ParentEntries,
+    RestConstants as ApiRestConstants,
+} from 'ngx-edu-sharing-api';
+import { CreateChatCompletionResponse, NodeConfig } from 'ngx-edu-sharing-b-api';
+import {
+    ColorHelper,
+    Constrain,
+    CustomOptions,
+    DefaultGroups,
+    Helper,
+    KeyboardShortcut,
+    Modifier,
+    OptionsHelperDataService,
+    PreferredColor,
+    Scope,
+    TranslationsService,
+    UIConstants,
+    Values,
+} from 'ngx-edu-sharing-ui';
+import { firstValueFrom, Observable, Subject } from 'rxjs';
+import {
+    debounceTime,
+    distinctUntilChanged,
+    filter,
+    startWith,
+    take,
+    takeUntil,
+} from 'rxjs/operators';
+import { v4 as uuidv4 } from 'uuid';
+import { RestConstants } from '../../../core-module/rest/rest-constants';
+import { RestConnectorService } from '../../../core-module/rest/services/rest-connector.service';
+import { UIService } from '../../../core-module/rest/services/ui.service';
+import { Closable } from '../../dialogs/card-dialog/card-dialog-config';
+import {
+    DELETE_OR_CANCEL,
+    GenericDialogButton,
+    YES_OR_NO,
+} from '../../dialogs/dialog-modules/generic-dialog/generic-dialog-data';
+import { QrDialogModule } from '../../dialogs/dialog-modules/qr-dialog/qr-dialog.module';
+import { DialogsService } from '../../dialogs/dialogs.service';
+import { KeyboardShortcutsService } from '../../../services/keyboard-shortcuts.service';
+import { EditorialSidebarModule } from '../../editorial-sidebar/editorial-sidebar.module';
+import { EditorialSidebarService } from '../../editorial-sidebar/editorial-sidebar.service';
+import { PreviewSidebarWrapperComponent } from '../../editorial-sidebar/preview-sidebar/preview-sidebar-wrapper/preview-sidebar-wrapper.component';
+import {
+    MainNavCreateConfig,
+    MainNavService,
+    TemplateSlot,
+} from '../../../main/navigation/main-nav.service';
+import { NodeHelperService } from '../../../services/node-helper.service';
+import { ImprintPrivacyService } from '../../../shared/components/imprint-privacy-footer/imprint-privacy-service';
+import { ThemeService } from '../../../services/theme.service';
+import { Toast } from '../../../services/toast';
+import {
+    SearchEvent,
+    SearchFieldService,
+} from '../../../main/navigation/search-field/search-field.service';
+import { SharedModule } from '../../../shared/shared.module';
+import { VarDirective } from '../shared/directives/ng-var.directive';
+import { FilterSwimlaneTypePipe } from '../shared/pipes/filter-swimlane-type.pipe';
+import { FilterUnfinishedSwimlanesPipe } from '../shared/pipes/filter-unfinished-swimlanes.pipe';
+import { AiTextPromptPipe } from '../shared/pipes/ai-text-prompt.pipe';
+import { SwimlaneSearchCountPipe } from '../shared/pipes/swimlane-search-count.pipe';
+import { FilterVisibleSwimlanePipe } from '../shared/pipes/filter-swimlane-hits.pipe';
+import { AiHelperService } from '../shared/services/ai-helper.service';
+import { ScrollHelperService } from '../shared/services/scroll-helper.service';
+import { SwimlaneRepeatService } from '../shared/services/swimlane-repeat.service';
+import { TopicPageEventsService } from '../shared/services/topic-page-events.service';
+import {
+    CustomSideMenuItem,
+    TopicPageGlobalService,
+} from '../shared/services/topic-page-global.service';
+import { TopicPageCreateOptionsService } from '../shared/services/topic-page-create-options.service';
+import { TopicPageGlobalTemplatesService } from '../shared/services/topic-page-global-templates.service';
+import { TopicPageHelperService } from '../shared/services/topic-page-helper.service';
+import { TopicPageShareService } from '../shared/services/topic-page-share.service';
+import {
+    PendingWidget,
+    TopicPageVariantCopyService,
+} from '../shared/services/topic-page-variant-copy.service';
+import { TopicPageVariantNodesService } from '../shared/services/topic-page-variant-nodes.service';
+import {
+    TopicPageEntry,
+    TopicPageManageService,
+} from '../shared/services/topic-page-manage.service';
+import {
+    TopicPageVariantPreviewService,
+    VariantPreviewHost,
+} from '../shared/services/topic-page-variant-preview.service';
+import {
+    HistoryTransaction,
+    StepOptions,
+    TopicPageHistoryHost,
+    TopicPageHistoryService,
+} from '../shared/services/topic-page-history.service';
+import {
+    DEFAULT_AI_CONFIG_PROP,
+    DEFAULT_PAGE_CONFIG_PROP,
+    DEFAULT_PAGE_CONFIG_PROPAGATE_REF_PROP,
+    DEFAULT_PAGE_CONFIG_REF_PROP,
+    DEFAULT_PAGE_VARIANT_CONFIG_PROP,
+    DEFAULT_PAGE_VARIANT_NAME_PREFIX,
+    DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP,
+    DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION,
+    DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP,
+    DEFAULT_WIDGET_CONFIG_PROP,
+    DEFAULT_WIDGET_NAME_PREFIX,
+    SEARCH_FILTERS_QUERY_PARAM,
+    SEARCH_INPUT_QUERY_PARAM,
+    SWIMLANE_TYPE_OPTIONS,
+    WIDGET_TYPE_OPTIONS,
+    WIDGETS,
+} from '../shared/types/custom-definitions';
+import { BapiConfigObject } from '../shared/types/bapi-config-object';
+import { ColorChangeEvent } from '../shared/types/color-change-event';
+import { GridTile } from '../shared/types/grid-tile';
+import { HistoryStep } from '../shared/types/history-step';
+import { GridTileToHitsMapping } from '../shared/types/grid-tile-to-hits-mapping';
+import { GridTileToSearchCountMapping } from '../shared/types/grid-tile-to-search-count-mapping';
+import { GridTileToSearchResultsMapping } from '../shared/types/grid-tile-to-search-results-mapping';
+import { PageConfig } from '../shared/types/page-config';
+import { PageStructure } from '../shared/types/page-structure';
+import { PageVariantConfig } from '../shared/types/page-variant-config';
+import { PromptToTextMapping } from '../shared/types/prompt-to-text-mapping';
+import { Swimlane } from '../shared/types/swimlane';
+import { SwimlaneBackgroundShape } from '../shared/types/swimlane-background-shape';
+import { SwimlaneRepeat } from '../shared/types/swimlane-repeat';
+import { TopicChangedEvent } from '../shared/types/topic-changed-event';
+import { WidgetConfigObject } from '../shared/types/widget-config-object';
+import { WidgetConfigUpdatedEvent } from '../shared/types/widget-config-updated-event';
+import { WidgetNodeAddedEvent } from '../shared/types/widget-node-added-event';
+import {
+    containsAiTags,
+    retrieveChatCompletionObject,
+    retrieveResultString,
+} from '../shared/utils/ai-util';
+import {
+    CreationKind,
+    VariantPreview,
+    VariantPreviewRestoreState,
+} from '../shared/types/variant-preview';
+import { checkUserAccess } from '../shared/utils/node-util';
+import {
+    computeSwimlaneHitMatching,
+    parseSearchFilters,
+    sameSearchFilters,
+    searchStateToQueryParams,
+    SwimlaneHitMatching,
+} from '../shared/utils/search-hit-util';
+import {
+    retrieveSwimlaneCompletion,
+    SwimlaneCompletion,
+} from '../shared/utils/swimlane-completion-util';
+import { canRenderWidgetType } from '../shared/utils/widget-type-util';
+import {
+    convertNodeRefIntoNodeId,
+    keepOwnHeaderBreadcrumbAndColors,
+    markForCopy,
+    markForRender,
+    prependWorkspacePrefix,
+    retrieveAiConfigFromNode,
+    retrieveNodeId,
+    retrievePageConfig,
+    retrievePageConfigPropagateRef,
+    retrievePageConfigRef,
+    retrievePageVariantConfig,
+    retrievePageVariantTemplateVersion,
+    isTemplateUpdateAvailable,
+    retrievePromptFromAiConfig,
+    retrieveTopicColor,
+} from '../shared/utils/template-util';
+import { GenericWidgetComponent } from '../widgets/generic-widget/generic-widget.component';
+import { GenericWidgetGlobalService } from '../widgets/generic-widget/generic-widget-global.service';
+import { ProfilingComponent } from '../widgets/profiling/profiling.component';
+import { ColorPickerComponent } from '../widgets/shared/color-picker/color-picker.component';
+import { EditableTextComponent } from '../widgets/shared/editable-text/editable-text.component';
+import { SideMenuItemComponent } from '../widgets/side-menu-wrapper/side-menu-item/side-menu-item.component';
+import { SideMenuWrapperComponent } from '../widgets/side-menu-wrapper/side-menu-wrapper.component';
+import { TopicHeaderComponent } from '../widgets/topic-header/topic-header.component';
+import {
+    CopyOption,
+    PageVariantSearchState,
+} from './page-variant-or-template-picker/page-variant-or-template-picker.component';
+import { AddSwimlaneBorderButtonComponent } from './add-swimlane-button/add-swimlane-border-button.component';
+import { ConfigurePageVariantOrTemplateComponent } from './configure-page-variant-or-template/configure-page-variant-or-template.component';
+import { SwimlaneComponent } from './swimlane/swimlane.component';
+import { SwimlaneBackgroundShapeComponent } from './swimlane-background-shape/swimlane-background-shape.component';
+import { SwimlaneSettingsDialogComponent } from './swimlane/swimlane-settings-dialog/swimlane-settings-dialog.component';
+import { SwimlaneConfigurationButtonsComponent } from './swimlane-configuration-buttons/swimlane-configuration-buttons.component';
+import { TopicPageFiltersSidebarComponent } from './topic-page-filters-sidebar/topic-page-filters-sidebar.component';
+import { OPEN_MANAGE_SIDEBAR_PARAM } from '../shared/utils/collection-topic-page-util';
+import { findInheritanceSource } from '../shared/utils/topic-page-inheritance-util';
+import { TopicPageCreateSidebarComponent } from './topic-page-sidebar/create/topic-page-create-sidebar.component';
+import { TopicPageInheritanceSidebarComponent } from './topic-page-sidebar/inheritance/topic-page-inheritance-sidebar.component';
+import { TopicPageManageSidebarComponent } from './topic-page-sidebar/manage/topic-page-manage-sidebar.component';
+import {
+    createOptionLabel,
+    TOPIC_PAGE_CREATE_OPTION,
+    TOPIC_PAGE_INHERITANCE_OPTION,
+    TOPIC_PAGE_MANAGE_OPTION,
+    TOPIC_PAGE_SIDEBAR_OPTION,
+    TOPIC_PAGE_SIDEBAR_OPTIONS,
+    TopicPageSidebarHost,
+    TopicPageSidebarService,
+} from './topic-page-sidebar/topic-page-sidebar.service';
+import {
+    TopicPageStatusBarComponent,
+    TopicPageStatusBarMode,
+} from './topic-page-status-bar/topic-page-status-bar.component';
+import { VariantSelectComponent } from '../widgets/variant-select/variant-select.component';
+
+// side menu items an `openMenu` query param can open, by the label they are identified with
+const OPEN_MENU_LABEL_KEYS: Record<string, string> = {
+    profiling: 'TOPIC_PAGE.SIDE_MENU.PROFILING.LABEL',
+    topicTree: 'TOPIC_PAGE.SIDE_MENU.TOPIC_TREE.LABEL',
+    statistics: 'TOPIC_PAGE.SIDE_MENU.STATISTICS.LABEL',
+    settings: 'TOPIC_PAGE.SIDE_MENU.CONFIG_PAGE_VARIANT.LABEL',
+};
+
+// the app-wide shortcuts only skip text inputs; textareas and rich text keep their own undo too
+const isEditableTarget = (target: EventTarget | null): boolean =>
+    target instanceof HTMLElement &&
+    (target.isContentEditable || ['INPUT', 'SELECT', 'TEXTAREA'].includes(target.tagName));
+
+@Component({
+    imports: [
+        AddSwimlaneBorderButtonComponent,
+        AiTextPromptPipe,
+        CdkAccordionModule,
+        ColorPickerComponent,
+        ConfigurePageVariantOrTemplateComponent,
+        EditableTextComponent,
+        FilterSwimlaneTypePipe,
+        FilterUnfinishedSwimlanesPipe,
+        FilterVisibleSwimlanePipe,
+        GenericWidgetComponent,
+        EditorialSidebarModule,
+        ProfilingComponent,
+        QrDialogModule,
+        SharedModule,
+        SideMenuItemComponent,
+        SideMenuWrapperComponent,
+        SwimlaneBackgroundShapeComponent,
+        SwimlaneComponent,
+        SwimlaneConfigurationButtonsComponent,
+        SwimlaneSearchCountPipe,
+        SwimlaneSettingsDialogComponent,
+        TopicHeaderComponent,
+        TopicPageFiltersSidebarComponent,
+        TopicPageStatusBarComponent,
+        TranslateModule,
+        VarDirective,
+        VariantSelectComponent,
+    ],
+    providers: [
+        OptionsHelperDataService,
+        TopicPageHelperService,
+        TopicPageEventsService,
+        TopicPageHistoryService,
+        TopicPageCreateOptionsService,
+        TopicPageGlobalTemplatesService,
+        TopicPageShareService,
+        TopicPageVariantCopyService,
+        TopicPageVariantNodesService,
+        TopicPageVariantPreviewService,
+        TopicPageSidebarService,
+        TopicPageManageService,
+    ],
+    selector: 'es-template-page',
+    templateUrl: './template.component.html',
+    styleUrls: [
+        './template.component.scss',
+        './template-content.component.scss',
+        './template-overrides.component.scss',
+    ],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    schemas: [CUSTOM_ELEMENTS_SCHEMA],
+})
+export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, OnInit {
+    private aiHelperService = inject(AiHelperService);
+    private connector = inject(RestConnectorService);
+    private dialogs = inject(DialogsService);
+    private editorialSidebarService = inject(EditorialSidebarService);
+    private elementRef = inject(ElementRef);
+    private injector = inject(Injector);
+    private genericWidgetGlobalService = inject(GenericWidgetGlobalService);
+    protected history = inject(TopicPageHistoryService);
+    private keyboardShortcuts = inject(KeyboardShortcutsService);
+    private imprintPrivacy = inject(ImprintPrivacyService);
+    private destroyRef = inject(DestroyRef);
+    private swimlaneRepeatService = inject(SwimlaneRepeatService);
+    private mainNavService = inject(MainNavService);
+    private mdsService = inject(MdsService);
+    private optionsHelperService = inject(OptionsHelperDataService);
+    private platformLocation = inject(PlatformLocation);
+    private route = inject(ActivatedRoute);
+    private router = inject(Router);
+    private scrollHelperService = inject(ScrollHelperService);
+    private searchFieldService = inject(SearchFieldService);
+    private topicPageEventsService = inject(TopicPageEventsService);
+    private topicPageGlobalService = inject(TopicPageGlobalService);
+    private topicPageCreateOptionsService = inject(TopicPageCreateOptionsService);
+    private topicPageGlobalTemplatesService = inject(TopicPageGlobalTemplatesService);
+    private topicPageHelperService = inject(TopicPageHelperService);
+    private topicPageShareService = inject(TopicPageShareService);
+    private topicPageVariantCopyService = inject(TopicPageVariantCopyService);
+    private topicPageVariantNodesService = inject(TopicPageVariantNodesService);
+    private variantPreviewService = inject(TopicPageVariantPreviewService);
+    private topicPageSidebarService = inject(TopicPageSidebarService);
+    private translate = inject(TranslateService);
+    private translationsService = inject(TranslationsService);
+    private nodeHelperService = inject(NodeHelperService);
+    private themeService = inject(ThemeService);
+    private toast = inject(Toast);
+    private uiService = inject(UIService);
+
+    readonly ACCORDION_TYPE: string = SWIMLANE_TYPE_OPTIONS.find(
+        (o) => o.viewValue === 'ACCORDION_ELEMENT',
+    )?.value;
+    private readonly ANCHOR_ITEM_CSS_PROPERTY: string = '--anchor-item-bg-color';
+    readonly ANCHOR_TYPE: string = SWIMLANE_TYPE_OPTIONS.find((o) => o.viewValue === 'ANCHOR_MENU')
+        ?.value;
+    readonly CONTAINER_TYPE: string = SWIMLANE_TYPE_OPTIONS.find(
+        (o) => o.viewValue === 'CONTAINER_ELEMENT',
+    )?.value;
+    readonly i18nPrefix: string = 'TOPIC_PAGE.';
+    private readonly historyStepPrefix: string = this.i18nPrefix + 'HISTORY.STEP.';
+    readonly createPageVariantTitle: string = this.i18nPrefix + 'NAVIGATION.NEW_PAGE_VARIANT';
+    readonly createPageTemplateTitle: string = this.i18nPrefix + 'NAVIGATION.NEW_PAGE_TEMPLATE';
+    readonly SWIMLANE_ID_PREFIX: string = 'swimlane-';
+    private readonly TOPIC_COLOR_CSS_PROPERTY: string = '--topic-color';
+
+    constructor() {
+        this.variantPreviewService.attach(this.variantPreviewHost);
+        this.topicPageSidebarService.attach(this.topicPageSidebarHost);
+        // offered only while there is something to manage or create; registering rebuilds the
+        // option list, whereas a `customShowCallback` would only be asked again on the next
+        // selection change
+        effect((): void => {
+            const canManage: boolean = this.canManage();
+            const canCreate: boolean = this.creationKinds().length > 0;
+            untracked((): void => {
+                if (canManage || canCreate) {
+                    this.registerSidebarOptions(canManage, canCreate);
+                } else {
+                    this.topicPageSidebarService.close();
+                    this.unregisterSidebarOptions();
+                }
+            });
+        });
+        // the sidebar opened without an option, i.e. via its edge tab, starts at the topic menu
+        effect((): void => {
+            if (this.editorialSidebarService.sidebarOpened()) {
+                untracked((): void => this.topicPageSidebarService.openMenuIfIdle());
+            }
+        });
+        this.topicPageShareService.setScrollContainer(
+            (): HTMLElement | undefined => this.scrollContainerRef()?.nativeElement,
+        );
+        this.topicPageHelperService.setInPlaceNavigationHandler(
+            (collectionId: string, url: string | null): boolean =>
+                this.openTopicInPlace(collectionId, url),
+        );
+        // the side menu on the page's right edge stays clear of the resizable preview column
+        effect((onCleanup): void => {
+            const column: HTMLElement | null =
+                this.previewPanelRef()?.nativeElement.querySelector('.preview-resizable') ?? null;
+            if (!column) {
+                return;
+            }
+            const host: HTMLElement = this.elementRef.nativeElement;
+            const updateInset = (): void =>
+                host.style.setProperty('--sideMenuRightInset', `${column.offsetWidth}px`);
+            const observer = new ResizeObserver(updateInset);
+            observer.observe(column);
+            updateInset();
+            onCleanup((): void => {
+                observer.disconnect();
+                host.style.removeProperty('--sideMenuRightInset');
+            });
+        });
+        effect((): void => {
+            this.scrollHelperService.setScrollContainer(
+                this.scrollContainerRef()?.nativeElement ?? null,
+            );
+        });
+        // the mode decides what is rendered: the persisted swimlanes while editing, their
+        // resolved form otherwise. It is switched from several places, so the signal is the hook
+        effect((): void => {
+            this.editMode();
+            untracked((): void => void this.updateRenderedSwimlanes());
+        });
+        // a history spans one edit session on one variant; a preview only shows other nodes in
+        // between, so the session of the page continues once the preview ends
+        effect((): void => {
+            const session: string = `${this.editMode()}:${this.pageVariantNodeId()}`;
+            if (this.variantPreview()) {
+                return;
+            }
+            untracked((): void => {
+                if (session !== this.historySession) {
+                    this.historySession = session;
+                    void this.history.reset();
+                }
+            });
+        });
+        this.history.attach(this.historyHost);
+        // listening to changes on the page variant node
+        effect((): void => {
+            this.pageVariantNode();
+            // untracked prevents loadTemplateVariantNodes internal signal reads
+            // from becoming tracked dependencies of the outer effect
+            untracked((): void => {
+                void this.loadTemplateVariantNode();
+            });
+        });
+        // wait for the login to be ready
+        this.connector.isLoggedIn().subscribe(async (): Promise<void> => {
+            // check for administration privileges
+            this.isAdmin.set(this.connector.getCurrentLogin()?.isAdmin ?? false);
+            this.isGuest.set(this.connector.getCurrentLogin()?.isGuest ?? true);
+            // check whether the user may add children to the global templates folder
+            await this.topicPageGlobalTemplatesService.updatePermission();
+        });
+        // subscribe to changes on the search input + search filters
+        this.searchInputSubject
+            .pipe(debounceTime(200), distinctUntilChanged(), takeUntil(this.destroyed$))
+            .subscribe((searchInput: string) => {
+                this.searchInput.set(searchInput);
+                this.persistSearchStateInParams();
+                this.topicPageHelperService.closePreview();
+            });
+        this.searchFiltersSubject
+            .pipe(debounceTime(500), distinctUntilChanged(), takeUntil(this.destroyed$))
+            .subscribe((searchFilters: Values) => {
+                this.searchFilters.set(searchFilters);
+                this.persistSearchStateInParams();
+                this.topicPageHelperService.closePreview();
+            });
+        if (!this.topicPageGlobalService.getCustomUrlFunction()) {
+            this.topicPageGlobalService.setCustomUrlFunction((node: Node): string => {
+                if (!retrieveNodeId(node)) {
+                    return '';
+                }
+                return (
+                    this.topicPageHelperService.getBaseHref() +
+                    this.router.serializeUrl(
+                        this.router.createUrlTree([UIConstants.ROUTER_PREFIX, 'collections'], {
+                            queryParams: { id: retrieveNodeId(node) },
+                        }),
+                    )
+                );
+            });
+        }
+        if (this.topicPageGlobalService.getCustomSideMenuItems()) {
+            this.customSideMenuItems.set(this.topicPageGlobalService.getCustomSideMenuItems());
+        }
+        // the sidebar should be hidden when it is configured and a touch event is detected
+        // TODO: this only works if a touch event is detected
+        // if (this.topicPageGlobalService.getSidebarMobileHidden()) {
+        //     this.uiService.isTouchSubject
+        //         .pipe(takeUntil(this.destroyed$))
+        //         .subscribe((isTouch: boolean): void => {
+        //             this.sidebarMobileHidden.set(isTouch);
+        //         });
+        // }
+        this.sidebarMobileHidden.set(this.topicPageGlobalService.getSidebarMobileHidden());
+        // listen to changes in the selected variables and reload the pageVariants, if necessary
+        this.topicPageHelperService
+            .getSelectedVariables$()
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe((): void => {
+                if (this.initialLoadSuccessfully() && this.latestParams) {
+                    try {
+                        void this.retrievePageConfigAndSelectVariant(
+                            this.latestParams.variantId,
+                            true,
+                        );
+                    } catch (err) {
+                        console.error(err);
+                        this.topicPageHelperService.displayErrorToast();
+                    }
+                }
+            });
+    }
+
+    @Input() collectionId: string;
+    @Input() customUrl?: (node: Node) => string;
+    @Input() customUrlTarget?: '_self' | '_blank';
+    showSidebar: InputSignal<boolean> = input(true);
+    /** The variant selection, which the host page renders where it fits, e.g. in its breadcrumb row. */
+    readonly variantSelectTemplate = viewChild.required<TemplateRef<unknown>>('variantSelect');
+    /** The collection and its ancestors as a host page already loaded them, for the first load. */
+    readonly hostCollection = input<Node | null>(null);
+    readonly hostParents = input<ParentEntries | null>(null);
+    @Input() variantId: string;
+    /**
+     * Loads topics linked inside the page (topic tree, collection chips, breadcrumb) in this
+     * component. The links keep the URLs of the custom URL function, e.g. for new tabs.
+     */
+    readonly navigateInPlace = input(false, { transform: booleanAttribute });
+    /** Hands topics linked inside the page to a host page that opens them itself. */
+    readonly openTopic = input<((collectionId: string) => void) | null>(null);
+    /**
+     * Shows the preview of clicked elements in a column of the page itself, e.g. as web component
+     * without an `edu-sharing-preview-sidebar` of its own.
+     * TODO: possibly obsolete, as every host of the page registers an editorial sidebar for previews
+     */
+    readonly previewPanel = input(false, { transform: booleanAttribute });
+    @HostBinding('class.with-preview-panel') get withPreviewPanel(): boolean {
+        return this.previewPanel();
+    }
+    private readonly previewPanelRef = viewChild(PreviewSidebarWrapperComponent, {
+        read: ElementRef,
+    });
+    /** Emitted after the page switched to another topic via navigateInPlace. */
+    readonly topicChanged = output<TopicChangedEvent>();
+    initialTopicColor: string;
+    @HostBinding('style.--topic-color') topicColor: string;
+    @ViewChild('editModeToggle') editModeToggle: TemplateRef<any>;
+    @ViewChild('editSwimlaneDialog') editSwimlaneRef: TemplateRef<undefined>;
+    @ViewChild('showQrCodeDialog') showQrCodeDialogRef: TemplateRef<undefined>;
+    @ViewChildren('accordionItem') accordions: QueryList<CdkAccordionItem>;
+    private scrollContainerRef = viewChild<ElementRef<HTMLElement>>('scrollContainerRef');
+
+    initialLoadSuccessfully: WritableSignal<boolean> = signal(false);
+    requestInProgress: WritableSignal<boolean> = signal(false);
+    private initializedWithParams: boolean = false;
+    private customEventListenersInitialized: boolean = false;
+    private switchedTopic: { collectionId: string; variantId?: string } | null = null;
+    private readonly destroyed$ = new Subject<void>();
+    private isDestroyed: boolean = false;
+
+    userHasEditRights: WritableSignal<boolean> = signal(false);
+    isAdmin: WritableSignal<boolean> = signal(false);
+    isGuest: WritableSignal<boolean> = signal(true);
+    canAddToGlobalTemplates: Signal<boolean> = this.topicPageGlobalTemplatesService.canAdd;
+    // set while a global template is edited in place of the collection's page; the collection
+    // only provides the topic and sub-collections the preview is resolved for
+    globalTemplateNode: WritableSignal<Node | null> = signal(null);
+    editMode: WritableSignal<boolean> = signal(false);
+    filterPanelOpen: WritableSignal<boolean> = signal(false);
+    readonly sidebarOpen: Signal<boolean> = computed(
+        () => !!this.topicPageHelperService.previewedNode(),
+    );
+    customSidebarOptions: CustomOptions = {
+        useDefaultOptions: true,
+        supportedOptions: ['OPTIONS.DEBUG', 'OPTIONS.DOWNLOAD'],
+        addOptions: [],
+    };
+    templateMode: WritableSignal<boolean> = signal(false);
+
+    topic: WritableSignal<string> = signal('');
+    topicCollectionId: WritableSignal<string> = signal(null);
+    aiSupported: WritableSignal<boolean> = signal(false);
+    rendering2Supported: WritableSignal<boolean> = signal(false);
+
+    collectionNode: Node;
+    collectionNodePageConfigRef: string;
+    // the copy of an inherited page config in progress, which concurrent edits wait for
+    private inheritedPageConfigCopy: Promise<void> | null = null;
+    collectionNodePagePropagateConfigRef: string;
+    parentEntries: WritableSignal<ParentEntries> = signal(null);
+    propagatingParentNode: Node;
+    convertedBreadcrumbNodeId: Signal<string> = computed((): string =>
+        convertNodeRefIntoNodeId(this.breadcrumbNodeId()),
+    );
+    convertedHeaderNodeId: Signal<string> = computed((): string =>
+        convertNodeRefIntoNodeId(this.headerNodeId()),
+    );
+    convertedPropagatedBreadcrumbNodeId: Signal<string> = computed((): string =>
+        convertNodeRefIntoNodeId(this.propagatedBreadcrumbNodeId()),
+    );
+    convertedPropagatedHeaderNodeId: Signal<string> = computed((): string =>
+        convertNodeRefIntoNodeId(this.propagatedHeaderNodeId()),
+    );
+    breadcrumbNodeId: WritableSignal<string> = signal(null);
+    headerNodeId: WritableSignal<string> = signal(null);
+    propagatedBreadcrumbNodeId: WritableSignal<string> = signal(null);
+    propagatedHeaderNodeId: WritableSignal<string> = signal(null);
+    pageConfigNode: Node;
+    pageConfigCheckFailed: WritableSignal<boolean> = signal(false);
+    pageConfigCreationInProgress: WritableSignal<boolean> = signal(false);
+    pageVariantConfigs: NodeEntries;
+    private pageVariantDefaultPosition: number = -1;
+    pageVariantNode: WritableSignal<Node | null> = signal(null);
+    private pageVariantNodeId: Signal<string | null> = computed(
+        (): string | null => retrieveNodeId(this.pageVariantNode()) ?? null,
+    );
+    // the edit mode and variant the history was last reset for
+    private historySession: string | null = null;
+    private readonly historyHost: TopicPageHistoryHost = {
+        variantNodeId: (): string | null => this.pageVariantNodeId(),
+        // a page records once it has its own config; a global template is always written itself
+        canRecord: (): boolean =>
+            this.editMode() &&
+            !!this.pageVariantNode() &&
+            (!!this.collectionNodePageConfigRef || !!this.globalTemplateNode()),
+        readStructure: (): PageStructure | null => this.readPersistedStructure(),
+        writeStructure: (structure: PageStructure): Promise<void> =>
+            this.writePersistedStructure(structure),
+        nodePropertyRestored: (nodeId: string): Promise<void> => this.refreshRestoredNode(nodeId),
+        setBusy: (busy: boolean): void => this.requestInProgress.set(busy),
+    };
+    pageVariantNodeIndex: number = 0;
+    pageVariantSettingsValid: WritableSignal<boolean> = signal(true);
+    templateVariantNode: WritableSignal<Node | null> = signal(null);
+    // set while the page variant references a template that is no longer available
+    templateMissing: WritableSignal<boolean> = signal(false);
+    templateUpdateAvailable: Signal<boolean> = computed(() =>
+        isTemplateUpdateAvailable(this.templateVariantNode(), this.pageVariantNode()),
+    );
+    // the global template the page was created from; the collection's own template is edited in
+    // template mode and the repository-maintained default template not at all
+    linkedGlobalTemplate: Signal<Node | null> = computed(() =>
+        this.topicPageGlobalTemplatesService.asLinkedGlobalTemplate(this.templateVariantNode()),
+    );
+    canEditLinkedGlobalTemplate: Signal<boolean> = computed(() => {
+        const templateNode: Node = this.linkedGlobalTemplate();
+        return (
+            !!templateNode &&
+            this.nodeHelperService.getNodesRight([templateNode], ApiRestConstants.ACCESS_WRITE)
+        );
+    });
+    canDeleteGlobalTemplate: Signal<boolean> = computed(() => {
+        const templateNode: Node = this.globalTemplateNode();
+        return (
+            !!templateNode &&
+            this.nodeHelperService.getNodesRight([templateNode], ApiRestConstants.ACCESS_DELETE)
+        );
+    });
+    // the i18n section of the settings menu matching the edited node
+    settingsI18nSection: Signal<string> = computed(() => {
+        if (this.globalTemplateNode()) {
+            return 'CONFIG_GLOBAL_TEMPLATE';
+        }
+        return this.templateMode() ? 'CONFIG_PAGE_TEMPLATE' : 'CONFIG_PAGE_VARIANT';
+    });
+    // set while listed nodes are shown in place of the collection's page; such a preview never
+    // writes, as the shown node belongs to no page of this collection
+    variantPreview: Signal<VariantPreview | null> = this.variantPreviewService.preview;
+    variantPreviewNode: Signal<Node | null> = this.variantPreviewService.node;
+    // the one state the status bar above the breadcrumb stands for, by priority
+    statusBarMode: Signal<TopicPageStatusBarMode | null> = computed(
+        (): TopicPageStatusBarMode | null => {
+            if (this.variantPreview()) {
+                return 'preview';
+            }
+            if (this.globalTemplateNode()) {
+                return 'globalTemplate';
+            }
+            if (this.templateMode()) {
+                return 'template';
+            }
+            return this.editMode() ? 'edit' : null;
+        },
+    );
+    // the collection's own page variant, also while a preview is shown in its place
+    collectionPageVariantNode: Signal<Node | null> = computed(() => {
+        const restoreState: VariantPreviewRestoreState | null =
+            this.variantPreviewService.restoreState();
+        return restoreState ? restoreState.pageVariantNode : this.pageVariantNode();
+    });
+    // what can be created on the page right now: whatever the "new" button offers
+    creationKinds: Signal<CreationKind[]> = computed((): CreationKind[] => {
+        const offered: string[] = this.topicPageCreateOptionsService.offered();
+        const kinds: CreationKind[] = [];
+        if (this.isGuest()) {
+            return kinds;
+        }
+        if (offered.includes(this.createPageVariantTitle)) {
+            kinds.push('variant');
+        }
+        if (offered.includes(this.createPageTemplateTitle)) {
+            kinds.push('template');
+        }
+        return kinds;
+    });
+    // whether the pages of the collection can be listed, shown and deleted in the sidebar
+    canManage: Signal<boolean> = computed(
+        (): boolean => !this.isGuest() && this.userHasEditRights() && !this.globalTemplateNode(),
+    );
+    pageVariantReloadNecessary: boolean = false;
+    qrCodeUrl: Signal<string> = this.topicPageShareService.qrCodeUrl;
+    selectedVariantPosition: number = -1;
+    showLoadingScreen: Signal<boolean> = computed(
+        (): boolean =>
+            (!this.pageConfigCheckFailed() || this.pageConfigCreationInProgress()) &&
+            (!this.initialLoadSuccessfully() || this.requestInProgress()),
+    );
+    anchorTrigger: number = 1;
+    anchorItemColor: string;
+    initialAnchorItemColor: string;
+
+    @HostBinding('style.--anchor-item-bg-color')
+    get anchorItemBackgroundColor(): string | null {
+        if (!this.anchorItemColor) {
+            return null;
+        }
+        return this.themeService.isDarkMode()
+            ? this.themeService.toDarkSurfaceColor(this.anchorItemColor)
+            : this.anchorItemColor;
+    }
+    swimlanes: Swimlane[] = [];
+    swimlaneToEditForm: UntypedFormGroup;
+    // the swimlanes as persisted; `swimlanes` may hold a preview of them resolved for rendering
+    private persistedSwimlanes: Swimlane[] = [];
+    // the unfinished or partial swimlane the editor jumped to last, to continue with the next one
+    private lastIncompleteSwimlaneJumpedTo: string | null = null;
+    swimlaneIdToPromptTextMapping: Map<string, PromptToTextMapping> = new Map<
+        string,
+        PromptToTextMapping
+    >();
+    topicWidgets: NodeEntries;
+
+    latestParams: Params;
+    /** Whether the URL selects a variant explicitly, which overrides the profile's best match. */
+    variantPinned: WritableSignal<boolean> = signal(false);
+    selectDimensions: Map<string, MdsWidget> = new Map<string, MdsWidget>();
+
+    customSideMenuItems = signal<CustomSideMenuItem[]>([]);
+    customSideMenuItemsBefore = computed(() =>
+        this.customSideMenuItems().filter((item) => item.position === 'before'),
+    );
+    customSideMenuItemsAfter = computed(() =>
+        this.customSideMenuItems().filter((item) => item.position === 'after'),
+    );
+    sidebarMobileHidden: WritableSignal<boolean> = signal(false);
+    selectedMenuItem: string = '';
+
+    searchEvent$: Observable<SearchEvent>;
+    searchCountTrigger: number = 1;
+    computedSearchInput: Signal<string> = computed((): string =>
+        this.editMode() ? '' : this.searchInput() ?? '',
+    );
+    computedSearchFilters: Signal<Values> = computed(
+        (): Values => (this.editMode() ? {} : this.searchFilters()),
+    );
+    searchInputOrFiltersDefined: Signal<boolean> = computed(() => {
+        const filters = this.computedSearchFilters();
+        return !!this.computedSearchInput() || (filters && Object.keys(filters).length > 0);
+    });
+    private searchInput: WritableSignal<string> = signal('');
+    private searchFilters: WritableSignal<Values> = signal({});
+    // the values the filter sidebar seeds its MDS editor with
+    searchFilterValues: Signal<Values> = this.searchFilters.asReadonly();
+    private searchInputSubject: Subject<string> = new Subject<string>();
+    private searchFiltersSubject: Subject<Values> = new Subject<Values>();
+    searchUrl: string = '';
+    swimlaneIdToHitMatching: Map<string, boolean> = new Map<string, boolean>();
+    swimlaneTitleIdToHitMatching: Map<string, boolean> = new Map<string, boolean>();
+    firstMatchingSwimlaneId: string;
+    lastMatchingSwimlaneId: string;
+
+    /**
+     * Initializes the component by setting general defaults and retrieving the collection node,
+     * page config and statistics.
+     */
+    async ngOnInit(): Promise<void> {
+        // @TODO
+        // retrieve the custom sidebar options (note: options with the same name are filtered out)
+        // note:
+        // * copyLink and qrCode should be added twice, so different names have to be used
+        // * the (default) qr code and report problem options cannot be used, as specific positioning is required
+        this.customSidebarOptions.addOptions = [
+            this.topicPageHelperService.retrieveCustomOption(
+                'copyLink',
+                DefaultGroups.Primary,
+                0,
+                'TOPIC_PAGE.WIDGET.SHARE_OPTIONS.COPY_LINK_TO_CONTENT',
+                'share',
+            ),
+            this.topicPageHelperService.retrieveCustomOption(
+                'qrCode',
+                DefaultGroups.Primary,
+                1,
+                'TOPIC_PAGE.SWIMLANE.QR_CODE.TOOLTIP',
+            ),
+            this.topicPageHelperService.retrieveCustomOption('copyLink', DefaultGroups.Primary, 2),
+            this.topicPageHelperService.retrieveCustomOption('writeMail', DefaultGroups.Primary, 3),
+            this.topicPageHelperService.retrieveCustomOption('qrCode', DefaultGroups.Primary, 4),
+            this.topicPageHelperService.retrieveCustomOption(
+                'reportProblem',
+                DefaultGroups.FileOperations,
+            ),
+        ];
+        this.topicPageHelperService.setPreviewCustomOptions(this.customSidebarOptions);
+        this.registerHistoryShortcuts();
+        // retrieve the search URL
+        this.searchUrl = this.retrieveSearchUrl();
+        // retrieve the AI support state
+        this.aiSupported.set(await this.aiHelperService.hasAISupport());
+        // retrieve the rendering 2 support state
+        this.rendering2Supported.set(await this.aiHelperService.hasRendering2Support());
+        // check if the collectionId input is set
+        if (this.collectionId) {
+            // set the collection ID
+            this.topicCollectionId.set(this.collectionId);
+            // initialize the component
+            void this.initializeComponent(this.variantId);
+        }
+        // the query params hold the search state, so the page is entered with the search
+        // input and filters its URL carries
+        this.route.queryParams
+            .pipe(take(1), takeUntil(this.destroyed$))
+            .subscribe((params: Params): void => this.restoreSearchStateFromParams(params));
+        // set the topic based on the query param "collectionID"; a host page passes it as input
+        this.route.queryParams
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe(async (params: Params): Promise<void> => {
+                this.latestParams = params;
+                this.variantPinned.set(!!params.variantId);
+                if (this.initialLoadSuccessfully()) {
+                    void this.openMenuFromParams(params);
+                }
+                // due to reload with queryParams, this might be called twice, thus, initializedWithParams is important
+                if (params.collectionId && !this.initializedWithParams) {
+                    // set the topicCollectionID
+                    this.topicCollectionId.set(params.collectionId);
+                    // initialize the component
+                    await this.initializeComponent(params.variantId);
+                }
+            });
+        // if a custom URL is input, register it in the topic page global service
+        if (this.customUrl) {
+            this.topicPageGlobalService.setCustomUrlFunction(this.customUrl);
+        }
+        // if a custom URL target is input, register it in the topic page global service
+        if (this.customUrlTarget) {
+            this.topicPageGlobalService.setCustomUrlTarget(this.customUrlTarget);
+        }
+    }
+
+    /**
+     * Listening to changes in the collection ID or variant ID to reinitialize the component.
+     */
+    async ngOnChanges(changes: SimpleChanges): Promise<void> {
+        const collectionIdChanged: boolean =
+            changes.collectionId && !changes.collectionId.firstChange;
+        const variantIdChanged: boolean = changes.variantId && !changes.variantId.firstChange;
+        if (collectionIdChanged || variantIdChanged) {
+            const collectionId: string = changes.collectionId?.currentValue || this.collectionId;
+            const variantId: string | undefined =
+                changes.variantId?.currentValue || this.variantId || undefined;
+            // an in-place navigation reflects the topic it has loaded into the inputs
+            if (
+                collectionId === this.switchedTopic?.collectionId &&
+                variantId === this.switchedTopic?.variantId
+            ) {
+                return;
+            }
+            await this.switchTopic(collectionId, variantId);
+        }
+    }
+
+    /**
+     * Loads another topic into this component.
+     */
+    private async switchTopic(collectionId: string, variantId?: string): Promise<void> {
+        this.variantPreviewService.leave();
+        this.switchedTopic = { collectionId, variantId };
+        // reset several values to ensure that the component is properly initialized
+        this.selectedVariantPosition = -1;
+        this.pageConfigNode = null;
+        this.topicCollectionId.set(collectionId);
+        await this.initializeComponent(variantId);
+    }
+
+    /**
+     * Opens the linked topic through the host page or loads it in this component instead of
+     * navigating to its link. Returns false if neither openTopic nor navigateInPlace is set.
+     *
+     * @param url the link of the topic, passed on to the host with topicChanged
+     */
+    private openTopicInPlace(collectionId: string, url: string | null): boolean {
+        const openTopic = this.openTopic();
+        if (openTopic) {
+            if (collectionId !== this.topicCollectionId()) {
+                openTopic(collectionId);
+            }
+            return true;
+        }
+        if (!this.navigateInPlace()) {
+            return false;
+        }
+        if (collectionId !== this.topicCollectionId()) {
+            void this.loadTopicInPlace({ collectionId, url });
+        }
+        return true;
+    }
+
+    /**
+     * Switches to the given topic and scrolls the page back to its top.
+     */
+    private async loadTopicInPlace(topic: TopicChangedEvent): Promise<void> {
+        // as web component, the attributes feed the inputs, so the host can set a previous
+        // topic again (e.g. on back) and read the current one
+        this.collectionId = topic.collectionId;
+        this.variantId = undefined;
+        const host: HTMLElement = this.elementRef.nativeElement;
+        host.setAttribute('collection-id', topic.collectionId);
+        host.removeAttribute('variant-id');
+        this.topicPageHelperService.closePreview();
+        this.scrollContainerRef()?.nativeElement.scrollTo({ top: 0 });
+        if (host.getBoundingClientRect().top < 0) {
+            host.scrollIntoView({ block: 'start' });
+        }
+        await this.switchTopic(topic.collectionId);
+        this.topicChanged.emit(topic);
+    }
+
+    /**
+     * After the view has been initialized, update the nav bars and register a search field.
+     */
+    async ngAfterViewInit(): Promise<void> {
+        // read the default background color of anchor items
+        const hostElement = this.elementRef.nativeElement;
+        const computedStyle = getComputedStyle(hostElement);
+        this.initialAnchorItemColor = computedStyle
+            .getPropertyValue(this.ANCHOR_ITEM_CSS_PROPERTY)
+            .trim();
+        this.initialTopicColor = computedStyle
+            .getPropertyValue(this.TOPIC_COLOR_CSS_PROPERTY)
+            .trim();
+        this.mainNavService.setMainNavConfig({
+            currentScope: Scope.TopicPage,
+            title: 'TOPIC_PAGE.NAVIGATION.TITLE',
+            create: this.getCreateConfig(),
+            // new material is stored in the inbox, as the create menu does for a collection parent
+            onCreate: (nodes: Node[]): void => this.addCreatedNodesToCollection(nodes),
+        });
+        void this.addCustomMainNavOptions();
+        // register the edit mode toggle button next to the create button
+        this.mainNavService.registerCustomTemplateSlot(
+            TemplateSlot.AfterCreateMenu,
+            this.editModeToggle,
+        );
+        // enable the search field and observe the search event
+        const mds = await firstValueFrom(
+            this.mdsService.getMetadataSet({
+                repository: HOME_REPOSITORY,
+                metadataSet: this.genericWidgetGlobalService.getDefaultMds(),
+            }),
+        );
+        // a page left meanwhile leaves the search field to the page shown instead
+        if (this.isDestroyed) {
+            return;
+        }
+        this.searchFieldService.enable(
+            {
+                enableFiltersAndSuggestions: false,
+                showFiltersButton: !!mds.views.find((v) => v.id === 'search_topic_page'),
+                placeholder: 'TOPIC_PAGE.NAVIGATION.SEARCH_PLACEHOLDER',
+            },
+            this.destroyed$,
+        );
+        this.searchFieldService
+            .observeCurrentInstance()
+            .pipe(
+                takeUntil(this.destroyed$),
+                filter((i) => !!i),
+            )
+            .subscribe((instance) => {
+                // the search input taken from the URL predates the search field
+                if (this.searchInput()) {
+                    instance.setSearchString(this.searchInput());
+                }
+                instance
+                    .onFiltersButtonClicked()
+                    .subscribe(() => this.filterPanelOpen.set(!this.filterPanelOpen()));
+                this.searchEvent$ = instance.onSearchTriggered();
+                // startWith defines the initial value
+                this.searchEvent$
+                    .pipe(
+                        takeUntil(this.destroyed$),
+                        startWith({
+                            searchString: this.searchFieldService
+                                .getCurrentInstance()
+                                ?.getSearchString(),
+                            cleared: false,
+                        }),
+                        distinctUntilChanged(),
+                    )
+                    .subscribe((event) => {
+                        this.searchInputSubject.next(event.searchString);
+                    });
+            });
+    }
+
+    /**
+     * Builds the "create" config for the main nav based on the user's rights on the collection node.
+     * Returns `allowed: false` while the collection node has not been loaded yet.
+     */
+    private getCreateConfig(): MainNavCreateConfig {
+        return {
+            allowed:
+                !!this.collectionNode &&
+                this.nodeHelperService.getNodesRight(
+                    [this.collectionNode],
+                    ApiRestConstants.ACCESS_ADD_CHILDREN,
+                ),
+            allowBinary: true,
+            parent: this.collectionNode ?? null,
+        };
+    }
+
+    /**
+     * Adds the material created via the main nav to the topic's collection.
+     */
+    private addCreatedNodesToCollection(nodes: Node[]): void {
+        if (!this.collectionNode || !nodes?.length) {
+            return;
+        }
+        this.uiService.addToCollection(this.collectionNode, nodes);
+    }
+
+    /**
+     * On destruction, complete the subjects.
+     */
+    ngOnDestroy(): void {
+        this.isDestroyed = true;
+        void this.history.reset();
+        this.destroyed$.next();
+        this.destroyed$.complete();
+        this.topicPageHelperService.setInPlaceNavigationHandler(null);
+        this.topicPageHelperService.setPreviewCustomOptions(null);
+        this.topicPageSidebarService.close();
+        this.unregisterSidebarOptions();
+        void this.topicPageCreateOptionsService.remove(
+            this.createPageVariantTitle,
+            this.createPageTemplateTitle,
+        );
+        this.mainNavService.unregisterCustomTemplateSlot(TemplateSlot.AfterCreateMenu);
+        this.scrollHelperService.setScrollContainer(null);
+    }
+
+    /**
+     * Initializes the component with an optionally given variant ID.
+     */
+    private async initializeComponent(variantId?: string): Promise<void> {
+        this.initializedWithParams = true;
+        this.translationsService.initialize().subscribe(() => {});
+        try {
+            // fetch the collection node to set the topic name, color and check the user access
+            const collectionId: string = this.topicCollectionId();
+            // a reload after changes or another topic does not match what the host loaded
+            const hostData: boolean = !this.initialLoadSuccessfully();
+            const hostCollection: Node | null = this.hostCollection();
+            this.collectionNode =
+                hostData && retrieveNodeId(hostCollection) === collectionId
+                    ? hostCollection
+                    : await this.topicPageHelperService.getNode(collectionId);
+            this.topic.set(this.collectionNode.title ?? 'No topic defined');
+            this.imprintPrivacy.setContextNode(this.collectionNode, this.destroyRef);
+            // retrieve parent entries
+            const hostParents: ParentEntries | null = this.hostParents();
+            const parentEntries: ParentEntries =
+                hostData && retrieveNodeId(hostParents?.nodes?.[0]) === collectionId
+                    ? hostParents
+                    : await this.topicPageHelperService.getNodeParents(collectionId);
+            this.parentEntries.set(parentEntries);
+            // check the user privileges for the collection node and initialize custom listeners
+            this.userHasEditRights.set(checkUserAccess(this.collectionNode));
+            // update the "create" permission now that the collection node is loaded
+            this.mainNavService.patchMainNavConfig({ create: this.getCreateConfig() });
+            if (this.userHasEditRights()) {
+                this.initializeCustomEventListeners();
+            }
+            // retrieve the page config node and select the proper variant to define the breadcrumbNodeId, headerNodeId + swimlanes
+            await this.retrievePageConfigAndSelectVariant(variantId);
+
+            // initial load finished (page structure loaded)
+            this.initialLoadSuccessfully.set(true);
+            // switching to the topic view asks for the list of pages before the page has loaded
+            if (this.latestParams?.openMenu === OPEN_MANAGE_SIDEBAR_PARAM) {
+                void this.openMenuFromParams(this.latestParams);
+            }
+
+            // listen to fragment changes to scroll given swimlane ID into view
+            // note: setTimeout is necessary for view being loaded first
+            this.topicPageShareService.listenToFragment();
+
+            // void this.addCustomMainNavOptions();
+        } catch (err) {
+            console.error(err);
+            this.topicPageHelperService.displayErrorToast();
+        }
+    }
+
+    /**
+     * Initializes custom event listeners to react to events sent by the widgets (color change, widget node added).
+     */
+    private initializeCustomEventListeners(): void {
+        // the listeners outlive a switch of the topic
+        if (this.customEventListenersInitialized) {
+            return;
+        }
+        this.customEventListenersInitialized = true;
+        // listen to swimlaneColorChanged event
+        this.topicPageEventsService.swimlaneColorChanged
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe(async (event: ColorChangeEvent): Promise<void> => {
+                const color: string = event?.color ?? '';
+                const pageVariantNode: Node = event?.pageVariantNode ?? null;
+                const swimlaneIndex: number = event?.swimlaneIndex ?? -1;
+
+                if (
+                    !this.variantPreview() &&
+                    pageVariantNode &&
+                    retrieveNodeId(pageVariantNode) === retrieveNodeId(this.pageVariantNode()) &&
+                    swimlaneIndex > -1
+                ) {
+                    let changesNecessary: boolean =
+                        this.swimlanes[swimlaneIndex]?.backgroundColor !== color;
+                    if (changesNecessary) {
+                        await this.history.record(
+                            this.historyStepPrefix + 'SWIMLANE_COLOR',
+                            async (tx: HistoryTransaction): Promise<void> => {
+                                try {
+                                    // if necessary, create a new page config node
+                                    await this.checkForCustomPageNodeExistence();
+                                    const pageVariant: PageVariantConfig =
+                                        this.retrievePageVariant();
+                                    this.swimlanes[swimlaneIndex].backgroundColor = color;
+                                    if (!color) {
+                                        delete this.swimlanes[swimlaneIndex].backgroundColor;
+                                    }
+                                    pageVariant.structure.swimlanes = this.swimlanes;
+                                    this.pageVariantNode.set(
+                                        await this.savePageVariantConfig(pageVariant),
+                                    );
+                                    await this.updatePageVariantConfigs();
+                                } catch (err) {
+                                    tx.fail();
+                                    console.error(err);
+                                    this.topicPageHelperService.displayErrorToast();
+                                }
+                            },
+                        );
+                    }
+                }
+            });
+
+        // listen to widgetNodeAdded event
+        this.topicPageEventsService.widgetNodeAdded
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe(async (event: WidgetNodeAddedEvent): Promise<void> => {
+                const pageVariantNode: Node = event?.pageVariantNode ?? null;
+                const swimlaneIndex: number = event?.swimlaneIndex ?? -1;
+                const gridIndex: number = event?.gridIndex ?? -1;
+                const isBreadcrumbNode: boolean = event?.isBreadcrumbNode ?? false;
+                const isHeaderNode: boolean = event?.isHeaderNode ?? false;
+                const widget: WidgetConfigObject = event?.widget ?? null;
+
+                const validParentVariant: boolean =
+                    !this.variantPreview() &&
+                    pageVariantNode &&
+                    retrieveNodeId(pageVariantNode) === retrieveNodeId(this.pageVariantNode());
+                const validSwimlaneIndex: boolean = swimlaneIndex > -1;
+                const validGridIndex: boolean = gridIndex > -1;
+                const validWidgetOrAiConfig: boolean =
+                    (widget.widgetConfig && Object.keys(widget.widgetConfig)?.length > 0) ||
+                    (widget.aiConfig && Object.keys(widget.aiConfig)?.length > 0);
+
+                const validInputs: boolean = validGridIndex && validSwimlaneIndex;
+
+                if (
+                    !validParentVariant ||
+                    !validWidgetOrAiConfig ||
+                    !(validInputs || isBreadcrumbNode || isHeaderNode)
+                ) {
+                    event?.nodeAvailable?.(null);
+                    return;
+                }
+                // the node is created on the first edit of a widget the user added before
+                const step: { key: string } & StepOptions = isHeaderNode
+                    ? { key: 'HEADER' }
+                    : isBreadcrumbNode
+                    ? { key: 'BREADCRUMB' }
+                    : this.widgetStep(
+                          'WIDGET_CONFIG',
+                          this.swimlanes?.[swimlaneIndex]?.grid?.[gridIndex]?.item,
+                      );
+                let widgetNodeId: string | null = null;
+                try {
+                    await this.history.record(
+                        this.historyStepPrefix + step.key,
+                        async (tx: HistoryTransaction): Promise<void> => {
+                            // if no page configuration exists yet, a config has to be created and a reload of the page is necessary
+                            // this also creates the widget node, as it has to be added as children of the page variant node
+                            const addedSuccessfully = await this.checkForCustomPageNodeExistence(
+                                pageVariantNode,
+                                swimlaneIndex,
+                                gridIndex,
+                                widget,
+                                isHeaderNode,
+                                isBreadcrumbNode,
+                            );
+                            widgetNodeId = addedSuccessfully
+                                ? this.findWidgetNodeId(event)
+                                : await this.storeWidgetWithoutNode(event, tx);
+                            await this.updatePageVariantConfigs();
+                        },
+                        step,
+                    );
+                } catch (err) {
+                    widgetNodeId = null;
+                    console.error(err);
+                    this.topicPageHelperService.displayErrorToast();
+                } finally {
+                    event.nodeAvailable?.(widgetNodeId);
+                }
+            });
+
+        // listen to widgetConfigUpdated event — widget settings edited in-place (configNodeExists path)
+        this.topicPageEventsService.widgetConfigUpdated
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe(async (event: WidgetConfigUpdatedEvent): Promise<void> => {
+                if (
+                    !this.variantPreview() &&
+                    event?.pageVariantNode &&
+                    retrieveNodeId(event.pageVariantNode) === retrieveNodeId(this.pageVariantNode())
+                ) {
+                    const step: { key: string } & StepOptions = this.widgetConfigStep(
+                        event.widgetNodeId,
+                    );
+                    void this.history.recordApplied(
+                        this.historyStepPrefix + step.key,
+                        event.changes.map((change) => ({
+                            kind: 'nodeProperty' as const,
+                            nodeId: event.widgetNodeId,
+                            ...change,
+                        })),
+                        { ...step, coalesceKey: 'widget:' + event.widgetNodeId },
+                    );
+                    await this.bumpTemplateVersionIfNeeded();
+                }
+            });
+    }
+
+    /**
+     * Sets the search filters to a given value.
+     */
+    applySearchFilters(filters: Values): void {
+        this.searchFiltersSubject.next(filters);
+    }
+
+    /**
+     * Takes the search input and the page filters of the given query params into the page state.
+     */
+    private restoreSearchStateFromParams(params: Params): void {
+        const searchInput: string = params[SEARCH_INPUT_QUERY_PARAM] ?? '';
+        if (searchInput) {
+            this.searchInput.set(searchInput);
+            this.searchFieldService.getCurrentInstance()?.setSearchString(searchInput);
+        }
+        const filters: Values = parseSearchFilters(params[SEARCH_FILTERS_QUERY_PARAM]);
+        if (Object.keys(filters).length > 0) {
+            this.searchFilters.set(filters);
+            // active filters stay visible: they explain the narrowed result set
+            this.filterPanelOpen.set(true);
+        }
+    }
+
+    /**
+     * Writes the search input and the page filters into the query params. Replaces the current
+     * history entry, so that the page occupies a single entry regardless of how often the
+     * search state changes.
+     */
+    private persistSearchStateInParams(): void {
+        const queryParams: Params = searchStateToQueryParams(
+            this.searchInput(),
+            this.searchFilters(),
+        );
+        // an unchanged search state, e.g. reported on page load, must not drop the URL fragment;
+        // the filter panel may report the URL's filters in another order
+        const currentParams: Params = this.route.snapshot.queryParams;
+        const searchInputUnchanged: boolean =
+            (currentParams[SEARCH_INPUT_QUERY_PARAM] ?? null) ===
+            queryParams[SEARCH_INPUT_QUERY_PARAM];
+        const filtersUnchanged: boolean = sameSearchFilters(
+            parseSearchFilters(currentParams[SEARCH_FILTERS_QUERY_PARAM]),
+            this.searchFilters(),
+        );
+        if (searchInputUnchanged && filtersUnchanged) {
+            return;
+        }
+        void this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams,
+            queryParamsHandling: 'merge',
+            replaceUrl: true,
+        });
+    }
+
+    // PAGE CONFIG + VARIANT SPECIFIC FUNCTIONS
+    /**
+     * Retrieves the page config node, selects the proper variant and defines the breadcrumbNodeId, headerNodeId + swimlanes.
+     */
+    private async retrievePageConfigAndSelectVariant(
+        variantId: string = '',
+        forceReload: boolean = false,
+    ): Promise<void> {
+        if (this.globalTemplateNode()) {
+            await this.loadGlobalTemplate();
+            return;
+        }
+        // the collection's page is restored as it was once the preview ends
+        if (this.variantPreview()) {
+            return;
+        }
+        // check whether the collection node has a page propagate config
+        // hint: this must be done before parsing the page config, as it might not exist and cancel the execution
+        const pageConfigPropagateRef: string = retrievePageConfigPropagateRef(this.collectionNode);
+        if (await this.isPageTemplateAvailable(pageConfigPropagateRef)) {
+            this.collectionNodePagePropagateConfigRef = pageConfigPropagateRef;
+            // a collection holds at most one page template, so drop a create option that was added
+            // while none existed yet (e.g. the template was just created in this session)
+            await this.topicPageCreateOptionsService.remove(this.createPageTemplateTitle);
+        }
+        // no (loadable) page template exists, so creating one starts a new propagate config
+        else {
+            this.collectionNodePagePropagateConfigRef = null;
+            // whoever may edit the collection decides whether its sub-collections inherit a page
+            if (this.userHasEditRights()) {
+                await this.topicPageCreateOptionsService.add(
+                    this.createPageTemplateTitle,
+                    'edu-add_page_template',
+                    () => {
+                        void this.createPageTemplate();
+                    },
+                    11,
+                    Constrain.User,
+                );
+            }
+        }
+        // idea: if "collectionNode" already has a page config, there is no need to search further
+        if (this.collectionNode.properties[DEFAULT_PAGE_CONFIG_PROP] && !this.templateMode()) {
+            this.pageConfigNode = this.collectionNode;
+            this.collectionNodePageConfigRef =
+                this.collectionNode.properties[DEFAULT_PAGE_CONFIG_PROP]?.[0];
+        }
+        // retrieve the page config node either by checking the node itself or by iterating the parents of the collectionNode
+        else if (!retrieveNodeId(this.pageConfigNode)) {
+            this.pageConfigNode = await this.retrievePageConfigNode(this.collectionNode);
+            if (!this.pageConfigNode) {
+                return;
+            }
+        }
+        // parse the page config from the properties
+        const pageConfig: PageConfig = retrievePageConfig(this.pageConfigNode);
+        if (!pageConfig.variants) {
+            console.error('pageConfig does not include variants', pageConfig);
+            return;
+        }
+        // retrieve the (potentially updated) page variant configs
+        await this.updatePageVariantConfigs(true);
+        if (!this.dropUnavailablePageVariants(pageConfig)) {
+            this.markTopicPageAsMissing();
+            return;
+        }
+        // default the ID with the default or the first occurrence
+        this.pageVariantDefaultPosition = pageConfig.variants.indexOf(pageConfig.default);
+        // select the proper variant (initialize with default or first variant)
+        let selectedVariantId: string = pageConfig.default ?? pageConfig.variants[0];
+        selectedVariantId = convertNodeRefIntoNodeId(selectedVariantId);
+        // if a variantId is provided, override it
+        if (variantId) {
+            selectedVariantId = variantId;
+        }
+        // otherwise, iterate the variant configs and select the one with the most matching variables
+        else {
+            // retrieve the best matching index
+            const bestMatchIndex = this.retrieveBestMatchingVariantIndex(
+                this.pageVariantConfigs.nodes,
+                this.topicPageHelperService.getSelectedVariables(),
+            );
+            if (bestMatchIndex !== -1 && this.pageVariantConfigs.nodes) {
+                const matchedVariantNode = this.pageVariantConfigs.nodes[bestMatchIndex];
+                selectedVariantId = retrieveNodeId(matchedVariantNode);
+            }
+        }
+        // hold the position of the selected variant for later retrieval
+        let newSelectedVariantPosition: number = pageConfig.variants.indexOf(
+            prependWorkspacePrefix(selectedVariantId),
+        );
+        // workaround for the case that the provided variantId is not part of the variants array
+        if (newSelectedVariantPosition === -1) {
+            selectedVariantId = convertNodeRefIntoNodeId(
+                pageConfig.default ?? pageConfig.variants[0],
+            );
+            newSelectedVariantPosition = pageConfig.variants.indexOf(
+                prependWorkspacePrefix(selectedVariantId),
+            );
+        }
+        const initialLoad: boolean = this.selectedVariantPosition === -1;
+        const pageVariantChanged: boolean =
+            !initialLoad && newSelectedVariantPosition !== this.selectedVariantPosition;
+        // if the variant was not selected yet or was changed, reload the page structure
+        if (initialLoad || pageVariantChanged) {
+            this.selectedVariantPosition = newSelectedVariantPosition;
+            // retrieve the variant config node of the page
+            this.pageVariantNode.set(
+                this.pageVariantConfigs.nodes?.find(
+                    (node: Node): boolean => retrieveNodeId(node) === selectedVariantId,
+                ),
+            );
+            if (!this.pageVariantNode()) {
+                console.error(
+                    this.translate.instant('TOPIC_PAGE.NO_PAGE_VARIANT.DEFAULT_MESSAGE'),
+                    pageConfig,
+                    selectedVariantId,
+                    this.pageVariantConfigs.nodes,
+                );
+                return;
+            }
+            this.pageVariantNodeIndex = this.pageVariantConfigs.nodes.findIndex(
+                (n) => retrieveNodeId(n) === this.pageVariantNodeId(),
+            );
+            this.pageVariantSettingsValid.set(true);
+            const pageVariant: PageVariantConfig = retrievePageVariantConfig(
+                this.pageVariantNode(),
+            );
+            if (!pageVariant || !pageVariant.structure) {
+                console.error(
+                    this.translate.instant(
+                        'TOPIC_PAGE.NO_PAGE_VARIANT.VARIANT_OR_STRUCTURE_MISSING',
+                    ),
+                    pageVariant,
+                );
+                return;
+            }
+            // if the page config was inherited from a parent collection (the collection has no own
+            // page config ref), render the referenced nodes read-only via propagated markers.
+            // In template mode the template owns its nodes, so they must render/edit in place —
+            // never strip them, otherwise edits keep creating new nodes (e.g. the header).
+            if (!this.templateMode() && !retrievePageConfigRef(this.collectionNode)) {
+                markForRender(pageVariant);
+            }
+            await this.applyStructureToLocalState(pageVariant.structure);
+        }
+        // update the swimlane ID to prompt text mapping
+        if (initialLoad || pageVariantChanged || forceReload) {
+            await this.updateSwimlaneIdToPromptTextMapping();
+        }
+        // wait for the page variant to be loaded before checking whether all accordions are opened in edit mode
+        setTimeout((): void => {
+            this.checkAccordionExpansionState();
+        });
+    }
+
+    /**
+     * Loads the global template being edited as the only variant of the page. It belongs to no
+     * page config, so the one of the collection is neither read nor written.
+     */
+    private async loadGlobalTemplate(): Promise<void> {
+        const templateNode: Node = await this.topicPageHelperService.getNodeUncached(
+            retrieveNodeId(this.globalTemplateNode()),
+        );
+        this.globalTemplateNode.set(templateNode);
+        await this.showDetachedVariant(templateNode, false);
+    }
+
+    /**
+     * Shows a node outside the collection's page config as the only variant of the page. A preview
+     * renders it read-only and without header and breadcrumb, which a copy does not take over.
+     */
+    private async showDetachedVariant(node: Node, preview: boolean): Promise<void> {
+        this.pageVariantConfigs = { nodes: [node], pagination: null };
+        this.pageVariantNode.set(node);
+        this.pageVariantNodeIndex = 0;
+        this.selectedVariantPosition = 0;
+        this.pageVariantSettingsValid.set(true);
+        this.pageConfigCheckFailed.set(false);
+        // neither the anchor color nor the AI headings of the page shown before may stay
+        this.anchorItemColor = null;
+        this.swimlaneIdToPromptTextMapping = new Map<string, PromptToTextMapping>();
+        const pageVariant: PageVariantConfig = retrievePageVariantConfig(node);
+        if (!pageVariant?.structure) {
+            console.error(
+                this.translate.instant('TOPIC_PAGE.NO_PAGE_VARIANT.VARIANT_OR_STRUCTURE_MISSING'),
+                pageVariant,
+            );
+            return;
+        }
+        if (preview) {
+            markForRender(pageVariant);
+            delete pageVariant.structure.propagatedBreadcrumbNodeId;
+            delete pageVariant.structure.propagatedHeaderNodeId;
+        }
+        await this.applyStructureToLocalState(pageVariant.structure);
+        // another node may have been shown in the meantime
+        if (this.pageVariantNode() !== node) {
+            return;
+        }
+        await this.updateSwimlaneIdToPromptTextMapping();
+        setTimeout((): void => {
+            this.checkAccordionExpansionState();
+        });
+    }
+
+    /**
+     * Allows creating a new page variant by opening the sidebar for picking its source.
+     */
+    createPageVariant(): void {
+        this.openCreationSidebar('variant');
+    }
+
+    /**
+     * Opens the topic page's sidebar option for picking the source of a new page variant or page
+     * template. The picked node is either used right away or previewed in place of the page.
+     */
+    openCreationSidebar(kind: CreationKind): void {
+        this.topicPageSidebarService.open(kind);
+    }
+
+    /**
+     * Creates a page variant or a page template from a given source node.
+     */
+    private async createFrom(
+        kind: CreationKind,
+        sourceNode: Node,
+        copyOption: CopyOption,
+    ): Promise<void> {
+        if (kind === 'template') {
+            await this.createPageTemplateFrom(sourceNode, copyOption);
+            return;
+        }
+        await this.createPageVariantFrom(sourceNode);
+    }
+
+    /**
+     * Adds a page variant built from a given source node to the collection's page.
+     */
+    private async createPageVariantFrom(sourceNode: Node): Promise<void> {
+        // start the editing process (idea: copy the selected node as a child and relink the widgets)
+        // the goal is to add another page variant to the existing (propagated) page config
+        this.startEditing(this.i18nPrefix + 'CREATE_PAGE_VARIANT.PENDING_MESSAGE');
+
+        // a collection without an own page config (none or only an inherited one) gets a new page
+        // config holding just the variant built from the selected source
+        const ownPageConfigMissing: boolean =
+            !this.collectionNodePageConfigRef || !this.pageVariantConfigs?.nodes?.length;
+        if (ownPageConfigMissing) {
+            await this.createCustomConfig(sourceNode);
+            return;
+        }
+        // check for custom page node existence and create it if necessary
+        await this.checkForCustomPageNodeExistence();
+        // check for pageConfigNode existence
+        if (!retrieveNodeId(this.pageConfigNode)) {
+            return;
+        }
+        // parse the page config from the properties
+        const pageConfig: PageConfig = retrievePageConfig(this.pageConfigNode);
+        // check for pageConfig variant existence
+        if (!pageConfig.variants) {
+            console.error(
+                this.translate.instant('TOPIC_PAGE.NO_PAGE_VARIANT.MISSING_IN_PAGE_CONFIG'),
+                pageConfig,
+            );
+            return;
+        }
+        try {
+            this.closeSideMenus();
+            // retrieve page variant config from selected source and prepare it
+            const variantConfig: PageVariantConfig = retrievePageVariantConfig(sourceNode);
+            // delete the nodeIds but keep them as temporaryNodeIds + remove certain variables
+            markForCopy(variantConfig);
+            // a variant holds swimlanes, never the rules a template may define them by
+            await this.swimlaneRepeatService.expandRepeats(variantConfig.structure, {
+                collectionId: this.topicCollectionId(),
+                title: this.topic(),
+            });
+            // retrieve the page variant properties
+            const properties: { [key: string]: string | string[] } =
+                await this.topicPageHelperService.retrievePageVariantProperties(
+                    sourceNode,
+                    '_' + this.translate.instant(this.i18nPrefix + 'COPY_SUFFIX'),
+                );
+            const pageConfigVariantNode: Node =
+                await this.topicPageVariantNodesService.createVariantNode(
+                    retrieveNodeId(this.pageConfigNode),
+                    sourceNode,
+                    properties,
+                );
+            // push it to the existing variants
+            pageConfig.variants.push(prependWorkspacePrefix(retrieveNodeId(pageConfigVariantNode)));
+            // update the ccm:page_config of page config node
+            this.pageConfigNode =
+                await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
+                    retrieveNodeId(this.pageConfigNode),
+                    DEFAULT_PAGE_CONFIG_PROP,
+                    JSON.stringify(pageConfig),
+                );
+            // copy widget nodes and persist the variant config without propagatedNodeIds
+            await this.persistRelinkedVariantConfig(variantConfig, pageConfigVariantNode, {
+                collectionId: this.topicCollectionId(),
+            });
+            // reload page variant configs
+            await this.updatePageVariantConfigs(true);
+            // TODO: there seems to be a race condition here, so slightly delay the navigate call
+            setTimeout((): void => {
+                void this.finishCreation(
+                    'CREATE_PAGE_VARIANT.SUCCESS_MESSAGE',
+                    retrieveNodeId(pageConfigVariantNode),
+                );
+            }, 500);
+        } catch (err) {
+            console.error(err);
+            this.topicPageHelperService.displayErrorToast();
+        } finally {
+            this.endEditing();
+        }
+    }
+
+    /**
+     * Applies the changes made to the currently selected page variant.
+     */
+    async applyPageVariant(changesMap: Map<string, string | string[]>): Promise<void> {
+        // reset validity variable
+        this.pageVariantSettingsValid.set(true);
+        this.startEditing();
+        if (!changesMap.size) {
+            this.closeSideMenus();
+            this.endEditing();
+            return;
+        }
+        try {
+            if (!(await this.persistPageVariantChanges(changesMap))) {
+                this.endEditing();
+                return;
+            }
+            this.closeSideMenus();
+            this.endEditing();
+        } catch (err) {
+            console.error(err);
+            this.endEditing();
+            this.topicPageHelperService.displayErrorToast();
+        }
+    }
+
+    /**
+     * Persists the pending settings changes (title + variable dimensions) on the currently
+     * selected page variant node and refreshes it. Shared by "apply changes" and the global
+     * template publishing, so publishing never copies the previously saved values.
+     *
+     * @returns the ID of the node the changes were written to (the currently selected variant if
+     *          there was nothing to persist), or null if the variant config is invalid
+     */
+    private async persistPageVariantChanges(
+        changesMap: Map<string, string | string[]>,
+    ): Promise<string | null> {
+        if (!changesMap?.size) {
+            return this.pageVariantNodeId();
+        }
+        // may replace the selected variant by an own copy when the page config is inherited
+        const pageConfigCreated: boolean = await this.checkForCustomPageNodeExistence();
+        const pageVariant: PageVariantConfig = this.retrievePageVariant();
+        if (!pageVariant) {
+            return null;
+        }
+        // resolve the target once: `pageVariantNode` is re-assigned from the cached
+        // `pageVariantConfigs.nodes` entry in several places, so re-reading it per iteration could
+        // scatter the writes across nodes
+        const targetNodeId: string = this.pageVariantNodeId();
+        // iterate changes map and persist them
+        for (const [key, value] of changesMap.entries()) {
+            await this.topicPageHelperService.setProperty(targetNodeId, key, value);
+        }
+        // a custom page config was just created: the in-memory collection node does not carry its
+        // ref yet, so the next variant resolution would fall back to the inherited page config and
+        // display the values from before these changes
+        if (pageConfigCreated) {
+            this.collectionNode = await this.topicPageHelperService.getNodeUncached(
+                retrieveNodeId(this.collectionNode),
+            );
+        }
+        await this.syncPageVariantNode(targetNodeId);
+        return targetNodeId;
+    }
+
+    /**
+     * Re-reads the variant list of the current page config from the server and points
+     * `pageVariantNode` at the given node. The UI resolves the selected variant from that list, so
+     * writing a node without refreshing it would keep the previous values on screen.
+     */
+    private async syncPageVariantNode(nodeId: string): Promise<void> {
+        if (retrieveNodeId(this.pageConfigNode) || this.globalTemplateNode()) {
+            await this.updatePageVariantConfigs(true);
+        }
+        const reloadedNode: Node = this.pageVariantConfigs?.nodes?.find(
+            (n: Node) => retrieveNodeId(n) === nodeId,
+        );
+        this.pageVariantNode.set(
+            reloadedNode ?? (await this.topicPageHelperService.getNodeUncached(nodeId)),
+        );
+        const reloadedIndex: number = this.pageVariantConfigs?.nodes?.findIndex(
+            (n: Node) => retrieveNodeId(n) === nodeId,
+        );
+        if (reloadedIndex >= 0) {
+            this.pageVariantNodeIndex = reloadedIndex;
+        }
+    }
+
+    /**
+     * Deletes the currently selected page variant or template, see `deleteVariantOfConfig`.
+     */
+    async deletePageVariant(): Promise<void> {
+        if (
+            !this.collectionNodePageConfigRef ||
+            !this.userHasEditRights() ||
+            this.globalTemplateNode() ||
+            this.variantPreview()
+        ) {
+            return;
+        }
+        await this.deleteVariantOfConfig(
+            this.pageConfigNode,
+            this.pageVariantNode(),
+            this.templateMode(),
+        );
+    }
+
+    /**
+     * Deletes a page variant or template of the collection after asking, removes it from its page
+     * config and deletes the config and its link on the collection along with the last one.
+     * Reloads the page afterwards.
+     */
+    private async deleteVariantOfConfig(
+        configNode: Node,
+        variantNode: Node,
+        template: boolean,
+    ): Promise<void> {
+        const deleteString: string = template ? 'DELETE_PAGE_TEMPLATE.' : 'DELETE_PAGE_VARIANT.';
+        const dialogRef = await this.dialogs.openGenericDialog({
+            title: this.i18nPrefix + deleteString + 'HEADING',
+            message: this.i18nPrefix + deleteString + 'MESSAGE',
+            buttons: DELETE_OR_CANCEL,
+            closable: Closable.Casual,
+        });
+        if ((await firstValueFrom(dialogRef.afterClosed())) !== 'YES_DELETE') {
+            return;
+        }
+        const pageConfig: PageConfig = retrievePageConfig(configNode);
+        if (!pageConfig.variants || !variantNode) {
+            console.error(
+                this.translate.instant('TOPIC_PAGE.NO_PAGE_CONFIG.MISSING_CONFIG_OR_VARIANTS'),
+                pageConfig,
+                variantNode,
+            );
+            return;
+        }
+        const variantId: string = retrieveNodeId(variantNode);
+        try {
+            this.startEditing(this.i18nPrefix + deleteString + 'PENDING_MESSAGE');
+            // the config drops the variant first, so it never lists a deleted node
+            pageConfig.variants = pageConfig.variants.filter((v) => !v.includes(variantId));
+            if (pageConfig.variants.length > 0) {
+                if (pageConfig.default?.includes(variantId)) {
+                    pageConfig.default = pageConfig.variants[0];
+                }
+                const updatedConfigNode: Node =
+                    await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
+                        retrieveNodeId(configNode),
+                        DEFAULT_PAGE_CONFIG_PROP,
+                        JSON.stringify(pageConfig),
+                    );
+                if (retrieveNodeId(this.pageConfigNode) === retrieveNodeId(configNode)) {
+                    this.pageConfigNode = updatedConfigNode;
+                }
+                // delete the page variant node along with all its children
+                await this.topicPageHelperService.deleteNode(variantId);
+            } else {
+                await this.topicPageHelperService.resetProperty(
+                    retrieveNodeId(this.collectionNode),
+                    template
+                        ? DEFAULT_PAGE_CONFIG_PROPAGATE_REF_PROP
+                        : DEFAULT_PAGE_CONFIG_REF_PROP,
+                );
+                await this.topicPageHelperService.deleteNode(retrieveNodeId(configNode));
+            }
+            // TODO: switch to the default variant without reloading the page
+            setTimeout(() => {
+                void this.reloadWithoutParameters();
+            }, 1000);
+            this.endEditing();
+        } catch (err) {
+            console.error(err);
+            this.topicPageHelperService.displayErrorToast();
+        }
+    }
+
+    /**
+     * Updates the topic or anchor item color of the page variant.
+     */
+    async updateTopicOrAnchorItemColor(
+        color: string,
+        isTopicColor: boolean = false,
+    ): Promise<void> {
+        const shownColor: string = isTopicColor
+            ? this.topicColor ?? this.initialTopicColor
+            : this.anchorItemColor ?? this.initialAnchorItemColor;
+        // the color picker also reports colors the page sets itself, which change nothing
+        if (color === shownColor) {
+            return;
+        }
+        await this.history.record(
+            this.historyStepPrefix + (isTopicColor ? 'TOPIC_COLOR' : 'ANCHOR_COLOR'),
+            async (tx: HistoryTransaction): Promise<void> => {
+                this.setTopicOrAnchorItemColor(color, isTopicColor);
+                this.startEditing();
+                try {
+                    await this.checkForCustomPageNodeExistence();
+                    // a copied page config is shown with its own colors, which the chosen one replaces
+                    this.setTopicOrAnchorItemColor(color, isTopicColor);
+                    const pageVariant: PageVariantConfig = this.retrievePageVariant();
+                    if (!pageVariant) {
+                        this.endEditing();
+                        return;
+                    }
+                    const propertyName = isTopicColor ? 'topicColor' : 'anchorItemColor';
+                    pageVariant.structure[propertyName] = color;
+                    this.pageVariantNode.set(await this.savePageVariantConfig(pageVariant));
+                    await this.updatePageVariantConfigs(this.pageVariantReloadNecessary);
+                    this.pageVariantReloadNecessary = false;
+                    this.endEditing();
+                } catch (err) {
+                    tx.fail();
+                    console.error(err);
+                    this.endEditing();
+                    this.topicPageHelperService.displayErrorToast();
+                }
+            },
+        );
+    }
+
+    /**
+     * Shows a given color as the topic or anchor item color of the page.
+     */
+    private setTopicOrAnchorItemColor(color: string, isTopicColor: boolean): void {
+        if (isTopicColor) {
+            this.topicColor = color;
+        } else {
+            this.anchorItemColor = color;
+        }
+    }
+
+    /**
+     * Reloads the page without parameters.
+     */
+    private async reloadWithoutParameters(): Promise<void> {
+        // navigate to default variant; the params of a host page, e.g. the collection id, stay
+        await this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: {
+                variantId: null,
+                openMenu: null,
+                [SEARCH_INPUT_QUERY_PARAM]: null,
+                [SEARCH_FILTERS_QUERY_PARAM]: null,
+            },
+            queryParamsHandling: 'merge',
+            replaceUrl: true,
+        });
+        // TODO: remove, if a solution without page reload is found
+        window.location.reload();
+    }
+
+    /**
+     * Drops an explicitly selected variant, so the variant selection follows the profile again.
+     * Runs synchronously before the profile values are set, which reloads the page variant.
+     */
+    releasePinnedVariant(): void {
+        if (!this.latestParams?.variantId) {
+            return;
+        }
+        this.latestParams = { ...this.latestParams, variantId: undefined };
+        this.variantPinned.set(false);
+        void this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { variantId: null },
+            queryParamsHandling: 'merge',
+            replaceUrl: true,
+        });
+    }
+
+    /**
+     * Navigates to a given variantId and reloads the page structure accordingly.
+     */
+    async navigateToVariant(variantId: string): Promise<void> {
+        this.closeSideMenus();
+        const queryParamsToAddOrOverwrite: Params = {
+            variantId: variantId,
+        };
+        // on variant change, do not keep the fragments
+        await this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: queryParamsToAddOrOverwrite,
+            queryParamsHandling: 'merge',
+        });
+        // retrieve the page config node and select the proper variant to define the breadcrumbNodeId, headerNodeId + swimlanes
+        try {
+            await this.retrievePageConfigAndSelectVariant(variantId);
+        } catch (err) {
+            console.error(err);
+            this.topicPageHelperService.displayErrorToast();
+        }
+    }
+
+    /**
+     * Navigates to a given fragment by appending it to the url.
+     */
+    navigateToFragment(fragment: string): void {
+        this.topicPageShareService.navigateToFragment(fragment);
+    }
+
+    // SWIMLANE SPECIFIC FUNCTIONS
+    /**
+     * Adds a new swimlane to the page and persists it in the config.
+     */
+    async addSwimlane(newSwimlane: Swimlane, positionToAdd: number): Promise<void> {
+        await this.history.record(
+            this.historyStepPrefix + 'ADD_SWIMLANE',
+            async (tx: HistoryTransaction): Promise<void> => {
+                this.startEditing();
+                try {
+                    await this.checkForCustomPageNodeExistence();
+                    const pageVariant: PageVariantConfig = this.retrievePageVariant();
+                    if (!pageVariant) {
+                        this.endEditing();
+                        return;
+                    }
+                    const swimlanesCopy = Helper.deepCopy(this.swimlanes ?? []);
+                    swimlanesCopy.splice(positionToAdd, 0, newSwimlane);
+                    pageVariant.structure.swimlanes = swimlanesCopy;
+                    this.pageVariantNode.set(await this.savePageVariantConfig(pageVariant));
+                    await this.updatePageVariantConfigs(this.pageVariantReloadNecessary);
+                    this.pageVariantReloadNecessary = false;
+                    // add swimlane visually as soon as the requests are done
+                    this.swimlanes.splice(positionToAdd, 0, newSwimlane);
+                    this.endEditing();
+                } catch (err) {
+                    tx.fail();
+                    console.error(err);
+                    this.endEditing();
+                    this.topicPageHelperService.displayErrorToast();
+                }
+            },
+        );
+    }
+
+    /**
+     * Moves the position of a swimlane on the page and persists it in the config.
+     */
+    async moveSwimlanePosition(oldIndex: number, newIndex: number): Promise<void> {
+        if (newIndex >= 0 && newIndex <= this.swimlanes.length - 1) {
+            await this.history.record(
+                this.historyStepPrefix + 'MOVE_SWIMLANE',
+                async (tx: HistoryTransaction): Promise<void> => {
+                    this.startEditing();
+                    try {
+                        await this.checkForCustomPageNodeExistence();
+                        const pageVariant: PageVariantConfig = this.retrievePageVariant();
+                        if (!pageVariant) {
+                            this.endEditing();
+                            return;
+                        }
+                        const swimlanesCopy = Helper.deepCopy(this.swimlanes ?? []);
+                        moveItemInArray(swimlanesCopy, oldIndex, newIndex);
+                        pageVariant.structure.swimlanes = swimlanesCopy;
+                        this.pageVariantNode.set(await this.savePageVariantConfig(pageVariant));
+                        await this.updatePageVariantConfigs(this.pageVariantReloadNecessary);
+                        this.pageVariantReloadNecessary = false;
+                        // move swimlane position visually as soon as the requests are done
+                        moveItemInArray(this.swimlanes, oldIndex, newIndex);
+                        this.endEditing();
+                    } catch (err) {
+                        tx.fail();
+                        console.error(err);
+                        this.endEditing();
+                        this.topicPageHelperService.displayErrorToast();
+                    }
+                },
+            );
+        }
+    }
+
+    /**
+     * Updates the shape of a swimlane at a given index.
+     */
+    async updateSwimlaneShape(
+        swimlaneShape: SwimlaneBackgroundShape,
+        mirror: boolean = false,
+        index: number,
+    ): Promise<void> {
+        await this.history.record(
+            this.historyStepPrefix + 'SWIMLANE_SHAPE',
+            async (tx: HistoryTransaction): Promise<void> => {
+                this.startEditing();
+                try {
+                    await this.checkForCustomPageNodeExistence();
+                    const pageVariant: PageVariantConfig = this.retrievePageVariant();
+                    if (!pageVariant) {
+                        return;
+                    }
+                    const applySwimlaneChanges = (swimlane: Swimlane) => {
+                        if (swimlaneShape != null) {
+                            swimlane.backgroundShape = swimlaneShape;
+                        }
+                        if (mirror) {
+                            swimlane.backgroundShapeMirrored = !swimlane.backgroundShapeMirrored;
+                        }
+                    };
+
+                    const swimlanesCopy = Helper.deepCopy(this.swimlanes ?? []);
+                    applySwimlaneChanges(swimlanesCopy[index]);
+                    pageVariant.structure.swimlanes = swimlanesCopy;
+                    this.pageVariantNode.set(await this.savePageVariantConfig(pageVariant));
+                    await this.updatePageVariantConfigs(this.pageVariantReloadNecessary);
+                    this.pageVariantReloadNecessary = false;
+                    applySwimlaneChanges(this.swimlanes[index]);
+                } catch (err) {
+                    tx.fail();
+                    console.error(err);
+                    this.topicPageHelperService.displayErrorToast();
+                } finally {
+                    this.endEditing();
+                }
+            },
+        );
+    }
+
+    /**
+     * Opens a dialog that displays a QR code for the swimlane link.
+     */
+    async openQrCodeDialog(swimlaneIndex: number): Promise<void> {
+        await this.topicPageShareService.openQrCodeDialog(
+            this.SWIMLANE_ID_PREFIX + this.swimlanes[swimlaneIndex].id,
+            this.pageVariantNodeId(),
+            this.showQrCodeDialogRef,
+        );
+    }
+
+    /**
+     * Copies the link to the swimlane into the clipboard.
+     */
+    async copySwimlaneLink(swimlaneIndex: number): Promise<void> {
+        await this.topicPageShareService.copyLink(
+            this.SWIMLANE_ID_PREFIX + this.swimlanes[swimlaneIndex].id,
+            this.pageVariantNodeId(),
+        );
+    }
+
+    /**
+     * Writes a mail with a link to a given swimlane.
+     */
+    async writeMail(swimlaneIndex: number): Promise<void> {
+        const swimlane: Swimlane = this.swimlanes[swimlaneIndex];
+        if (!swimlane) {
+            console.warn(
+                this.translate.instant('TOPIC_PAGE.SWIMLANE.SHARE_CONTENT.WRITE_MAIL.ERROR_NO_URL'),
+            );
+            return;
+        }
+        await this.topicPageShareService.writeMail(
+            this.SWIMLANE_ID_PREFIX + swimlane.id,
+            swimlane.heading,
+            this.pageVariantNodeId(),
+        );
+    }
+
+    /**
+     * Reacts to es-editable-text textChange output event by persisting the changes in the page config.
+     */
+    async swimlaneTitleChanged(title: string, index: number): Promise<void> {
+        await this.history.record(
+            this.historyStepPrefix + 'SWIMLANE_HEADING',
+            async (tx: HistoryTransaction): Promise<void> => {
+                this.startEditing();
+                try {
+                    await this.checkForCustomPageNodeExistence();
+                    const pageVariant: PageVariantConfig = this.retrievePageVariant();
+                    if (!pageVariant || !this.pageVariantNode()) {
+                        this.endEditing();
+                        return;
+                    }
+                    // update swimlane heading
+                    this.swimlanes[index].heading = title;
+                    pageVariant.structure.swimlanes = this.swimlanes;
+                    this.pageVariantNode.set(await this.savePageVariantConfig(pageVariant));
+                    // retrieve existing AI config
+                    const aiConfig: BapiConfigObject = retrieveAiConfigFromNode(
+                        this.pageVariantNode(),
+                    );
+                    let aiUpdateNecessary: boolean = false;
+                    if (containsAiTags(title)) {
+                        aiConfig[this.swimlanes[index].id] = retrieveChatCompletionObject(title);
+                        aiUpdateNecessary = true;
+                    } else if (aiConfig.hasOwnProperty(this.swimlanes[index].id)) {
+                        delete aiConfig[this.swimlanes[index].id];
+                        aiUpdateNecessary = true;
+                    }
+                    // update AI config, if necessary (either AI tags are present or were deleted)
+                    if (aiUpdateNecessary) {
+                        const previousAiConfig: string[] | null =
+                            this.pageVariantNode().properties?.[DEFAULT_AI_CONFIG_PROP] ?? null;
+                        this.pageVariantNode.set(
+                            await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
+                                retrieveNodeId(this.pageVariantNode()),
+                                DEFAULT_AI_CONFIG_PROP,
+                                JSON.stringify(aiConfig),
+                            ),
+                        );
+                        tx.trackNodeProperty(
+                            retrieveNodeId(this.pageVariantNode()),
+                            DEFAULT_AI_CONFIG_PROP,
+                            previousAiConfig,
+                            this.pageVariantNode().properties?.[DEFAULT_AI_CONFIG_PROP] ?? null,
+                        );
+                        // reload the page variant configs and set the updated pageVariantNode
+                        await this.updatePageVariantConfigs(this.pageVariantReloadNecessary);
+                        this.pageVariantReloadNecessary = false;
+                        this.retrievePageVariant();
+                        // use this pageVariantNode to update the mapping
+                        await this.updateSwimlaneIdToPromptTextMapping();
+                    }
+                    // update the page variant config in any case
+                    else {
+                        await this.updatePageVariantConfigs(this.pageVariantReloadNecessary);
+                        this.pageVariantReloadNecessary = false;
+                    }
+                    this.endEditing();
+                } catch (err) {
+                    tx.fail();
+                    console.error(err);
+                    this.endEditing();
+                    this.topicPageHelperService.displayErrorToast();
+                }
+            },
+            { coalesceKey: 'heading:' + this.swimlanes[index]?.id },
+        );
+    }
+
+    /**
+     * Starts editing a swimlane by opening a dialog and handling the result status.
+     */
+    async editSwimlane(swimlane: Swimlane, index: number): Promise<void> {
+        this.swimlaneToEditForm = new UntypedFormGroup({
+            type: new UntypedFormControl(swimlane.type),
+            heading: new UntypedFormControl(swimlane.heading),
+            grid: new UntypedFormControl(JSON.stringify(swimlane.grid ?? '[]')),
+            repeatSource: new UntypedFormControl(swimlane.repeat?.source ?? null),
+            repeatOrderBy: new UntypedFormControl(swimlane.repeat?.orderBy ?? ''),
+            repeatOrderDescending: new UntypedFormControl(!!swimlane.repeat?.orderDescending),
+            repeatMaxItems: new UntypedFormControl(swimlane.repeat?.maxItems ?? null),
+            // set by the dialog while a config patch does not parse
+            advancedValid: new UntypedFormControl(true),
+        });
+        const applyButton: GenericDialogButton<'APPLY'> = {
+            label: 'APPLY',
+            config: { color: 'primary' },
+            // an unsound config patch keeps the dialog open, the field states the problem
+            callback: async (): Promise<boolean> => {
+                const valid: boolean = !!this.swimlaneToEditForm.get('advancedValid').value;
+                if (!valid) {
+                    this.toast.error(
+                        null,
+                        this.i18nPrefix + 'SWIMLANE.EDIT.ADVANCED.ERROR.CANNOT_APPLY',
+                    );
+                }
+                return valid;
+            },
+        };
+        const dialogRef = await this.dialogs.openGenericDialog({
+            title: this.translate.instant('TOPIC_PAGE.SWIMLANE.EDIT.HEADING', {
+                heading: swimlane.heading
+                    ? '"' + swimlane.heading + '"'
+                    : this.translate.instant('TOPIC_PAGE.SWIMLANE.EDIT.SWIMLANE_DEFAULT'),
+            }),
+            minWidth: '700px',
+            maxWidth: '100%',
+            contentTemplate: this.editSwimlaneRef,
+            closable: Closable.Casual,
+            buttons: [{ label: 'CANCEL', config: { color: 'standard' } }, applyButton],
+        });
+        const result = await firstValueFrom(dialogRef.afterClosed());
+        if (result === 'APPLY') {
+            const formValue = this.swimlaneToEditForm.value;
+            if (!formValue) {
+                return;
+            }
+            // start from the swimlane so that properties the form does not cover are kept
+            const editedSwimlane: Swimlane = {
+                ...swimlane,
+                type: formValue.type,
+                heading: formValue.heading,
+                grid: formValue.grid ? JSON.parse(formValue.grid) : swimlane.grid,
+            };
+            const repeat: SwimlaneRepeat = this.retrieveRepeatFromForm(formValue);
+            if (repeat) {
+                editedSwimlane.repeat = repeat;
+            } else {
+                delete editedSwimlane.repeat;
+            }
+            if (JSON.stringify(editedSwimlane) === JSON.stringify(swimlane)) {
+                return;
+            }
+            // detect whether a structural change has been made (type or grid was changed)
+            const structuralChange: boolean =
+                editedSwimlane.type !== swimlane.type ||
+                JSON.stringify(editedSwimlane.grid) !== JSON.stringify(swimlane.grid);
+            // a dialog that only changed the grid is named like the same change made in place
+            const onlyGridChanged: boolean =
+                JSON.stringify({ ...editedSwimlane, grid: null }) ===
+                JSON.stringify({ ...swimlane, grid: null });
+            const step: { key: string } & StepOptions = onlyGridChanged
+                ? this.gridChangeStep(swimlane.grid ?? [], editedSwimlane.grid ?? [])
+                : { key: 'EDIT_SWIMLANE' };
+            await this.history.record(
+                this.historyStepPrefix + step.key,
+                async (tx: HistoryTransaction): Promise<void> => {
+                    this.startEditing();
+                    try {
+                        await this.checkForCustomPageNodeExistence();
+                        const pageVariant: PageVariantConfig = this.retrievePageVariant();
+                        if (!pageVariant) {
+                            this.endEditing();
+                            return;
+                        }
+                        // create a copy of the swimlanes
+                        const swimlanesCopy = JSON.parse(JSON.stringify(this.swimlanes ?? []));
+                        // store updated swimlane in config
+                        swimlanesCopy[index] = editedSwimlane;
+                        // overwrite swimlanes
+                        pageVariant.structure.swimlanes = swimlanesCopy;
+                        let reloadNecessary: boolean = false;
+                        if (structuralChange) {
+                            reloadNecessary = this.pageVariantReloadNecessary;
+                        }
+                        this.pageVariantNode.set(await this.savePageVariantConfig(pageVariant));
+                        if (structuralChange) {
+                            await this.updatePageVariantConfigs(reloadNecessary);
+                            this.pageVariantReloadNecessary = false;
+                        } else {
+                            await this.updatePageVariantConfigs();
+                        }
+                        // the history deletes the widget nodes of removed tiles once no step can
+                        // restore them
+                        // sync with the visible nodes (reset map, as the outputs are triggered again)
+                        this.topicPageGlobalService.deleteVisibleNodesMap();
+                        // visually change swimlanes
+                        this.persistedSwimlanes = pageVariant.structure.swimlanes;
+                        await this.updateRenderedSwimlanes();
+                        this.endEditing();
+                        // fix accordions are closed on edit
+                        setTimeout((): void => {
+                            this.accordions?.forEach((accordion: CdkAccordionItem): void => {
+                                accordion.open();
+                            });
+                        });
+                    } catch (err) {
+                        tx.fail();
+                        console.error(err);
+                        this.endEditing();
+                        this.topicPageHelperService.displayErrorToast();
+                    }
+                },
+                step,
+            );
+        }
+    }
+
+    /**
+     * Builds the repeat rule from the advanced form values, or `null` when no source is chosen.
+     * Empty options are left out so that a rule carries only what an author actually set.
+     */
+    private retrieveRepeatFromForm(formValue: { [key: string]: any }): SwimlaneRepeat | null {
+        if (!formValue.repeatSource) {
+            return null;
+        }
+        const repeat: SwimlaneRepeat = { source: formValue.repeatSource };
+        if (formValue.repeatOrderBy) {
+            repeat.orderBy = formValue.repeatOrderBy;
+        }
+        if (formValue.repeatOrderDescending) {
+            repeat.orderDescending = true;
+        }
+        if (formValue.repeatMaxItems > 0) {
+            repeat.maxItems = Number(formValue.repeatMaxItems);
+        }
+        return repeat;
+    }
+
+    /**
+     * Deletes a swimlane from the page with possible widget nodes and persists it in the config.
+     */
+    async deleteSwimlane(index: number): Promise<void> {
+        if (!this.swimlanes?.[index]) {
+            return;
+        }
+        const dialogRef = await this.dialogs.openGenericDialog({
+            title: this.i18nPrefix + 'SWIMLANE.DELETE.LABEL',
+            message: this.i18nPrefix + 'SWIMLANE.DELETE.MESSAGE',
+            buttons: YES_OR_NO,
+            closable: Closable.Casual,
+        });
+        const response = await firstValueFrom(dialogRef.afterClosed());
+        if (response !== 'YES') {
+            return;
+        }
+        await this.history.record(
+            this.historyStepPrefix + 'DELETE_SWIMLANE',
+            async (tx: HistoryTransaction): Promise<void> => {
+                this.startEditing();
+                try {
+                    await this.checkForCustomPageNodeExistence();
+                    const pageVariant: PageVariantConfig = this.retrievePageVariant();
+                    if (!pageVariant) {
+                        return;
+                    }
+                    const swimlanesCopy = Helper.deepCopy(this.swimlanes ?? []);
+                    swimlanesCopy.splice(index, 1);
+                    pageVariant.structure.swimlanes = swimlanesCopy;
+                    this.pageVariantNode.set(await this.savePageVariantConfig(pageVariant));
+                    await this.updatePageVariantConfigs(this.pageVariantReloadNecessary);
+                    this.pageVariantReloadNecessary = false;
+                    // the history deletes the swimlane's widget nodes once no step can restore them
+                    // sync with the visible nodes (reset swimlane nodes)
+                    this.topicPageGlobalService.deleteVisibleNodesBySwimlane(index);
+                    // delete swimlane visually as soon as the requests are done
+                    this.swimlanes.splice(index, 1);
+                } catch (err) {
+                    tx.fail();
+                    console.error(err);
+                    this.topicPageHelperService.displayErrorToast();
+                } finally {
+                    this.endEditing();
+                }
+            },
+        );
+    }
+
+    // SWIMLANE COMPLETION
+    /**
+     * Whether this page can render the given widget type, by the rule es-swimlane renders with.
+     */
+    readonly isRenderableWidgetType = (widgetType: string): boolean =>
+        canRenderWidgetType(widgetType, {
+            aiSupported: this.aiSupported(),
+            rendering2Supported: this.rendering2Supported(),
+            hasCustomWidget: (type: string) =>
+                this.genericWidgetGlobalService.hasCustomWidget(type),
+        });
+
+    /**
+     * Rates how far the grid of the given swimlane is filled with renderable widgets.
+     */
+    swimlaneCompletion(swimlane: Swimlane): SwimlaneCompletion {
+        return retrieveSwimlaneCompletion(swimlane, this.isRenderableWidgetType);
+    }
+
+    /**
+     * Counts the swimlanes still to be finished, or returns null when all are complete.
+     */
+    swimlaneCompletionCounts(): { unfinished: number; partial: number } | null {
+        const completions: SwimlaneCompletion[] = this.swimlanes.map((swimlane: Swimlane) =>
+            this.swimlaneCompletion(swimlane),
+        );
+        const unfinished: number = completions.filter((c) => c === 'unfinished').length;
+        const partial: number = completions.filter((c) => c === 'partial').length;
+        return unfinished + partial > 0 ? { unfinished, partial } : null;
+    }
+
+    /**
+     * Scrolls to the next swimlane still to be finished after the one jumped to last, starting
+     * over at the first one.
+     */
+    scrollToNextIncompleteSwimlane(): void {
+        const incompleteSwimlanes: Swimlane[] = this.swimlanes.filter(
+            (swimlane: Swimlane) => swimlane.id && this.swimlaneCompletion(swimlane) !== 'complete',
+        );
+        if (!incompleteSwimlanes.length) {
+            return;
+        }
+        const lastIndex: number = incompleteSwimlanes.findIndex(
+            (swimlane: Swimlane) => swimlane.id === this.lastIncompleteSwimlaneJumpedTo,
+        );
+        const target: Swimlane = incompleteSwimlanes[(lastIndex + 1) % incompleteSwimlanes.length];
+        this.lastIncompleteSwimlaneJumpedTo = target.id;
+        this.topicPageShareService.scrollToElement(
+            document.getElementById(this.SWIMLANE_ID_PREFIX + target.id),
+        );
+    }
+
+    // REACT TO FURTHER OUTPUT EVENTS
+    /**
+     * Called by es-swimlane gridUpdated output event.
+     * Handles the initial grid update of a given swimlane.
+     */
+    async handleGridUpdate(grid: GridTile[], swimlaneIndex: number): Promise<void> {
+        const step: { key: string } & StepOptions = this.gridChangeStep(
+            this.readPersistedStructure()?.swimlanes?.[swimlaneIndex]?.grid ?? [],
+            grid,
+        );
+        await this.history.record(
+            this.historyStepPrefix + step.key,
+            async (tx: HistoryTransaction): Promise<void> => {
+                try {
+                    // overwrite swimlane grid
+                    this.swimlanes[swimlaneIndex].grid = grid;
+
+                    // persist the state afterward
+                    await this.checkForCustomPageNodeExistence();
+                    const pageVariant: PageVariantConfig = this.retrievePageVariant();
+                    if (!pageVariant) {
+                        // restores the grid the swimlane had before
+                        tx.fail();
+                        return;
+                    }
+                    pageVariant.structure.swimlanes = this.swimlanes;
+                    this.pageVariantNode.set(await this.savePageVariantConfig(pageVariant));
+                    await this.updatePageVariantConfigs(this.pageVariantReloadNecessary);
+                    this.pageVariantReloadNecessary = false;
+                } catch (err) {
+                    tx.fail();
+                    console.error(err);
+                    this.topicPageHelperService.displayErrorToast();
+                }
+            },
+            step,
+        );
+    }
+
+    /**
+     * Called by es-editable-text searchResultsUpdated output event.
+     */
+    updateTitleSearchResults(event: number, swimlaneId: string): void {
+        // the title reports its hits while this page is being checked, and the matching feeds
+        // bindings checked before it, so the update follows the current check
+        queueMicrotask((): void => {
+            this.swimlaneTitleIdToHitMatching.set(swimlaneId, event > 0);
+            this.updateSwimlaneIdToHitMatching();
+        });
+    }
+
+    /**
+     * Called by es-swimlane searchHitsChanged output event.
+     */
+    updateGridItemSearchInputHits(event: GridTileToHitsMapping, swimlaneIndex: number): void {
+        // update the hasHits value of the grid tile
+        this.swimlanes[swimlaneIndex].grid[event.gridIndex].hasHits = event.hasHits;
+        // update the hit matching
+        this.updateSwimlaneIdToHitMatching();
+    }
+
+    /**
+     * Called by es-swimlane totalSearchResultCountChanged output event.
+     * Sets the search count and triggers an update.
+     */
+    updateGridItemTotalSearchCount(event: GridTileToSearchCountMapping, swimlaneIndex: number) {
+        this.swimlanes[swimlaneIndex].grid[event.gridIndex].searchCount = event?.count || 0;
+        this.searchCountTrigger++;
+    }
+
+    /**
+     * Called by es-swimlane visibleNodesChanged output event.
+     * Sets the visible nodes in the global service and triggers the hit matching.
+     */
+    updateVisibleNodes(event: GridTileToSearchResultsMapping, swimlaneIndex: number): void {
+        this.topicPageGlobalService.updateVisibleNodes(swimlaneIndex, event.gridIndex, event.nodes);
+        this.updateSwimlaneIdToHitMatching();
+    }
+
+    /**
+     * Called by es-profiling selectDimensionsChanged output event.
+     * Retrieves a mapping between the dimension ID and the mds widgets from the mds service.
+     */
+    selectDimensionsChanged(event: Map<string, MdsWidget>): void {
+        if (!event) {
+            return;
+        }
+        // iterate incoming select dimensions and insert new or overwrite existing ones
+        event.forEach((value: MdsWidget, key: string): void => {
+            this.selectDimensions.set(key, value);
+        });
+    }
+
+    /**
+     * Called by right es-side-menu-item itemClicked output event.
+     */
+    /**
+     * Opens the side menu item, or the sidebar's list of pages, an `openMenu` query param asks for
+     * and removes the param again.
+     */
+    private async openMenuFromParams(params: Params): Promise<void> {
+        const labelKey: string | undefined = OPEN_MENU_LABEL_KEYS[params.openMenu];
+        if (params.openMenu === OPEN_MANAGE_SIDEBAR_PARAM) {
+            if (this.canManage()) {
+                this.topicPageSidebarService.openManage();
+            }
+        } else if (labelKey) {
+            this.collapsibleItemClicked(this.translate.instant(labelKey));
+        } else {
+            return;
+        }
+        await this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { openMenu: null },
+            queryParamsHandling: 'merge',
+        });
+    }
+
+    collapsibleItemClicked(item: string): void {
+        if (this.selectedMenuItem === item) {
+            this.closeSideMenus();
+        } else {
+            this.selectedMenuItem = item;
+        }
+    }
+
+    /**
+     * Called by edit mode toggle button located in the top navbar.
+     * Opens all accordions when the view is switched into edit mode.
+     */
+    async toggleEditMode(): Promise<void> {
+        if (this.variantPreview()) {
+            return;
+        }
+        this.editMode.set(!this.editMode());
+        this.checkAccordionExpansionState();
+        this.closeSideMenus();
+    }
+
+    /**
+     * Sets the swimlanes that are rendered. Editing works on the persisted ones, so that what is
+     * saved is what an editor placed; outside edit mode repeat rules are resolved, which is what
+     * makes a rule reviewable before a variant is created from it.
+     */
+    private async updateRenderedSwimlanes(): Promise<void> {
+        if (this.editMode()) {
+            this.swimlanes = this.persistedSwimlanes;
+            return;
+        }
+        const source: Swimlane[] = this.persistedSwimlanes;
+        const expanded: Swimlane[] = await this.swimlaneRepeatService.expandForPreview(
+            { swimlanes: source },
+            { collectionId: this.topicCollectionId(), title: this.topic() },
+        );
+        // resolving takes a request, in which time the page may have loaded other swimlanes
+        if (source === this.persistedSwimlanes) {
+            this.swimlanes = expanded;
+        }
+    }
+
+    /**
+     * Renders a page structure and rebuilds the state derived from it. The structure is taken
+     * over by reference and edited in place afterwards, so it has to be a copy of its own.
+     */
+    private async applyStructureToLocalState(structure: PageStructure): Promise<void> {
+        this.anchorItemColor = structure.anchorItemColor;
+        this.topicColor = retrieveTopicColor({ structure }, this.collectionNode, this.topic());
+        this.breadcrumbNodeId.set(structure.breadcrumbNodeId);
+        this.headerNodeId.set(structure.headerNodeId);
+        this.propagatedBreadcrumbNodeId.set(structure.propagatedBreadcrumbNodeId ?? null);
+        this.propagatedHeaderNodeId.set(structure.propagatedHeaderNodeId ?? null);
+        this.persistedSwimlanes = structure.swimlanes ?? [];
+        await this.updateRenderedSwimlanes();
+        this.updateSwimlaneIdToHitMatching();
+        this.anchorTrigger++;
+        setTimeout((): void => this.checkAccordionExpansionState());
+    }
+
+    /**
+     * Reads the structure as persisted on the page variant node, freshly parsed on every call.
+     */
+    private readPersistedStructure(): PageStructure | null {
+        const pageVariantNode: Node = this.pageVariantNode();
+        return pageVariantNode
+            ? retrievePageVariantConfig(pageVariantNode)?.structure ?? null
+            : null;
+    }
+
+    /**
+     * Persists a structure the history restores and renders it.
+     */
+    private async writePersistedStructure(structure: PageStructure): Promise<void> {
+        this.pageVariantNode.set(await this.savePageVariantConfig({ structure }));
+        await this.bumpTemplateVersionIfNeeded();
+        await this.updatePageVariantConfigs();
+        // the visible nodes are keyed by swimlane and grid index
+        this.topicPageGlobalService.deleteVisibleNodesMap();
+        await this.applyStructureToLocalState(this.readPersistedStructure());
+    }
+
+    /**
+     * Updates what displays a node after the history restored one of its properties.
+     */
+    private async refreshRestoredNode(nodeId: string): Promise<void> {
+        if (nodeId === retrieveNodeId(this.collectionNode)) {
+            // the header shows the collection description from the collection node it is given
+            this.collectionNode = await this.topicPageHelperService.getNodeUncached(nodeId);
+            return;
+        }
+        if (nodeId === this.pageVariantNodeId()) {
+            // the variant node carries the AI config of the swimlane headings
+            this.pageVariantNode.set(await this.topicPageHelperService.getNodeUncached(nodeId));
+            await this.updatePageVariantConfigs();
+            await this.updateSwimlaneIdToPromptTextMapping();
+            return;
+        }
+        await this.bumpTemplateVersionIfNeeded();
+        this.topicPageEventsService.widgetNodeRestored.emit(nodeId);
+    }
+
+    /**
+     * Registers undo (Ctrl/Cmd+Z) and redo (Ctrl/Cmd+Shift+Z, Ctrl/Cmd+Y) for the edit mode.
+     */
+    private registerHistoryShortcuts(): void {
+        // matched by the character typed, so the shortcuts follow the keyboard layout
+        const shortcut = (
+            key: string,
+            modifiers: Modifier[],
+            action: () => Promise<void>,
+        ): KeyboardShortcut => ({
+            keyCode: 'Key' + key.toUpperCase(),
+            key,
+            modifiers,
+            ignoreWhen: (event: KeyboardEvent): boolean =>
+                !this.editMode() || this.requestInProgress() || isEditableTarget(event.target),
+            callback: (): void => void action(),
+        });
+        this.keyboardShortcuts.register(
+            [
+                shortcut('z', ['Ctrl/Cmd'], () => this.history.undo()),
+                shortcut('z', ['Ctrl/Cmd', 'Shift'], () => this.history.redo()),
+                shortcut('y', ['Ctrl/Cmd'], () => this.history.redo()),
+            ],
+            { until: this.destroyed$ },
+        );
+    }
+
+    /**
+     * The translated label of a history step, with the names it refers to filled in.
+     */
+    readonly historyStepLabel = (step: HistoryStep): string => {
+        const params: { [param: string]: string } = {};
+        Object.entries(step.labelParams ?? {}).forEach(([param, key]: [string, string]): void => {
+            params[param] = this.translate.instant(key);
+        });
+        return this.translate.instant(step.labelKey, params);
+    };
+
+    /**
+     * Names a change of a swimlane grid the way the user made it: picking a widget for an empty
+     * tile, changing a widget's type, rearranging the widgets, or changing the layout itself.
+     */
+    private gridChangeStep(before: GridTile[], after: GridTile[]): { key: string } & StepOptions {
+        const sameLayout: boolean =
+            before.length === after.length &&
+            before.every((tile, i) => tile.cols === after[i].cols && tile.rows === after[i].rows);
+        const changedTiles: { from: string; to: string }[] = sameLayout
+            ? after
+                  .map((tile, i) => ({ from: before[i].item || '', to: tile.item || '' }))
+                  .filter(({ from, to }) => from !== to)
+            : [];
+        const tileKey = (tile: GridTile): string => (tile.item || '') + '|' + (tile.nodeId || '');
+        const sameWidgets: boolean =
+            JSON.stringify(before.map(tileKey).sort()) ===
+            JSON.stringify(after.map(tileKey).sort());
+        if (changedTiles.length > 1 && sameWidgets) {
+            return { key: 'REARRANGE_WIDGETS' };
+        }
+        if (changedTiles.length === 1 && changedTiles[0].to) {
+            const { from, to } = changedTiles[0];
+            if (!from) {
+                return this.widgetStep('ADD_WIDGET', to);
+            }
+            return {
+                key: 'WIDGET_TYPE',
+                labelParams: { from: this.widgetNameKey(from), to: this.widgetNameKey(to) },
+            };
+        }
+        return { key: 'GRID' };
+    }
+
+    /**
+     * Names an edit of a widget node by what the node belongs to on the page.
+     */
+    private widgetConfigStep(widgetNodeId: string): { key: string } & StepOptions {
+        const nodeId: string = convertNodeRefIntoNodeId(widgetNodeId);
+        if (nodeId === convertNodeRefIntoNodeId(this.headerNodeId())) {
+            return { key: 'HEADER' };
+        }
+        if (nodeId === convertNodeRefIntoNodeId(this.breadcrumbNodeId())) {
+            return { key: 'BREADCRUMB' };
+        }
+        const tile: GridTile = this.persistedSwimlanes
+            .flatMap((swimlane: Swimlane) => swimlane.grid ?? [])
+            .find((t: GridTile) => !!t.nodeId && convertNodeRefIntoNodeId(t.nodeId) === nodeId);
+        return this.widgetStep('WIDGET_CONFIG', tile?.item);
+    }
+
+    private widgetStep(key: string, widgetType: string): { key: string } & StepOptions {
+        return { key, labelParams: { widget: this.widgetNameKey(widgetType) } };
+    }
+
+    // the name the widget selection shows for a widget type
+    private widgetNameKey(widgetType: string): string {
+        const option = WIDGET_TYPE_OPTIONS.find((o) => o.value === widgetType);
+        return option
+            ? 'TOPIC_PAGE.SWIMLANE.SELECT_WIDGET.' + option.viewValue
+            : this.historyStepPrefix + 'WIDGET';
+    }
+
+    /**
+     * Leaves the template mode by setting the according variable and reloading the page.
+     */
+    leaveTemplateMode(): void {
+        this.templateMode.set(false);
+        window.location.reload();
+    }
+
+    /**
+     * Called by es-topic-page-breadcrumb navigateToTemplate output event.
+     */
+    async switchIntoTemplateMode(reloadNecessary: boolean = false): Promise<void> {
+        this.templateMode.set(true);
+        if (reloadNecessary) {
+            this.collectionNode = await this.topicPageHelperService.getNodeUncached(
+                retrieveNodeId(this.collectionNode),
+            );
+        }
+        this.pageConfigNode = null;
+        this.selectedVariantPosition = -1;
+        this.closeSideMenus();
+        // remove the create buttons for a new page variant and a new page template: neither can be
+        // created while the template itself is being edited
+        await this.topicPageCreateOptionsService.remove(
+            this.createPageVariantTitle,
+            this.createPageTemplateTitle,
+        );
+        await this.retrievePageConfigAndSelectVariant();
+    }
+
+    /**
+     * Opens a global template in the editor in place of the collection's page. The rights on the
+     * template decide about editing; the collection's page itself stays untouched.
+     */
+    async switchIntoGlobalTemplateMode(templateNode: Node): Promise<void> {
+        if (!templateNode) {
+            return;
+        }
+        // the page may still offer a template that was deleted in the meantime
+        const availableTemplateNode: Node | null =
+            await this.topicPageHelperService.getNodeIfAvailable(retrieveNodeId(templateNode));
+        if (!availableTemplateNode) {
+            this.toast.error(null, this.i18nPrefix + 'GLOBAL_TEMPLATE_UNAVAILABLE');
+            await this.loadTemplateVariantNode();
+            return;
+        }
+        this.variantPreviewService.leave();
+        this.requestInProgress.set(true);
+        try {
+            this.globalTemplateNode.set(availableTemplateNode);
+            this.templateMode.set(false);
+            // no write may reach the collection's page config while the template is edited
+            this.pageConfigNode = null;
+            this.closeSideMenus();
+            // neither a page variant nor a page template can be created from within the template
+            await this.topicPageCreateOptionsService.remove(
+                this.createPageVariantTitle,
+                this.createPageTemplateTitle,
+            );
+            await this.retrievePageConfigAndSelectVariant();
+            this.userHasEditRights.set(
+                this.nodeHelperService.getNodesRight(
+                    [this.globalTemplateNode()],
+                    ApiRestConstants.ACCESS_WRITE,
+                ),
+            );
+            if (this.userHasEditRights()) {
+                this.initializeCustomEventListeners();
+            }
+            this.editMode.set(this.userHasEditRights());
+        } catch (err) {
+            console.error(err);
+            this.topicPageHelperService.displayErrorToast();
+        } finally {
+            this.endEditing();
+        }
+    }
+
+    /**
+     * Opens a global template picked in the sidebar for creating a page variant or template.
+     */
+    async openGlobalTemplateFromSidebar(templateNode: Node): Promise<void> {
+        this.topicPageSidebarService.close();
+        await this.switchIntoGlobalTemplateMode(templateNode);
+    }
+
+    /**
+     * Re-resolves the template of the current page after a global template was deleted, as it may
+     * have been that one, and drops the template from a running preview.
+     */
+    async onGlobalTemplateDeleted(templateNode: Node): Promise<void> {
+        await this.loadTemplateVariantNode();
+        await this.variantPreviewService.remove(templateNode);
+    }
+
+    /**
+     * Leaves the global template by reloading the collection's page.
+     */
+    leaveGlobalTemplateMode(): void {
+        window.location.reload();
+    }
+
+    /**
+     * Deletes the global template being edited and returns to the collection's page.
+     */
+    async deleteGlobalTemplate(): Promise<void> {
+        const templateNode: Node = this.globalTemplateNode();
+        if (
+            templateNode &&
+            (await this.topicPageHelperService.deleteGlobalTemplate(templateNode))
+        ) {
+            this.leaveGlobalTemplateMode();
+        }
+    }
+
+    /**
+     * Shows the listed node at the given position of the running preview.
+     */
+    async showVariantPreviewAt(index: number): Promise<void> {
+        await this.variantPreviewService.showAt(index);
+    }
+
+    /**
+     * Creates a page variant or template from the node shown in the running preview.
+     */
+    async useVariantPreview(): Promise<void> {
+        await this.variantPreviewService.use();
+    }
+
+    /**
+     * Ends the running preview and restores the collection's page.
+     */
+    async endVariantPreview(): Promise<void> {
+        await this.variantPreviewService.end();
+    }
+
+    // the collection's page as the variant preview replaces and restores it
+    private readonly variantPreviewHost: VariantPreviewHost = {
+        isGlobalTemplateOpen: (): boolean => !!this.globalTemplateNode(),
+        enterPreview: (): VariantPreviewRestoreState => {
+            const restoreState: VariantPreviewRestoreState = this.captureCollectionPage();
+            this.editMode.set(false);
+            this.closeSideMenus();
+            return restoreState;
+        },
+        showNode: async (node: Node): Promise<void> => {
+            this.topicPageHelperService.closePreview();
+            this.topicPageGlobalService.deleteVisibleNodesMap();
+            this.scrollContainerRef()?.nativeElement.scrollTo({ top: 0 });
+            await this.showDetachedVariant(node, true);
+        },
+        restorePage: (restoreState: VariantPreviewRestoreState): void =>
+            this.restoreCollectionPage(restoreState),
+        reloadPage: async (): Promise<void> => {
+            if (this.initialLoadSuccessfully() && this.latestParams) {
+                await this.retrievePageConfigAndSelectVariant(this.latestParams.variantId, true);
+            }
+        },
+        createFrom: (kind: CreationKind, node: Node, copyOption: CopyOption): Promise<void> =>
+            this.createFrom(kind, node, copyOption),
+    };
+
+    // the collection's page as the topic page's sidebar option acts on it
+    private readonly topicPageSidebarHost: TopicPageSidebarHost = {
+        collectionNodeId: this.topicCollectionId,
+        pageVariantNode: this.collectionPageVariantNode,
+        pageConfigRef: (): string | null => this.collectionNodePageConfigRef ?? null,
+        creationKinds: this.creationKinds,
+        restoredSearchState: (kind: CreationKind): PageVariantSearchState | null => {
+            const preview: VariantPreview | null = this.variantPreview();
+            if (!preview?.searchState || preview.kind !== kind) {
+                return null;
+            }
+            return {
+                ...preview.searchState,
+                selectedNodeId: retrieveNodeId(this.variantPreviewNode()) ?? null,
+            };
+        },
+        // the status bar of the preview leads back to the selection
+        preview: async (
+            kind: CreationKind,
+            copyOption: CopyOption,
+            searchState: PageVariantSearchState | null,
+            node: Node,
+        ): Promise<void> => {
+            await this.variantPreviewService.start(kind, copyOption, searchState, node);
+            this.topicPageSidebarService.close();
+        },
+        use: async (kind: CreationKind, node: Node, copyOption: CopyOption): Promise<void> => {
+            this.topicPageSidebarService.close();
+            await this.endVariantPreview();
+            await this.createFrom(kind, node, copyOption);
+        },
+        editGlobalTemplate: (node: Node): Promise<void> => this.openGlobalTemplateFromSidebar(node),
+        globalTemplateDeleted: (node: Node): Promise<void> => this.onGlobalTemplateDeleted(node),
+        templateMode: this.templateMode,
+        canEditTemplates: this.userHasEditRights,
+        canManage: this.canManage,
+        showEntry: (entry: TopicPageEntry): Promise<void> => this.showEntry(entry),
+        regenerateEntry: async (entry: TopicPageEntry): Promise<void> => {
+            await this.showEntry(entry);
+            await this.regeneratePageVariant();
+        },
+        deleteEntry: async (entry: TopicPageEntry): Promise<void> => {
+            if (!this.canManage() || this.variantPreview() || entry.kind === 'inherited') {
+                return;
+            }
+            await this.deleteVariantOfConfig(
+                entry.configNode,
+                entry.node,
+                entry.kind === 'template',
+            );
+        },
+        editTemplate: (entry: TopicPageEntry): Promise<void> => this.editEntryTemplate(entry),
+    };
+
+    /**
+     * Shows a page or template listed in the sidebar in place of the current one. Leaving the
+     * template mode takes loading the collection's page anew, which reopens the list.
+     */
+    private async showEntry(entry: TopicPageEntry): Promise<void> {
+        const variantId: string = retrieveNodeId(entry.node);
+        const template: boolean = entry.kind === 'template';
+        await this.endVariantPreview();
+        if (this.templateMode() && !template) {
+            await this.router.navigate([], {
+                relativeTo: this.route,
+                queryParams: { variantId, openMenu: OPEN_MANAGE_SIDEBAR_PARAM },
+                queryParamsHandling: 'merge',
+            });
+            window.location.reload();
+            return;
+        }
+        if (template && !this.templateMode()) {
+            await this.switchIntoTemplateMode();
+        }
+        if (variantId !== this.pageVariantNodeId()) {
+            await this.navigateToVariant(variantId);
+        }
+    }
+
+    /**
+     * Opens the template a listed page was built from for editing, as a global template or in
+     * the template mode of the collection.
+     */
+    private async editEntryTemplate(entry: TopicPageEntry): Promise<void> {
+        if (!entry.templateNode) {
+            return;
+        }
+        if (entry.templateEditTarget === 'global') {
+            await this.openGlobalTemplateFromSidebar(entry.templateNode);
+        } else if (entry.templateEditTarget === 'collection') {
+            await this.showEntry({ ...entry, kind: 'template', node: entry.templateNode });
+            if (!this.editMode()) {
+                await this.toggleEditMode();
+            }
+        }
+    }
+
+    /**
+     * Offers the topic page's menu in the editorial sidebar with the entries the user can use,
+     * rendered with the services of this page.
+     */
+    private registerSidebarOptions(canManage: boolean, canCreate: boolean): void {
+        this.editorialSidebarService.registerCustomOption({
+            id: TOPIC_PAGE_SIDEBAR_OPTION,
+            label: 'TOPIC_PAGE.SIDEBAR.TITLE',
+            icon: 'edu-page_variant',
+            // the menu acts on the page, not on content selected on it
+            customShowCallback: async (nodes) => !nodes?.length,
+        });
+        const entries = [
+            {
+                id: TOPIC_PAGE_MANAGE_OPTION,
+                label: 'TOPIC_PAGE.SIDEBAR.MENU.MANAGE',
+                icon: 'list',
+                component: TopicPageManageSidebarComponent,
+                offered: canManage,
+            },
+            {
+                id: TOPIC_PAGE_CREATE_OPTION,
+                label: createOptionLabel(this.creationKinds()),
+                icon: 'add',
+                component: TopicPageCreateSidebarComponent,
+                offered: canCreate,
+            },
+            {
+                id: TOPIC_PAGE_INHERITANCE_OPTION,
+                label: 'TOPIC_PAGE.SIDEBAR.MENU.INHERITANCE',
+                icon: 'account_tree',
+                component: TopicPageInheritanceSidebarComponent,
+                offered: canManage,
+            },
+        ];
+        for (const { offered, ...entry } of entries) {
+            if (offered) {
+                this.editorialSidebarService.registerCustomOption({
+                    ...entry,
+                    parent: TOPIC_PAGE_SIDEBAR_OPTION,
+                    injector: this.injector,
+                });
+            } else {
+                this.editorialSidebarService.unregisterCustomOption(entry.id);
+            }
+        }
+    }
+
+    private unregisterSidebarOptions(): void {
+        for (const id of TOPIC_PAGE_SIDEBAR_OPTIONS) {
+            this.editorialSidebarService.unregisterCustomOption(id);
+        }
+    }
+
+    /**
+     * Captures the state of the collection's page that a preview replaces.
+     */
+    private captureCollectionPage(): VariantPreviewRestoreState {
+        return {
+            anchorItemColor: this.anchorItemColor,
+            breadcrumbNodeId: this.breadcrumbNodeId(),
+            editMode: this.editMode(),
+            headerNodeId: this.headerNodeId(),
+            pageConfigCheckFailed: this.pageConfigCheckFailed(),
+            pageVariantConfigs: this.pageVariantConfigs,
+            pageVariantNode: this.pageVariantNode(),
+            pageVariantNodeIndex: this.pageVariantNodeIndex,
+            pageVariantSettingsValid: this.pageVariantSettingsValid(),
+            persistedSwimlanes: this.persistedSwimlanes,
+            propagatedBreadcrumbNodeId: this.propagatedBreadcrumbNodeId(),
+            propagatedHeaderNodeId: this.propagatedHeaderNodeId(),
+            scrollTop: this.scrollContainerRef()?.nativeElement.scrollTop ?? 0,
+            selectedVariables: JSON.stringify(
+                this.topicPageHelperService.getSelectedVariables() ?? null,
+            ),
+            selectedVariantPosition: this.selectedVariantPosition,
+            swimlaneIdToPromptTextMapping: this.swimlaneIdToPromptTextMapping,
+            swimlanes: this.swimlanes,
+            topicColor: this.topicColor,
+        };
+    }
+
+    /**
+     * Restores the collection's page as captured before a preview, without reloading it.
+     */
+    private restoreCollectionPage(restoreState: VariantPreviewRestoreState): void {
+        this.anchorItemColor = restoreState.anchorItemColor;
+        this.topicColor = restoreState.topicColor;
+        this.breadcrumbNodeId.set(restoreState.breadcrumbNodeId);
+        this.headerNodeId.set(restoreState.headerNodeId);
+        this.propagatedBreadcrumbNodeId.set(restoreState.propagatedBreadcrumbNodeId);
+        this.propagatedHeaderNodeId.set(restoreState.propagatedHeaderNodeId);
+        this.pageConfigCheckFailed.set(restoreState.pageConfigCheckFailed);
+        this.pageVariantConfigs = restoreState.pageVariantConfigs;
+        this.pageVariantNodeIndex = restoreState.pageVariantNodeIndex;
+        this.pageVariantSettingsValid.set(restoreState.pageVariantSettingsValid);
+        this.selectedVariantPosition = restoreState.selectedVariantPosition;
+        this.persistedSwimlanes = restoreState.persistedSwimlanes;
+        this.swimlanes = restoreState.swimlanes;
+        this.swimlaneIdToPromptTextMapping = restoreState.swimlaneIdToPromptTextMapping;
+        // last, as effects reload the template and the rendered swimlanes from these
+        this.pageVariantNode.set(restoreState.pageVariantNode);
+        this.editMode.set(restoreState.editMode);
+        this.topicPageHelperService.closePreview();
+        this.topicPageGlobalService.deleteVisibleNodesMap();
+        this.endEditing();
+        setTimeout((): void => {
+            this.scrollContainerRef()?.nativeElement.scrollTo({ top: restoreState.scrollTop });
+        });
+    }
+
+    // HELPER FUNCTIONS
+    /**
+     * Adds the topic page's own options to the main nav.
+     */
+    private async addCustomMainNavOptions(): Promise<void> {
+        // @TODO: setting scope does not work yet
+        this.optionsHelperService.setData({
+            scope: Scope.TopicPage,
+        });
+        await this.topicPageCreateOptionsService.add(
+            this.createPageVariantTitle,
+            'edu-page_variant',
+            () => {
+                void this.createPageVariant();
+            },
+            10,
+            Constrain.User,
+        );
+    }
+
+    /**
+     * Helper function to retrieve the search URL.
+     */
+    private retrieveSearchUrl(): string {
+        const tree: UrlTree = this.router.createUrlTree([UIConstants.ROUTER_PREFIX, 'search']);
+        return (
+            this.platformLocation.getBaseHrefFromDOM() + this.router.serializeUrl(tree).substring(1)
+        );
+    }
+
+    /**
+     * Helper function to parse the page config ref of the collection and return the proper page config node.
+     * If no page config ref is set, check whether a parent propagates one.
+     */
+    private async retrievePageConfigNode(node: Node): Promise<Node> {
+        // check whether the node itself has a pageConfigRef
+        let pageRef: string = retrievePageConfigRef(node);
+        // in template mode, overwrite the page ref with the propagate page config ref
+        if (this.templateMode() && retrievePageConfigPropagateRef(node)) {
+            pageRef = retrievePageConfigPropagateRef(node);
+        }
+        this.collectionNodePageConfigRef = pageRef;
+        // otherwise, iterate the parents to retrieve the pageConfigPropagateRef if set
+        if (!pageRef) {
+            const parents: ParentEntries = await this.topicPageHelperService.getNodeParents(
+                retrieveNodeId(node),
+            );
+            this.propagatingParentNode = findInheritanceSource(node, parents.nodes ?? []);
+            if (this.propagatingParentNode) {
+                pageRef = retrievePageConfigPropagateRef(this.propagatingParentNode);
+            }
+            this.pageVariantReloadNecessary = true;
+        }
+        if (pageRef) {
+            const pageNodeId: string = convertNodeRefIntoNodeId(pageRef);
+            const pageConfigNode: Node | null = pageNodeId
+                ? await this.topicPageHelperService.getNodeIfAvailable(pageNodeId)
+                : null;
+            if (pageConfigNode) {
+                this.pageConfigCheckFailed.set(false);
+                return pageConfigNode;
+            }
+        }
+        this.markTopicPageAsMissing();
+        return null;
+    }
+
+    /**
+     * Checks whether the propagate config referenced by the collection still holds at least one
+     * template variant that can be loaded.
+     */
+    private async isPageTemplateAvailable(pageConfigPropagateRef: string): Promise<boolean> {
+        if (!pageConfigPropagateRef) {
+            return false;
+        }
+        const propagateNodeId: string = convertNodeRefIntoNodeId(pageConfigPropagateRef);
+        const propagateNode: Node | null = await this.topicPageHelperService.getNodeIfAvailable(
+            propagateNodeId,
+        );
+        const templateVariants: string[] = retrievePageConfig(propagateNode).variants ?? [];
+        if (!templateVariants.length) {
+            return false;
+        }
+        const children: NodeEntries = await this.topicPageHelperService.getNodeChildren(
+            propagateNodeId,
+        );
+        const childIds: string[] = (children?.nodes ?? []).map((node: Node) =>
+            retrieveNodeId(node),
+        );
+        return templateVariants.some((variantRef: string) =>
+            childIds.includes(convertNodeRefIntoNodeId(variantRef)),
+        );
+    }
+
+    /**
+     * Removes the variants that were deleted or are no longer readable from the given page config
+     * and the loaded page config node, so index-based variant lookups stay aligned.
+     * Returns whether at least one variant is left.
+     */
+    private dropUnavailablePageVariants(pageConfig: PageConfig): boolean {
+        const availableVariantIds: string[] = (this.pageVariantConfigs?.nodes ?? []).map(
+            (node: Node) => retrieveNodeId(node),
+        );
+        const isAvailable = (variantRef: string): boolean =>
+            availableVariantIds.includes(convertNodeRefIntoNodeId(variantRef));
+        if (pageConfig.variants.every(isAvailable)) {
+            return pageConfig.variants.length > 0;
+        }
+        pageConfig.variants = pageConfig.variants.filter(isAvailable);
+        if (pageConfig.default && !isAvailable(pageConfig.default)) {
+            delete pageConfig.default;
+        }
+        this.pageConfigNode.properties[DEFAULT_PAGE_CONFIG_PROP] = [JSON.stringify(pageConfig)];
+        return pageConfig.variants.length > 0;
+    }
+
+    /**
+     * Shows that no topic page exists, dropping references to an unavailable page config so
+     * creating a variant starts a new page config for the collection.
+     */
+    private markTopicPageAsMissing(): void {
+        this.pageConfigNode = null;
+        this.collectionNodePageConfigRef = null;
+        this.pageVariantConfigs = null;
+        this.pageVariantDefaultPosition = -1;
+        this.pageVariantNode.set(null);
+        this.pageConfigCheckFailed.set(true);
+    }
+
+    /**
+     * Helper function to update the swimlane ID to search hit matching.
+     */
+    private updateSwimlaneIdToHitMatching(): void {
+        const hitMatching: SwimlaneHitMatching = computeSwimlaneHitMatching(
+            this.swimlanes,
+            this.swimlaneTitleIdToHitMatching,
+        );
+        this.swimlaneIdToHitMatching = hitMatching.bySwimlaneId;
+        this.firstMatchingSwimlaneId = hitMatching.firstMatchingSwimlaneId;
+        this.lastMatchingSwimlaneId = hitMatching.lastMatchingSwimlaneId;
+    }
+
+    /**
+     * Helper function to update the swimlane ID to prompt text mapping.
+     */
+    private async updateSwimlaneIdToPromptTextMapping(): Promise<void> {
+        if (!this.pageVariantNode()) {
+            console.warn(this.translate.instant('TOPIC_PAGE.NO_PAGE_VARIANT.DEFAULT_MESSAGE'));
+            return;
+        }
+        if (!this.aiSupported()) {
+            return;
+        }
+        const aiConfig: BapiConfigObject = retrieveAiConfigFromNode(this.pageVariantNode());
+        // a fresh map per run: a section without a stored prompt shows its plain heading, and a
+        // slower earlier run cannot fill the map of a later one
+        const mapping: Map<string, PromptToTextMapping> = new Map();
+        this.swimlaneIdToPromptTextMapping = mapping;
+        if (!aiConfig || !Object.keys(aiConfig)?.length) {
+            return;
+        }
+        try {
+            for (const swimlane of this.swimlanes) {
+                if (aiConfig.hasOwnProperty(swimlane.id)) {
+                    const prompt: string = retrievePromptFromAiConfig(aiConfig, swimlane.id);
+                    if (prompt) {
+                        const config: NodeConfig = {
+                            type: 'node',
+                            nodeId: convertNodeRefIntoNodeId(this.pageVariantNodeId()),
+                            configName: swimlane.id,
+                        };
+                        const result: CreateChatCompletionResponse =
+                            await this.aiHelperService.generateFromPrompt(
+                                config,
+                                this.topicPageHelperService.getSelectedVariables() || {},
+                                this.topicCollectionId(),
+                            );
+                        const promptToTextMapping = new PromptToTextMapping(
+                            prompt,
+                            retrieveResultString(result) ||
+                                this.translate.instant('TOPIC_PAGE.AI.INVALID_PROMPT'),
+                        );
+                        mapping.set(swimlane.id, promptToTextMapping);
+                    }
+                }
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    /**
+     * Helper function to create a custom page config as a starting point.
+     *
+     * @param sourceNode the node the only variant of the new page config is built from
+     */
+    async createCustomConfig(sourceNode: Node): Promise<void> {
+        try {
+            // fake page variant config nodes
+            this.pageVariantConfigs = {
+                nodes: [],
+                pagination: {
+                    count: 1,
+                    from: 1,
+                    total: 1,
+                },
+            };
+            this.selectedVariantPosition = 0;
+            this.pageVariantConfigs.nodes = [sourceNode];
+            // start reinitialization process
+            this.pageConfigCreationInProgress.set(true);
+            this.requestInProgress.set(true);
+            // create config node + link
+            await this.checkForCustomPageNodeExistence();
+            // workaround: copy profiling properties separately to avoid crashes
+            const updatedVariantNode =
+                await this.topicPageVariantNodesService.copyProfilingProperties(
+                    sourceNode,
+                    this.pageVariantNodeId(),
+                );
+            if (updatedVariantNode) {
+                this.pageVariantNode.set(updatedVariantNode);
+            }
+            // after the page config + variant node were created from the template,
+            // copy the widget nodes and persist the variant config without propagatedNodeIds
+            const variantConfig: PageVariantConfig = retrievePageVariantConfig(
+                this.pageVariantNode(),
+            );
+            await this.persistRelinkedVariantConfig(variantConfig, this.pageVariantNode(), {
+                syncLocalState: true,
+                collectionId: this.topicCollectionId(),
+            });
+            // reset values + reinitialize the component
+            this.pageConfigCheckFailed.set(false);
+            this.initialLoadSuccessfully.set(false);
+            await this.initializeComponent();
+            await this.finishCreation('CREATE_PAGE_VARIANT.SUCCESS_MESSAGE');
+        } catch (err) {
+            console.error(err);
+            this.endEditing();
+            this.topicPageHelperService.displayErrorToast();
+        } finally {
+            this.pageConfigCreationInProgress.set(false);
+            this.requestInProgress.set(false);
+        }
+    }
+
+    /**
+     * Allows creating a page template by opening the sidebar for picking its source.
+     */
+    createPageTemplate(): void {
+        this.openCreationSidebar('template');
+    }
+
+    /**
+     * Ends the creation of a page variant or template: switches into edit mode, opens the new
+     * variant if given and its settings menu once it is loaded.
+     */
+    private async finishCreation(successMessageKey: string, variantNodeId?: string): Promise<void> {
+        this.editMode.set(true);
+        this.endEditing();
+        this.topicPageHelperService.openSaveConfigToast(this.i18nPrefix + successMessageKey);
+        if (variantNodeId) {
+            await this.navigateToVariant(variantNodeId);
+        }
+        setTimeout(async () => {
+            // on variant change, do not keep the fragments
+            await this.router.navigate([], {
+                relativeTo: this.route,
+                queryParams: { openMenu: 'settings' },
+                queryParamsHandling: 'merge',
+            });
+        }, 500);
+    }
+
+    /**
+     * Creates the template variant under the ccm:page_config_propagate_ref node from a given
+     * source. If no propagate config node exists yet it is created and linked; otherwise the new
+     * template variant is added to the existing propagate config folder.
+     */
+    private async createPageTemplateFrom(sourceNode: Node, copyOption: CopyOption): Promise<void> {
+        this.startEditing(this.i18nPrefix + 'CREATE_PAGE_TEMPLATE.PENDING_MESSAGE');
+        // when pageConfigCheckFailed() is true the showLoadingScreen first clause requires
+        // pageConfigCreationInProgress — startEditing alone is not enough in that state
+        if (this.pageConfigCheckFailed()) {
+            this.pageConfigCreationInProgress.set(true);
+        }
+
+        try {
+            this.closeSideMenus();
+            // retrieve page variant config from selected source and prepare it
+            const variantConfig: PageVariantConfig = retrievePageVariantConfig(sourceNode);
+            // delete the nodeIds but keep them as temporaryNodeIds + remove certain variables
+            markForCopy(variantConfig);
+            const properties: { [key: string]: string | string[] } =
+                await this.topicPageVariantNodesService.templateVariantProperties(
+                    sourceNode,
+                    copyOption,
+                );
+            const propagateConfig: { node: Node; pageConfig: PageConfig } =
+                await this.topicPageVariantNodesService.getOrCreatePropagateConfig(
+                    this.collectionNode,
+                    this.collectionNodePagePropagateConfigRef,
+                );
+            const pageConfigPropagateNode: Node = propagateConfig.node;
+            const pageConfig: PageConfig = propagateConfig.pageConfig;
+            // create the template variant as a child of the propagate config node
+            const pageConfigVariantNode: Node =
+                await this.topicPageVariantNodesService.createVariantNode(
+                    retrieveNodeId(pageConfigPropagateNode),
+                    sourceNode,
+                    properties,
+                );
+            // push new variant into the propagate page config
+            pageConfig.variants.push(prependWorkspacePrefix(retrieveNodeId(pageConfigVariantNode)));
+            if (!pageConfig.default) {
+                pageConfig.default = pageConfig.variants[0];
+            }
+            // create and relink copies of the widget nodes + persist variant config
+            await this.persistRelinkedVariantConfig(variantConfig, pageConfigVariantNode);
+            // update ccm:page_config of the propagate config node
+            await this.topicPageHelperService.setProperty(
+                retrieveNodeId(pageConfigPropagateNode),
+                DEFAULT_PAGE_CONFIG_PROP,
+                JSON.stringify(pageConfig),
+            );
+            if (!this.collectionNodePagePropagateConfigRef) {
+                // link the new propagate config node to the collection via ccm:page_config_propagate_ref
+                await this.topicPageHelperService.setProperty(
+                    retrieveNodeId(this.collectionNode),
+                    DEFAULT_PAGE_CONFIG_PROPAGATE_REF_PROP,
+                    prependWorkspacePrefix(retrieveNodeId(pageConfigPropagateNode)),
+                );
+                this.collectionNodePagePropagateConfigRef = prependWorkspacePrefix(
+                    retrieveNodeId(pageConfigPropagateNode),
+                );
+            }
+            await this.switchIntoTemplateMode(true);
+            // TODO: there seems to be a race condition here, so slightly delay the navigate call
+            setTimeout((): void => {
+                void this.finishCreation(
+                    'CREATE_PAGE_TEMPLATE.SUCCESS_MESSAGE',
+                    retrieveNodeId(pageConfigVariantNode),
+                );
+            }, 500);
+        } catch (err) {
+            console.error(err);
+            this.topicPageHelperService.displayErrorToast();
+        } finally {
+            this.pageConfigCreationInProgress.set(false);
+            this.endEditing();
+        }
+    }
+
+    /**
+     * Checks whether the background color of a given swimlane is a dark color.
+     */
+    isDarkColor(swimlane: Swimlane): boolean {
+        const color = swimlane.backgroundColor;
+        if (
+            !color ||
+            ![undefined, SwimlaneBackgroundShape.None].includes(swimlane.backgroundShape)
+        ) {
+            return false;
+        }
+        return ColorHelper.getPreferredColor(color) === PreferredColor.Black;
+    }
+
+    /**
+     * Resolves the background color to paint for a swimlane. In dark mode a bright custom color is
+     * adapted to a dark surface (so the theme's light text stays readable); already-dark colors
+     * and light mode are left as configured.
+     */
+    swimlaneBackgroundColor(color: string): string {
+        return this.themeService.isDarkMode() ? this.themeService.toDarkSurfaceColor(color) : color;
+    }
+
+    /**
+     * True when a dark custom anchor-item color is set, so the item text needs to be light. The
+     * check uses the original color (not the dark-adapted one): in dark mode a light color keeps
+     * the theme's already-light `$on-surface` text, while a dark color flips to `--textOnDarkSurface`.
+     */
+    isAnchorItemColorDark(): boolean {
+        return (
+            !!this.anchorItemColor &&
+            ColorHelper.getPreferredColor(this.anchorItemColor) === PreferredColor.Black
+        );
+    }
+
+    /**
+     * Helper function to add a possible non-existing page config node.
+     */
+    private async checkForCustomPageNodeExistence(
+        pageVariantNode?: Node,
+        swimlaneIndex?: number,
+        gridIndex?: number,
+        widget?: WidgetConfigObject,
+        isHeaderNode?: boolean,
+        isBreadcrumbNode?: boolean,
+    ): Promise<boolean> {
+        // a global template is edited in place and must never give the collection a page config
+        if (this.globalTemplateNode()) {
+            await this.bumpTemplateVersionIfNeeded();
+            return false;
+        }
+        if (this.variantPreview()) {
+            return false;
+        }
+        // edits made while the inherited page config is copied apply to that copy
+        if (this.inheritedPageConfigCopy) {
+            await this.inheritedPageConfigCopy;
+        }
+        if (!this.collectionNodePageConfigRef) {
+            this.inheritedPageConfigCopy = this.copyInheritedPageConfig(
+                widget
+                    ? {
+                          variantNodeId: retrieveNodeId(pageVariantNode),
+                          swimlaneIndex,
+                          gridIndex,
+                          widget,
+                          isHeaderNode,
+                          isBreadcrumbNode,
+                      }
+                    : null,
+            );
+            try {
+                await this.inheritedPageConfigCopy;
+            } finally {
+                this.inheritedPageConfigCopy = null;
+            }
+            return true;
+        }
+        // existing config — this is a real modification, not initial creation
+        await this.bumpTemplateVersionIfNeeded();
+        return false;
+    }
+
+    /**
+     * Gives the collection a page config of its own, copied from the inherited one, and shows it.
+     */
+    private async copyInheritedPageConfig(pendingWidget: PendingWidget | null): Promise<void> {
+        // before creating another page config node, check which variant is currently selected
+        const pageConfig: PageConfig = retrievePageConfig(this.pageConfigNode);
+        const copy: { pageConfigNode: Node; selectedVariantPosition: number | null } =
+            await this.topicPageVariantCopyService.copyPageConfig(
+                this.collectionNode,
+                this.pageVariantConfigs?.nodes ?? [],
+                pageConfig.variants?.[this.selectedVariantPosition] || '',
+                this.pageVariantDefaultPosition,
+                pendingWidget,
+                { collectionId: this.topicCollectionId(), title: this.topic() },
+            );
+        this.pageConfigNode = copy.pageConfigNode;
+        // the copy of the shown variant stays selected
+        if (copy.selectedVariantPosition !== null) {
+            this.selectedVariantPosition = copy.selectedVariantPosition;
+        }
+        // retrieve the updated page variant configs
+        await this.updatePageVariantConfigs(true); // retrieve the updated page variant configs
+        await this.updatePageVariantConfigs(true);
+        // parse the page config ref again
+        const pageVariant: PageVariantConfig = this.retrievePageVariant();
+        await this.applyStructureToLocalState(pageVariant.structure);
+        // update the ccm:page_config_ref in the collection
+        await this.topicPageHelperService.setProperty(
+            retrieveNodeId(this.collectionNode),
+            DEFAULT_PAGE_CONFIG_REF_PROP,
+            prependWorkspacePrefix(retrieveNodeId(this.pageConfigNode)),
+        );
+        this.collectionNodePageConfigRef = prependWorkspacePrefix(
+            retrieveNodeId(this.pageConfigNode),
+        );
+    }
+
+    /**
+     * Retrieves the node holding the config of the widget (header, breadcrumb or grid tile) a
+     * given event belongs to, or null if it has none.
+     */
+    private findWidgetNodeId(event: WidgetNodeAddedEvent): string | null {
+        let nodeId: string | undefined;
+        if (event.isHeaderNode) {
+            nodeId = this.headerNodeId();
+        } else if (event.isBreadcrumbNode) {
+            nodeId = this.breadcrumbNodeId();
+        } else {
+            nodeId = this.swimlanes?.[event.swimlaneIndex]?.grid?.[event.gridIndex]?.nodeId;
+        }
+        return nodeId ? convertNodeRefIntoNodeId(nodeId) : null;
+    }
+
+    /**
+     * Stores the config of a widget that had no node when it was changed, in a node it got meanwhile
+     * (e.g. from a page config copy, reported to tx) or in a newly linked one.
+     * @returns the ID of the node holding the config, null if none could be linked
+     */
+    private async storeWidgetWithoutNode(
+        event: WidgetNodeAddedEvent,
+        tx: HistoryTransaction,
+    ): Promise<string | null> {
+        const { gridIndex, isBreadcrumbNode, isHeaderNode, swimlaneIndex, widget } = event;
+        const existingNodeId: string | null = this.findWidgetNodeId(event);
+        const existingNode: Node | null = existingNodeId
+            ? await this.topicPageHelperService.getNodeIfAvailable(existingNodeId, true)
+            : null;
+        if (existingNode) {
+            await this.topicPageHelperService.writeWidgetConfig(
+                existingNodeId,
+                widget.widgetConfig,
+                widget.aiConfig,
+            );
+            const updatedNode: Node = await this.topicPageHelperService.getNodeUncached(
+                existingNodeId,
+            );
+            for (const property of [DEFAULT_WIDGET_CONFIG_PROP, DEFAULT_AI_CONFIG_PROP]) {
+                tx.trackNodeProperty(
+                    existingNodeId,
+                    property,
+                    existingNode.properties?.[property] ?? null,
+                    updatedNode.properties?.[property] ?? null,
+                );
+            }
+            return existingNodeId;
+        }
+        const pageVariant: PageVariantConfig = this.retrievePageVariant();
+        // create the widget node
+        const properties: { [key: string]: string } = {
+            [DEFAULT_WIDGET_CONFIG_PROP]: JSON.stringify(widget.widgetConfig),
+        };
+        if (widget.aiConfig && Object.keys(widget.aiConfig)?.length) {
+            properties[DEFAULT_AI_CONFIG_PROP] = JSON.stringify(widget.aiConfig);
+        }
+        const widgetNode: Node = await this.topicPageHelperService.createChild(
+            retrieveNodeId(this.pageVariantNode()),
+            RestConstants.CCM_TYPE_MAP,
+            DEFAULT_WIDGET_NAME_PREFIX + uuidv4(),
+            null,
+            properties,
+        );
+        const convertedWidgetNodeId: string = prependWorkspacePrefix(retrieveNodeId(widgetNode));
+        // modify breadcrumb nodeId
+        if (isBreadcrumbNode) {
+            pageVariant.structure.breadcrumbNodeId = convertedWidgetNodeId;
+            this.breadcrumbNodeId.set(pageVariant.structure.breadcrumbNodeId);
+        }
+        // modify header nodeId
+        else if (isHeaderNode) {
+            pageVariant.structure.headerNodeId = convertedWidgetNodeId;
+            this.headerNodeId.set(pageVariant.structure.headerNodeId);
+        }
+        // modify nodeId of swimlane grid tile
+        else if (this.swimlanes?.[swimlaneIndex]?.grid?.[gridIndex] && pageVariant) {
+            this.swimlanes[swimlaneIndex].grid[gridIndex].nodeId = convertedWidgetNodeId;
+            pageVariant.structure.swimlanes = this.swimlanes;
+        } else {
+            return null;
+        }
+        this.pageVariantNode.set(await this.savePageVariantConfig(pageVariant));
+        return retrieveNodeId(widgetNode);
+    }
+
+    /**
+     * Helper function to retrieve the page variant of an existing page config node.
+     */
+    private retrievePageVariant(): PageVariantConfig {
+        if (this.variantPreview()) {
+            return null;
+        }
+        // a global template is the only variant of the page and belongs to no page config
+        if (this.globalTemplateNode()) {
+            return retrievePageVariantConfig(this.pageVariantNode());
+        }
+        // parse the page config from the properties
+        const pageConfig: PageConfig = retrievePageConfig(this.pageConfigNode);
+        if (!pageConfig.variants) {
+            console.error(
+                this.translate.instant('TOPIC_PAGE.NO_PAGE_CONFIG.MISSING_VARIANTS'),
+                pageConfig,
+            );
+            return null;
+        }
+        let selectedVariantId: string = pageConfig.variants?.[this.selectedVariantPosition];
+        if (!selectedVariantId) {
+            console.error(
+                this.translate.instant('TOPIC_PAGE.NO_PAGE_VARIANT.NO_SELECTED_VARIANT'),
+                pageConfig.variants,
+                this.selectedVariantPosition,
+            );
+            return null;
+        }
+        selectedVariantId = convertNodeRefIntoNodeId(selectedVariantId);
+        this.pageVariantNode.set(
+            this.pageVariantConfigs.nodes?.find(
+                (node: Node) => retrieveNodeId(node) === selectedVariantId,
+            ),
+        );
+        if (!this.pageVariantNode()) {
+            console.error(
+                this.translate.instant('TOPIC_PAGE.NO_PAGE_VARIANT.NO_SELECTED_VARIANT_NODE'),
+                selectedVariantId,
+                this.pageVariantConfigs.nodes,
+            );
+            return null;
+        }
+        this.pageVariantNodeIndex = this.pageVariantConfigs.nodes.findIndex(
+            (n) => retrieveNodeId(n) === this.pageVariantNodeId(),
+        );
+        this.pageVariantSettingsValid.set(true);
+        const pageVariant: PageVariantConfig = retrievePageVariantConfig(this.pageVariantNode());
+        if (!pageVariant || !pageVariant.structure) {
+            console.error(
+                this.translate.instant('TOPIC_PAGE.NO_PAGE_VARIANT.VARIANT_OR_STRUCTURE_MISSING'),
+                pageVariant,
+            );
+            return null;
+        }
+        return pageVariant;
+    }
+
+    /**
+     * Helper function to reload the page variant configs.
+     */
+    private async updatePageVariantConfigs(reloadNecessary: boolean = false): Promise<void> {
+        if (reloadNecessary && this.globalTemplateNode()) {
+            const templateNode: Node = await this.topicPageHelperService.getNodeUncached(
+                retrieveNodeId(this.globalTemplateNode()),
+            );
+            this.globalTemplateNode.set(templateNode);
+            this.pageVariantConfigs = { nodes: [templateNode], pagination: null };
+            return;
+        }
+        if (reloadNecessary) {
+            this.pageVariantConfigs = await this.topicPageHelperService.getNodeChildren(
+                retrieveNodeId(this.pageConfigNode),
+            );
+            return;
+        }
+        // update the page variant node inside the page variant configs. The configs may not be
+        // loaded at all (e.g. in template mode, where the edited node is a child of the propagate
+        // config node and `pageConfigNode` was reset), so both the list and a missing entry are
+        // tolerated — this is a local cache refresh and must never fail the calling operation.
+        const nodes: Node[] = this.pageVariantConfigs?.nodes;
+        if (!nodes?.length) {
+            return;
+        }
+        const index: number = nodes.findIndex(
+            (n) => retrieveNodeId(n) === this.pageVariantNodeId(),
+        );
+        if (index === -1) {
+            return;
+        }
+        nodes[index] = this.pageVariantNode();
+    }
+
+    /**
+     * Saves the page variant config and returns the updated node.
+     */
+    private async savePageVariantConfig(pageVariant: PageVariantConfig): Promise<Node> {
+        return this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
+            this.pageVariantNodeId(),
+            DEFAULT_PAGE_VARIANT_CONFIG_PROP,
+            JSON.stringify(pageVariant),
+        );
+    }
+
+    /**
+     * Bumps the patch segment of `ccm:page_variant_template_version` on the current node while a
+     * template is edited (template mode or a global template), e.g. 1.0.0 → 1.0.1. Called on
+     * every real modification and on widget settings edits.
+     */
+    private async bumpTemplateVersionIfNeeded(): Promise<void> {
+        if ((!this.templateMode() && !this.globalTemplateNode()) || !this.pageVariantNode()) return;
+        const currentVersion =
+            this.pageVariantNode().properties?.[DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP]?.[0] ??
+            DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION;
+        this.pageVariantNode.set(
+            await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
+                this.pageVariantNodeId(),
+                DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP,
+                this.incrementPatchVersion(currentVersion),
+            ),
+        );
+    }
+
+    private incrementPatchVersion(version: string): string {
+        const colonIdx = version.lastIndexOf(':');
+        if (colonIdx !== -1) {
+            // non-root template: increment the own_counter after the last ':'
+            const counter = parseInt(version.slice(colonIdx + 1), 10);
+            return version.slice(0, colonIdx + 1) + (isNaN(counter) ? 1 : counter + 1);
+        }
+        // root template: simple integer increment
+        const num = parseInt(version, 10);
+        return String(isNaN(num) ? 2 : num + 1);
+    }
+
+    /**
+     * Loads the template variant node referenced by the current page variant node
+     * and stores it in `templateVariantNode` so `templateUpdateAvailable` can
+     * compare versions. Skips loading when in template mode or when no template ref exists.
+     */
+    private async loadTemplateVariantNode(): Promise<void> {
+        if (!this.pageVariantNode()) {
+            this.templateVariantNode.set(null);
+            this.templateMissing.set(false);
+            return;
+        }
+        const templateRef: string =
+            this.pageVariantNode().properties?.[DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP]?.[0];
+        if (!templateRef) {
+            this.templateVariantNode.set(null);
+            this.templateMissing.set(false);
+            return;
+        }
+        const pageVariantNode: Node = this.pageVariantNode();
+        try {
+            // a deleted template leaves the variant without a template to regenerate from
+            const templateNode: Node | null = await this.topicPageHelperService.getNodeIfAvailable(
+                convertNodeRefIntoNodeId(templateRef),
+            );
+            // another page variant may be shown by now
+            if (this.pageVariantNode() !== pageVariantNode) {
+                return;
+            }
+            this.templateVariantNode.set(templateNode);
+            this.templateMissing.set(!templateNode);
+        } catch {
+            this.templateVariantNode.set(null);
+            this.templateMissing.set(false);
+        }
+    }
+
+    /**
+     * Rebuilds the content of the current page variant from its template variant in place
+     * (node ID and MDS properties stay). Header, breadcrumb and colors of the page are kept.
+     */
+    async regeneratePageVariant(): Promise<void> {
+        if (!this.templateVariantNode() || !this.pageVariantNode() || this.variantPreview()) {
+            return;
+        }
+        // re-read, as the template may have been deleted or changed since the variant was loaded
+        const templateNode: Node | null = await this.topicPageHelperService.getNodeIfAvailable(
+            retrieveNodeId(this.templateVariantNode()),
+            true,
+        );
+        if (!templateNode) {
+            this.templateVariantNode.set(null);
+            this.templateMissing.set(true);
+            this.toast.error(
+                null,
+                this.i18nPrefix + 'SIDE_MENU.CONFIG_PAGE_VARIANT.TEMPLATE_UPDATE.TEMPLATE_MISSING',
+            );
+            return;
+        }
+        this.templateVariantNode.set(templateNode);
+
+        const i18nExtension: string = 'SIDE_MENU.CONFIG_PAGE_VARIANT.TEMPLATE_UPDATE.';
+        const dialogRef = await this.dialogs.openGenericDialog({
+            title: this.i18nPrefix + i18nExtension + 'HEADING',
+            message: this.i18nPrefix + i18nExtension + 'MESSAGE',
+            buttons: YES_OR_NO,
+            closable: Closable.Casual,
+        });
+        const response = await firstValueFrom(dialogRef.afterClosed());
+        if (response !== 'YES') {
+            return;
+        }
+        // the page content is replaced wholesale, which no step can undo
+        await this.history.reset();
+        this.startEditing();
+        try {
+            // collect old widget nodeIds before overwriting so they can be
+            // deleted only after the new config is successfully persisted
+            const oldVariantConfig = retrievePageVariantConfig(this.pageVariantNode());
+            const oldNodeIds: string[] = [];
+            oldVariantConfig?.structure?.swimlanes?.forEach((s) =>
+                s.grid?.forEach((tile) => {
+                    if (tile.nodeId) oldNodeIds.push(tile.nodeId);
+                }),
+            );
+            const variantConfig = retrievePageVariantConfig(templateNode);
+            markForCopy(variantConfig, true);
+            keepOwnHeaderBreadcrumbAndColors(variantConfig, oldVariantConfig?.structure);
+            // create new widget nodes + persist config
+            await this.persistRelinkedVariantConfig(variantConfig, this.pageVariantNode(), {
+                syncLocalState: true,
+                collectionId: this.topicCollectionId(),
+            });
+            // store the template version that was used so we know it's up to date;
+            // in template mode the node is a non-root template, so append the default
+            // own_counter to form the compound "{parent_sync}:{own_counter}" version
+            const templateVersion = retrievePageVariantTemplateVersion(templateNode);
+            const syncedVersion = this.templateMode()
+                ? templateVersion + ':' + DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION
+                : templateVersion;
+            this.pageVariantNode.set(
+                await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
+                    retrieveNodeId(this.pageVariantNode()),
+                    DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP,
+                    syncedVersion,
+                ),
+            );
+            await this.updatePageVariantConfigs(true);
+            // refresh pageVariantNode from the fully-loaded configs; the node returned by
+            // setPropertyAndRetrieveUpdatedNode above only carries the written property, so
+            // the effect re-running loadTemplateVariantNode would compare versions against a
+            // stale/incomplete node and incorrectly re-enable the regenerate button
+            const refreshedNode = this.pageVariantConfigs.nodes?.find(
+                (n) => retrieveNodeId(n) === retrieveNodeId(this.pageVariantNode()),
+            );
+            if (refreshedNode) {
+                this.pageVariantNode.set(refreshedNode);
+            }
+            // if the config was saved, delete the now-orphaned old widget nodes
+            for (const nodeId of oldNodeIds) {
+                await this.topicPageHelperService.deleteNodeIfExists(
+                    convertNodeRefIntoNodeId(nodeId),
+                );
+            }
+        } catch (err) {
+            console.error('Failed to regenerate page variant', err);
+        } finally {
+            this.endEditing();
+        }
+    }
+
+    /**
+     * Helper function to start an editing process by setting requestInProgress to true and opening a toast to inform the user about it.
+     */
+    private startEditing(msg?: string): void {
+        this.requestInProgress.set(true);
+        this.topicPageHelperService.openSaveConfigToast(msg);
+    }
+
+    /**
+     * Helper function to end an editing process by triggering an anchor update, setting requestInProgress to false and checking the accordion expansion state.
+     */
+    private endEditing(): void {
+        this.anchorTrigger++;
+        this.updateSwimlaneIdToHitMatching();
+        this.requestInProgress.set(false);
+        // wait for the swimlane to be loaded before checking whether all accordions are opened in edit mode
+        setTimeout((): void => {
+            this.checkAccordionExpansionState();
+        });
+    }
+
+    /**
+     * Helper function to check whether all accordions are opened when in edit mode.
+     */
+    private checkAccordionExpansionState(): void {
+        if (this.editMode()) {
+            this.accordions?.forEach((accordion: CdkAccordionItem): void => {
+                accordion.open();
+            });
+        }
+    }
+
+    /**
+     * Helper function to close potentially opened side menus.
+     */
+    private closeSideMenus(): void {
+        this.selectedMenuItem = '';
+        this.pageVariantSettingsValid.set(true);
+    }
+
+    /**
+     * Helper function to retrieve the best matching between given page variant nodes and selected values.
+     */
+    private retrieveBestMatchingVariantIndex(
+        pageVariants: Node[],
+        parameterSelection: { [key: string]: string[] },
+    ): number {
+        // early return, if no selection is available
+        if (!Object.keys(parameterSelection).length) {
+            return -1;
+        }
+        const numberOfUserSelectionVariables = Object.values(parameterSelection).reduce(
+            (sum, values) => sum + values.length,
+            0,
+        );
+        let highestNumberOfMatches = 0;
+        let bestMatchIndex = -1;
+        // prefer fewer variables
+        let bestMatchNumberOfVariables = Number.MAX_VALUE;
+
+        for (let index = 0; index < pageVariants.length; index++) {
+            const pageVariantNode: Node = pageVariants[index];
+
+            // count the number of selected values from the page variant
+            let variantNumberOfVariables: number = 0;
+            Array.from(this.selectDimensions.keys()).forEach((dimension: string) => {
+                variantNumberOfVariables += pageVariantNode.properties[dimension]?.length ?? 0;
+            });
+            let totalMatches: number = 0;
+
+            // count matches per dimension
+            for (const [dimensionKey, selectedValues] of Object.entries(parameterSelection)) {
+                // retrieve the selected values directly from the according property
+                const storedValues: string[] = pageVariantNode.properties[dimensionKey];
+                if (storedValues?.length) {
+                    selectedValues.forEach((val) => {
+                        if (storedValues.includes(val)) {
+                            totalMatches++;
+                        }
+                    });
+                }
+            }
+
+            if (totalMatches > 0 && totalMatches >= highestNumberOfMatches) {
+                if (totalMatches > highestNumberOfMatches) {
+                    highestNumberOfMatches = totalMatches;
+                    bestMatchIndex = index;
+                    bestMatchNumberOfVariables = variantNumberOfVariables;
+                } else {
+                    // prefer variant with fewer variables
+                    if (variantNumberOfVariables < bestMatchNumberOfVariables) {
+                        highestNumberOfMatches = totalMatches;
+                        bestMatchIndex = index;
+                        bestMatchNumberOfVariables = variantNumberOfVariables;
+                    }
+                }
+
+                // an exact match is found
+                if (
+                    totalMatches === numberOfUserSelectionVariables &&
+                    variantNumberOfVariables === numberOfUserSelectionVariables
+                ) {
+                    return index;
+                }
+            }
+        }
+        return bestMatchIndex;
+    }
+
+    /**
+     * Copies the widget nodes referenced by the given variant config below the target variant node
+     * and persists the relinked config on it, optionally also taking it over as the shown variant.
+     */
+    private async persistRelinkedVariantConfig(
+        variantConfig: PageVariantConfig,
+        targetVariantNode: Node,
+        options: { syncLocalState?: boolean; collectionId?: string } = {},
+    ): Promise<Node> {
+        const updatedNode: Node =
+            await this.topicPageVariantCopyService.persistRelinkedVariantConfig(
+                variantConfig,
+                targetVariantNode,
+                options.collectionId,
+            );
+        if (options.syncLocalState && variantConfig?.structure && targetVariantNode) {
+            this.pageVariantNode.set(updatedNode);
+            await this.applyStructureToLocalState(variantConfig.structure);
+            await this.updatePageVariantConfigs(true);
+        }
+        return updatedNode;
+    }
+
+    /**
+     * Publishes the currently loaded page variant (or template) into the global topic-page
+     * templates folder (`-topic_page_templates-`). A full copy is created — including relinked
+     * widget, breadcrumb and topic-header nodes plus their uploaded image children — so the
+     * resulting template is self-contained. The source variant is left untouched except for its
+     * template reference (repointed to the new global template) and its template version (reset).
+     */
+    async addCurrentVariantToGlobalTemplates(
+        changesMap?: Map<string, string | string[]>,
+    ): Promise<void> {
+        if (
+            !this.pageVariantNode() ||
+            !this.canAddToGlobalTemplates() ||
+            this.globalTemplateNode() ||
+            this.variantPreview()
+        ) {
+            return;
+        }
+        this.startEditing(this.i18nPrefix + 'ADD_TO_GLOBAL.PENDING_MESSAGE');
+        try {
+            // persist the still unsaved settings changes first (same as "apply changes"), so the
+            // published template carries the values currently shown in the configuration menu
+            const sourceNodeId: string = await this.persistPageVariantChanges(changesMap);
+            if (!sourceNodeId) {
+                return;
+            }
+            // re-read the source by the ID the changes were written to instead of using the local
+            // signal: `pageVariantNode` is re-assigned from the cached `pageVariantConfigs.nodes`
+            // entry in several places (variant selection, `retrievePageVariant`), so it may point
+            // at an outdated node object — the copy would then be built from stale metadata
+            const sourceNode: Node = await this.topicPageHelperService.getNode(sourceNodeId);
+            this.pageVariantNode.set(sourceNode);
+            const globalTemplateNode: Node = await this.topicPageGlobalTemplatesService.createFrom(
+                sourceNode,
+                changesMap,
+                (variantConfig: PageVariantConfig, targetNode: Node) =>
+                    this.persistRelinkedVariantConfig(variantConfig, targetNode),
+            );
+            // update the source variant: repoint its template ref to the new global template and
+            // reset its template version so it tracks the new foundation
+            await this.topicPageHelperService.setProperty(
+                retrieveNodeId(sourceNode),
+                DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP,
+                prependWorkspacePrefix(retrieveNodeId(globalTemplateNode)),
+            );
+            // leaf variants store the foundation version verbatim; a template stores the compound
+            // "{parent_sync}:{own_counter}" form (same logic as regeneratePageVariant)
+            const syncedVersion: string = this.templateMode()
+                ? DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION +
+                  ':' +
+                  DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION
+                : DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION;
+            this.pageVariantNode.set(
+                await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
+                    retrieveNodeId(sourceNode),
+                    DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP,
+                    syncedVersion,
+                ),
+            );
+            await this.updatePageVariantConfigs(false);
+            // the settings changes were persisted along the way, so close the menu like "apply
+            // changes" does — leaving it open suggests there is still something to save
+            this.closeSideMenus();
+            this.topicPageHelperService.openSaveConfigToast(
+                this.i18nPrefix + 'ADD_TO_GLOBAL.SUCCESS_MESSAGE',
+            );
+        } catch (err) {
+            console.error('Failed to add variant to global templates', err);
+            this.topicPageHelperService.displayErrorToast();
+        } finally {
+            this.endEditing();
+        }
+    }
+
+    protected readonly pageVariantConfigPrefix = DEFAULT_PAGE_VARIANT_NAME_PREFIX;
+    protected readonly SwimlaneBackgroundShape = SwimlaneBackgroundShape;
+    protected readonly WIDGETS = WIDGETS;
+}

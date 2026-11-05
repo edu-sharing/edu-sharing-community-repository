@@ -47,6 +47,16 @@ export type ListOptionsConfig = {
 export interface ListSortConfig extends Sort {
     columns: ListItemSort[];
     allowed?: boolean;
+    /**
+     * Offers no choice of the sort criterion: the order is set elsewhere and only the toggle for
+     * arranging the entries by hand is shown.
+     */
+    hideSortSelection?: boolean;
+    /**
+     * Offers no toggle for arranging the entries by hand: the host switches the mode through
+     * `customSortingInProgress` itself.
+     */
+    hideCustomSortToggle?: boolean;
     customSortingInProgress?: boolean;
 }
 
@@ -125,6 +135,11 @@ export type TreeConfig = {
      */
     multipleSelection?: boolean;
     /**
+     * whether starting to drag a node selects it; defaults to true. A host that reacts to the
+     * selection (e.g. by opening a sidebar) sets this to false so a drag leaves the selection alone.
+     */
+    selectOnDrag?: boolean;
+    /**
      * whether to display the file name instead of the title
      */
     showFileName?: boolean;
@@ -146,6 +161,15 @@ export type TreeConfig = {
     includeResolveInheritedAccess?: boolean;
     /** node attribute used to determine the initial selection state */
     initialSelectionAttribute?: string;
+    /** nodes for which neither the options button nor the context menu is offered */
+    hasNoOptions?: (node: Node) => boolean;
+    /**
+     * whether every node whose children are part of the given data starts expanded, so a tree
+     * that was built from a complete set of paths shows all of them
+     */
+    expandAll?: boolean;
+    /** nodes that are shown in a subdued colour, e.g. because they only lead to other nodes */
+    isMuted?: (node: Node) => boolean;
 };
 
 export interface ListEventInterface<T extends NodeEntriesDataType> {

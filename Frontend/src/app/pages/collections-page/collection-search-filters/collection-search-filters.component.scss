@@ -1,0 +1,77 @@
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
+
+:host {
+    display: flex;
+}
+
+// width-controlled wrapper that esResizableSidenav resizes and in which it inserts the drag handle
+.filter-bar-resizable {
+    display: block;
+    position: relative;
+    // fallback before the directive sets an inline width, so there is no width flash
+    width: 319px;
+    &[hidden] {
+        // display:none cannot be transitioned; the collapsed panel keeps its box with zero width
+        // and is marked `inert` in the template instead
+        display: block;
+        overflow: hidden;
+        width: 0 !important;
+    }
+    transition: width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.filter-bar-container {
+    @include mixins.roundedContainerCard(vars.$mobileTabSwitchWidth, vars.$mobileTabNavHeight);
+    @include mixins.roundedContainerStaticScroll(
+        vars.$mobileTabSwitchWidth,
+        vars.$mobileTabNavHeight
+    );
+    margin-right: 4px;
+}
+
+// centers the drag handle in the gap between the filter card and the main container
+:host ::ng-deep .es-sidenav-resizer.start {
+    right: -9px;
+}
+
+.filter-bar-heading {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    height: vars.$secondaryBarHeight;
+    background-color: var(--roundedContainerBackground);
+    @include mixins.materialShadowBottom();
+    // paints the shadow above the scrolled filter body
+    position: relative;
+    z-index: 1;
+    .filter-bar-title {
+        flex-grow: 1;
+        font-size: 140%;
+        margin: 0;
+        font-weight: 400;
+    }
+}
+
+.filter-bar-body {
+    flex-grow: 1;
+    min-height: 0;
+    overflow: auto;
+    padding: 20px;
+    @include mixins.materialScrollbarLight();
+}
+
+.filter-hint {
+    margin: 8px 0 0;
+    color: var(--textMediumLight);
+}
+
+.filter-editor {
+    display: block;
+    margin-top: 16px;
+}
+
+.filter-reset {
+    margin-top: 8px;
+}

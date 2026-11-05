@@ -26,6 +26,9 @@
   </mat-sidenav>
 
   <mat-sidenav-content>
+    @if (!topicView.selected()) {
+    <es-collection-search-filters></es-collection-search-filters>
+    }
     <div class="main-content">
       @if (showTabs()) {
       <mat-tab-group
@@ -69,7 +72,7 @@
             [ngTemplateOutletContext]="{
               $implicit: null,
               collection: collection,
-              permissions: collectionContentRef?.permissions ?? null,
+              permissions: details.permissions() ?? null,
               isLoading: isLoading,
               tabSelected: tabSelected
             }"
@@ -84,14 +87,6 @@
             class="collectionsContainer"
             [attr.data-test]="'collections-grid-' + tabSelected.toLowerCase().replaceAll('_', '-')"
           >
-            @if (!isLoading && !isRootLevelCollection() && collection) {
-            <es-collection-info-bar
-              #infobar
-              [collection]="collection"
-              [permissions]="collectionContentRef?.permissions ?? null"
-              (edit)="collectionEdit()"
-            ></es-collection-info-bar>
-            }
             <!-- <div *ngIf="isLoading" class="collection-loading"><es-spinner-small></es-spinner-small></div> -->
             <div class="collections-right" role="main" esSkipTarget="MAIN_CONTENT">
               @if (isLoading || !isReady) {
@@ -102,7 +97,7 @@
               <h1 esTitle class="cdk-visually-hidden">
                 {{ 'COLLECTIONS.TITLE' | translate }}
               </h1>
-              } @if (!isLoading && isGuest) {
+              } @if (!isLoading && isGuest && !topicView.selected()) {
               <a
                 mat-button
                 color="primary"
@@ -126,8 +121,9 @@
                 } @else {
                 <es-breadcrumbs
                   class="collections-breadcrumb"
+                  esScrollStartOverflow
                   [home]="'COLLECTIONS.TAB.' + tabSelected"
-                  [showLanding]="true"
+                  [showLanding]="showLanding()"
                   [showHomeNotice]="false"
                   [homeRouterLink]="{
                     routerLink: ['.'],
@@ -136,20 +132,93 @@
                   }"
                   preferredName="title"
                   [invisibleDescription]="true"
-                  [canDropNodes]="collectionContentComponent.canDropOnCollectionBreadcrumbs"
+                  [canDropNodes]="collectionContentRef?.canDropOnCollectionBreadcrumbs"
                   (dropElement)="
-                    collectionContentComponent.dropOnCollection($event.target, $event.source)
+                    collectionContentRef?.dropOnCollection($event.target, $event.source)
                   "
                 ></es-breadcrumbs>
                 }
+                <!-- content the current view adds to the breadcrumb row, e.g. a variant selection -->
+                <div class="breadcrumb-end">
+                  <ng-container [ngTemplateOutlet]="breadcrumbEndSlot()"></ng-container>
+                </div>
+                <es-view-toggle-group
+                  class="display-type-toggle"
+                  groupLabel="EDITORIAL.OPTIONS.NODES_SELECTOR.COLLECTIONS.DISPLAY_TYPE.LABEL"
+                  [items]="collectionDisplayTypeItems()"
+                  [value]="viewState.viewType()"
+                  (valueChange)="topicView.select($event)"
+                ></es-view-toggle-group>
+              </div>
+              @if (!topicView.selected()) { @if (searchState.active()) {
+              <h2 class="root-bar-title mat-heading-3 search-in-collection">
+                {{
+                  (searchState.query()?.trim()
+                    ? searchState.hitCount() === null
+                      ? 'COLLECTIONS.SEARCH_RESULTS_IN_COLLECTION'
+                      : 'COLLECTIONS.SEARCH_RESULTS_IN_COLLECTION_COUNT'
+                    : searchState.hitCount() === null
+                    ? 'COLLECTIONS.FILTER_RESULTS_IN_COLLECTION'
+                    : 'COLLECTIONS.FILTER_RESULTS_IN_COLLECTION_COUNT'
+                  ) | translate : { query: searchState.query(), count: searchState.hitCount() }
+                }}
+              </h2>
+              }
+              <es-collection-header-bar
+                [collection]="collection"
+                [orderModeAvailable]="!!collectionContentRef?.canOrder()"
+                [orderModeActive]="!!collectionContentRef?.isOrderModeActive()"
+                (orderModeToggle)="collectionContentRef?.onOrderModeToggle($event)"
+              ></es-collection-header-bar>
+              } } @if (isRootLevelCollection() && !isLoading) {
+              <div class="breadcrumb-space root-bar" data-test="collections-root-bar">
+                <h2 class="root-bar-title mat-heading-3">
+                  @if (searchState.active()) {
+                  {{
+                    (searchState.query()?.trim()
+                      ? searchState.hitCount() === null
+                        ? 'COLLECTIONS.SEARCH_RESULTS'
+                        : 'COLLECTIONS.SEARCH_RESULTS_COUNT'
+                      : searchState.hitCount() === null
+                      ? 'COLLECTIONS.FILTER_RESULTS'
+                      : 'COLLECTIONS.FILTER_RESULTS_COUNT'
+                    )
+                      | translate
+                        : {
+                            query: searchState.query(),
+                            count: searchState.hitCount(),
+                            scope: ('COLLECTIONS.TAB.' + tabSelected | translate)
+                          }
+                  }}
+                  } @else {
+                  {{ 'COLLECTIONS.TAB.' + tabSelected + '_LONG' | translate }}
+                  }
+                </h2>
+                <es-view-toggle-group
+                  class="display-type-toggle"
+                  groupLabel="EDITORIAL.OPTIONS.NODES_SELECTOR.COLLECTIONS.DISPLAY_TYPE.LABEL"
+                  [items]="displayTypeItems"
+                  [value]="viewState.viewType()"
+                  (valueChange)="topicView.select($event)"
+                ></es-view-toggle-group>
               </div>
               }
+              <!-- the topic view replaces everything below the breadcrumb and scrolls itself -->
+              @if (topicView.selected()) { @if (topicView.available() && topicView.parents() &&
+              topicView.component(); as topicViewComponent) {
+              <ng-container
+                *ngComponentOutlet="
+                  topicViewComponent;
+                  inputs: { collection: collection, parents: topicView.parents() }
+                "
+              ></ng-container>
+              } } @else {
               <!-- Only this region scrolls; the breadcrumb header above stays fixed. -->
               <div class="collections-scroll">
                 <es-collection-content
                   #collectionContentComponent
                   [collection]="collection"
-                  [getInfobar]="getInfobar"
+                  [headerActionbar]="headerActionbar"
                   [selectionActionbar]="selectionActionbar"
                   [scope]="getScope()"
                   [isRootLevel]="isRootLevelCollection()"
@@ -157,29 +226,33 @@
                   [class.collections-master-div-notabs]="!showTabs()"
                 >
                   <ng-template #empty>
-                    @if (isRootLevelCollection()) { @if (tabSelected === 'EDU_GROUPS') {
+                    @if (searchState.active()) {
+                    {{ 'COLLECTIONS.EMPTY.SEARCH' | translate }}
+                    @if (!searchState.includeSubLevels()) {
+                    {{ 'COLLECTIONS.EMPTY.SEARCH_LEVEL' | translate }}
+                    } } @else { @if (isRootLevelCollection()) { @if (tabSelected === 'EDU_GROUPS') {
                     {{ 'COLLECTIONS.EMPTY.SHARED' | translate }}
                     } @if (tabSelected === 'EDU_ALL') {
                     {{ 'COLLECTIONS.EMPTY.PUBLIC' | translate }}
                     } } @if (!isRootLevelCollection()) {
                     {{ 'COLLECTIONS.EMPTY.SUBCOLLECTIONS' | translate }}
-                    }
+                    } }
                   </ng-template>
                 </es-collection-content>
               </div>
-              }
+              } }
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Full-width selection bar (incl. the info-bar column) shown when references are selected;
+      <!-- Full-width selection bar shown when sub-collections or materials are selected;
         mirrors the search-page selection layout. State lives in es-collection-content. -->
       <div
         class="selection-action-bar"
         cdkOverlayOrigin
         #selectionBar="cdkOverlayOrigin"
-        [class.visible]="collectionContentRef?.selection?.length"
+        [class.visible]="!!collectionContentRef?.selection?.length"
       >
         <button
           mat-icon-button
@@ -217,7 +290,7 @@
         cdkConnectedOverlay
         [cdkConnectedOverlayOrigin]="selectionBar"
         [cdkConnectedOverlayOpen]="
-          collectionContentRef?.selectionOverlayOpen && !!collectionContentRef?.selection?.length
+          !!collectionContentRef?.selectionOverlayOpen && !!collectionContentRef?.selection?.length
         "
         [cdkConnectedOverlayPositions]="overlayPositions"
         [cdkConnectedOverlayWidth]="selectionBar.elementRef.nativeElement.offsetWidth"
@@ -226,8 +299,8 @@
       >
         <es-search-selection-overlay
           [nodes]="collectionContentRef?.selection || []"
-          [columns]="$safeNavigationMigration(collectionContentRef?.referencesColumns)"
-          [displayType]="$safeNavigationMigration(collectionContentRef?.referencesDisplayType)"
+          [columns]="collectionContentRef?.referencesColumns"
+          [displayType]="viewState.referencesDisplayType()"
           (deselect)="collectionContentRef?.deselectNode($event)"
         ></es-search-selection-overlay>
       </ng-template>

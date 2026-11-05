@@ -6,6 +6,57 @@
       "TITLE": "Topic page",
       "SEARCH_PLACEHOLDER": "Search for content on the topic page..."
     },
+    "SIDEBAR": {
+      "TITLE": "Topic page",
+      "TITLE_DESCRIPTION": "Manage and create topic pages and templates",
+      "TAB": {
+        "VARIANT": "Topic page",
+        "TEMPLATE": "Template"
+      },
+      "MENU": {
+        "MANAGE": "Manage topic pages",
+        "MANAGE_DESCRIPTION": "Show, regenerate or delete pages and templates",
+        "CREATE": "New topic page",
+        "CREATE_DESCRIPTION": "Create a new topic page from an existing one",
+        "CREATE_WITH_TEMPLATE": "New topic page/template",
+        "CREATE_WITH_TEMPLATE_DESCRIPTION": "Create a new topic page or template from an existing one",
+        "INHERITANCE": "Inheritance",
+        "INHERITANCE_DESCRIPTION": "Pass topic pages on to sub-collections"
+      },
+      "MANAGE": {
+        "INTRO": "{{title}} has the following topic pages:",
+        "TEMPLATES_DESCRIPTION": "passed on to the sub-collections",
+        "UP_TO_DATE": "up to date, template from {{date}}",
+        "MORE_ACTIONS": "More actions",
+        "INHERITED_HEADING": "Inherited from {{title}}",
+        "VARIANTS_HEADING": "Pages of this collection",
+        "TEMPLATES_HEADING": "Templates of this collection",
+        "DEFAULT": "(default)",
+        "CREATED": "created by {{name}} on {{date}}",
+        "SHOW": "Show",
+        "REGENERATE": "Regenerate",
+        "EDIT_TEMPLATE": "Edit template",
+        "DELETE": "Delete",
+        "EMPTY": "There is no topic page for this collection yet.",
+        "LOAD_ERROR": "The topic pages could not be loaded."
+      },
+      "INHERITANCE": {
+        "INTRO": "Inheritance of {{title}}",
+        "INTRO_DESCRIPTION": "This is how this collection and its sub-collections get their topic pages. \"Pass on\" decides whether inherited templates are handed further down.",
+        "STATE_OWN": "Own topic page – no inheritance needed",
+        "STATE_INHERITS": "inherits from {{title}}",
+        "STATE_STOPPED": "inherits nothing – passing on stopped at {{title}}",
+        "STATE_NONE": "no topic page",
+        "PASSES_OWN_TEMPLATES": "passes its own templates on to sub-collections",
+        "PASSES_NOTHING_ON": "does not pass inherited templates on to sub-collections",
+        "SAVED_STATE": "previously:",
+        "PASS_ON": "Pass on",
+        "PASS_ON_TOOLTIP": "Pass inherited templates on to the sub-collections",
+        "CHANGED_COUNT": "{{count}} shown collections change",
+        "SAVED": "The inheritance has been saved.",
+        "LOAD_ERROR": "The inheritance could not be loaded."
+      }
+    },
     "AI": {
       "GENERATED": "AI-generated",
       "INVALID_PROMPT": "Invalid prompt"
@@ -37,7 +88,7 @@
         "CURRENT_SELECTION_ANSWER_LABEL": "Answer for the current selection",
         "NO_ANSWER_DEFINED": "No text has been defined for the selection yet."
       },
-      "BREADCRUMB": {
+      "VARIANT_SELECT": {
         "PAGE_VARIANT_LABEL": "Page variant",
         "NAVIGATE_TO_PAGE_TEMPLATE": "Navigate to page template"
       },
@@ -448,7 +499,6 @@
       "SUCCESS_MESSAGE": "The page template was created successfully"
     },
     "DEFAULT_PAGE_VARIANT_NAME": "Page variant",
-    "NAVIGATE_TO_COLLECTION_PAGE": "Navigate to collection page",
     "COPY_SUFFIX": "Copy",
     "ADD_TO_GLOBAL": {
       "PENDING_MESSAGE": "The page is being added to the global templates.",

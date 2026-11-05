@@ -1,5 +1,6 @@
 <ng-template #gridTop>
-  @if (entriesService.sort?.allowed && (hasHiddenSortColumns$ | async)) {
+  @if (entriesService.sort?.allowed && !entriesService.sort.hideSortSelection &&
+  (hasHiddenSortColumns$ | async)) {
   <es-sort-select-panel
     class="order-panel"
     [active]="entriesService.sort.active"
@@ -78,7 +79,9 @@
     </mat-header-cell>
     <mat-cell *matCellDef="let node" class="cell-icon">
       @if (entriesService.elementInteractionType === InteractionType.DefaultActionLink) {
-      <ng-container *ngTemplateOutlet="icon; context: { node: node }"></ng-container>
+      <es-node-url [node]="node" mode="wrapper">
+        <ng-container *ngTemplateOutlet="icon; context: { node: node }"></ng-container>
+      </es-node-url>
       } @if (entriesService.elementInteractionType !== InteractionType.DefaultActionLink) {
       <div
         (click)="
@@ -139,7 +142,13 @@
       <mat-header-cell
         *matHeaderCellDef
         mat-sort-header
-        [disabled]="!(entriesService.sort?.allowed && isSortable(column))"
+        [disabled]="
+          !(
+            entriesService.sort?.allowed &&
+            !entriesService.sort.hideSortSelection &&
+            isSortable(column)
+          )
+        "
         [class.mat-column-primary]="first"
         [style.min-width]="first ? (containerWidth$ | async) / 3 + 'px' : null"
         >{{ column | esListItemLabel | async }}</mat-header-cell
@@ -157,31 +166,33 @@
           : null
       "
       (click)="
-        entriesService.elementInteractionType !== InteractionType.DefaultActionLink &&
-          entriesService.onClicked({
-            event: $event,
-            element: node,
-            source: ClickSource.Metadata,
-            attribute: column,
-          })
+        entriesService.elementInteractionType !== InteractionType.DefaultActionLink
+          ? entriesService.onClicked({
+              event: $event,
+              element: node,
+              source: ClickSource.Metadata,
+              attribute: column,
+            })
+          : null
       "
       (keydown.enter)="
-        first &&
-          entriesService.elementInteractionType !== InteractionType.DefaultActionLink &&
-          entriesService.onClicked({
-            event: $any($event),
-            element: node,
-            source: ClickSource.Metadata,
-            attribute: column,
-          })
+        first && entriesService.elementInteractionType !== InteractionType.DefaultActionLink
+          ? entriesService.onClicked({
+              event: $any($event),
+              element: node,
+              source: ClickSource.Metadata,
+              attribute: column,
+            })
+          : null
       "
       (dblclick)="
-        entriesService.elementInteractionType !== InteractionType.DefaultActionLink &&
-          entriesService.dblClickItem.emit({
-            element: node,
-            source: ClickSource.Metadata,
-            attribute: column,
-          })
+        entriesService.elementInteractionType !== InteractionType.DefaultActionLink
+          ? entriesService.dblClickItem.emit({
+              element: node,
+              source: ClickSource.Metadata,
+              attribute: column,
+            })
+          : null
       "
     >
       <!-- layout wrapper: transparent to the cell layout normally, a stacked box when the

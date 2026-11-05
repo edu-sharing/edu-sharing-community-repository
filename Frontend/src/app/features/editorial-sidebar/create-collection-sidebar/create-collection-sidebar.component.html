@@ -1,0 +1,192 @@
+@if (colors(); as colors) { @if (steps().length > 1) {
+<mat-stepper
+  class="steps"
+  labelPosition="bottom"
+  [linear]="false"
+  [attr.aria-label]="i18nPrefix + 'STEPS' | translate"
+  [selectedIndex]="steps().indexOf(step())"
+  (selectionChange)="onStepperChange($event.selectedIndex)"
+>
+  @for (item of steps(); track item) {
+  <mat-step
+    [label]="i18nPrefix + 'STEP.' + item | translate"
+    [completed]="steps().indexOf(item) < steps().indexOf(step())"
+  ></mat-step>
+  }
+</mat-stepper>
+} @switch (step()) { @case ('DESIGN') {
+<div class="content">
+  @if (location(); as path) {
+  <section class="location-field" data-test="create-collection-location">
+    <div class="caption">{{ 'WORKSPACE.FILE_LOCATION' | translate }}</div>
+    <div class="location-bar">
+      <i esIcon="layers" aria-hidden="true"></i>
+      <span class="path">{{
+        path.length ? path.join(' › ') : (i18nPrefix + 'LOCATION_ROOT' | translate)
+      }}</span>
+    </div>
+  </section>
+  }
+  <es-collection-design-form
+    [collection]="draft"
+    [colors]="colors"
+    [showAuthor]="false"
+    menuIcon="edit"
+    (previewChange)="onPreviewChange($event)"
+  ></es-collection-design-form>
+</div>
+} @case ('CONFIGURE') {
+<div class="content">
+  @if (!isEdit() && availableTypes().length > 1) {
+  <section class="section">
+    <h3 class="section-title" id="create-collection-type">{{ i18nPrefix + 'TYPE' | translate }}</h3>
+    <mat-radio-group
+      class="types"
+      aria-labelledby="create-collection-type"
+      [ngModel]="type()"
+      (ngModelChange)="setType($event)"
+    >
+      @for (availableType of availableTypes(); track availableType) {
+      <div class="type">
+        <mat-radio-button [value]="availableType" color="primary">
+          {{ i18nPrefix + 'TYPE_' + availableType.toUpperCase() | translate }}
+        </mat-radio-button>
+        <button
+          mat-icon-button
+          type="button"
+          [attr.aria-label]="
+            i18nPrefix + 'TYPE_INFO'
+              | translate : { type: i18nPrefix + 'TYPE_' + availableType.toUpperCase() | translate }
+          "
+          [attr.aria-expanded]="infoType() === availableType"
+          (click)="toggleInfo(availableType)"
+        >
+          <i esIcon="info"></i>
+        </button>
+      </div>
+      @if (infoType() === availableType) {
+      <div class="type-info" role="note">
+        @for (key of typeInfoKeys[availableType]; track key) {
+        <p>
+          <strong>{{ key | translate }}</strong
+          >: {{ key + '_DESCRIPTION' | translate }}
+        </p>
+        }
+      </div>
+      } }
+    </mat-radio-group>
+  </section>
+  }
+  <section class="section">
+    <h3 class="section-title">{{ i18nPrefix + 'METADATA' | translate }}</h3>
+    @if (hasMetadata()) {
+    <!-- a new group id needs a fresh editor, so each group gets its own instance -->
+    @for (groupId of [metadataGroupId()]; track groupId) {
+    <es-mds-editor-wrapper
+      #mds
+      [groupId]="groupId"
+      setId="-default-"
+      editorMode="form"
+      [embedded]="true"
+      [currentValues]="metadata"
+    ></es-mds-editor-wrapper>
+    } } @else {
+    <p class="no-metadata">{{ i18nPrefix + 'NO_METADATA' | translate }}</p>
+    }
+  </section>
+  <section class="section">
+    <h3 class="section-title">{{ i18nPrefix + 'DEFAULT_VIEW' | translate }}</h3>
+    <!-- no collection property stores this yet, so the choice is not saved -->
+    <mat-checkbox
+      color="primary"
+      [ngModel]="openAsTopicPage()"
+      (ngModelChange)="openAsTopicPage.set($event)"
+    >
+      {{ i18nPrefix + 'OPEN_AS_TOPIC_PAGE' | translate }}
+    </mat-checkbox>
+  </section>
+  <section class="section">
+    <h3 class="section-title">{{ i18nPrefix + 'DEFAULT_SORT' | translate }}</h3>
+    <mat-form-field>
+      <mat-label>{{ i18nPrefix + 'SORT_SUBCOLLECTIONS' | translate }}</mat-label>
+      <mat-select [ngModel]="subcollectionSort()" (ngModelChange)="subcollectionSort.set($event)">
+        @for (id of sortIds; track id) {
+        <mat-option [value]="id">{{ i18nPrefix + 'SORT.' + id | translate }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>{{ i18nPrefix + 'SORT_REFERENCES' | translate }}</mat-label>
+      <mat-select [ngModel]="referenceSort()" (ngModelChange)="referenceSort.set($event)">
+        @for (id of sortIds; track id) {
+        <mat-option [value]="id">{{ i18nPrefix + 'SORT.' + id | translate }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </section>
+</div>
+} @case ('PERMISSIONS') {
+<div class="content permissions">
+  @if (permissionsKind() === 'SHARE') {
+  <div class="permissions-title">{{ 'COLLECTIONS.EDIT_PERMISSIONS_SUBTEXT' | translate }}</div>
+  <div class="permissions-description">
+    {{ 'COLLECTIONS.EDIT_PERMISSIONS_DESCRIPTION' | translate }}
+  </div>
+  @if (shareConfig) {
+  <es-share-dialog
+    [dataInput]="shareConfig"
+    (permissionsChange)="onSharePermissionsChange($event)"
+  ></es-share-dialog>
+  } } @else {
+  <es-collection-editorial-groups-form
+    [shareToAll]="shareToAll()"
+    [initialPermissions]="editorialInitialPermissions()"
+    [publicVisible]="editorialPublic()"
+  ></es-collection-editorial-groups-form>
+  }
+</div>
+} }
+<es-sidebar-sticky-footer>
+  <div class="footer-buttons">
+    @if (isFirstStep()) {
+    <button mat-button color="primary" data-test="create-collection-cancel" (click)="cancel()">
+      {{ 'CANCEL' | translate }}
+    </button>
+    } @else {
+    <button
+      mat-button
+      color="primary"
+      data-test="create-collection-back"
+      [disabled]="saving()"
+      (click)="previousStep()"
+    >
+      <i esIcon="arrow_back"></i>
+      {{ 'BACK' | translate }}
+    </button>
+    } @if (isLastStep()) {
+    <button
+      mat-flat-button
+      color="primary"
+      data-test="create-collection-create"
+      [disabled]="saving()"
+      (click)="save()"
+    >
+      {{ (isEdit() ? 'SAVE' : i18nPrefix + 'CREATE') | translate }}
+    </button>
+    } @else {
+    <button
+      mat-flat-button
+      color="primary"
+      data-test="create-collection-next"
+      [disabled]="isDesignStep() && !hasTitle()"
+      (click)="next()"
+    >
+      {{ i18nPrefix + 'NEXT' | translate }}
+      <i esIcon="arrow_forward"></i>
+    </button>
+    }
+  </div>
+</es-sidebar-sticky-footer>
+} @else {
+<es-spinner></es-spinner>
+}

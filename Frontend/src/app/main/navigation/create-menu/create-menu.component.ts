@@ -265,9 +265,9 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             (this._parent && this.nodeHelper.isNodeCollection(this._parent)) ||
             ['collections', 'landing'].includes(this.scope)
         ) {
-            const newCollection = new OptionItem('OPTIONS.NEW_COLLECTION', 'layers', (node) =>
+            const newCollection = new OptionItem('OPTIONS.NEW_COLLECTION', 'layers', () =>
                 // new collection always creates a new collection (selection to create or copy is skipped here)
-                this.uiService.goToCollection(this._parent, 'new'),
+                this.createCollection(),
             );
             newCollection.elementType = [ElementType.NoneOrUnknown];
             newCollection.constrains = [Constrain.NoSelection, Constrain.User];
@@ -370,6 +370,27 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         if (nodes && Array.isArray(nodes)) {
             this.localEventsService.nodesCreated.emit(nodes);
             this.createElement.emit(nodes);
+        }
+    }
+
+    /**
+     * Creates a collection in the sidebar of the page, or in the sidebar of the collections page
+     * when the current page has none.
+     */
+    private createCollection(): void {
+        if (this.editorialSidebarService.editorialSidebar) {
+            this.editorialSidebarService.showOption({
+                option: 'CREATE_COLLECTION',
+                trap: false,
+            });
+        } else {
+            const parentId =
+                this._parent && this.nodeHelper.isNodeCollection(this._parent)
+                    ? this._parent.ref.id
+                    : null;
+            void this.router.navigate([UIConstants.ROUTER_PREFIX + 'collections'], {
+                queryParams: { id: parentId, createCollection: true },
+            });
         }
     }
 

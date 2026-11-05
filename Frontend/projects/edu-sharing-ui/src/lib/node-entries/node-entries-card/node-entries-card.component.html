@@ -49,6 +49,8 @@
   <div class="card-top-bar" [style.background-color]="isCollection ? node.collection.color : null">
     @if (nodeHelper.isNodeCollection(node)) {
     <div class="card-top-bar-collection-color"></div>
+    } @if (entriesService.sort?.customSortingInProgress) {
+    <div class="card-top-bar-drag-handle" aria-hidden="true"><i esIcon="drag_indicator"></i></div>
     }
     <div class="card-top-bar-node-type-badge">
       <es-node-type-badge [node]="node"></es-node-type-badge>

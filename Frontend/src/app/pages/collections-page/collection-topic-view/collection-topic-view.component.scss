@@ -1,0 +1,16 @@
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
+
+// fills the space below the breadcrumb; the topic page scrolls its content internally
+:host {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+
+// scrolls below the page's sticky breadcrumb bar and stacks underneath it as a whole
+@media only screen and (max-width: vars.$mobileWidth) {
+    :host {
+        isolation: isolate;
+    }
+}

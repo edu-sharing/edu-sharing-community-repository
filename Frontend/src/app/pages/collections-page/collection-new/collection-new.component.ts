@@ -1,6 +1,5 @@
 import {
     Component,
-    ElementRef,
     EventEmitter,
     HostListener,
     OnDestroy,
@@ -12,13 +11,7 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import {
     AuthorityNamePipe,
-    ColumnType,
-    InteractionType,
-    ListItem,
     LocalEventsService,
-    NodeDataSource,
-    NodeEntriesDisplayType,
-    NodeEntriesWrapperComponent,
     OptionsHelperDataService,
     TranslationsService,
     UIConstants,
@@ -28,7 +21,6 @@ import {
     ConfigurationHelper,
     ConfigurationService,
     DialogButton,
-    IamGroups,
     IamUser,
     NodeRef,
     RestCollectionService,
@@ -50,7 +42,6 @@ import {
     CollectionServiceUnwrapped,
     CollectionsTypeConfig,
     ConfigService,
-    Group,
     Node,
     NodeService,
     SessionStorageService,
@@ -60,6 +51,7 @@ import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { Observable, Subject } from 'rxjs';
 import { LoadingScreenService } from '../../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../../main/navigation/main-nav.service';
+import { CollectionEditorialGroupsFormComponent } from '../../../features/collection-info/collection-editorial-groups-form/collection-editorial-groups-form.component';
 import { MdsEditorWrapperComponent } from '../../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { Values } from '../../../features/mds/types/types';
 import {
@@ -71,7 +63,6 @@ import {
     ShareDialogComponent,
 } from '../../../features/dialogs/dialog-modules/share-dialog/share-dialog.component';
 import { OptionsHelperService } from '../../../services/options-helper.service';
-import { filter, first } from 'rxjs/operators';
 
 type Step = 'NEW' | 'GENERAL' | 'METADATA' | 'PERMISSIONS' | 'SETTINGS' | 'EDITORIAL_GROUPS';
 
@@ -108,10 +99,9 @@ export class CollectionNewComponent implements OnInit, OnDestroy {
     private authorityNamePipe = inject(AuthorityNamePipe);
 
     @ViewChild('mds') mds: MdsEditorWrapperComponent;
-    @ViewChild('organizations') organizationsRef: NodeEntriesWrapperComponent<Group>;
+    @ViewChild(CollectionEditorialGroupsFormComponent)
+    editorialGroupsForm: CollectionEditorialGroupsFormComponent;
     @ViewChild(ShareDialogComponent) shareDialogRef: ShareDialogComponent;
-    readonly InteractionType = InteractionType;
-    readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     public hasCustomScope: boolean;
     public COLORS: string[];
     public isLoading = true;
@@ -129,11 +119,7 @@ export class CollectionNewComponent implements OnInit, OnDestroy {
     public mediacenter: any;
     public parentId: any;
     public editId: any;
-    public editorialGroups = new NodeDataSource<Group>();
     public editorialPublic = true;
-    public editorialColumns: ColumnType = {
-        Default: [new ListItem('GROUP', RestConstants.AUTHORITY_DISPLAYNAME)],
-    };
     // truthy while a new preview image is pending upload (see onPreviewChange / saveImage)
     imageData: string = null;
     private imageFile: File = null;
@@ -153,18 +139,15 @@ export class CollectionNewComponent implements OnInit, OnDestroy {
     public newCollectionStep: Step = this.STEP_NEW;
     availableSteps: Step[];
     private parentCollection: EduData.Node;
-    private originalPermissions: Acl;
+    originalPermissions: Acl;
     private permissionsInfo: ShareDialogResult;
     private destroyed = new Subject<void>();
     private loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed });
 
-    @ViewChild('authorFreetextInput') authorFreetextInput: ElementRef<HTMLInputElement>;
     buttons: DialogButton[];
-    authorFreetext = false;
     authorFreetextAllowed = false;
     authorFreetextFixedAllowed = false;
     mdsSet: string;
-    editorialGroupsSelected: Group[] = [];
     editorialCollectionsConfig: CollectionsTypeConfig;
     shareConfig: ShareDialogData;
 
@@ -195,8 +178,8 @@ export class CollectionNewComponent implements OnInit, OnDestroy {
                 this.currentCollection = collection;
                 // cleanup irrelevant data
                 this.currentCollection.rating = null;
-                this.authorFreetext = this.currentCollection.collection.authorFreetext != null;
-                this.authorFreetextFixedAllowed = this.authorFreetext;
+                this.authorFreetextFixedAllowed =
+                    this.currentCollection.collection.authorFreetext != null;
                 this.originalPermissions = perm.localPermissions;
                 this.properties = collection.properties;
                 this.newCollectionType = this.getTypeForCollection(this.currentCollection);
@@ -349,29 +332,6 @@ export class CollectionNewComponent implements OnInit, OnDestroy {
                             }
                         });
                     });
-                    if (
-                        this.connector.hasToolPermissionInstant(
-                            RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH,
-                        ) ||
-                        this.connector.hasToolPermissionInstant(
-                            RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE,
-                        )
-                    ) {
-                        this.editorialGroups.isLoading = true;
-                        this.iamService
-                            .searchGroups('*', true, RestConstants.GROUP_TYPE_EDITORIAL, '', {
-                                count: RestConstants.COUNT_UNLIMITED,
-                                sortBy: [RestConstants.CM_PROP_AUTHORITY_DISPLAYNAME],
-                                sortAscending: [true],
-                            })
-                            .subscribe((data: IamGroups) => {
-                                this.editorialGroups.setData(
-                                    data.groups as Group[],
-                                    data.pagination,
-                                );
-                                this.editorialGroups.isLoading = false;
-                            });
-                    }
                 });
             });
         });
@@ -464,33 +424,6 @@ export class CollectionNewComponent implements OnInit, OnDestroy {
         let id = this.parentId;
         if (id == null) id = this.editId;
         this.navigateToCollectionId(id);
-    }
-
-    setColor(color: string): void {
-        this.currentCollection.collection.color = color;
-    }
-
-    setColorByDirection(event: Event): void {
-        const rowLength = 6;
-        let index = this.COLORS.indexOf(this.currentCollection.collection.color);
-        switch ((event as KeyboardEvent).key) {
-            case 'ArrowUp':
-                index -= rowLength;
-                break;
-            case 'ArrowDown':
-                index += rowLength;
-                break;
-            case 'ArrowLeft':
-                index -= 1;
-                break;
-            case 'ArrowRight':
-                index += 1;
-                break;
-        }
-        if (index >= 0 && index < this.COLORS.length) {
-            this.setColor(this.COLORS[index]);
-            event.preventDefault();
-        }
     }
 
     handleError(error: any) {
@@ -594,7 +527,7 @@ export class CollectionNewComponent implements OnInit, OnDestroy {
         }
         if (type === RestConstants.COLLECTIONTYPE_MEDIA_CENTER) {
             this.authorFreetextFixedAllowed = true;
-            this.switchToAuthorFreetext();
+            this.currentCollection.collection.authorFreetext = this.getDefaultAuthorName();
         }
         this.updateAvailableSteps();
         void this.goToNextStep();
@@ -660,19 +593,6 @@ export class CollectionNewComponent implements OnInit, OnDestroy {
             setTimeout(() => {
                 this.mds?.loadMds(true);
             });
-            if (this.newCollectionStep == this.STEP_EDITORIAL_GROUPS) {
-                setTimeout(async () => {
-                    this.editorialGroupsSelected = await this.getEditoralGroups(
-                        this.originalPermissions?.permissions || [],
-                    );
-                    this.organizationsRef.getSelection().select(...this.editorialGroupsSelected);
-                    this.organizationsRef
-                        .getSelection()
-                        .changed.subscribe(
-                            (change) => (this.editorialGroupsSelected = change.source.selected),
-                        );
-                });
-            }
         }
         this.updateButtons();
     }
@@ -752,7 +672,7 @@ export class CollectionNewComponent implements OnInit, OnDestroy {
                 void this.save4(collection);
                 return;
             }
-            this.permissions = this.getEditorialGroupPermissions() as ExtendedAcl;
+            this.permissions = this.editorialGroupsForm.getAcl() as ExtendedAcl;
         }
         if (
             (this.newCollectionType == RestConstants.COLLECTIONSCOPE_CUSTOM ||
@@ -810,46 +730,6 @@ export class CollectionNewComponent implements OnInit, OnDestroy {
     private updateAvailableSteps() {
         this.availableSteps = this.getAvailableSteps();
         this.updateButtons();
-    }
-
-    private getEditorialGroupPermissions() {
-        const permissions = {
-            inherited: false,
-            permissions: [],
-        } as Acl;
-        if (this.editorialPublic) {
-            const pub = RestHelper.getAllAuthoritiesPermission();
-            pub.permissions = [RestConstants.PERMISSION_CONSUMER];
-            permissions.permissions.push(pub);
-        }
-        for (const group of this.editorialGroupsSelected) {
-            permissions.permissions.push({
-                authority: {
-                    authorityName: group.authorityName,
-                    authorityType: group.authorityType,
-                },
-                permissions: [RestConstants.PERMISSION_COORDINATOR],
-            });
-        }
-        return permissions;
-    }
-
-    private async getEditoralGroups(permissions: Ace[]) {
-        let list: Group[] = [];
-        for (let perm of permissions) {
-            for (let group of await this.editorialGroups
-                .connect()
-                .pipe(
-                    filter((g) => g?.length > 0),
-                    first(),
-                )
-                .toPromise()) {
-                if (group.authorityName == perm.authority.authorityName) {
-                    list.push(group);
-                }
-            }
-        }
-        return list;
     }
 
     private setParent(id: string, parent: EduData.Node) {
@@ -932,25 +812,15 @@ export class CollectionNewComponent implements OnInit, OnDestroy {
         ];
     }
 
-    switchToAuthorFreetext() {
-        this.authorFreetextAllowed = this.connector.hasToolPermissionInstant(
-            RestConstants.TOOLPERMISSION_COLLECTION_CHANGE_OWNER,
-        );
-        this.authorFreetext = true;
-        this.currentCollection.collection.authorFreetext = this.authorityNamePipe.transform(
+    /** the author an author free text starts with: the media center for its collections, else the user */
+    getDefaultAuthorName(): string {
+        return this.authorityNamePipe.transform(
             this.newCollectionType === RestConstants.COLLECTIONTYPE_MEDIA_CENTER ||
-                this.currentCollection.collection.type === RestConstants.COLLECTIONTYPE_MEDIA_CENTER
+                this.currentCollection?.collection.type ===
+                    RestConstants.COLLECTIONTYPE_MEDIA_CENTER
                 ? this.mediacenter
                 : this.user,
             null,
         );
-        setTimeout(() => {
-            this.authorFreetextInput.nativeElement.focus();
-        });
-    }
-
-    cancelAuthorFreetext() {
-        this.authorFreetext = false;
-        this.currentCollection.collection.authorFreetext = null;
     }
 }

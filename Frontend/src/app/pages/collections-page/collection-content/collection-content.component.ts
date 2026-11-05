@@ -1,16 +1,23 @@
 import {
+    afterNextRender,
     Component,
+    ElementRef,
     ContentChild,
+    effect,
     EventEmitter,
     inject,
+    Injector,
     Input,
     OnChanges,
     OnDestroy,
     OnInit,
     Output,
+    runInInjectionContext,
+    signal,
     Signal,
     SimpleChanges,
     TemplateRef,
+    untracked,
     ViewChild,
     ChangeDetectionStrategy,
 } from '@angular/core';
@@ -39,6 +46,7 @@ import {
     DropSource,
     FetchEvent,
     InteractionType,
+    ListDragGropConfig,
     ListEventInterface,
     ListItem,
     ListItemSort,
@@ -48,18 +56,23 @@ import {
     NodeClickEvent,
     NodeDataSource,
     NodeEntriesDisplayType,
+    ClickSource,
+    DefaultGroups,
     NodeEntriesWrapperComponent,
+    TreeConfig,
     NodesRightMode,
     OptionItem,
     OptionsHelperDataService,
     Scope,
     UIConstants,
+    Values,
     VirtualNode,
 } from 'ngx-edu-sharing-ui';
-import { firstValueFrom, forkJoin, Subject } from 'rxjs';
-import { filter, takeUntil } from 'rxjs/operators';
+import { MatSlideToggleChange } from '@angular/material/slide-toggle';
+import { firstValueFrom, forkJoin, from, Observable, of, Subject } from 'rxjs';
+import { catchError, concatMap, filter, map, takeUntil, toArray } from 'rxjs/operators';
 import * as EduData from '../../../core-module/core.module';
-import { ConfigurationHelper, LoginResult, Permission } from '../../../core-module/core.module';
+import { ConfigurationHelper, LoginResult } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
 import { RequestObject } from '../../../core-module/rest/request-object';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
@@ -70,6 +83,7 @@ import { UIService } from '../../../core-module/rest/services/ui.service';
 import { NodeHelperService } from '../../../services/node-helper.service';
 import { Toast } from '../../../services/toast';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
+import { DELETE_OR_CANCEL } from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import {
     ManagementEvent,
@@ -78,7 +92,10 @@ import {
 import { LoadingScreenService } from '../../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../../main/navigation/main-nav.service';
 import { BridgeService } from '../../../services/bridge.service';
-import { CollectionInfoBarComponent } from '../collection-info-bar/collection-info-bar.component';
+import { CollectionViewStateService, CollectionViewType } from '../collection-view-state.service';
+import { CollectionSearchService } from '../collection-search.service';
+import { sameSearchFilters } from '../../../features/topic-page/shared/utils/search-hit-util';
+import { CollectionSearchStateService } from '../collection-search-state.service';
 import { InfobarService } from '../infobar/infobar.service';
 import { SelectionChange } from '@angular/cdk/collections';
 import { ConnectedPosition } from '@angular/cdk/overlay';
@@ -89,6 +106,9 @@ import {
     TabType,
 } from '../../editorial-page/nodes-selector/nodes-selector.component';
 import { ScopeMdsService } from '../../../features/scopes/scope-mds.service';
+
+/** Client-side property holding the title of the collection a search hit is placed in. */
+const SEARCH_PARENT_TITLE_PROPERTY = 'virtual:es_search_parent_title';
 
 @Component({
     selector: 'es-collection-content',
@@ -108,6 +128,9 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     private sessionStorageService = inject(SessionStorageService);
     private dialogs = inject(DialogsService);
     private infobar = inject(InfobarService);
+    /** Order of the lists when the arrangement by hand started; null for a list not arranged. */
+    private collectionsOrderSnapshot: string[] | null = null;
+    private referencesOrderSnapshot: string[] | null = null;
     private loadingScreen = inject(LoadingScreenService);
     private mainNavService = inject(MainNavService);
     private mdsService = inject(MdsService);
@@ -116,6 +139,16 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     private nodeService = inject(RestNodeService);
     private nodeServiceApi = inject(NodeService);
     private optionsService = inject(OptionsHelperDataService);
+    private injector = inject(Injector);
+    private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+    /**
+     * Options of the selection bar. The header and each list have an options service of their
+     * own, none of which knows the selection of the sub-collections and materials together.
+     */
+    private readonly selectionOptions = runInInjectionContext(
+        this.injector,
+        () => new OptionsHelperDataService(),
+    );
     private platformLocation = inject(PlatformLocation);
     private route = inject(ActivatedRoute);
     private router = inject(Router);
@@ -123,6 +156,13 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     private translation = inject(TranslateService);
     private uiService = inject(UIService);
     private globalCollectionsPageService = inject(GlobalCollectionsPageService);
+
+    /**
+     * The number of collections requested per page when the tree needs all of them. A single
+     * request for everything exceeds the backend's search result window (10000 entries counted
+     * from the first one) and is rejected.
+     */
+    private static TREE_PAGE_SIZE = 1000;
 
     private static DEFAULT_REQUEST = {
         sortBy: [
@@ -132,7 +172,9 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         ],
         sortAscending: [false, true, false],
     };
-    referencesDisplayType = NodeEntriesDisplayType.Grid;
+    readonly viewState = inject(CollectionViewStateService);
+    readonly searchState = inject(CollectionSearchStateService);
+    private readonly collectionSearch = inject(CollectionSearchService);
     private readonly destroyed$ = new Subject<void>();
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
@@ -147,11 +189,10 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     @Input() interactionType: InteractionType = InteractionType.DefaultActionLink;
     @Input() scope: string;
     /**
-     * reference to the infobar component
-     * this is required if you want to interconnect it to have support for editing & managing the collection
-     * (the options service is inited in the content component)
+     * the actionbar that shows the actions of the collection; the options service is initialized
+     * for it by this component
      */
-    @Input() getInfobar: () => CollectionInfoBarComponent;
+    @Input() headerActionbar: Signal<ActionbarComponent | undefined>;
     /** The page-level selection actionbar (rendered full-width in the bottom selection bar), provided
      * as the page's `viewChild` signal so it resolves lazily/reactively. */
     @Input() selectionActionbar: Signal<ActionbarComponent | undefined>;
@@ -161,13 +202,23 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     @ContentChild('empty') emptyRef: TemplateRef<unknown>;
     /** Toggles-only bar above the list (display type / sort). */
     @ViewChild('actionbarToggles') actionbarToggles: ActionbarComponent;
+    /** Toggles-only bar of the sub-collections list (select all). */
+    @ViewChild('actionbarCollectionToggles') actionbarCollectionToggles: ActionbarComponent;
     @ViewChild('listReferences') listReferences: NodeEntriesWrapperComponent<CollectionReference>;
+    @ViewChild('listTree') listTree: NodeEntriesWrapperComponent<Node>;
     @ViewChild('listCollections') listCollections: ListEventInterface<Node>;
 
     /** Currently selected references, mirrored from the references list for the selection bar/overlay. */
     selection: Node[] = [];
     /** Original node ids to auto-select once the references (re)load (a freshly *created* node). */
     private selectAfterLoad: string[] = [];
+    /**
+     * collections that were created below the shown one and are selected whenever the list is
+     * loaded until `createdCollectionsUntil`: the page reloads more than once after a change, and
+     * each load drops the selection
+     */
+    private createdCollections: Node[] = [];
+    private createdCollectionsUntil = 0;
     /** True while a sidebar-add reload is in flight, so its selection-clear does not close the sidebar. */
     private addInProgress = false;
     /** Whether the selected-nodes overlay above the selection bar is open. */
@@ -244,16 +295,72 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     });
     dataSourceCollections = new NodeDataSource<Node>();
     dataSourceReferences = new NodeDataSource<CollectionReference>();
+    /** the collection as the root of the tree, followed by its sub-collections and materials */
+    readonly dataSourceTree = new NodeDataSource<Node>();
+    readonly treeConfig: TreeConfig = {
+        label: 'COLLECTIONS.TITLE',
+        // the hits of a search are shown with the collections that lead to them
+        expandAll: false,
+        isMuted: (node) => this.searchAncestorIds.has(node.ref.id),
+        showFiles: true,
+        multipleSelection: true,
+        // a selection opens the sidebar or the material, which a drag must not do
+        selectOnDrag: false,
+        // the stand-in for the root level is no node the options or the sidebar could work on
+        hasNoOptions: (node) => node.ref.id === ROOT,
+    };
+    /**
+     * Whether the tree view may be rendered. The tree reads its data once when it is created, so
+     * it is created only after the data has been put into `dataSourceTree`.
+     */
+    readonly treeReady = signal(false);
+    private shownViewType = this.viewState.viewType();
+    private shownQuery = this.searchState.query();
+    private shownIncludeSubLevels = this.searchState.includeSubLevels();
+    private shownFilters = this.searchState.filters();
+    /** The collections that lead to the hits of the search, which are no hits themselves. */
+    private searchAncestors: Node[] = [];
+    private searchAncestorIds = new Set<string>();
+    /** The collection each hit or ancestor of the search is placed in, by id. */
+    private searchParentIds = new Map<string, string>();
+    /** Whether more collections match the search than are listed. */
+    readonly searchTruncated = signal(false);
     collectionsColumns: ColumnType;
+    /** columns of the search hits in the list view, which tell where each hit is placed */
+    collectionsSearchTableColumns: ColumnType;
+    /** columns of the sub-collections in the list view, which cannot render the card columns */
+    readonly collectionsTableColumns: ColumnType = {
+        Default: [new ListItem('NODE', 'cm:title'), new ListItem('NODE', 'cm:modified')],
+    };
     referencesColumns: ColumnType;
     private loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed$ });
 
     private contentNode: Node;
-    permissions: Permission[];
     login: LoginResult;
     config: ConfigValues;
 
     constructor() {
+        effect(() => {
+            const viewType = this.viewState.viewType();
+            untracked(() => this.onViewTypeChange(viewType));
+        });
+        effect(() => {
+            const query = this.searchState.query();
+            const includeSubLevels = this.searchState.includeSubLevels();
+            const filters = this.searchState.filters();
+            untracked(() => this.onQueryChange(query, includeSubLevels, filters));
+        });
+        // the header bar is rendered independently of the content, so its actionbar can appear
+        // after the options were set up
+        effect(() => {
+            if (this.headerActionbar?.()) {
+                untracked(() => {
+                    if (this.collection) {
+                        this.setOptionsCollection();
+                    }
+                });
+            }
+        });
         this.sortCollectionColumns[this.sortCollectionColumns.length - 1].mode = 'ascending';
         // this.collectionSortEmitter.subscribe((sort: SortEvent) => this.setCollectionSort(sort));
         // this.collectionCustomSortEmitter.subscribe((state: boolean) => state ? this.toggleCollectionsOrder() : this.changeCollectionsOrder());
@@ -262,10 +369,21 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         this.collectionsColumns = {
             Default: ListItem.getCollectionDefaults(),
         };
+        const parentColumn = new ListItem('NODE', SEARCH_PARENT_TITLE_PROPERTY);
+        this.translation
+            .get('COLLECTIONS.SEARCH_PARENT_COLUMN')
+            .subscribe((label) => (parentColumn.label = label));
+        this.collectionsSearchTableColumns = {
+            Default: [
+                new ListItem('NODE', 'cm:title'),
+                parentColumn,
+                new ListItem('NODE', 'cm:modified'),
+            ],
+        };
         this.mainNavService.getDialogs().eventTriggered.subscribe((event: ManagementEvent) => {
             if (event.event === ManagementEventType.AddCollectionNodes) {
                 if (event.data.collection.ref.id === this.collection.ref.id) {
-                    this.listReferences.addVirtualNodes(event.data.references);
+                    this.listReferences?.addVirtualNodes(event.data.references);
                 }
             }
         });
@@ -275,6 +393,15 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 filter((n) => n.some((n1) => n1?.ref?.id === this.collection?.ref?.id)),
             )
             .subscribe(() => this.refreshContent());
+        this.localEventsService.nodesCreated.pipe(takeUntil(this.destroyed$)).subscribe((nodes) => {
+            this.createdCollectionsUntil = Date.now() + 5000;
+            this.createdCollections = nodes.filter(
+                (node) =>
+                    !!node.collection &&
+                    (node.parent?.id === this.collection?.ref?.id ||
+                        (this.isRootLevel && node.collection.level0)),
+            );
+        });
         this.editorialSidebarService.applyNodeEmitted
             .pipe(takeUntil(this.destroyed$))
             .subscribe((payload) => {
@@ -308,6 +435,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     ngOnDestroy(): void {
         this.destroyed$.next();
         this.destroyed$.complete();
+        this.selectionOptions.ngOnDestroy();
     }
 
     async ngOnInit() {
@@ -383,18 +511,6 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 this.dataSourceCollections.isLoading = false;
                 this.setOptionsCollection();
                 this.refreshContent();
-                if (
-                    this.collection.access.indexOf(RestConstants.ACCESS_CHANGE_PERMISSIONS) !== -1
-                ) {
-                    this.nodeService
-                        .getNodePermissions(this.collection.ref.id)
-                        .subscribe((permissions) => {
-                            this.permissions =
-                                permissions.permissions.localPermissions.permissions.concat(
-                                    permissions.permissions.inheritedPermissions,
-                                );
-                        });
-                }
             }
         }
         // update the main nav buttons & availability
@@ -455,6 +571,15 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         });
     }
     canDropOnCollectionBreadcrumbs = (dropData: DragData<Node | 'HOME'>): CanDrop => {
+        const target = dropData.target;
+        if (target !== 'HOME' && target.ref.id === this.collection.ref.id) {
+            return { accept: false };
+        }
+        return this.canDropInto(dropData);
+    };
+
+    /** The drop rules that hold for every target, independent of the collection being shown. */
+    private canDropInto(dropData: DragData<Node | 'HOME'>): CanDrop {
         const nodes = dropData.draggedNodes;
         const target = dropData.target;
         if (target === 'HOME') {
@@ -469,7 +594,6 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         }
         if (
             nodes[0].ref.id === (target as Node).ref.id ||
-            (target as Node).ref.id === this.collection.ref.id ||
             (nodes[0].collection && dropData.action === 'copy')
         ) {
             return {
@@ -515,11 +639,57 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 NodesRightMode.Local,
             ),
         };
-    };
+    }
 
     canDropOnCollection = (dropData: DragData<Node>): CanDrop => {
         return this.canDropOnCollectionBreadcrumbs(dropData);
     };
+
+    /**
+     * The tree stands the root level in with a placeholder node, which stands for the top of the
+     * selected scope.
+     */
+    private treeDropTarget(target: Node): Node | 'HOME' {
+        return target.ref.id === ROOT ? 'HOME' : target;
+    }
+
+    canDropInTree = (dragData: DragData<Node>): CanDrop => {
+        const target = this.treeDropTarget(dragData.target);
+        const nodes = dragData.draggedNodes;
+        const targetId = target === 'HOME' ? ROOT : target.ref.id;
+        if (target !== 'HOME' && !this.nodeHelper.isNodeCollection(target)) {
+            return { accept: false };
+        }
+        // already there, so dropping would change nothing
+        if (nodes.every((node) => (node.parent?.id ?? ROOT) === targetId)) {
+            return { accept: false };
+        }
+        // collections are moved, materials are put in; a mixed drag has no single meaning
+        if (new Set(nodes.map((node) => this.nodeHelper.isNodeCollection(node))).size > 1) {
+            return { accept: false };
+        }
+        return this.canDropInto({ ...dragData, target });
+    };
+
+    dropInTree = (target: Node, source: DropSource<Node>) =>
+        this.dropOnCollection(this.treeDropTarget(target), source);
+
+    /**
+     * The drag configuration of the tree. `dragAllowed` is read whenever a drag could start, so it
+     * follows the collection that is currently shown.
+     */
+    readonly treeDragDrop: ListDragGropConfig<Node> = (() => {
+        const config: ListDragGropConfig<Node> = {
+            dragAllowed: false,
+            dropAllowed: this.canDropInTree,
+            dropped: this.dropInTree,
+        };
+        Object.defineProperty(config, 'dragAllowed', {
+            enumerable: true,
+            get: () => this.isAllowedToEditCollection(),
+        });
+        return config;
+    })();
 
     canDropOnRef = (dragData: DragData<CollectionReference>): CanDrop => {
         // allow dropping when only files are dragged and the view context was changed
@@ -585,7 +755,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                                         source.element,
                                     );
                                     this.toast.closeProgressSpinner();
-                                    this.refreshContent();
+                                    this.refreshAfterMove(source.element, target);
                                 },
                                 (error) => {
                                     this.handleError(error);
@@ -634,7 +804,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                         ).subscribe(
                             () => {
                                 this.toast.closeProgressSpinner();
-                                this.refreshContent();
+                                this.refreshAfterMove(source.element, target);
                             },
                             (error) => {
                                 this.handleError(error);
@@ -648,6 +818,23 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             }
         }
     };
+    /**
+     * Reloads the lists after nodes were moved. The tree updates the branches that lost and gained
+     * the nodes itself, so it is kept (and with it what the user has expanded) unless the nodes
+     * went to the top of the scope, which the tree cannot reload.
+     */
+    private refreshAfterMove(nodes: Node[], target: Node | 'HOME') {
+        if (this.viewState.viewType() === 'tree' && target !== 'HOME') {
+            this.keepTreeOnRefresh = true;
+            this.localEventsService.nodesMoved.emit({
+                nodes,
+                source: { ref: nodes[0]?.parent } as Node,
+                target,
+            });
+        }
+        this.refreshContent();
+    }
+
     private handleError(error: any) {
         if (error.status === RestConstants.DUPLICATE_NODE_RESPONSE) {
             this.toast.error(null, 'COLLECTIONS.ERROR_NODE_EXISTS');
@@ -687,7 +874,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     }
 
     handleSelection(selection: SelectionChange<Node>) {
-        this.selection = selection.source.selected;
+        this.updateSelection();
         // While a sidebar-add reload is in flight, swallow the selection-clear so it does not
         // close the sidebar (selectPendingNodes decides the final state afterwards).
         if (this.interactionType === InteractionType.DefaultActionLink && !this.addInProgress) {
@@ -720,9 +907,161 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     }
 
     clearSelection() {
-        this.listReferences?.getSelection().clear();
+        this.clearAllSelections();
         this.selection = [];
         this.selectionOverlayOpen = false;
+    }
+
+    /** The nodes selected in the lists that are currently rendered. */
+    private collectSelection(): Node[] {
+        if (this.viewState.viewType() === 'tree') {
+            return this.listTree?.getSelection()?.selected ?? [];
+        }
+        return [
+            ...(this.listCollections?.getSelection()?.selected ?? []),
+            ...(this.listReferences?.getSelection()?.selected ?? []),
+        ];
+    }
+
+    /** Mirrors the selection of the rendered lists into the selection bar and its options. */
+    updateSelection() {
+        this.selection = this.collectSelection();
+        this.selectionOptions.setData({
+            scope: Scope.CollectionsReferences,
+            activeObjects: this.selection,
+            selectedObjects: this.selection,
+            parent: this.collection,
+            postPrepareOptions: (options, nodes) =>
+                this.removeOptionsUnsupportedForSelection(options, nodes),
+        });
+        void this.selectionOptions.initComponents(
+            this.selectionActionbar?.(),
+            this.viewState.viewType() === 'tree'
+                ? (this.listTree as ListEventInterface<Node>)
+                : (this.listReferences as ListEventInterface<Node>),
+        );
+        void this.selectionOptions.refreshComponents();
+    }
+
+    /**
+     * Drops the options whose action only takes the first node into account or cannot be
+     * carried out for a selection that mixes sub-collections and materials.
+     */
+    private removeOptionsUnsupportedForSelection(options: OptionItem[], nodes: Node[]) {
+        const collections = nodes.filter((node) => this.nodeHelper.isNodeCollection(node)).length;
+        const mixed = collections > 0 && collections < nodes.length;
+        const unsupported = (option: OptionItem) =>
+            (nodes.length > 1 && option.name === 'OPTIONS.ADD_SHORTCUT') ||
+            (mixed && option.name === 'OPTIONS.COPY') ||
+            ((collections > 1 || mixed) && option.name === 'OPTIONS.INVITE');
+        for (let i = options.length - 1; i >= 0; i--) {
+            if (unsupported(options[i])) {
+                options.splice(i, 1);
+            }
+        }
+        // neither the deletion of collections nor the removal of references covers both kinds
+        if (mixed && this.nodeHelper.getNodesRight(nodes, RestConstants.ACCESS_DELETE)) {
+            const deleteMixed = new OptionItem('OPTIONS.DELETE', 'delete', () =>
+                this.deleteSelection(nodes),
+            );
+            deleteMixed.group = DefaultGroups.Delete;
+            deleteMixed.color = 'warn';
+            deleteMixed.priority = 10;
+            options.push(deleteMixed);
+        }
+    }
+
+    /**
+     * Deletes the selected sub-collections and removes the selected materials from the collection
+     * they are listed in, after a single confirmation.
+     */
+    private async deleteSelection(nodes: Node[]) {
+        const collections = nodes.filter((node) => this.nodeHelper.isNodeCollection(node));
+        const references = nodes.filter((node) => !this.nodeHelper.isNodeCollection(node));
+        const dialogRef = await this.dialogs.openGenericDialog({
+            title: 'OPTIONS.DELETE',
+            message: 'COLLECTIONS.DELETE_SELECTION_DIALOG_TEXT',
+            messageParameters: {
+                collections: collections.length.toString(),
+                references: references.length.toString(),
+            },
+            buttons: DELETE_OR_CANCEL,
+        });
+        if ((await firstValueFrom(dialogRef.afterClosed())) !== 'YES_DELETE') {
+            return;
+        }
+        // what lies inside a collection that is deleted goes away together with it
+        const deletedIds = new Set(collections.map((node) => node.ref.id));
+        const isInsideDeleted = (node: Node) => deletedIds.has(node.parent?.id as string);
+        const toDelete = collections.filter((node) => !isInsideDeleted(node));
+        const toRemove = references.filter((node) => !isInsideDeleted(node));
+        void this.globalCollectionsPageService.removeTemporaryCollections(toDelete);
+        const requests: Observable<Node | { error: unknown }>[] = [
+            ...toDelete.map((node) =>
+                this.nodeService.deleteNode(node.ref.id).pipe(map(() => node)),
+            ),
+            ...toRemove.map((node) =>
+                this.collectionService
+                    .removeFromCollection(
+                        node.ref.id,
+                        (node.parent?.id ?? this.collection.ref.id) as string,
+                    )
+                    .pipe(map(() => node)),
+            ),
+        ].map((request) => request.pipe(catchError((error) => of({ error }))));
+        this.toast.showProgressSpinner();
+        const results = await firstValueFrom(
+            from(requests).pipe(
+                concatMap((request) => request),
+                toArray(),
+            ),
+        );
+        this.toast.closeProgressSpinner();
+        const failed = results.find((result) => 'error' in result) as
+            | { error: unknown }
+            | undefined;
+        if (failed) {
+            this.toast.error(failed.error);
+        } else {
+            this.toast.toast('WORKSPACE.TOAST.DELETE_FINISHED');
+        }
+        const processed = results.filter((result) => !('error' in result)) as Node[];
+        if (processed.length > 0) {
+            this.localEventsService.nodesDeleted.emit(processed);
+        }
+    }
+
+    onCollectionsSelectionChange() {
+        this.updateSelection();
+        this.syncSidebarWithCollectionSelection();
+    }
+
+    /**
+     * Lets the sidebar follow a selection that contains collections: a single collection shows its
+     * information, anything else closes the sidebar, as the actions of several nodes are offered by
+     * the selection bar. A selection of materials only is handled by the list of the materials.
+     */
+    private syncSidebarWithCollectionSelection() {
+        if (this.interactionType !== InteractionType.DefaultActionLink) {
+            return;
+        }
+        const selected = this.selection;
+        if (
+            selected.length > 0 &&
+            !selected.some((node) => this.nodeHelper.isNodeCollection(node))
+        ) {
+            return;
+        }
+        if (selected.length === 1) {
+            this.editorialSidebarService.nodes.set(selected);
+            this.editorialSidebarService.showOption({ option: 'COLLECTION_INFO', trap: false });
+        } else {
+            this.editorialSidebarService.close();
+            // closing forgets the nodes, but a sidebar opened later has to describe the selection
+            if (selected.length > 0) {
+                this.editorialSidebarService.nodes.set(selected);
+            }
+        }
     }
 
     /**
@@ -730,7 +1069,9 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
      * Deselecting on the list's selection model fires `selectionChange`, which updates `selection`.
      */
     deselectNode(node: Node) {
-        this.listReferences?.getSelection().deselect(node as CollectionReference);
+        this.listReferences?.getSelection()?.deselect(node as CollectionReference);
+        this.listCollections?.getSelection()?.deselect(node);
+        this.listTree?.getSelection()?.deselect(node);
     }
     private clickElementEvent(event: NodeClickEvent<CollectionReference | ProposalNode>) {
         if (this.interactionType === InteractionType.DefaultActionLink) {
@@ -747,10 +1088,17 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 );
                 return;
             }
+            // a click replaces the selection of the tree by the clicked material
+            const inTree = this.viewState.viewType() === 'tree';
+            if (!inTree) {
+                this.listCollections?.getSelection()?.clear();
+            }
             this.editorialSidebarService.handleSelect(
-                this.listReferences,
+                inTree ? this.listTree : this.listReferences,
                 event,
                 Scope.CollectionsReferences,
+                undefined,
+                !inTree,
             );
         } else {
             this.clickItem.emit(event);
@@ -812,12 +1160,92 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         });
     }
 
+    /** Reloads the content when the search term changed, e.g. when it was typed or cleared. */
+    private onQueryChange(query: string | null, includeSubLevels: boolean, filters: Values) {
+        if (
+            query === this.shownQuery &&
+            includeSubLevels === this.shownIncludeSubLevels &&
+            sameSearchFilters(filters, this.shownFilters)
+        ) {
+            return;
+        }
+        this.shownQuery = query;
+        this.shownIncludeSubLevels = includeSubLevels;
+        this.shownFilters = filters;
+        if (this.collection) {
+            this.refreshContent();
+        }
+    }
+
+    /** Lists the collections matching the search instead of the content of the collection. */
+    private searchContent() {
+        this.dataSourceCollections.isLoading = true;
+        this.dataSourceReferences.isLoading = false;
+        const query = this.searchState.query()?.trim() ?? '';
+        const includeSubLevels = this.searchState.includeSubLevels();
+        const filters = this.searchState.filters();
+        this.collectionSearch
+            .search(query, {
+                includeSubLevels,
+                filters,
+                scope: this.isRootLevel ? this.scope : undefined,
+                parentId: this.isRootLevel ? undefined : this.collection.ref.id,
+            })
+            .subscribe({
+                next: (result) => {
+                    // a stale answer must not replace the one of a newer search
+                    if (
+                        query !== (this.searchState.query()?.trim() ?? '') ||
+                        includeSubLevels !== this.searchState.includeSubLevels() ||
+                        !sameSearchFilters(filters, this.searchState.filters())
+                    ) {
+                        return;
+                    }
+                    this.searchAncestors = result.ancestors;
+                    this.searchAncestorIds = new Set(result.ancestors.map((n) => n.ref.id));
+                    this.searchParentIds = result.parentIds;
+                    this.searchTruncated.set(result.truncated);
+                    this.searchState.hitCount.set(result.hits.length);
+                    this.dataSourceCollections.setData(
+                        result.hits.map((hit) => this.withParentTitle(hit, result.parents)),
+                    );
+                    this.dataSourceCollections.isLoading = false;
+                    this.finishCollectionLoading();
+                },
+                error: (error: unknown) => {
+                    this.dataSourceCollections.isLoading = false;
+                    this.toast.error(error);
+                },
+            });
+    }
+
+    /** Adds the title of the collection a hit is placed in, which the list shows as a column. */
+    private withParentTitle(hit: Node, parents: Map<string, Node>): Node {
+        const parent = parents.get(hit.ref.id);
+        return {
+            ...hit,
+            properties: {
+                ...hit.properties,
+                [SEARCH_PARENT_TITLE_PROPERTY]: [parent ? parent.title || parent.name : ''],
+            },
+        };
+    }
+
     private refreshContent() {
         this.dataSourceCollections.reset();
         this.dataSourceReferences.reset();
         this.listReferences?.getSelection().clear();
         this.selection = [];
         this.selectionOverlayOpen = false;
+        this.searchTruncated.set(false);
+        this.searchAncestors = [];
+        this.searchAncestorIds = new Set();
+        this.searchParentIds = new Map();
+        this.searchState.hitCount.set(null);
+        if (this.searchState.active()) {
+            this.searchContent();
+            return;
+        }
         this.dataSourceCollections.isLoading = true;
         this.dataSourceReferences.isLoading = true;
 
@@ -858,9 +1286,10 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                         collection.pagination,
                     );
                     this.dataSourceCollections.isLoading = false;
+                    this.selectCreatedCollections();
                     if (this.isRootLevel) {
                         if (this.scope === RestConstants.COLLECTIONSCOPE_MY) {
-                            this.listCollections.addVirtualNodes(
+                            this.listCollections?.addVirtualNodes(
                                 (
                                     await this.sessionStorageService.get<VirtualNode[]>(
                                         SessionStorageService.KEY_ROOT_COLLECTIONS,
@@ -899,47 +1328,17 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             );
     }
 
+    getCollectionsColumns(): ColumnType {
+        if (this.viewState.collectionsDisplayType() !== NodeEntriesDisplayType.Table) {
+            return this.collectionsColumns;
+        }
+        return this.searchState.active()
+            ? this.collectionsSearchTableColumns
+            : this.collectionsTableColumns;
+    }
+
     isMobile() {
         return this.uiService.isMobile();
-    }
-    async setReferenceSort(sort: ListSortConfig) {
-        const diff = Helper.getKeysWithDifferentValues(this.sortReferences, sort);
-        this.sortReferences = sort;
-        // auto activate the custom sorting when the users switch to "custom order"
-        if (diff.includes('active')) {
-            this.sortReferences.customSortingInProgress =
-                this.sortReferences.active === RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION;
-        }
-        void this.toggleReferencesOrder();
-        if (this.sortReferences.customSortingInProgress) {
-            await this.loadMoreReferences({
-                reset: true,
-                amount: RestConstants.COUNT_UNLIMITED,
-                offset: 0,
-            });
-        }
-        if (diff.includes('customSortingInProgress') && sort.customSortingInProgress) {
-            return;
-        }
-
-        try {
-            await this.nodeServiceApi
-                .setProperty(
-                    this.collection.ref.repo,
-                    this.collection.ref.id,
-                    RestConstants.CCM_PROP_COLLECTION_ORDER_MODE,
-                    [sort.active, (sort.direction === 'asc') + ''],
-                )
-                .toPromise();
-            if (sort.active !== RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION) {
-                this.toast.toast('COLLECTIONS.TOAST.SORT_SAVED_TYPE', {
-                    type: this.translation.instant('NODE.' + sort.active),
-                });
-            }
-        } catch (e) {
-            this.toast.error(e);
-        }
-        this.refreshContent();
     }
 
     private getReferencesRequest(): RequestObject {
@@ -976,6 +1375,10 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     }
 
     async loadMoreCollections() {
+        // all hits of a search are loaded at once
+        if (this.searchState.active()) {
+            return;
+        }
         if (!(await this.dataSourceCollections.hasMore()) || this.dataSourceCollections.isLoading) {
             return;
         }
@@ -994,6 +1397,31 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 this.dataSourceCollections.appendData(refs.collections);
                 this.dataSourceCollections.isLoading = false;
             });
+    }
+
+    /**
+     * Shows the collections that were just created like a node created in the workspace: marked as
+     * new, selected, and in view. The search index may not list them yet, so they are added to the
+     * list themselves.
+     */
+    private selectCreatedCollections(): void {
+        const created = this.createdCollections;
+        if (!created.length || Date.now() > this.createdCollectionsUntil) {
+            this.createdCollections = [];
+            return;
+        }
+        this.listCollections?.addVirtualNodes(
+            created.map((node) => Object.assign(node, { override: false })) as VirtualNode[],
+            { select: true },
+        );
+        // the selection replaced any earlier one, so the only selected entry is a created collection
+        afterNextRender(
+            () =>
+                this.elementRef.nativeElement
+                    .querySelector('es-node-entries-wrapper .selected, .mat-row-selected')
+                    ?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }),
+            { injector: this.injector },
+        );
     }
 
     private finishCollectionLoading(callback?: () => void) {
@@ -1019,22 +1447,167 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         if (callback) {
             callback();
         }
+        if (this.viewState.viewType() === 'tree' && !this.keepTreeOnRefresh) {
+            void this.buildTree();
+        }
+        this.keepTreeOnRefresh = false;
         setTimeout(() => {
-            this.setOptionsCollection();
-            void this.listReferences?.initOptionsGenerator({
-                actionbar: [this.actionbarToggles, this.selectionActionbar?.()],
-                parent: this.collection,
-            });
-            // in reurl picker mode with applyCollections, wire options on the sub-collections
-            // list too so their cards expose the APPLY action (mirrors the search page). The
-            // one-shot call in ngOnChanges runs before the view/data are ready and is unreliable.
-            const queryParams = this.route.snapshot.queryParams;
-            if (queryParams.reurl && queryParams.applyCollections === 'true') {
-                void this.listCollections?.initOptionsGenerator({});
-            }
+            this.wireListOptions();
             if (!this.loadingTask.isDone) {
                 this.loadingTask.done();
             }
+        });
+    }
+
+    /** Connects the lists that are currently rendered to the options of the collection. */
+    private wireListOptions() {
+        this.setOptionsCollection();
+        void this.listReferences?.initOptionsGenerator({
+            actionbar: [this.actionbarToggles],
+            parent: this.collection,
+        });
+        // the sub-collections offer the same actions as in the tree; in reurl picker mode with
+        // applyCollections this also exposes the APPLY action on their cards
+        void this.listCollections?.initOptionsGenerator({
+            actionbar: [this.actionbarCollectionToggles],
+            parent: this.collection,
+        });
+    }
+
+    /**
+     * The lists are destroyed and re-created when the tree is entered or left, so the selection
+     * is dropped and the options are wired to whatever is rendered afterwards.
+     */
+    private onViewTypeChange(viewType: CollectionViewType) {
+        if (viewType === this.shownViewType) {
+            return;
+        }
+        this.shownViewType = viewType;
+        this.clearSelection();
+        if (viewType === 'tree') {
+            void this.buildTree();
+        } else {
+            this.treeReady.set(false);
+            setTimeout(() => this.wireListOptions());
+        }
+    }
+
+    /** (Re-)creates the tree from the sub-collections and materials that are currently loaded. */
+    private async buildTree() {
+        this.treeReady.set(false);
+        if (this.isRootLevel && !this.searchState.active()) {
+            // the tree cannot page, so it needs every collection of the scope
+            await this.loadRemainingCollections();
+        }
+        // the tree adjusts the counts of the nodes it is given, so it works on copies
+        const copy = (node: Node): Node => ({
+            ...node,
+            collection: node.collection ? { ...node.collection } : node.collection,
+        });
+        this.treeConfig.expandAll = this.searchState.active();
+        const collections = this.dataSourceCollections.getData() ?? [];
+        // a search lists its hits below the collections leading to them; whatever has no such
+        // collection among the listed ones hangs from the root
+        const listedIds = new Set([...this.searchAncestors, ...collections].map((n) => n.ref.id));
+        const placeInSearch = (node: Node): Node => {
+            const parentId = this.searchParentIds.get(node.ref.id);
+            return {
+                ...node,
+                parent: {
+                    ...node.parent,
+                    id: parentId && listedIds.has(parentId) ? parentId : this.collection.ref.id,
+                },
+            };
+        };
+        this.dataSourceTree.setData(
+            [
+                this.treeRoot(),
+                ...(this.searchState.active()
+                    ? [...this.searchAncestors, ...collections].map(placeInSearch)
+                    : collections.map((node) =>
+                          this.isRootLevel
+                              ? { ...node, parent: { ...node.parent, id: this.collection.ref.id } }
+                              : node,
+                      )),
+                ...(this.dataSourceReferences.getData() ?? []),
+            ].map(copy),
+        );
+        setTimeout(() => {
+            this.treeReady.set(true);
+            setTimeout(() => void this.listTree?.initOptionsGenerator({ parent: this.collection }));
+        });
+    }
+
+    /**
+     * The node the tree hangs from. The root level has no collection of its own, so a stand-in
+     * named after the selected scope is used.
+     */
+    private treeRoot(): Node {
+        if (!this.isRootLevel) {
+            return this.collection;
+        }
+        const title = this.translation.instant('COLLECTIONS.TAB.' + this.scope);
+        return { ...this.collection, title, name: title, icon: { fontGlyphId: 'layers' } } as Node;
+    }
+
+    /** Loads the pages of the root collections that have not been requested yet. */
+    private async loadRemainingCollections() {
+        if (this.searchState.active()) {
+            return;
+        }
+        this.dataSourceCollections.isLoading = true;
+        try {
+            while (this.dataSourceCollections.hasMore()) {
+                const request: RequestObject = Helper.deepCopy(
+                    CollectionContentComponent.DEFAULT_REQUEST,
+                );
+                request.offset = this.dataSourceCollections.getData().length;
+                request.count = CollectionContentComponent.TREE_PAGE_SIZE;
+                const page = await firstValueFrom(
+                    this.collectionService.getCollectionSubcollections(
+                        this.collection.ref.id,
+                        this.scope,
+                        [],
+                        request,
+                        this.collection.ref.repo,
+                    ),
+                );
+                if (!page.collections.length) {
+                    // the total is stale, so there is nothing more to page through
+                    break;
+                }
+                this.dataSourceCollections.appendData(page.collections);
+            }
+        } finally {
+            this.dataSourceCollections.isLoading = false;
+        }
+    }
+
+    /** Whether the next load of the lists leaves the tree as it is instead of building it anew. */
+    private keepTreeOnRefresh = false;
+
+    onTreeSelectionChange() {
+        this.updateSelection();
+        this.syncSidebarWithCollectionSelection();
+    }
+
+    /**
+     * A material that is clicked in the tree is opened the same way as in the list; a clicked
+     * collection shows its information. With the control key the node is added to or removed from
+     * the selection instead.
+     */
+    onTreeClick(event: NodeClickEvent<Node>) {
+        if (event.ctrlKey) {
+            this.listTree?.getSelection()?.toggle(event.element);
+            return;
+        }
+        if (this.nodeHelper.isNodeCollection(event.element)) {
+            this.onCollectionClick(event);
+            return;
+        }
+        void this.onContentClick({
+            element: event.element as CollectionReference,
+            source: event.source,
         });
     }
 
@@ -1043,77 +1616,183 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         this.deleteFromCollection();
     }
 
-    async setCollectionSort(sort: ListSortConfig) {
-        this.sortCollections = sort;
-        try {
-            await this.nodeServiceApi
-                .setProperty(
-                    this.collection.ref.repo,
-                    this.collection.ref.id,
-                    RestConstants.CCM_PROP_COLLECTION_SUBCOLLECTION_ORDER_MODE,
-                    [this.sortCollections.active, (this.sortCollections.direction === 'asc') + ''],
-                )
-                .toPromise();
-        } catch (e) {
-            this.toast.error(e);
-        }
-        this.refreshContent();
-        if (sort.active !== RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION) {
-            this.toast.toast('COLLECTIONS.TOAST.SORT_SAVED_TYPE', {
-                type: this.translation.instant('NODE.' + sort.active),
-            });
-        }
-        if (this.sortCollections.active === RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION) {
-            void this.toggleCollectionsOrder();
-        } else {
-            this.infobar.close();
-        }
-    }
-
     private setOptionsCollection() {
         this.optionsService.setData({
             scope: Scope.CollectionsCollection,
             activeObjects: [this.collection],
+            // the topic page is reached through the view toggle, so it stays in the menu and the
+            // buttons of the header are the information and the editing
+            postPrepareOptions: (options) => {
+                for (const option of options) {
+                    if (option.name === 'OPTIONS.SHOW_TOPIC_PAGE') {
+                        option.showAsAction = false;
+                    }
+                }
+            },
         });
-        void this.optionsService.initComponents(this.getInfobar()?.actionbar, this.listReferences);
+        void this.optionsService.initComponents(this.headerActionbar?.(), this.listReferences);
         void this.optionsService.refreshComponents();
     }
 
-    async toggleCollectionsOrder() {
-        if (this.sortCollections.customSortingInProgress) {
-            const response = await this.infobar.open({
-                title: 'COLLECTIONS.ORDER_COLLECTIONS',
-                message: 'COLLECTIONS.ORDER_COLLECTIONS_INFO',
-                buttons: [{ label: 'SAVE', config: { color: 'primary' } }],
-            });
-            if (response === 'SAVE') {
-                return this.changeCollectionsOrder();
-            } else {
-                this.sortCollections.customSortingInProgress = false;
-            }
-        } else {
-            this.infobar.close();
-        }
-        this.refreshContent();
+    /** Whether the sub-collections or the materials are currently arranged by hand. */
+    isOrderModeActive(): boolean {
+        return (
+            !!this.sortCollections.customSortingInProgress ||
+            !!this.sortReferences.customSortingInProgress
+        );
     }
 
-    async toggleReferencesOrder() {
-        if (this.sortReferences.customSortingInProgress) {
-            const response = await this.infobar.open({
-                title: 'COLLECTIONS.ORDER_ELEMENTS',
-                message: 'COLLECTIONS.ORDER_ELEMENTS_INFO',
-                buttons: [{ label: 'SAVE', config: { color: 'primary' } }],
+    /** Whether there is a list the user may arrange by hand, which the mode toggle depends on. */
+    canOrder(): boolean {
+        return (
+            this.viewState.viewType() !== 'tree' &&
+            (this.canOrderCollections() || this.canOrderReferences())
+        );
+    }
+
+    canOrderCollections(): boolean {
+        return (
+            !this.isMobile() &&
+            !this.searchState.active() &&
+            this.viewState.collectionsDisplayType() !== NodeEntriesDisplayType.Table &&
+            this.dataSourceCollections.getData()?.length > 1 &&
+            this.isUserAllowedToEdit(this.collection)
+        );
+    }
+
+    canOrderReferences(): boolean {
+        return (
+            !this.isMobile() &&
+            this.viewState.referencesDisplayType() !== NodeEntriesDisplayType.Table &&
+            this.dataSourceReferences.getData()?.length > 1 &&
+            this.isUserAllowedToEdit(this.collection)
+        );
+    }
+
+    /**
+     * Handles the toggle that switches the arrangement by hand on or off for the sub-collections
+     * and the materials together.
+     */
+    async onOrderModeToggle(event: MatSlideToggleChange) {
+        if (event.checked) {
+            await this.enterOrderMode();
+        } else {
+            await this.leaveOrderMode();
+        }
+        // The toggle keeps its own state, which differs when leaving the mode was refused.
+        event.source.checked = this.isOrderModeActive();
+    }
+
+    private async enterOrderMode() {
+        const collections = this.canOrderCollections();
+        const references = this.canOrderReferences();
+        if (references) {
+            // all materials have to be present to arrange them
+            await this.loadMoreReferences({
+                reset: true,
+                amount: RestConstants.COUNT_UNLIMITED,
+                offset: 0,
             });
-            this.sortReferences.customSortingInProgress = false;
-            if (response === 'SAVE') {
-                void this.changeReferencesOrder();
-                this.listReferences.getSelection().clear();
-            } else {
-                this.refreshContent();
+        }
+        this.collectionsOrderSnapshot = collections
+            ? await this.getOrderSnapshot(this.dataSourceCollections)
+            : null;
+        this.referencesOrderSnapshot = references
+            ? await this.getOrderSnapshot(this.dataSourceReferences)
+            : null;
+        this.sortCollections = { ...this.sortCollections, customSortingInProgress: collections };
+        this.sortReferences = { ...this.sortReferences, customSortingInProgress: references };
+        void this.awaitOrderDecision();
+    }
+
+    /** Shows the info bar of the mode and applies the choice made there. */
+    private async awaitOrderDecision() {
+        const response = await this.infobar.open({
+            title: 'COLLECTIONS.ORDER_ALL',
+            message: 'COLLECTIONS.ORDER_ALL_INFO',
+            buttons: [
+                { label: 'CANCEL', config: { color: 'standard' } },
+                { label: 'SAVE', config: { color: 'primary' } },
+            ],
+        });
+        if (!this.isOrderModeActive()) {
+            // The mode was left via the toggle, which takes care of the pending changes.
+            return;
+        }
+        const changed = await this.getChangedOrderLists();
+        this.endOrderMode();
+        if (response === 'SAVE') {
+            if (changed.collections || changed.references) {
+                await this.saveOrder(changed);
             }
         } else {
-            this.infobar.close();
+            this.refreshContent();
         }
+    }
+
+    private async leaveOrderMode() {
+        const changed = await this.getChangedOrderLists();
+        let decision: 'SAVE' | 'DISCARD' | 'CANCEL' = 'DISCARD';
+        if (changed.collections || changed.references) {
+            decision = await this.confirmLeavingOrderMode();
+        }
+        if (decision === 'CANCEL') {
+            return;
+        }
+        this.endOrderMode();
+        if (decision === 'SAVE') {
+            await this.saveOrder(changed);
+        } else {
+            this.refreshContent();
+        }
+    }
+
+    /** Switches both lists back to their regular view and closes the info bar of the mode. */
+    private endOrderMode() {
+        this.sortCollections = { ...this.sortCollections, customSortingInProgress: false };
+        this.sortReferences = { ...this.sortReferences, customSortingInProgress: false };
+        this.infobar.close();
+    }
+
+    private async getOrderSnapshot<T extends Node>(
+        dataSource: NodeDataSource<T>,
+    ): Promise<string[]> {
+        return RestHelper.getNodeIds(await dataSource.getData());
+    }
+
+    /** Tells which of the lists differ from the arrangement they had when the mode was entered. */
+    private async getChangedOrderLists(): Promise<{ collections: boolean; references: boolean }> {
+        const differs = async <T extends Node>(
+            dataSource: NodeDataSource<T>,
+            snapshot: string[] | null,
+        ) => {
+            if (snapshot === null) {
+                return false;
+            }
+            const current = await this.getOrderSnapshot(dataSource);
+            return (
+                current.length !== snapshot.length || current.some((id, i) => id !== snapshot[i])
+            );
+        };
+        return {
+            collections: await differs(this.dataSourceCollections, this.collectionsOrderSnapshot),
+            references: await differs(this.dataSourceReferences, this.referencesOrderSnapshot),
+        };
+    }
+
+    /** Resolves what to do with the arrangement made in the mode when the mode is left. */
+    private async confirmLeavingOrderMode(): Promise<'SAVE' | 'DISCARD' | 'CANCEL'> {
+        const dialogRef = await this.dialogs.openGenericDialog({
+            title: 'COLLECTIONS.ORDER_UNSAVED_TITLE',
+            message: 'COLLECTIONS.ORDER_UNSAVED_MESSAGE',
+            buttons: [
+                { label: 'CANCEL', config: { color: 'standard' } },
+                { label: 'DISCARD', config: { color: 'standard' } },
+                { label: 'SAVE', config: { color: 'primary' } },
+            ],
+        });
+        // Dismissing the dialog without a choice keeps the user in the mode.
+        return (await firstValueFrom(dialogRef.afterClosed())) ?? 'CANCEL';
     }
 
     addNodesToCollection(nodes: Node[], allowDuplicate: boolean | 'ignore' = false) {
@@ -1130,43 +1809,106 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         );
     }
 
-    private async changeReferencesOrder() {
+    /**
+     * Stores the arrangement of the given lists as the order in which the children of the
+     * collection show.
+     */
+    private async saveOrder({
+        collections,
+        references,
+    }: {
+        collections: boolean;
+        references: boolean;
+    }) {
         this.toast.showProgressSpinner();
-        this.collectionService
-            .setOrder(
-                this.collection.ref.id,
-                RestHelper.getNodeIds(await this.dataSourceReferences.getData()),
-            )
-            .subscribe(
-                () => {
-                    this.toast.toast('COLLECTIONS.TOAST.SORT_SAVED_CUSTOM');
-                    this.toast.closeProgressSpinner();
-                },
-                (error: any) => {
-                    this.toast.closeProgressSpinner();
-                    this.toast.error(error);
-                },
-            );
+        try {
+            if (references) {
+                await firstValueFrom(
+                    this.collectionService.setOrder(
+                        this.collection.ref.id,
+                        RestHelper.getNodeIds(await this.dataSourceReferences.getData()),
+                    ),
+                );
+                await this.storeCustomOrderMode(RestConstants.CCM_PROP_COLLECTION_ORDER_MODE);
+                this.sortReferences = {
+                    ...this.sortReferences,
+                    active: RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION,
+                    direction: 'asc',
+                };
+            }
+            if (collections) {
+                await firstValueFrom(
+                    this.collectionService.setOrder(
+                        this.collection.ref.id,
+                        RestHelper.getNodeIds(await this.dataSourceCollections.getData()),
+                    ),
+                );
+                await this.storeCustomOrderMode(
+                    RestConstants.CCM_PROP_COLLECTION_SUBCOLLECTION_ORDER_MODE,
+                );
+                this.sortCollections = {
+                    ...this.sortCollections,
+                    active: RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION,
+                    direction: 'asc',
+                };
+            }
+            this.toast.toast('COLLECTIONS.TOAST.SORT_SAVED_CUSTOM');
+        } catch (error) {
+            this.toast.error(error);
+        } finally {
+            this.toast.closeProgressSpinner();
+        }
     }
 
-    private async changeCollectionsOrder() {
-        this.toast.showProgressSpinner();
-        this.collectionService
-            .setOrder(
-                this.collection.ref.id,
-                RestHelper.getNodeIds(await this.dataSourceCollections.getData()),
-            )
-            .subscribe(
-                () => {
-                    this.sortCollections.customSortingInProgress = false;
-                    this.toast.toast('COLLECTIONS.TOAST.SORT_SAVED_CUSTOM');
-                    this.toast.closeProgressSpinner();
-                },
-                (error: any) => {
-                    this.toast.closeProgressSpinner();
-                    this.toast.error(error);
-                },
-            );
+    /** Makes the arrangement set by hand the order in which the children of the collection show. */
+    private async storeCustomOrderMode(property: string): Promise<void> {
+        const value = [RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION, 'true'];
+        await this.nodeServiceApi
+            .setProperty(this.collection.ref.repo, this.collection.ref.id, property, value)
+            .toPromise();
+        this.collection.properties = { ...this.collection.properties, [property]: value };
+    }
+
+    /**
+     * The sub-collections are not links when the page handles them itself: a click shows the
+     * information of the collection and only a double click enters it.
+     */
+    collectionsInteractionType(): InteractionType {
+        return this.interactionType === InteractionType.DefaultActionLink
+            ? InteractionType.Emitter
+            : this.interactionType;
+    }
+
+    onCollectionClick(event: NodeClickEvent<Node | CollectionReference>) {
+        if (this.interactionType !== InteractionType.DefaultActionLink) {
+            this.clickItem.emit(event);
+            return;
+        }
+        const list = this.viewState.viewType() === 'tree' ? this.listTree : this.listCollections;
+        const selection = list?.getSelection();
+        const isSoleSelection =
+            selection?.selected.length === 1 && selection.selected[0] === event.element;
+        this.clearAllSelections();
+        if (isSoleSelection) {
+            this.editorialSidebarService.close();
+            return;
+        }
+        selection?.select(event.element as Node);
+        this.editorialSidebarService.nodes.set([event.element]);
+        this.editorialSidebarService.showOption({ option: 'COLLECTION_INFO', trap: false });
+    }
+
+    /** Empties the selection of every list that is currently rendered. */
+    private clearAllSelections() {
+        this.listReferences?.getSelection()?.clear();
+        this.listCollections?.getSelection()?.clear();
+        this.listTree?.getSelection()?.clear();
+    }
+
+    openCollection(event: NodeClickEvent<Node | CollectionReference>) {
+        if (this.interactionType === InteractionType.DefaultActionLink) {
+            void this.nodeHelper.navigateToNode(event);
+        }
     }
 
     openItem(event: NodeClickEvent<CollectionReference>) {

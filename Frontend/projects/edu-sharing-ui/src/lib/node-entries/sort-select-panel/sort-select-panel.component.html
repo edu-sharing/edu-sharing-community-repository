@@ -1,11 +1,11 @@
-@if (active === 'ccm:collection_ordered_position') {
+@if (showCustomToggle && (!showSelection || active === 'ccm:collection_ordered_position')) {
 <mat-slide-toggle
   [(ngModel)]="customSortingInProgress"
   (ngModelChange)="customSortingInProgressChange.emit($event)"
 >
   {{ 'COLLECTIONS.SORT_SLIDER' | translate }}
 </mat-slide-toggle>
-} @if (columns?.length) { @if (sortDropdown.menu) {
+} @if (showSelection && columns?.length) { @if (sortDropdown.menu) {
 <button [matMenuTriggerFor]="sortDropdown.menu" mat-button color="primary">
   @if (active) {
   <span>{{

@@ -1,0 +1,27 @@
+:host {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.icon {
+    flex: none;
+    margin-top: 2px;
+}
+
+.text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.label {
+    font-size: var(--fontSizeXSmall);
+    color: var(--textMediumLight);
+}
+
+.value {
+    font-size: 1.1em;
+    font-weight: 500;
+    overflow-wrap: anywhere;
+}

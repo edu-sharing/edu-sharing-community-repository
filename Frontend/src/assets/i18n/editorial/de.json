@@ -70,6 +70,39 @@
           "DESCRIPTION": "Eine bestehende Sammlung inklusive gewünschter Inhalte und Untersammlungen hierher kopieren.",
           "ACTION": "Kopieren"
         }
+      },
+      "CREATE_COLLECTION": {
+        "TITLE": "Sammlung erstellen",
+        "EDIT_TITLE": "Sammlung bearbeiten",
+        "LOCATION_ROOT": "Meine Sammlungen",
+        "STEPS": "Schritte",
+        "STEP": {
+          "DESIGN": "Gestalten",
+          "CONFIGURE": "Konfigurieren",
+          "PERMISSIONS": "Freigeben"
+        },
+        "NEXT": "Weiter",
+        "CREATE": "Erstellen",
+        "CREATED": "Die Sammlung wurde erstellt.",
+        "TYPE": "Sammlungstyp",
+        "TYPE_EDITORIAL": "Redaktionelle Sammlung",
+        "TYPE_MEDIA_CENTER": "Medienzentrum",
+        "METADATA": "Metadaten",
+        "DEFAULT_VIEW": "Standarddarstellung",
+        "OPEN_AS_TOPIC_PAGE": "Als Themenseite öffnen",
+        "DEFAULT_SORT": "Standardsortierung",
+        "SORT_SUBCOLLECTIONS": "Untersammlungen sortieren nach",
+        "SORT_REFERENCES": "Materialien sortieren nach",
+        "SORT": {
+          "TITLE": "Titel",
+          "MODIFIED": "Zuletzt geändert",
+          "CREATED": "Erstellt",
+          "MANUAL": "Manuell"
+        },
+        "TYPE_DEFAULT": "Allgemeine Sammlung",
+        "NO_METADATA": "Keine Metadaten verfügbar",
+        "TYPE_INFO": "Informationen zu {{type}}",
+        "SAVED": "Die Sammlung wurde gespeichert."
       }
     },
     "OPTION": {
@@ -136,7 +169,9 @@
             "LABEL": "Anzeigeart",
             "GRID": "Anzeige als Kacheln",
             "TABLE": "Anzeige als Liste",
-            "TREE": "Anzeige als Baum"
+            "TREE": "Anzeige als Baum",
+            "TOPIC": "Anzeige als Themenseite",
+            "TOPIC_UNAVAILABLE": "Für diese Sammlung wurde noch keine Themenseite eingerichtet"
           }
         },
         "WORKSPACE": {
@@ -181,6 +216,19 @@
       },
       "ADD_COLLECTION": "Sammlung hinzufügen",
       "ADD_COLLECTION_DESCRIPTION": "Eine neue Sammlung erstellen oder eine bestehende Sammlung hierher kopieren",
+      "COLLECTION_INFO": "Sammlungsinformationen",
+      "COLLECTION_INFO_DESCRIPTION": "Allgemeine Informationen zu dieser Sammlung anzeigen",
+      "COLLECTION_USAGE": "Aufrufe & Nutzung",
+      "COLLECTION_USAGE_DESCRIPTION": "Die Aufrufe, Downloads und Verwendungen der Sammlung anzeigen",
+      "COLLECTION_EDIT": "Sammlung bearbeiten",
+      "COLLECTION_EDIT_DESCRIPTION": "Titel, Aussehen, Metadaten und Sortierung der Sammlung ändern",
+      "COLLECTION_EDIT_DESIGN": "Sammlung gestalten",
+      "COLLECTION_EDIT_DESIGN_DESCRIPTION": "Titel, Beschreibung, Bild und Farbe der Sammlung ändern",
+      "COLLECTION_EDIT_CONFIGURE": "Sammlung konfigurieren",
+      "COLLECTION_EDIT_CONFIGURE_DESCRIPTION": "Typ, Metadaten und Standardsortierung der Sammlung einstellen",
+      "EDIT_COLLECTION_MENU": "Sammlung bearbeiten",
+      "COLLECTION_SHARE": "Freigeben",
+      "COLLECTION_SHARE_DESCRIPTION": "Zugriffsrechte verwalten",
       "SCOPE_EDITORIAL": "Redaktionell bearbeiten",
       "SCOPE_EDITORIAL_DESCRIPTION": "Status, Zulassung und angepasste Metadaten in der aktiven Redaktion setzen"
     },

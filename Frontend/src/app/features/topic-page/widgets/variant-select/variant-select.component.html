@@ -1,0 +1,30 @@
+@if (pageVariantConfigNodes().length || (canManagePageTemplate() && pageTemplateExists())) {
+<mat-form-field class="select-config-field" appearance="outline" subscriptSizing="dynamic">
+  <mat-label>
+    {{ i18nPrefix + 'PAGE_VARIANT_LABEL' | translate }}
+  </mat-label>
+  <!-- hint: use default mat-select over es-dropdown due to being implemented as mat-menu -->
+  <mat-select
+    [disabled]="
+      (pageVariantConfigNodes().length === 1 || isProcessing()) &&
+      !(canManagePageTemplate() && pageTemplateExists() && !templateMode())
+    "
+    [value]="pageVariantNode()?.ref.id"
+    (selectionChange)="selectVariant($event.value)"
+  >
+    @for (variant of pageVariantConfigNodes(); track variant.ref.id; let i = $index) {
+    <mat-option [value]="variant.ref.id">
+      {{
+        variant.title && !variant.title.includes(pageVariantConfigPrefix)
+          ? (variant | nodeTitle)
+          : (i18nPrefix + 'PAGE_VARIANT_LABEL' | translate) + ' ' + (i + 1)
+      }}
+    </mat-option>
+    } @if (canManagePageTemplate() && pageTemplateExists()) {
+    <mat-option class="navigate-to-template" [value]="navigateToTemplateValue">
+      {{ i18nPrefix + 'NAVIGATE_TO_PAGE_TEMPLATE' | translate }}
+    </mat-option>
+    }
+  </mat-select>
+</mat-form-field>
+}

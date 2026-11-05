@@ -1,0 +1,14 @@
+// A box within the embedding page, in which fixed parts of the topic page (side menu, loading
+// overlay) are positioned.
+:host {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    height: 100vh;
+    contain: layout;
+}
+
+.render-container {
+    flex-grow: 1;
+    overflow: auto;
+}

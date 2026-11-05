@@ -1,0 +1,32 @@
+:host {
+    display: block;
+}
+
+// fits the bar it is placed in, the value centered and the field sized to its title
+.select-config-field {
+    --mat-form-field-container-height: 48px;
+    --mat-form-field-container-vertical-padding: 12px;
+    max-width: 320px;
+
+    // outlined fields reserve extra space above the value for their label app-wide; the field
+    // keeps the default width at least, which leaves its label room in the outline
+    &.mat-mdc-form-field ::ng-deep .mdc-text-field--outlined .mat-mdc-form-field-infix {
+        width: auto;
+        min-width: 180px;
+        padding-top: var(--mat-form-field-container-vertical-padding);
+        padding-bottom: var(--mat-form-field-container-vertical-padding);
+    }
+
+    ::ng-deep .mat-mdc-select-arrow-wrapper {
+        padding-left: 12px;
+    }
+
+    &.mat-form-field-disabled {
+        cursor: not-allowed;
+    }
+}
+
+// separates the template option from the variants
+::ng-deep .navigate-to-template {
+    border-top: 1px solid var(--borderLight);
+}

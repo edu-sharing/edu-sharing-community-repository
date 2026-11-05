@@ -197,72 +197,6 @@ $imagePath: '../../../../assets/images/collections/';
         background: $actionDialogBackground;
     }
 }
-.collection-general {
-    mat-form-field {
-        width: 100%;
-        textarea {
-            height: 6rem;
-            resize: none;
-        }
-    }
-    .dialog-input-area {
-        padding-top: 0;
-        padding-bottom: 0;
-    }
-    .collection-new-owner {
-        display: flex;
-        align-items: center;
-        padding: 0 $cardPadding;
-        > i {
-            margin: 5px;
-        }
-        > span {
-            flex-grow: 1;
-        }
-    }
-    .color-group {
-        display: flex;
-        flex-wrap: wrap;
-        margin: auto;
-        //max-width: 220px;
-        justify-content: center;
-        &:focus {
-            outline: unset;
-        }
-        &.cdk-keyboard-focused {
-            @include setGlobalKeyboardFocus();
-        }
-        .color-option {
-            display: inline-block;
-            border-radius: 4pt;
-            width: 14%;
-            height: 30px;
-            margin: 4px 3px;
-            cursor: pointer;
-        }
-        .color-selected {
-            border: 2px solid var(--borderDark);
-        }
-    }
-}
-.collection-metadata {
-    .noGroups {
-        padding-top: 15px;
-        font-size: $fontSizeXLarge;
-        color: $textLight;
-        text-align: center;
-    }
-    .noPermission {
-        color: $textLight;
-        text-align: center;
-        h4 {
-            font-size: $fontSizeXLarge;
-        }
-        h5 {
-            font-size: 100%;
-        }
-    }
-}
 .groupLabel {
     margin-bottom: 5px;
 }
@@ -282,31 +216,6 @@ $imagePath: '../../../../assets/images/collections/';
 .collectionShadow {
     @include materialShadowLarge();
 }
-.collectionImage {
-    position: relative;
-    height: 240px;
-    background-color: var(--backgroundColor);
-    overflow: hidden;
-}
-
-.collection-new-preview-infoarea {
-    position: relative;
-    min-height: 120px;
-    padding: 16px;
-    color: var(--textBlack);
-    transition: $transitionNormal all;
-
-    --mat-form-field-outlined-hover-label-text-color: #333;
-
-    @include placeholder {
-        color: var(--textLight);
-    }
-
-    input,
-    textarea {
-        background-color: transparent;
-    }
-}
 
 .collection-new-preview-headline {
     font-size: 200%;
@@ -316,11 +225,6 @@ $imagePath: '../../../../assets/images/collections/';
     font-size: 120%;
     margin-bottom: 16px;
     opacity: 0.85;
-}
-
-.collection-new-preview-infoline {
-    opacity: 0.75;
-    margin-bottom: 10px;
 }
 
 .collection-nocontent-big {
@@ -378,31 +282,6 @@ $imagePath: '../../../../assets/images/collections/';
 }
 .card-content {
     padding: $cardPadding;
-}
-.card-collection-icon-container {
-    text-align: center;
-    vertical-align: middle;
-    width: 100%;
-    height: 240px;
-    background-color: var(--backgroundColor);
-    color: white;
-    cursor: pointer;
-}
-.card-image-distance {
-    height: 35px;
-}
-.card-image-icon-container {
-    height: 160px;
-    width: 160px;
-    border-radius: 160px;
-    background-color: darkgray;
-    margin: auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    i {
-        font-size: 75px;
-    }
 }
 
 .card-collection-image-container {
@@ -462,31 +341,10 @@ input[type='radio'] {
     cursor: pointer;
 }
 
-.dialog-color-group {
-    min-height: 140px;
-}
-
 .dialog-header-field {
     background-color: #383838;
     padding: 8px 0px 8px 20px;
     color: #ffffff;
-}
-.editorial-group {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    .editorial-list {
-        flex-grow: 1;
-        overflow-y: auto;
-    }
-    .editorial-public {
-        padding: $cardPadding $cardPadding 20px $cardPadding;
-        background-color: $cardLightBackground;
-
-        ::ng-deep .mat-slide-toggle {
-            height: auto;
-        }
-    }
 }
 @media screen and (max-width: $mobileWidth+$mobileStage*3) {
     .card-high {
@@ -530,24 +388,6 @@ input[type='radio'] {
     .card-high,
     .card-low {
         top: calc(var(--mainnavHeight) + 15px);
-    }
-    .collectionImage {
-        height: 120px;
-    }
-    .card-collection-icon-container {
-        height: 120px;
-    }
-    .card-image-icon-container {
-        margin-top: 10px;
-        height: 100px;
-        width: 100px;
-        border-radius: 100px;
-        i {
-            font-size: 60px;
-        }
-    }
-    .card-image-distance {
-        height: 0;
     }
     .blurred-image {
         display: block;

@@ -2648,6 +2648,11 @@
                     <type>d:noderef</type>
                     <multiple>false</multiple>
                 </property>
+                <!-- if true, the pages this object inherits from its parents are not passed on to its own children -->
+                <property name="ccm:page_config_propagate_stop">
+                    <type>d:boolean</type>
+                    <multiple>false</multiple>
+                </property>
             </properties>
         </aspect>
 

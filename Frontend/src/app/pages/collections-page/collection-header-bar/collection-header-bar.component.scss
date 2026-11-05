@@ -1,0 +1,79 @@
+:host {
+    display: block;
+    flex-shrink: 0;
+    padding: 12px 20px 0;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 8px 16px 8px 8px;
+    border-radius: 6px;
+    // the collection colour as a light tint of the card, so it follows the theme
+    background-color: color-mix(
+        in srgb,
+        var(--collection-color, var(--primary)) 14%,
+        var(--cardLightBackground)
+    );
+}
+
+// the round action buttons keep the neutral surface instead of showing the banner tint
+es-actionbar ::ng-deep .actionbar-round button:not(:disabled) {
+    background-color: var(--backgroundColor);
+}
+
+// the thumbnail doubles as the entry to the collection information
+.thumbnail-button {
+    display: block;
+    padding: 0;
+    border: 0;
+    background: none;
+    border-radius: var(--collection-thumbnail-radius, 4px);
+    cursor: pointer;
+}
+
+es-collection-thumbnail {
+    --collection-thumbnail-radius: 4px;
+}
+
+.text {
+    flex: 1;
+    min-width: 0;
+}
+
+.title {
+    margin: 0 0 4px;
+    font-size: 2em;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.order-mode {
+    flex-shrink: 0;
+}
+
+.scope {
+    color: var(--textMediumLight);
+}
+
+@media screen and (max-width: 600px) {
+    :host {
+        padding: 8px 10px 0;
+    }
+
+    .header {
+        gap: 10px;
+        padding: 6px 8px 6px 6px;
+    }
+
+    .header {
+        --collection-header-thumbnail-size: 48px;
+    }
+
+    .title {
+        font-size: 1.4em;
+    }
+}

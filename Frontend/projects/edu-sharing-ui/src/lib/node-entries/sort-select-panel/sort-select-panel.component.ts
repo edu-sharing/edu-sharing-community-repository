@@ -13,6 +13,10 @@ export class SortSelectPanelComponent implements SortPanel {
     @Input() active: string;
     @Input() direction: SortDirection;
     @Input() columns: ListItemSort[];
+    /** whether the sort criterion can be chosen, in addition to the toggle for manual ordering */
+    @Input() showSelection = true;
+    /** whether the toggle for manual ordering is offered */
+    @Input() showCustomToggle = true;
     @Output() sortChange = new EventEmitter<Sort>();
     @Input() customSortingInProgress: boolean;
     @Output() customSortingInProgressChange = new EventEmitter<boolean>();

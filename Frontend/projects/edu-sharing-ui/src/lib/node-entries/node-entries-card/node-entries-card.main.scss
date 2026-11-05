@@ -79,6 +79,13 @@ $cardLineHeight: 1.4;
             right: 0;
             bottom: 0;
         }
+        // Hint that the card can be moved while the entries are arranged by hand.
+        .card-top-bar-drag-handle {
+            position: relative;
+            display: flex;
+            color: var(--textMain);
+            cursor: grab;
+        }
         .card-top-bar-flag {
             @include card-top-bar-badge;
         }

@@ -24,7 +24,7 @@ import { UIService } from '../../services/ui.service';
 import { TranslationsService } from '../../translations/translations.service';
 import { CanDrop, DragData } from '../../types/drag-drop';
 import { Target } from '../../types/option-item';
-import { NodeEntriesDisplayType } from '../entries-model';
+import { ClickSource, NodeEntriesDisplayType } from '../entries-model';
 import { DynamicDataSource } from './dynamic-data-source';
 import { DynamicFlatNode } from './dynamic-flat-node';
 import { TreeNodeService } from './tree-node.service';
@@ -41,6 +41,7 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
     implements AfterViewInit, OnDestroy
 {
     private changeDetectorRef = inject(ChangeDetectorRef);
+    protected readonly ClickSource = ClickSource;
     entriesService = inject<NodeEntriesService<T>>(NodeEntriesService);
     nodeHelper = inject(NodeHelperService);
     private elementRef = inject(ElementRef);
@@ -122,7 +123,7 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
     onContextMenu(event: MouseEvent | Event, node: T): void {
         event.stopPropagation();
         event.preventDefault();
-        if (!this.dropdown) {
+        if (!this.dropdown || this.entriesService.treeConfig?.hasNoOptions?.(node as Node)) {
             return;
         }
         if (event instanceof MouseEvent) {
@@ -151,6 +152,11 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
         } else {
             this.entriesService.openDropdown(this.dropdown, node);
         }
+    }
+
+    /** Whether the options menu may be opened for the node. */
+    hasOptionsFor(node: Partial<Node>): boolean {
+        return !this.entriesService.treeConfig?.hasNoOptions?.(node as Node);
     }
 
     hasDropdownOptions(): boolean {
@@ -305,16 +311,43 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
     }
 
     canDrop = (dragData: DragData<T>): CanDrop => {
-        return this.entriesService.dragDrop.dropAllowed?.(
-            this.nodesDragDropService.convertDragData(this.elementRef, dragData),
-        );
+        const dropAllowed = this.entriesService.dragDrop?.dropAllowed;
+        if (!dropAllowed) {
+            return { accept: false };
+        }
+        if (this.isInsideDraggedNodes(dragData.target, dragData.draggedNodes)) {
+            // a node cannot become part of its own subtree
+            return { accept: false, denyExplicit: true };
+        }
+        return dropAllowed(this.nodesDragDropService.convertDragData(this.elementRef, dragData));
     };
 
     async drop(dragData: DragData<Node>): Promise<void> {
-        this.entriesService.dragDrop.dropped(dragData.target, {
+        this.entriesService.dragDrop?.dropped?.(dragData.target, {
             element: dragData.draggedNodes,
             mode: dragData.action,
         });
+    }
+
+    /**
+     * Whether the target is one of the dragged nodes or lies below one of them in the tree.
+     */
+    private isInsideDraggedNodes(target: T, draggedNodes: Node[]): boolean {
+        const draggedIds = new Set(draggedNodes.map((node) => node.ref.id));
+        const visited = new Set<string>();
+        let current: Partial<Node> = target as Partial<Node>;
+        while (current?.ref?.id && !visited.has(current.ref.id)) {
+            if (draggedIds.has(current.ref.id)) {
+                return true;
+            }
+            visited.add(current.ref.id);
+            const parentId = current.parent?.id;
+            current = parentId
+                ? this.treeNodeService.getCurrentData().find((d) => d.item.ref.id === parentId)
+                      ?.item
+                : null;
+        }
+        return false;
     }
 
     getDragData(node: T): T[] {
@@ -327,7 +360,10 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
     }
 
     onDragStarted(node: T) {
-        if (!this.entriesService.selection.isSelected(node)) {
+        if (
+            this.entriesService.treeConfig?.selectOnDrag !== false &&
+            !this.entriesService.selection.isSelected(node)
+        ) {
             this.entriesService.selection.clear();
             this.entriesService.selection.select(node);
         }
@@ -389,13 +425,17 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
         }
         this.dataSource.data = this.treeNodeService.getCurrentData();
         if (!alreadyInitialized) {
-            // find a first level element that can be expanded and expand it
-            const firstLevelElement = this.dataSource.data.find(
-                (d) => d.level === 0 && d.expandable,
-            );
-            if (firstLevelElement) {
-                this.treeControl.expand(firstLevelElement);
-                await this.updateTree([firstLevelElement.item as Node]);
+            if (this.entriesService.treeConfig?.expandAll) {
+                this.expandAllNodes();
+            } else {
+                // find a first level element that can be expanded and expand it
+                const firstLevelElement = this.dataSource.data.find(
+                    (d) => d.level === 0 && d.expandable,
+                );
+                if (firstLevelElement) {
+                    this.treeControl.expand(firstLevelElement);
+                    await this.updateTree([firstLevelElement.item as Node]);
+                }
             }
         } else {
             // restore the previously existing expanded states
@@ -410,6 +450,43 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
             }
         }
         this.treeInitialized.set(true);
+    }
+
+    /**
+     * Renders every node of the initial data that has children in the data as expanded. The
+     * children are put into the rendered list directly, which is what a restored expansion does as
+     * well, so the expansion model is filled before the tree listens to it.
+     */
+    private expandAllNodes(): void {
+        const dataMap = this.treeNodeService.getDataMap();
+        const rendered: DynamicFlatNode[] = [];
+        const expanded: DynamicFlatNode[] = [];
+        const visited = new Set<string>();
+        const add = (flatNode: DynamicFlatNode) => {
+            rendered.push(flatNode);
+            const id = flatNode.item.ref.id;
+            const children = dataMap.get(id) ?? [];
+            if (!children.length || visited.has(id)) {
+                return;
+            }
+            visited.add(id);
+            flatNode.expandable = true;
+            expanded.push(flatNode);
+            this.treeNodeService.expandNode(flatNode.item);
+            children.forEach((child) =>
+                add(
+                    new DynamicFlatNode(
+                        child,
+                        flatNode.level + 1,
+                        this.treeNodeService.isExpandable(child),
+                    ),
+                ),
+            );
+        };
+        this.dataSource.data.forEach(add);
+        this.treeNodeService.setCurrentData(rendered);
+        this.dataSource.data = rendered;
+        this.treeControl.expansionModel.select(...expanded);
     }
 
     /**

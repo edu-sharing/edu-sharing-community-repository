@@ -1,0 +1,78 @@
+<es-collection-info-section>
+  <div class="numbers">
+    <div class="number" data-test="collection-info-child-collections-count">
+      <div class="figure">
+        <i [esIcon]="'layers'"></i>
+        <span class="value">{{ collection()?.collection?.childCollectionsCount ?? 0 }}</span>
+      </div>
+      <span class="label">{{ 'COLLECTIONS.INFO.SUBCOLLECTIONS' | translate }}</span>
+    </div>
+    <div class="number" data-test="collection-info-child-references-count">
+      <div class="figure">
+        <i [esIcon]="'insert_drive_file'"></i>
+        <span class="value">{{ collection()?.collection?.childReferencesCount ?? 0 }}</span>
+      </div>
+      <span class="label">{{ 'COLLECTIONS.INFO.MATERIALS' | translate }}</span>
+    </div>
+    @if (details.viewCount() !== undefined) {
+    <div class="number" data-test="collection-info-stats">
+      <div class="figure">
+        <i [esIcon]="'bar_chart'"></i>
+        <span class="value">{{ details.viewCount() }}</span>
+      </div>
+      <span class="label">{{ 'COLLECTIONS.INFO.VIEWS' | translate }}</span>
+    </div>
+    }
+  </div>
+</es-collection-info-section>
+<es-collection-info-section heading="COLLECTIONS.INFO.SECTION_GENERAL">
+  <div class="rows">
+    <es-collection-info-row
+      [icon]="visibilityIcon()"
+      label="COLLECTIONS.INFO.VISIBILITY"
+      data-test="collection-info-sharing-state"
+    >
+      <es-collection-scope-label
+        [collection]="collection()"
+        [showIcon]="false"
+      ></es-collection-scope-label>
+    </es-collection-info-row>
+    <es-collection-info-row
+      icon="layers"
+      label="COLLECTIONS.INFO.TYPE.LABEL"
+      data-test="collection-info-type"
+    >
+      {{ typeKey() | translate }}
+    </es-collection-info-row>
+  </div>
+</es-collection-info-section>
+@if (showSettings()) {
+<es-collection-info-section heading="COLLECTIONS.INFO.SECTION_DISPLAY">
+  <div class="rows">
+    <es-collection-info-row
+      icon="visibility"
+      label="COLLECTIONS.INFO.DEFAULT_VIEW"
+      data-test="collection-info-default-view"
+    >
+      {{ defaultViewKey() | translate }}
+    </es-collection-info-row>
+    @if (subcollectionSortKey()) {
+    <es-collection-info-row
+      icon="sort"
+      label="COLLECTIONS.INFO.SORT_SUBCOLLECTIONS"
+      data-test="collection-info-sort-subcollections"
+    >
+      {{ subcollectionSortKey() | translate }}
+    </es-collection-info-row>
+    } @if (referenceSortKey()) {
+    <es-collection-info-row
+      icon="sort"
+      label="COLLECTIONS.INFO.SORT_REFERENCES"
+      data-test="collection-info-sort-references"
+    >
+      {{ referenceSortKey() | translate }}
+    </es-collection-info-row>
+    }
+  </div>
+</es-collection-info-section>
+}

@@ -19,6 +19,7 @@ import {
     ChangeDetectionStrategy,
 } from '@angular/core';
 import { Node, RestConstants, ROOT, ScopesService } from 'ngx-edu-sharing-api';
+import { RestHelper } from '../../core-module/rest/rest-helper';
 import {
     Constrain,
     CustomOptions,
@@ -44,6 +45,10 @@ import { EdgeToggleComponent } from '../../shared/components/edge-toggle/edge-to
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
 import { NodesSelectorConfig } from '../../pages/editorial-page/nodes-selector/nodes-selector.component';
+import {
+    EditCollectionConfig,
+    Step,
+} from './create-collection-sidebar/create-collection-sidebar.component';
 import { CardDialogRef } from '../dialogs/card-dialog/card-dialog-ref';
 import { DialogsService } from '../dialogs/dialogs.service';
 import {
@@ -73,6 +78,21 @@ export type EditorialSidebarOptionDescriptor = {
     selectionMode: SelectionMode;
 };
 
+/** options that are about the collection the sidebar currently belongs to */
+const COLLECTION_BOUND_OPTIONS: EditorialSidebarOption[] = [
+    'COLLECTION_INFO',
+    'COLLECTION_USAGE',
+    'SHARE_COLLECTION',
+    'EDIT_COLLECTION_MENU',
+];
+
+/** the options that are offered on the page of `EDIT_COLLECTION_MENU` instead of the overview */
+const EDIT_COLLECTION_MENU_ENTRIES = [
+    'EDITORIAL.OPTIONS.COLLECTION_EDIT_DESIGN',
+    'EDITORIAL.OPTIONS.COLLECTION_EDIT_CONFIGURE',
+    'EDITORIAL.OPTIONS.COLLECTION_SHARE',
+];
+
 export const EDITORIAL_SIDEBAR_OPTIONS = {
     VERSION_MANAGEMENT: { selectionMode: 'single' },
     VIEWS_AND_USAGE: { selectionMode: 'multi' },
@@ -84,6 +104,18 @@ export const EDITORIAL_SIDEBAR_OPTIONS = {
     MANAGE_CONTENT: { selectionMode: 'multi' },
     /** entry step to either create a new collection or copy an existing one to this location */
     ADD_COLLECTION: { selectionMode: 'none' },
+    /** form to create a new collection, reached from the "add collection" step or the create menu */
+    CREATE_COLLECTION: { selectionMode: 'none' },
+    /** the same form for a collection that exists; it is about that collection, not the selection */
+    EDIT_COLLECTION: { selectionMode: 'any' },
+    /** page that offers to design, configure or share the collection that is shown as `parent` */
+    EDIT_COLLECTION_MENU: { selectionMode: 'any' },
+    /** the views and usages of the collection that is shown as `parent` */
+    COLLECTION_USAGE: { selectionMode: 'any' },
+    /** gives others access to the collection that is shown as `parent` */
+    SHARE_COLLECTION: { selectionMode: 'any' },
+    /** general information about the collection that is shown as `parent` */
+    COLLECTION_INFO: { selectionMode: 'any' },
     MANAGE_SUBMISSION: { selectionMode: 'single' },
     VIEW_ASSIGNMENT: { selectionMode: 'single' },
     /** editorial changes inside the active scope (single node, selection or all hits via bulk) */
@@ -109,7 +141,8 @@ export type OptionConfig =
     | NodesSelectorConfig
     | SubmissionConfig
     | AssignmentConfig
-    | PreviewConfig;
+    | PreviewConfig
+    | EditCollectionConfig;
 export type OptionState<T extends OptionConfig> = {
     option: EditorialSidebarOption;
     /**
@@ -124,6 +157,11 @@ export type OptionState<T extends OptionConfig> = {
      * when true, do not allow to navigate back to the overview of all actions
      */
     trap: boolean;
+    /**
+     * the page the header's back arrow returns to instead of the overview, for an option that was
+     * reached from another option
+     */
+    backTo?: OptionState<OptionConfig>;
 };
 /** running counter so every instance's generated ids are document-unique */
 let nextInstanceId = 0;
@@ -162,6 +200,17 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
 
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
     parent = input<Node>();
+    /**
+     * The collection the collection information describes: a collection selected in a list, else
+     * the `parent`.
+     */
+    readonly collectionInfoTarget = computed(
+        () =>
+            (this.editorialSidebarService
+                .nodes()
+                ?.find((node) => (node as Node).mediatype === 'collection') as Node) ??
+            this.parent(),
+    );
     /**
      * current main component (only for editorial page context)
      */
@@ -212,6 +261,35 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
     );
     options = signal<OptionItem[]>(null);
     /**
+     * The options of the overview, without the ones that belong to a page of their own and without
+     * a custom menu page none of whose entries is offered.
+     */
+    protected readonly overviewOptions = computed(() => {
+        const customOptions = this.editorialSidebarService.getCustomOptions();
+        const subEntries = customOptions
+            .filter((custom) => custom.parent)
+            .map((custom) => custom.label);
+        const emptyMenus = customOptions
+            .filter((custom) => !custom.component && !this.customMenuEntries(custom.id).length)
+            .map((custom) => custom.label);
+        return this.options()?.filter(
+            (option) =>
+                !EDIT_COLLECTION_MENU_ENTRIES.includes(option.name) &&
+                !subEntries.includes(option.name) &&
+                !emptyMenus.includes(option.name),
+        );
+    });
+    /** the entries of the custom menu page that is open, in the order they were registered */
+    protected readonly customMenuOptions = computed(() =>
+        this.customMenuEntries(this.enabledOption()?.option),
+    );
+    /** the options of the page that edits the collection, in the order they are offered */
+    protected readonly editMenuOptions = computed(() =>
+        EDIT_COLLECTION_MENU_ENTRIES.map((name) =>
+            this.options()?.find((option) => option.name === name),
+        ).filter((option) => !!option),
+    );
+    /**
      * The registration of the currently enabled option, if it is one another module contributed.
      * Reactive: the registrations are a signal, so the panel follows a late registration.
      */
@@ -246,6 +324,17 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
                 this.enabledOption.set(null);
             }
         });
+        // options that describe the current collection have nothing to show once it is gone, e.g.
+        // after navigating to the collections root
+        effect(() => {
+            const option = this.enabledOption()?.option;
+            if (
+                COLLECTION_BOUND_OPTIONS.includes(option) &&
+                !this.isRealCollection(this.collectionInfoTarget())
+            ) {
+                this.enabledOption.set(null);
+            }
+        });
     }
 
     async ngOnChanges(changes: SimpleChanges) {
@@ -258,6 +347,27 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
             void this.openDialog();
         }
         void this.initOptions();
+    }
+
+    /** the collections root has no collection of its own */
+    /**
+     * Whether the selection leaves the collection options meaningful: nothing is selected, or a
+     * single collection is, which the options then describe instead of the current parent.
+     */
+    private isCollectionContext(): boolean {
+        const nodes = this.editorialSidebarService.nodes();
+        return (
+            !nodes?.length ||
+            (nodes.length === 1 && this.nodeHelperService.isNodeCollection(nodes[0] as Node))
+        );
+    }
+
+    private isRealCollection(collection: Node | undefined): boolean {
+        return (
+            !!collection &&
+            collection.ref?.id !== ROOT &&
+            this.nodeHelperService.isNodeCollection(collection)
+        );
     }
 
     private async initOptions() {
@@ -345,7 +455,8 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
                 option: 'ADD_COLLECTION',
             }),
         );
-        addCollection.group = DefaultGroups.Create;
+        addCollection.group = DefaultGroups.Primary;
+        addCollection.priority = 3;
         addCollection.elementType = [ElementType.NoneOrUnknown];
         addCollection.scopes = ['collections'];
         addCollection.toolpermissions = [RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS];
@@ -362,6 +473,117 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
             );
         };
         options.push(addCollection);
+
+        const collectionInfo = new OptionItem('EDITORIAL.OPTIONS.COLLECTION_INFO', 'info', () =>
+            this.enabledOption.set({
+                trap: false,
+                option: 'COLLECTION_INFO',
+            }),
+        );
+        collectionInfo.group = DefaultGroups.Primary;
+        collectionInfo.priority = 1;
+        collectionInfo.elementType = [ElementType.NoneOrUnknown, ElementType.Node];
+        collectionInfo.scopes = ['collections'];
+        // the root of the collections has no collection to describe
+        collectionInfo.customShowCallback = async () =>
+            this.isCollectionContext() && this.isRealCollection(this.collectionInfoTarget());
+        options.push(collectionInfo);
+
+        const collectionUsage = new OptionItem(
+            'EDITORIAL.OPTIONS.VIEWS_AND_USAGE',
+            'bar_chart',
+            () => this.enabledOption.set({ trap: false, option: 'COLLECTION_USAGE' }),
+        );
+        collectionUsage.group = DefaultGroups.Primary;
+        collectionUsage.priority = 2;
+        collectionUsage.elementType = [ElementType.NoneOrUnknown, ElementType.Node];
+        collectionUsage.scopes = ['collections'];
+        collectionUsage.toolpermissions = [RestConstants.TOOLPERMISSION_SELECTIVE_STATISTICS_NODES];
+        collectionUsage.toolpermissionsMode = HideMode.Hide;
+        collectionUsage.customShowCallback = async () =>
+            this.isCollectionContext() && this.isRealCollection(this.collectionInfoTarget());
+        options.push(collectionUsage);
+
+        const editCollection = new OptionItem('EDITORIAL.OPTIONS.COLLECTION_EDIT', 'edit', () =>
+            this.enabledOption.set({ trap: false, option: 'EDIT_COLLECTION_MENU' }),
+        );
+        editCollection.group = DefaultGroups.Primary;
+        editCollection.priority = 5;
+        editCollection.elementType = [ElementType.NoneOrUnknown, ElementType.Node];
+        editCollection.scopes = ['collections'];
+        editCollection.customShowCallback = async () => {
+            const collection = this.collectionInfoTarget();
+            return (
+                this.isCollectionContext() &&
+                this.isRealCollection(collection) &&
+                (RestHelper.hasAccessPermission(collection, RestConstants.PERMISSION_WRITE) ||
+                    RestHelper.hasAccessPermission(
+                        collection,
+                        RestConstants.ACCESS_CHANGE_PERMISSIONS,
+                    ))
+            );
+        };
+        options.push(editCollection);
+
+        const editSteps: { name: string; icon: string; step: Step }[] = [
+            { name: EDIT_COLLECTION_MENU_ENTRIES[0], icon: 'palette', step: 'DESIGN' },
+            { name: EDIT_COLLECTION_MENU_ENTRIES[1], icon: 'tune', step: 'CONFIGURE' },
+        ];
+        for (const { name, icon, step } of editSteps) {
+            const editStep = new OptionItem(name, icon, () =>
+                this.enabledOption.set({
+                    trap: false,
+                    option: 'EDIT_COLLECTION',
+                    backTo: { trap: false, option: 'EDIT_COLLECTION_MENU' },
+                    optionConfig: { collectionId: this.collectionInfoTarget().ref.id, step },
+                }),
+            );
+            editStep.group = DefaultGroups.Primary;
+            editStep.elementType = [ElementType.NoneOrUnknown, ElementType.Node];
+            editStep.scopes = ['collections'];
+            editStep.customShowCallback = async () => {
+                const collection = this.collectionInfoTarget();
+                return (
+                    this.isCollectionContext() &&
+                    this.isRealCollection(collection) &&
+                    RestHelper.hasAccessPermission(collection, RestConstants.PERMISSION_WRITE)
+                );
+            };
+            options.push(editStep);
+        }
+
+        const shareCollection = new OptionItem(EDIT_COLLECTION_MENU_ENTRIES[2], 'group_add', () => {
+            const collection = this.collectionInfoTarget();
+            // a collection of type editorial is given to groups, which its editor asks for
+            this.enabledOption.set(
+                collection.collection?.type === RestConstants.COLLECTIONTYPE_EDITORIAL
+                    ? {
+                          trap: false,
+                          option: 'EDIT_COLLECTION',
+                          backTo: { trap: false, option: 'EDIT_COLLECTION_MENU' },
+                          optionConfig: { collectionId: collection.ref.id, step: 'PERMISSIONS' },
+                      }
+                    : {
+                          trap: false,
+                          option: 'SHARE_COLLECTION',
+                          backTo: { trap: false, option: 'EDIT_COLLECTION_MENU' },
+                      },
+            );
+        });
+        shareCollection.group = DefaultGroups.Primary;
+        shareCollection.elementType = [ElementType.NoneOrUnknown, ElementType.Node];
+        shareCollection.scopes = ['collections'];
+        shareCollection.toolpermissions = [RestConstants.TOOLPERMISSION_INVITE];
+        shareCollection.toolpermissionsMode = HideMode.Hide;
+        shareCollection.customShowCallback = async () => {
+            const collection = this.collectionInfoTarget();
+            return (
+                this.isCollectionContext() &&
+                this.isRealCollection(collection) &&
+                RestHelper.hasAccessPermission(collection, RestConstants.ACCESS_CHANGE_PERMISSIONS)
+            );
+        };
+        options.push(shareCollection);
 
         const sortInto = new OptionItem(
             'EDITORIAL.OPTIONS.SORT_INTO',
@@ -380,16 +602,26 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         createAssignment.group = DefaultGroups.Primary;
         sortInto.customShowCallback = async () => {
             const validParent = this.parent() && ![ROOT].includes(this.parent().ref.id);
+            // the user home is handed over as a bare node without a type
             const isMapOrFolder =
-                this.parent()?.type &&
+                this.parent()?.ref.id === RestConstants.USERHOME ||
                 [RestConstants.CM_TYPE_FOLDER, RestConstants.CCM_TYPE_MAP].includes(
-                    this.parent().type,
+                    this.parent()?.type,
                 );
-            return validParent && isMapOrFolder;
+            // a selection-less option has no node the generic permission check could run on,
+            // so the right to add children is verified against the parent itself
+            // the option helper only hides on an explicit `false`, so the result is coerced
+            return !!(
+                validParent &&
+                isMapOrFolder &&
+                RestHelper.hasAccessPermission(this.parent(), RestConstants.ACCESS_ADD_CHILDREN)
+            );
         };
         // only for logged-in users who may add children to the current collection or folder
         sortInto.constrains = [Constrain.User, Constrain.AddObjects];
         sortInto.elementType = [ElementType.NoneOrUnknown];
+        sortInto.group = DefaultGroups.Primary;
+        sortInto.priority = 4;
         sortInto.scopes = ['collections', 'workspace'];
         options.push(sortInto);
 
@@ -434,7 +666,11 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         // offer and render them (see `EditorialSidebarService.registerCustomOption`)
         for (const custom of this.editorialSidebarService.getCustomOptions()) {
             const option = new OptionItem(custom.label, custom.icon, () =>
-                this.enabledOption.set({ trap: false, option: custom.id }),
+                this.enabledOption.set({
+                    trap: false,
+                    option: custom.id,
+                    ...(custom.parent && { backTo: { trap: false, option: custom.parent } }),
+                }),
             );
             option.group = custom.group ?? DefaultGroups.Primary;
             // Offered whatever is selected: `isOptionAvailable` hides an option whose `elementType`
@@ -470,6 +706,18 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         void this.uiService.updateOptionEnabledState(options$);
         this.options.set(options$.value);
         return options;
+    }
+
+    /** the offered options that the custom option with the given id lists on its menu page */
+    private customMenuEntries(parent: EditorialSidebarOption | undefined): OptionItem[] {
+        if (!parent) {
+            return [];
+        }
+        return this.editorialSidebarService
+            .getCustomOptions()
+            .filter((custom) => custom.parent === parent)
+            .map((custom) => this.options()?.find((option) => option.name === custom.label))
+            .filter((option) => !!option);
     }
 
     ngOnDestroy(): void {
@@ -518,6 +766,11 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
     async goBack(): Promise<void> {
         const canDeactivate = this.customOption()?.canDeactivate;
         if (canDeactivate && !(await canDeactivate())) {
+            return;
+        }
+        const backTo = this.enabledOption()?.backTo;
+        if (backTo) {
+            this.editorialSidebarService.showOption(backTo);
             return;
         }
         this.enabledOption.set(null);

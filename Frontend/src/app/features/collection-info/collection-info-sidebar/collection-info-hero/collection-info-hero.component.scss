@@ -1,0 +1,33 @@
+:host {
+    display: block;
+    padding-bottom: 16px;
+}
+
+es-collection-thumbnail {
+    display: block;
+    --collection-thumbnail-radius: 0;
+}
+
+// the collection colour as a light tint, like the header bar of the collection page
+.text {
+    padding: 12px 16px 14px;
+    background-color: color-mix(
+        in srgb,
+        var(--collection-color, var(--primary)) 14%,
+        var(--cardLightBackground)
+    );
+}
+
+.title {
+    margin: 0 0 6px;
+    font-size: 2em;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.description {
+    margin: 0;
+    font-size: 1.05em;
+    color: var(--textMain);
+    white-space: pre-line;
+}

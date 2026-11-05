@@ -1,4 +1,13 @@
-import { effect, EventEmitter, inject, Injectable, signal, Type, untracked } from '@angular/core';
+import {
+    effect,
+    EventEmitter,
+    inject,
+    Injectable,
+    Injector,
+    signal,
+    Type,
+    untracked,
+} from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import {
     EDITORIAL_SIDEBAR_OPTIONS,
@@ -35,8 +44,18 @@ export type CustomSidebarOption = {
     /** i18n key (or plain text) for the entry in the option list and the panel heading */
     label: string;
     icon: string;
-    /** rendered while the option is open (via `ngComponentOutlet`, so it must be standalone) */
-    component: Type<unknown>;
+    /**
+     * Rendered while the option is open (via `ngComponentOutlet`, so it must be standalone).
+     * Without one, the option is a menu page listing the options that name it as `parent`.
+     */
+    component?: Type<unknown>;
+    /**
+     * Id of the custom option whose menu page offers this one instead of the overview; its back
+     * arrow returns to that page.
+     */
+    parent?: string;
+    /** resolves the services of `component`, e.g. ones the registering view provides itself */
+    injector?: Injector;
     /**
      * Defaults to `'any'`: a contributed option is usually about the current context rather than
      * about the selection, and would otherwise be dropped the moment something is selected.
@@ -309,7 +328,7 @@ export class EditorialSidebarService {
             nodeEntriesRef?.getSelection()?.toggle(event.element as Node);
         }
         if (nodeEntriesRef?.getSelection()?.selected.length === 0) {
-            this.sidebarOpened.set(false);
+            this.close();
         } else if (
             nodeEntriesRef?.getSelection()?.selected.length === 1 &&
             (event.element as Node).mediatype &&

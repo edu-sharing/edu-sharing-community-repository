@@ -1,0 +1,164 @@
+@use '../../topic-page-variables' as topicPageVars;
+
+:host {
+    display: block;
+}
+
+.page-variant-or-template-picker {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.select-copy-option {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+// adjustments for search form field
+.search-form-field {
+    width: 100%;
+
+    &::ng-deep {
+        // remove border from search form field
+        --mat-form-field-outlined-outline-width: 0;
+        --mat-form-field-outlined-focus-outline-width: 0;
+        .mat-mdc-notch-piece {
+            border: none;
+        }
+
+        // remove padding-left from search field
+        .mat-mdc-text-field-wrapper {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+
+        // adjust paddings of search field outer div, over the global outlined field padding
+        .mat-mdc-text-field-wrapper.mdc-text-field--outlined
+            .mat-mdc-form-field-flex
+            .mat-mdc-form-field-infix {
+            padding-top: 4px;
+            padding-bottom: 4px;
+        }
+
+        // remove suffix from form-field to avoid invisible div
+        .mat-mdc-form-field-icon-suffix {
+            display: none;
+        }
+    }
+
+    .search-field-input-wrapper {
+        display: flex;
+        flex-grow: 1;
+        border-radius: 26px;
+        align-items: center;
+        height: 52px;
+        min-width: 0;
+        background-color: topicPageVars.$surface-container-highest;
+
+        .search-icon {
+            margin-top: -1px;
+            margin-right: 6px;
+            margin-left: 16px;
+            min-width: 24px;
+            width: 24px;
+            height: 22px;
+            color: topicPageVars.$primary;
+        }
+
+        input {
+            height: 52px;
+            min-width: 0;
+            flex-shrink: 1;
+            // placeholder
+            text-overflow: ellipsis;
+            color: topicPageVars.$primary;
+
+            &::placeholder {
+                color: var(--placeholderColor);
+            }
+        }
+
+        .search-button {
+            margin: 6px;
+            padding-left: 16px;
+            padding-right: 16px;
+            min-height: unset !important;
+            height: calc(52px - 12px);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
+    }
+}
+
+.search-filters-and-results {
+    // the result table keeps its column widths, so it scrolls on its own instead of widening the panel
+    .topic-page-entries-wrapper {
+        display: block;
+        overflow-x: auto;
+        // separates the sorting from the filters above
+        margin-top: 8px;
+    }
+
+    .empty {
+        padding: 8px 16px;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+.page-variant-search-filters ::ng-deep {
+    .content {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 16px;
+
+        // remove unnecessary margin-bottom from widgets
+        .widget-container {
+            margin-bottom: 0;
+        }
+
+        // fix floating label is cut off
+        .mat-mdc-form-field {
+            padding-top: 8px;
+        }
+
+        // fix paddings of form-field
+        .mat-mdc-form-field-infix {
+            padding: 12px 0 !important;
+        }
+    }
+}
+
+// collection scope of the page variant search, shown above the metadata filters
+.collection-filter {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
+
+    .collection-filter-label {
+        color: topicPageVars.$secondary-text;
+    }
+
+    // the checkbox is rendered as a filter pill holding its own label
+    .collection-filter-chip {
+        --mat-checkbox-label-text-color: #{topicPageVars.$on-surface};
+        --mat-checkbox-label-text-size: #{topicPageVars.$font-size-small};
+        border-radius: 16px;
+        background-color: topicPageVars.$surface-container-highest;
+        padding-right: 12px;
+
+        ::ng-deep .mdc-form-field {
+            height: 32px;
+        }
+    }
+}

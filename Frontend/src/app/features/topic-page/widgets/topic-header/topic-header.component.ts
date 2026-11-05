@@ -1,0 +1,613 @@
+import {
+    Component,
+    ComponentRef,
+    CUSTOM_ELEMENTS_SCHEMA,
+    DestroyRef,
+    effect,
+    ElementRef,
+    input,
+    Input,
+    InputSignal,
+    OnChanges,
+    OnInit,
+    signal,
+    SimpleChanges,
+    untracked,
+    viewChild,
+    ViewContainerRef,
+    ViewEncapsulation,
+    WritableSignal,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { TranslateModule } from '@ngx-translate/core';
+import { Node, ParentEntries } from 'ngx-edu-sharing-api';
+import { CreateChatCompletionResponse } from 'ngx-edu-sharing-b-api';
+import {
+    ColorHelper,
+    EduSharingUiCommonModule,
+    PreferredColor,
+    SpinnerComponent,
+    UIService,
+} from 'ngx-edu-sharing-ui';
+import { RestConstants } from '../../../../core-module/rest/rest-constants';
+import { ThemeService } from '../../../../services/theme.service';
+import { SharedModule } from '../../../../shared/shared.module';
+import { HighlightSearchPipe } from '../../shared/pipes/highlight-search.pipe';
+import { AiHelperService } from '../../shared/services/ai-helper.service';
+import { GlobalWidgetConfigService } from '../../shared/services/global-widget-config.service';
+import { TopicPageEventsService } from '../../shared/services/topic-page-events.service';
+import { TopicPageGlobalService } from '../../shared/services/topic-page-global.service';
+import { TopicPageHelperService } from '../../shared/services/topic-page-helper.service';
+import { TopicPageHistoryService } from '../../shared/services/topic-page-history.service';
+import { DEFAULT_WIDGET_CONFIG_PROP } from '../../shared/types/custom-definitions';
+import { HeaderExtensionInterface } from '../../shared/types/header-extension';
+import { BreadcrumbConfig } from '../../shared/types/widget-config/breadcrumb-config';
+import { TopicHeaderConfig } from '../../shared/types/widget-config/topic-header-config';
+import { retrieveResultString } from '../../shared/utils/ai-util';
+import { getNodeOrDefaultNodeId } from '../../shared/utils/node-util';
+import {
+    convertNodeRefIntoNodeId,
+    retrieveNodeId,
+    retrieveWidgetConfigFromNode,
+} from '../../shared/utils/template-util';
+import { ColorPickerComponent } from '../shared/color-picker/color-picker.component';
+import { EditableTextComponent } from '../shared/editable-text/editable-text.component';
+import { ImageWrapperComponent } from '../shared/image-wrapper/image-wrapper.component';
+
+@Component({
+    selector: 'es-topic-header',
+    encapsulation: ViewEncapsulation.Emulated,
+    imports: [
+        EduSharingUiCommonModule,
+        ColorPickerComponent,
+        EditableTextComponent,
+        HighlightSearchPipe,
+        ImageWrapperComponent,
+        SharedModule,
+        SpinnerComponent,
+        TranslateModule,
+    ],
+    schemas: [CUSTOM_ELEMENTS_SCHEMA],
+    templateUrl: './topic-header.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrls: ['./topic-header.component.scss'],
+})
+export class TopicHeaderComponent implements OnChanges, OnInit {
+    private aiHelperService = inject(AiHelperService);
+    private globalWidgetConfigService = inject(GlobalWidgetConfigService);
+    private topicPageEventsService = inject(TopicPageEventsService);
+    private topicPageGlobalService = inject(TopicPageGlobalService);
+    private topicPageHelperService = inject(TopicPageHelperService);
+    private topicPageHistoryService = inject(TopicPageHistoryService, { optional: true });
+    private themeService = inject(ThemeService);
+    private uiService = inject(UIService);
+    private destroyRef = inject(DestroyRef);
+
+    // CONSTANTS
+    private readonly DEFAULT_DESCRIPTION: string = '';
+    readonly DEFAULT_HEADER_TEXT_BG_COLOR = '#FFFFFF';
+    readonly i18nPrefix: string = 'TOPIC_PAGE.WIDGET.TOPIC_HEADER.';
+
+    private _collectionNode: Node = null;
+    @Input() set collectionNode(value: Node) {
+        this._collectionNode = value;
+        this.collectionDescription = value?.properties?.[RestConstants.CM_DESCRIPTION]?.[0];
+        // a stored description was written by an editor, only a missing one is generated
+        this.aiGeneratedDescription.set(false);
+        if (!this.collectionDescription) {
+            void this.generateCollectionDescription(retrieveNodeId(value));
+        }
+    }
+    get collectionNode(): Node {
+        return this._collectionNode;
+    }
+    @Input() contextNodeId: string;
+    @Input() defaultDescriptionNodeId?: string = '';
+    @Input() defaultImageNodeId?: string = '';
+    @Input() defaultTextNodeId?: string = '';
+    private readonly editModeSignal: WritableSignal<boolean> = signal(false);
+    private _editMode: boolean = false;
+    @Input() set editMode(value: boolean) {
+        this._editMode = value;
+        this.editModeSignal.set(value);
+    }
+    get editMode(): boolean {
+        return this._editMode;
+    }
+    @Input() nodeId: string = '';
+    // propagated header node: only its text background color is taken over,
+    // other parameters fall back to defaults
+    @Input() propagatedNodeId: string = '';
+    @Input() pageVariantNode: Node;
+    // breadcrumb widget nodes of pages stored before the header held the editorial members
+    @Input() legacyMembersNodeId: string = '';
+    @Input() legacyPropagatedMembersNodeId: string = '';
+    parentEntries: InputSignal<ParentEntries> = input<ParentEntries>(null);
+    searchInput: InputSignal<string> = input<string>(null);
+    @Input() topic: string;
+
+    // own config node, empty if none exists or it was deleted, so saving creates a new one
+    availableNodeId: string = '';
+    aiGeneratedDescription: WritableSignal<boolean> = signal(false);
+    aiGeneratedImage: boolean;
+    aiGeneratedText: WritableSignal<boolean> = signal(false);
+    aiSupported: WritableSignal<boolean> = signal(false);
+    collectionDescription: string;
+    // members of this page's own config; undefined while the inherited ones are shown
+    private ownEditorialMemberNodeIds: string[] | undefined;
+    private editorialMemberNodeIds: string[] = [];
+    readonly hasHeaderExtension: boolean = this.topicPageGlobalService.hasCustomHeaderExtension();
+    private readonly customExtensionContainer = viewChild('customExtension', {
+        read: ViewContainerRef,
+    });
+    private readonly customExtensionElement = viewChild<ElementRef<HTMLElement>>('customExtension');
+    private customExtensionRef: ComponentRef<HeaderExtensionInterface> | null = null;
+    // description is used for the "description" of importance (stored in a "header" widget node)
+    description: string = this.DEFAULT_DESCRIPTION;
+    initialized: WritableSignal<boolean> = signal(false);
+    // the page is creating the config node this header asked for
+    private nodeCreationPending: boolean = false;
+    // saves run one after another, each storing the state current at its turn
+    private saveQueue: Promise<void> = Promise.resolve();
+    // the config last stored (or loaded), so an unchanged state is not stored again
+    private storedConfig: string = null;
+    textBackgroundColor: string = this.DEFAULT_HEADER_TEXT_BG_COLOR;
+    userUploadedNodeId: string = null;
+    widgetNodeId: string = null;
+
+    constructor() {
+        effect((): void => {
+            const container: ViewContainerRef | undefined = this.customExtensionContainer();
+            const element: ElementRef<HTMLElement> | undefined = this.customExtensionElement();
+            if (container && element) {
+                untracked((): void => void this.mountCustomExtension(container, element));
+            } else {
+                this.customExtensionRef = null;
+            }
+        });
+        effect((): void => {
+            const editMode: boolean = this.editModeSignal();
+            this.customExtensionRef?.setInput('editMode', editMode);
+        });
+        this.topicPageEventsService.widgetNodeRestored
+            .pipe(takeUntilDestroyed())
+            .subscribe(async (nodeId: string): Promise<void> => {
+                if (this.nodeId && convertNodeRefIntoNodeId(this.nodeId) === nodeId) {
+                    this.resetConfigValues();
+                    await this.initTopicHeader();
+                }
+            });
+    }
+
+    /**
+     * Initializes the component.
+     */
+    async ngOnInit(): Promise<void> {
+        // retrieve the widget node ID for a potential AI request
+        this.widgetNodeId = getNodeOrDefaultNodeId(
+            this.defaultImageNodeId,
+            this.globalWidgetConfigService.defaultTopicHeaderImageWidgetNodeId,
+        );
+        // by default, the image should be generated by AI if it is supported
+        this.aiSupported.set(await this.aiHelperService.hasAISupport());
+        this.aiGeneratedImage = this.aiSupported();
+    }
+
+    /**
+     * Initializes or updates the topic header component.
+     */
+    async ngOnChanges(changes: SimpleChanges): Promise<void> {
+        const topicChanged: boolean = changes.topic && !changes.topic?.firstChange;
+        const nodeIdChanged: boolean =
+            !!changes.nodeId && changes.nodeId.currentValue !== changes.nodeId.previousValue;
+        const propagatedNodeIdChanged: boolean =
+            !!changes.propagatedNodeId &&
+            changes.propagatedNodeId.currentValue !== changes.propagatedNodeId.previousValue;
+        // a node created on request of this header keeps the local state, which may be newer
+        const ownNodeCreated: boolean =
+            nodeIdChanged &&
+            !changes.nodeId.firstChange &&
+            !!this.nodeId &&
+            !topicChanged &&
+            (this.nodeCreationPending || this.nodeId === this.availableNodeId);
+        if (ownNodeCreated) {
+            this.availableNodeId = this.nodeId;
+        } else if (
+            changes.nodeId?.firstChange ||
+            changes.propagatedNodeId?.firstChange ||
+            nodeIdChanged ||
+            propagatedNodeIdChanged ||
+            topicChanged
+        ) {
+            // reset several variables if an actual (non-first) change was detected
+            if (
+                (!changes.nodeId?.firstChange && nodeIdChanged) ||
+                (!changes.propagatedNodeId?.firstChange && propagatedNodeIdChanged) ||
+                topicChanged
+            ) {
+                this.resetConfigValues();
+            }
+            // initialize the topic header component
+            await this.initTopicHeader();
+        }
+        if (!changes.editMode?.firstChange && changes.editMode?.currentValue === false) {
+            // regenerate texts of the topic header component
+            await this.regenerateTexts();
+        }
+    }
+
+    /**
+     * Resets the values read from the config, which only overrides the values it carries.
+     */
+    private resetConfigValues(): void {
+        this.aiGeneratedImage = this.aiSupported();
+        this.aiGeneratedText.set(false);
+        this.initialized.set(false);
+        this.description = this.DEFAULT_DESCRIPTION;
+        this.textBackgroundColor = this.DEFAULT_HEADER_TEXT_BG_COLOR;
+        this.userUploadedNodeId = null;
+        this.ownEditorialMemberNodeIds = undefined;
+        this.editorialMemberNodeIds = [];
+    }
+
+    /**
+     * Resolves the editorial members: the own header config, then the legacy breadcrumb config of
+     * this page, which both count as own, then the inherited header and breadcrumb configs.
+     */
+    private async loadEditorialMembers(ownConfig: TopicHeaderConfig | undefined): Promise<void> {
+        this.ownEditorialMemberNodeIds =
+            ownConfig?.editorialMemberNodeIds ??
+            (await this.readEditorialMembers(this.legacyMembersNodeId));
+        this.editorialMemberNodeIds =
+            this.ownEditorialMemberNodeIds ??
+            (await this.readEditorialMembers(this.propagatedNodeId)) ??
+            (await this.readEditorialMembers(this.legacyPropagatedMembersNodeId)) ??
+            [];
+        this.customExtensionRef?.setInput('editorialMemberNodeIds', this.editorialMemberNodeIds);
+    }
+
+    private async readEditorialMembers(nodeId: string): Promise<string[] | undefined> {
+        if (!nodeId) {
+            return undefined;
+        }
+        const node: Node | null = await this.topicPageHelperService.getNodeIfAvailable(nodeId);
+        const config = node
+            ? (retrieveWidgetConfigFromNode(node) as TopicHeaderConfig | BreadcrumbConfig)
+            : undefined;
+        return config?.editorialMemberNodeIds;
+    }
+
+    /**
+     * Mounts the registered header extension and stores the members it changes in this header.
+     */
+    private async mountCustomExtension(
+        container: ViewContainerRef,
+        element: ElementRef<HTMLElement>,
+    ): Promise<void> {
+        const componentClass = await this.topicPageGlobalService.getCustomHeaderExtension();
+        if (!componentClass || this.customExtensionContainer() !== container) {
+            return;
+        }
+        const ref: ComponentRef<HeaderExtensionInterface> = this.uiService.injectAngularComponent(
+            container,
+            componentClass,
+            element.nativeElement,
+            {
+                editorialMemberNodeIds: this.editorialMemberNodeIds,
+            } as unknown as Partial<HeaderExtensionInterface>,
+            { replace: false },
+        );
+        // editMode is an input signal, which only setInput reaches
+        ref.setInput('editMode', this.editMode);
+        ref.instance.editorialMemberNodeIdsChanged
+            ?.pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe((memberNodeIds: string[]): void => {
+                this.ownEditorialMemberNodeIds = memberNodeIds;
+                this.editorialMemberNodeIds = memberNodeIds;
+                void this.persistConfig();
+            });
+        this.customExtensionRef = ref;
+    }
+
+    /**
+     * Initializes the topic header by generating an introductory text or retrieving it from the config.
+     */
+    async initTopicHeader(): Promise<void> {
+        // retrieve a config node if one exists
+        let configJson: string = '{}';
+        // when only a propagated node exists, take over only its color attribute
+        let colorOnly: boolean = false;
+        const configNodeId: string = this.nodeId || this.propagatedNodeId;
+        let node: Node | null = null;
+        if (configNodeId) {
+            node = await this.topicPageHelperService.getNodeIfAvailable(configNodeId);
+            if (node?.properties?.[DEFAULT_WIDGET_CONFIG_PROP]?.[0]) {
+                configJson = node.properties[DEFAULT_WIDGET_CONFIG_PROP][0];
+            }
+            colorOnly = !this.nodeId && !!this.propagatedNodeId;
+        }
+        this.availableNodeId = this.nodeId && node ? this.nodeId : '';
+        // read config from this JSON string and generates an AI text if no description is found
+        const aiNodeId: string = getNodeOrDefaultNodeId(
+            this.defaultTextNodeId,
+            this.globalWidgetConfigService.defaultTopicHeaderTextWidgetNodeId,
+        );
+        await this.readConfigFromJson(configJson, aiNodeId, colorOnly);
+        await this.loadEditorialMembers(colorOnly ? undefined : JSON.parse(configJson));
+        this.storedConfig = JSON.stringify(this.retrieveWidgetConfig());
+        // set the component to be initialized (further processing is done in the child component)
+        this.initialized.set(true);
+    }
+
+    /**
+     * Regenerates collectionDescription and description via AI if they were cleared.
+     */
+    async regenerateTexts(): Promise<void> {
+        if (!this.collectionDescription) {
+            await this.generateCollectionDescription(retrieveNodeId(this._collectionNode));
+        }
+        if (!this.description) {
+            const aiNodeId: string = getNodeOrDefaultNodeId(
+                this.defaultTextNodeId,
+                this.globalWidgetConfigService.defaultTopicHeaderTextWidgetNodeId,
+            );
+            await this.generateDescription(aiNodeId);
+        }
+    }
+
+    /**
+     * Changes the text background color by emitting a persist config event.
+     */
+    async changeTextBackgroundColor(color: string): Promise<void> {
+        if (color !== this.textBackgroundColor) {
+            this.textBackgroundColor = color;
+            await this.persistConfig();
+        }
+    }
+
+    /**
+     * Handles a manual change of the importance description text. The text is no longer
+     * AI-generated once edited by the user, so the AI label must be hidden before persisting.
+     */
+    async onDescriptionChanged(): Promise<void> {
+        this.aiGeneratedText.set(false);
+        await this.persistConfig();
+    }
+
+    /**
+     * Handles a manual change of the collection description text. The text is no longer
+     * AI-generated once edited by the user, so the AI label must be hidden before persisting.
+     */
+    async onCollectionDescriptionChanged(description: string): Promise<void> {
+        this.aiGeneratedDescription.set(false);
+        await this.persistCollectionDescription(description);
+    }
+
+    /**
+     * Persists the currently defined config once the saves requested before are done.
+     *
+     * @param force stores the config even if unchanged, e.g. to get a node for an image upload
+     */
+    persistConfig(force: boolean = false): Promise<void> {
+        const save: Promise<void> = this.saveQueue.then(() => this.storeConfig(force));
+        this.saveQueue = save.catch((): void => undefined);
+        return save;
+    }
+
+    /**
+     * Stores the current config, either in the own node or in a node the page creates for it.
+     */
+    private async storeConfig(force: boolean): Promise<void> {
+        // a config being loaded is no state of this header yet
+        if (!this.initialized()) {
+            return;
+        }
+        const widgetConfig: TopicHeaderConfig = this.retrieveWidgetConfig();
+        const serializedConfig: string = JSON.stringify(widgetConfig);
+        if (!force && serializedConfig === this.storedConfig) {
+            return;
+        }
+        if (this.availableNodeId) {
+            const node: Node = await this.topicPageHelperService.persistConfig(
+                this.availableNodeId,
+                -1,
+                -1,
+                this.pageVariantNode,
+                widgetConfig,
+                null,
+                this.contextNodeId,
+                false,
+                true,
+            );
+            this.storedConfig = node ? serializedConfig : null;
+            return;
+        }
+        // creating the node may involve copying an inherited page config first
+        this.nodeCreationPending = true;
+        const nodeId: string | null = await new Promise<string | null>((resolve): void => {
+            void this.topicPageHelperService.persistConfig(
+                '',
+                -1,
+                -1,
+                this.pageVariantNode,
+                widgetConfig,
+                null,
+                this.contextNodeId,
+                false,
+                true,
+                resolve,
+            );
+        });
+        this.nodeCreationPending = false;
+        if (nodeId) {
+            this.availableNodeId = nodeId;
+            this.storedConfig = serializedConfig;
+        }
+    }
+
+    /**
+     * Persists the description of the collection.
+     */
+    async persistCollectionDescription(description: string): Promise<void> {
+        if (!this.collectionNode?.ref.id) {
+            return;
+        }
+        try {
+            this.topicPageHelperService.openSaveConfigToast();
+            const collectionNodeId: string = this.collectionNode.ref.id;
+            const before: Node = await this.topicPageHelperService.getNodeUncached(
+                collectionNodeId,
+            );
+            await this.topicPageHelperService.setProperty(
+                collectionNodeId,
+                RestConstants.CM_DESCRIPTION,
+                description,
+            );
+            const after: Node = await this.topicPageHelperService.getNodeUncached(collectionNodeId);
+            // the description belongs to the collection, not to a widget node, so it is recorded here
+            void this.topicPageHistoryService?.recordApplied(
+                'TOPIC_PAGE.HISTORY.STEP.COLLECTION_DESCRIPTION',
+                [
+                    {
+                        kind: 'nodeProperty',
+                        nodeId: collectionNodeId,
+                        property: RestConstants.CM_DESCRIPTION,
+                        before: before.properties?.[RestConstants.CM_DESCRIPTION] ?? null,
+                        after: after.properties?.[RestConstants.CM_DESCRIPTION] ?? null,
+                    },
+                ],
+                { coalesceKey: 'collection-description' },
+            );
+        } catch (err) {
+            this.topicPageHelperService.displayErrorToast(err);
+        }
+    }
+
+    /**
+     * Helper function to generate the description of a collection.
+     */
+    private async generateCollectionDescription(contextNodeId: string): Promise<void> {
+        if (!(await this.aiHelperService.hasAISupport())) {
+            return;
+        }
+        const mdsConfigId: string = getNodeOrDefaultNodeId(
+            this.defaultDescriptionNodeId,
+            this.globalWidgetConfigService.defaultTopicHeaderDescriptionWidgetNodeId,
+        );
+        try {
+            const promptResponse: CreateChatCompletionResponse =
+                await this.aiHelperService.generateFromPrompt(
+                    mdsConfigId,
+                    {},
+                    this.contextNodeId || contextNodeId,
+                );
+            const responseText: string = retrieveResultString(promptResponse) ?? '';
+            if (responseText !== '') {
+                this.collectionDescription = responseText;
+                this.aiGeneratedDescription.set(true);
+            }
+        } catch {
+            // AI generation failed; fall back to no collection description
+        }
+    }
+
+    /**
+     * Helper function to read the config from a given string.
+     */
+    private async readConfigFromJson(
+        configString: string,
+        nodeId: string,
+        colorOnly: boolean = false,
+    ): Promise<void> {
+        const config: TopicHeaderConfig = JSON.parse(configString);
+        // check whether a text background color is explicitly set (taken over in all modes)
+        if (
+            config.textBackgroundColor &&
+            config.textBackgroundColor !== this.DEFAULT_HEADER_TEXT_BG_COLOR
+        ) {
+            this.textBackgroundColor = config.textBackgroundColor;
+        }
+        // colorOnly (propagated header): only the color is taken over; image and upload fall back
+        // to their defaults and the description is (re)generated by AI as the default
+        if (colorOnly) {
+            await this.generateDescription(nodeId);
+            return;
+        }
+        // this is the case if a widgetNode for the header exists
+        if (config.description) {
+            this.description = config.description;
+            this.aiGeneratedText.set(false);
+        } else {
+            await this.generateDescription(nodeId);
+        }
+        // check whether an AI-generated image is explicitly set to false
+        if (config.aiGeneratedImage === false) {
+            this.aiGeneratedImage = false;
+        }
+        // check if an image was uploaded
+        if (config.userUploadedNodeId) {
+            this.userUploadedNodeId = config.userUploadedNodeId;
+        }
+    }
+
+    /**
+     * Helper function to generate the description text via AI.
+     */
+    private async generateDescription(nodeId: string): Promise<void> {
+        if (!(await this.aiHelperService.hasAISupport())) {
+            return;
+        }
+        try {
+            const promptResponse: CreateChatCompletionResponse =
+                await this.aiHelperService.generateFromPrompt(nodeId, {}, this.contextNodeId);
+            const responseText: string = retrieveResultString(promptResponse) ?? '';
+            if (responseText !== '') {
+                this.description = responseText;
+                this.aiGeneratedText.set(true);
+            }
+        } catch {
+            // AI generation failed; fall back to no description text
+        }
+    }
+
+    /**
+     * Helper function to retrieve a widget config from the currently set variables in the component.
+     */
+    private retrieveWidgetConfig(): TopicHeaderConfig {
+        const headerConfig: TopicHeaderConfig = {
+            aiGeneratedImage: this.aiGeneratedImage,
+            description: this.description,
+            userUploadedNodeId: this.userUploadedNodeId,
+        };
+        if (this.ownEditorialMemberNodeIds) {
+            headerConfig.editorialMemberNodeIds = this.ownEditorialMemberNodeIds;
+        }
+        if (this.textBackgroundColor) {
+            headerConfig.textBackgroundColor = this.textBackgroundColor;
+        }
+        return headerConfig;
+    }
+
+    /**
+     * Checks whether a given color is dark.
+     */
+    isDarkColor(color: string): boolean {
+        if (!color) {
+            return false;
+        }
+        return ColorHelper.getPreferredColor(color) === PreferredColor.Black;
+    }
+
+    /**
+     * Resolves the header text background color to paint. The default color leaves the themed
+     * surface shared with the image; a custom color is adapted to a dark surface in dark mode.
+     */
+    headerBackgroundColor(color: string): string | null {
+        if (!color || color.toUpperCase() === this.DEFAULT_HEADER_TEXT_BG_COLOR) {
+            return null;
+        }
+        return this.themeService.isDarkMode() ? this.themeService.toDarkSurfaceColor(color) : color;
+    }
+}

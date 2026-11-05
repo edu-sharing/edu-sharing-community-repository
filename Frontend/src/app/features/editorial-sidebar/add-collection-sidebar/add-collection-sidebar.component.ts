@@ -1,7 +1,5 @@
 import { Component, inject, input, ChangeDetectionStrategy } from '@angular/core';
-import { Router } from '@angular/router';
-import { Node, ROOT } from 'ngx-edu-sharing-api';
-import { UIConstants } from 'ngx-edu-sharing-ui';
+import { Node } from 'ngx-edu-sharing-api';
 import { SharedModule } from '../../../shared/shared.module';
 import {
     NodesSelectorConfig,
@@ -29,27 +27,23 @@ type AddCollectionChoice = {
 })
 export class AddCollectionSidebarComponent {
     private editorialSidebarService = inject(EditorialSidebarService);
-    private router = inject(Router);
 
     /** the collection the new/copied collection is added to (unset on the collections root) */
     parent = input<Node>();
 
     protected readonly i18nPrefix = 'EDITORIAL.SIDEBAR.ADD_COLLECTION.';
     protected readonly choices: AddCollectionChoice[] = [
-        { id: 'CREATE', icon: 'library_add', action: () => void this.create() },
+        { id: 'CREATE', icon: 'library_add', action: () => this.create() },
         { id: 'COPY', icon: 'file_copy', action: () => this.copy() },
     ];
 
-    /**
-     * Opens the collection editor for a new collection below the current parent. The common url
-     * parameters are kept by the `AppLocationStrategy`, so they must not be passed on here.
-     */
-    private async create(): Promise<void> {
-        await this.router.navigate([
-            UIConstants.ROUTER_PREFIX + 'collections/collection',
-            'new',
-            this.parent()?.ref?.id ?? ROOT,
-        ]);
+    /** Opens the form for a new collection below the current parent. */
+    private create(): void {
+        this.editorialSidebarService.showOption({
+            option: 'CREATE_COLLECTION',
+            trap: false,
+            backTo: { option: 'ADD_COLLECTION', trap: false },
+        });
     }
 
     /**
@@ -60,6 +54,7 @@ export class AddCollectionSidebarComponent {
         this.editorialSidebarService.showOption({
             option: 'SORT_INTO',
             trap: false,
+            backTo: { option: 'ADD_COLLECTION', trap: false },
             title: this.i18nPrefix + 'COPY.TITLE',
             optionConfig: {
                 state: TabType.COLLECTIONS,

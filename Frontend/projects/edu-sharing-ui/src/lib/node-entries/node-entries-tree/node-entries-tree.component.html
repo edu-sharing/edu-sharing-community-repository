@@ -101,18 +101,23 @@
         (selectionMode() === 'target' && !isValidInsertTarget(node))
       "
       cdkDrag
-      cdkDragDisabled
       esNodesDrag
+      [cdkDragData]="getDragData(node.item)"
+      [cdkDragDisabled]="!entriesService.dragDrop?.dragAllowed || node.level === 0"
+      (cdkDragStarted)="onDragStarted(node.item)"
+      (cdkDragEnded)="onDragEnded()"
       [esNodesDropTarget]="node.item"
       [canDropNodes]="canDrop"
       (nodeDropped)="drop($event)"
     >
+      @if (entriesService?.columns?.[0]) {
       <es-drag-preview
         *cdkDragPreview
         [node]="node.item"
         [selected]="entriesService.selection.selected"
         [item]="entriesService.columns[0]"
       ></es-drag-preview>
+      }
       <div class="parent-tree-node-container">
         <ng-container *ngTemplateOutlet="checkboxTemplate; context: { node: node }"></ng-container>
         <div
@@ -195,7 +200,21 @@
       (selectionMode() !== 'source' || isValidSource(flatNode))
     "
     [class.insert-not-allowed]="selectionMode() === 'target' && !isValidInsertTarget(flatNode)"
-    (click)="!entriesService.checkbox && updateSelectedNodes(flatNode, $event)"
+    [class.muted]="entriesService.treeConfig?.isMuted?.(flatNode.item)"
+    (click)="
+      entriesService.checkbox
+        ? flatNode.level !== 0 &&
+          entriesService.clickItem.emit({
+            element: flatNode.item,
+            source: ClickSource.Metadata,
+            ctrlKey: $event.ctrlKey || $event.metaKey
+          })
+        : updateSelectedNodes(flatNode, $event)
+    "
+    (dblclick)="
+      flatNode.level !== 0 &&
+        entriesService.dblClickItem.emit({ element: flatNode.item, source: ClickSource.Metadata })
+    "
     (contextmenu)="onContextMenu($event, $any(flatNode.item))"
     (keydown.ContextMenu)="onContextMenu($event, $any(flatNode.item))"
   >
@@ -218,7 +237,7 @@
         </span>
       </span>
     </div>
-    @if (dropdown && hasDropdownOptions()) {
+    @if (dropdown && hasDropdownOptions() && hasOptionsFor(flatNode.item)) {
     <div class="node-options">
       @if (!UIService.isMobileWidth()) {
       <button

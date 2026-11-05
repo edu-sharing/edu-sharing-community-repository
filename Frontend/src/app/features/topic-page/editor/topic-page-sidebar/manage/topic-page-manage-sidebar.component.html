@@ -1,0 +1,130 @@
+@if (!entries.hasValue()) {
+<div class="loading">
+  @if (entries.error()) {
+  <es-info-message mode="error">{{ i18nPrefix + 'LOAD_ERROR' | translate }}</es-info-message>
+  } @else {
+  <es-spinner></es-spinner>
+  }
+</div>
+} @else {
+<div class="intro">
+  {{ i18nPrefix + 'INTRO' | translate : { title: entries.value().collection | nodeTitle } }}
+</div>
+@for (section of sections(); track section.key) {
+<section class="section">
+  @if (!section.hideHeading) {
+  <div class="section-header">
+    <h3 class="section-heading">
+      {{ i18nPrefix + section.heading | translate : section.headingParams }}
+    </h3>
+    @if (section.description) {
+    <div class="section-description">{{ i18nPrefix + section.description | translate }}</div>
+    }
+  </div>
+  }
+  <div class="entries">
+    @for (entry of section.entries; track entry.node.ref.id) {
+    <div class="entry" [class.current]="isCurrent(entry)">
+      <div class="entry-header">
+        <div class="entry-text">
+          <div class="entry-title">
+            {{ entry.node | nodeTitle }}
+            @if (entry.isDefault && entry.kind !== 'template') {
+            <span class="entry-badge">{{ i18nPrefix + 'DEFAULT' | translate }}</span>
+            }
+          </div>
+          <div class="entry-meta">
+            {{
+              i18nPrefix + 'CREATED'
+                | translate
+                  : {
+                      name: createdBy(entry.node),
+                      date: entry.node.createdAt | formatDate : { time: false }
+                    }
+            }}
+          </div>
+          @switch (entry.templateStatus) { @case ('upToDate') {
+          <div class="entry-status status-up-to-date">
+            {{
+              i18nPrefix + 'UP_TO_DATE'
+                | translate : { date: templateDate(entry) | formatDate : { time: false } }
+            }}
+          </div>
+          } @case ('updateAvailable') {
+          <div class="entry-status status-update-available">
+            {{
+              templateUpdatePrefix + 'TOOLTIP_AVAILABLE'
+                | translate : { date: templateDate(entry) | formatDate : { time: false } }
+            }}
+          </div>
+          } @case ('templateMissing') {
+          <div class="entry-status status-missing">
+            {{ templateUpdatePrefix + 'TEMPLATE_MISSING' | translate }}
+          </div>
+          } }
+        </div>
+        @if (entry.templateEditTarget || entry.kind !== 'inherited') {
+        <button
+          class="entry-menu"
+          mat-icon-button
+          type="button"
+          [disabled]="busy()"
+          [attr.aria-label]="i18nPrefix + 'MORE_ACTIONS' | translate"
+          [matTooltip]="i18nPrefix + 'MORE_ACTIONS' | translate"
+          [matMenuTriggerFor]="actions"
+        >
+          <i esIcon="more_vert"></i>
+        </button>
+        <mat-menu #actions="matMenu" xPosition="before">
+          @if (entry.templateEditTarget) {
+          <button mat-menu-item type="button" (click)="editTemplate(entry)">
+            <i esIcon="edit"></i>
+            {{ i18nPrefix + 'EDIT_TEMPLATE' | translate }}
+          </button>
+          } @if (entry.kind !== 'inherited') {
+          <button mat-menu-item type="button" (click)="delete(entry)">
+            <i esIcon="delete"></i>
+            {{ i18nPrefix + 'DELETE' | translate }}
+          </button>
+          }
+        </mat-menu>
+        }
+      </div>
+      <div class="entry-actions">
+        <button
+          mat-flat-button
+          color="primary"
+          type="button"
+          [disabled]="busy()"
+          (click)="show(entry)"
+        >
+          <i esIcon="open_in_new"></i>
+          {{ i18nPrefix + 'SHOW' | translate }}
+        </button>
+        @if (entry.kind !== 'inherited') {
+        <button
+          mat-stroked-button
+          type="button"
+          [color]="entry.templateStatus === 'updateAvailable' ? 'warn' : undefined"
+          [disabled]="busy() || entry.templateStatus !== 'updateAvailable'"
+          (click)="regenerate(entry)"
+        >
+          <i esIcon="autorenew"></i>
+          {{ i18nPrefix + 'REGENERATE' | translate }}
+        </button>
+        }
+      </div>
+    </div>
+    }
+  </div>
+</section>
+} @empty {
+<es-info-message mode="info">{{ i18nPrefix + 'EMPTY' | translate }}</es-info-message>
+} @if (host.creationKinds().includes('variant')) {
+<div class="create">
+  <button mat-stroked-button type="button" (click)="create()">
+    <i esIcon="add"></i>
+    {{ createLabel() | translate }}
+  </button>
+</div>
+} }

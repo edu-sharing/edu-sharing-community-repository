@@ -184,7 +184,8 @@ mat-tree-node {
         cursor: pointer;
     }
 
-    &.insert-not-allowed {
+    &.insert-not-allowed,
+    &.muted {
         color: vars.$textVeryLight;
     }
 

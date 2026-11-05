@@ -1,0 +1,182 @@
+@use '../topic-page-variables' as topicPageVars;
+
+:host {
+    --topic-color: #{topicPageVars.$primary-dark};
+    --anchor-item-bg-color: #{topicPageVars.$surface};
+    --anchor-menu-height: 108px;
+    --border-radius: 24px;
+    --content-max-width: 1440px;
+    --offcanvas-menu-width: 48px;
+    --offcanvas-offset: 8px;
+    // overwrite border radius for template page
+    --mat-fab-small-container-shape: 4px;
+
+    // A row of the page (`main`) and the panels standing beside it: the filters on the left, the
+    // element preview on the right. Fills the space its host gives it.
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+    min-height: 0;
+    position: relative;
+}
+
+// The host page provides the outer spacing of the preview column, which therefore runs the full
+// height of the page; only the gap holding the resize handle stays.
+:host(.with-preview-panel) ::ng-deep es-preview-sidebar-wrapper {
+    .preview-resizable {
+        align-self: stretch;
+    }
+    .preview-panel {
+        margin-top: 0;
+        margin-right: 0;
+        margin-bottom: 0;
+    }
+}
+
+// The status bar stays on top while .template-scroll scrolls the page content internally.
+main {
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: topicPageVars.$surface-container-lowest;
+}
+
+.template-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    @include topicPageVars.materialScrollbarLight();
+}
+
+// above the status bar and the side menu fixed beside the page
+.reloading-indicator-bg {
+    position: absolute;
+    z-index: 98;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+// fix: do not place color picker behind topic header
+es-color-picker {
+    z-index: 1;
+}
+
+// OFFCANVAS MENU
+// reserve space for close button + adjust color
+.side-menu-header {
+    margin-top: 0;
+    padding-right: 24px;
+    color: topicPageVars.$on-surface;
+    font-weight: topicPageVars.$font-weight-bold;
+    font-size: topicPageVars.$font-size-x-large;
+}
+
+es-side-menu-wrapper {
+    color: topicPageVars.$on-surface;
+
+    // color adjustments of specific elements
+    &::ng-deep {
+        mat-radio-button label,
+        mat-checkbox label {
+            color: topicPageVars.$on-surface;
+        }
+
+        mat-radio-button.mat-mdc-radio-button .mdc-radio {
+            --mat-radio-state-layer-size: 36px;
+        }
+        --mat-checkbox-state-layer-size: 36px;
+    }
+}
+
+// FIXED BARS ABOVE THE PAGE CONTENT
+.template-fixed-top {
+    flex-shrink: 0;
+    position: relative;
+    // overflow contents such as the image of the navbar or the AI labels
+    z-index: 12;
+}
+
+// Below a host page's bar, the status bar takes its height and the edges of a bar of its own:
+// the host bar's shadow is covered, so the status bar draws the line to it and to the page.
+es-topic-page-status-bar ::ng-deep .status-bar {
+    min-height: topicPageVars.$secondaryBarHeight;
+    box-shadow: inset 0 3px 3px -3px rgba(0, 0, 0, 0.25), 0 3px 3px rgba(0, 0, 0, 0.1);
+}
+
+// TOPIC HEADER
+.template-header {
+    padding: 32px calc(var(--offcanvas-menu-width) + var(--offcanvas-offset)) 32px
+        var(--offcanvas-offset);
+    background-color: var(--topic-color);
+    position: relative;
+
+    .topic-color-picker {
+        position: absolute;
+        top: 16px;
+        right: calc(50% - 26px);
+    }
+
+    // check whether it includes a children with bright-color set in order to adjust the label of the topic-color-picker
+    &:has(es-topic-header .topic-text-wrapper.bright-color) {
+        ::ng-deep .color-picker-button .mdc-button__label {
+            color: topicPageVars.$on-primary;
+        }
+    }
+
+    // reserve space for the anchor menu
+    &.extra-padding-bottom {
+        padding-bottom: calc(32px + var(--anchor-menu-height) / 2);
+    }
+
+    .template-header-wrapper {
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        gap: 24px;
+        position: relative;
+        box-sizing: border-box;
+        max-width: var(--content-max-width);
+
+        .template-header-container {
+            position: relative;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border-radius: var(--border-radius);
+            // use overflow hidden to prevent children from overflowing areas hidden by border-radius
+            overflow: hidden;
+
+            // workaround for keeping overflow: hidden, but realizing border-radius on the
+            // image-wrapper, even though it has margin-right set
+            ::ng-deep es-topic-header {
+                es-image-wrapper,
+                es-image-wrapper es-mds-editor-widget-preview,
+                es-image-wrapper .image-loading {
+                    border-top-right-radius: var(--border-radius);
+                    border-bottom-right-radius: var(--border-radius);
+                }
+            }
+        }
+    }
+}
+
+.topic-page-outer-wrapper {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: row;
+}
+
+.topic-page-wrapper {
+    width: 100%;
+}

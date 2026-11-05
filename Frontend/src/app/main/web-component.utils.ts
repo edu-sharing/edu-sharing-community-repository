@@ -7,6 +7,13 @@ import { environment } from '../../environments/environment';
  * Usually, this means opening things in a new tab if it's impossible to show it in the component
  */
 export class WebComponentLocationStrategy extends MockLocationStrategy {
+    /** Routes a web component shows itself instead of opening them in a new tab. */
+    private readonly routesShownInside = new Set<string>();
+
+    showInside(route: string): void {
+        this.routesShownInside.add(route);
+    }
+
     replaceState(ctx: any, title: string, path: string, query: string) {
         super.replaceState(ctx, title, path, query);
         this.route(path, query);
@@ -24,8 +31,10 @@ export class WebComponentLocationStrategy extends MockLocationStrategy {
     }
     private route(path: string, query: string) {
         if (
-            ['render', 'collections', 'workspace'].some((v) =>
-                path.startsWith('/' + UIConstants.ROUTER_PREFIX + v),
+            ['render', 'collections', 'workspace'].some(
+                (v) =>
+                    !this.routesShownInside.has(v) &&
+                    path.startsWith('/' + UIConstants.ROUTER_PREFIX + v),
             )
         ) {
             window.open(this.getBaseUri() + path + query);

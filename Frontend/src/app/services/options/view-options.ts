@@ -16,6 +16,7 @@ import { RestHelper } from '../../core-module/rest/rest-helper';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { Closable } from '../../features/dialogs/card-dialog/card-dialog-config';
 import { OptionsContext } from './options-context';
+import { hasTopicPage } from '../../features/topic-page/shared/utils/collection-topic-page-util';
 import { firstValueFrom, forkJoin } from 'rxjs';
 
 export function createViewOptions({
@@ -214,19 +215,16 @@ export function createViewOptions({
             return false;
         }
         try {
-            if (objects[0].properties?.[RestConstants.CCM_PROP_PAGE_CONFIG_REF]?.[0]) {
+            if (hasTopicPage(objects[0] as Node, [])) {
                 return true;
             }
-            return (
-                await firstValueFrom(
-                    service.nodeService.getParents(objects[0].ref.id, {
-                        repository: objects[0].ref.repo,
-                        fullPath: false,
-                    }),
-                )
-            ).nodes.some(
-                (n) => n.properties[RestConstants.CCM_PROP_PAGE_CONFIG_PROPAGATE_REF]?.[0],
+            const parents = await firstValueFrom(
+                service.nodeService.getParents(objects[0].ref.id, {
+                    repository: objects[0].ref.repo,
+                    fullPath: false,
+                }),
             );
+            return hasTopicPage(objects[0] as Node, parents.nodes);
         } catch (e) {
             e.preventDefault();
             return false;
@@ -323,6 +321,20 @@ export function createViewOptions({
     showStatistics.toolpermissionsMode = HideMode.Hide;
     showStatistics.group = DefaultGroups.View;
     showStatistics.priority = 35;
+
+    const collectionInfo = new OptionItem('EDITORIAL.OPTIONS.COLLECTION_INFO', 'info', () => {
+        // a collection selected in a list would otherwise take the place of the one in the header
+        service.editorialSidebarService.nodes.set([]);
+        service.editorialSidebarService.showOption({
+            option: 'COLLECTION_INFO',
+            trap: false,
+        });
+    });
+    collectionInfo.constrains = [Constrain.Collections, Constrain.NoBulk];
+    collectionInfo.scopes = [Scope.CollectionsCollection];
+    collectionInfo.showAsAction = true;
+    collectionInfo.group = DefaultGroups.View;
+    collectionInfo.priority = 0;
 
     const downloadNode = service.getDownloadOption(data, false);
     const downloadNodeSafe = service.getDownloadOption(data, true);
@@ -473,6 +485,7 @@ export function createViewOptions({
         viewAssignmentSubmission,
         infoVersions,
         showStatistics,
+        collectionInfo,
         downloadNode,
         downloadNodeSafe,
         downloadMetadataNode,

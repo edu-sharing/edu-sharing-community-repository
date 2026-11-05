@@ -1,0 +1,619 @@
+import {
+    AfterViewInit,
+    Component,
+    EventEmitter,
+    input,
+    Input,
+    InputSignal,
+    OnDestroy,
+    OnInit,
+    output,
+    Output,
+    OutputEmitterRef,
+    signal,
+    ViewChild,
+    WritableSignal,
+    inject,
+    ChangeDetectionStrategy,
+} from '@angular/core';
+import { MatCheckboxChange } from '@angular/material/checkbox';
+import { SortDirection } from '@angular/material/sort';
+import {
+    CONTENT_TYPE_ALL,
+    HOME_REPOSITORY,
+    MdsQueryCriteria,
+    Node,
+    Pagination,
+    PROPERTY_FILTER_ALL,
+    SearchRequestParams,
+    SearchResults,
+    SearchService,
+} from 'ngx-edu-sharing-api';
+import {
+    FetchEvent,
+    InteractionType,
+    ListItem,
+    ListItemSort,
+    ListSortConfig,
+    NodeClickEvent,
+    NodeDataSource,
+    NodeEntriesDisplayType,
+    NodeEntriesWrapperComponent,
+    NodeHelperService,
+    OptionItem,
+    OptionsHelperDataService,
+    OptionsHelperService as OptionsHelperServiceAbstract,
+    Scope,
+    SearchHelperService,
+    Values,
+} from 'ngx-edu-sharing-ui';
+import { firstValueFrom, Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
+import { RestConstants } from '../../../../core-module/rest/rest-constants';
+import { valuesDictIsEquivalent } from '../../../mds/mds-editor/mds-editor-wrapper/values-dict-is-equivalent';
+import { MdsModule } from '../../../mds/mds.module';
+import { SharedModule } from '../../../../shared/shared.module';
+import { OptionsHelperService } from '../../shared/services/options-helper.service';
+import { TopicPageHelperService } from '../../shared/services/topic-page-helper.service';
+import {
+    DEFAULT_PAGE_VARIANT_GLOBAL_PROP,
+    DEFAULT_PAGE_VARIANT_PARENT_RECURSIVE_PROP,
+    DEFAULT_PAGE_VARIANT_QUERY_ID,
+} from '../../shared/types/custom-definitions';
+import { SelectOption } from '../../shared/types/select-option';
+import {
+    convertNodeRefIntoNodeId,
+    isDefaultGlobalTemplate,
+    retrieveNodeId,
+    retrievePageVariantTemplateRef,
+} from '../../shared/utils/template-util';
+import { GenericWidgetGlobalService } from '../../widgets/generic-widget/generic-widget-global.service';
+
+export enum CopyOption {
+    TopicPage = 'topicPage',
+    Template = 'template',
+}
+
+/**
+ * The search a list of page variants or templates was produced by, with the listed and the
+ * selected nodes, so that a later picker or a preview can continue from it.
+ */
+export interface PageVariantSearchState {
+    copyOption: CopyOption;
+    searchValue: string;
+    searchFilters: Values;
+    collectionFilterActive: boolean;
+    sortActive: string;
+    sortDirection: SortDirection;
+    selectedNodeId: string | null;
+    nodes: Node[];
+}
+type ListedSearch = Omit<PageVariantSearchState, 'selectedNodeId' | 'nodes'>;
+
+/**
+ * Searches the page variants or templates a new page variant or template can be copied from.
+ */
+@Component({
+    selector: 'es-page-variant-or-template-picker',
+    imports: [SharedModule, MdsModule],
+    // own instances, so the row actions do not replace the options of the hosting topic page
+    providers: [
+        OptionsHelperDataService,
+        { provide: OptionsHelperServiceAbstract, useClass: OptionsHelperService },
+    ],
+    templateUrl: 'page-variant-or-template-picker.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrls: ['page-variant-or-template-picker.component.scss'],
+})
+export class PageVariantOrTemplatePickerComponent implements AfterViewInit, OnDestroy, OnInit {
+    public genericWidgetGlobalService = inject(GenericWidgetGlobalService);
+    private nodeHelperService = inject(NodeHelperService);
+    private searchHelperService = inject(SearchHelperService);
+    private searchService = inject(SearchService);
+    private topicPageHelperService = inject(TopicPageHelperService);
+
+    readonly i18nPrefix: string = 'TOPIC_PAGE.CREATE_PAGE_VARIANT.';
+    readonly templateI18nPrefix: string = 'TOPIC_PAGE.CREATE_PAGE_TEMPLATE.';
+
+    // the collection the topic page belongs to — its subtree is searched for existing page variants
+    collectionNodeId: InputSignal<string> = input<string>(null);
+    @Input() pageConfigRef: string;
+    @Input() pageVariantNode: Node;
+    @Input() selectedNode: Node;
+    templateMode: InputSignal<boolean> = input(false);
+    // the search of an earlier picker to continue with, e.g. when returning from a preview
+    restoredSearchState: InputSignal<PageVariantSearchState | null> =
+        input<PageVariantSearchState | null>(null);
+    searchStateChange: OutputEmitterRef<PageVariantSearchState> = output<PageVariantSearchState>();
+    @Output() copyOptionChanged: EventEmitter<CopyOption> = new EventEmitter<CopyOption>();
+    // a global template is to be opened in the editor
+    @Output() editGlobalTemplate: EventEmitter<Node> = new EventEmitter<Node>();
+    @Output() globalTemplateDeleted: EventEmitter<Node> = new EventEmitter<Node>();
+    @Output() selectedNodeChange: EventEmitter<Node> = new EventEmitter<Node>();
+
+    // copy options toggle
+    copyOptions: SelectOption[] = [
+        {
+            icon: 'menu_book',
+            value: CopyOption.TopicPage,
+            viewValue: 'COPY_OPTIONS.TOPIC_PAGE',
+        },
+        {
+            icon: 'account_tree',
+            value: CopyOption.Template,
+            viewValue: 'COPY_OPTIONS.TEMPLATE',
+        },
+    ];
+    selectedOption: string;
+
+    // mds-editor-wrapper
+    searchFilters: Values;
+    // the filter values the filter editor starts with
+    initialSearchFilters: Values = {};
+
+    // whether the search is restricted to the collection the topic page belongs to
+    collectionFilterActive: boolean = true;
+
+    // search-related variables
+    private searchSubject: Subject<string> = new Subject<string>();
+    searchValue: string;
+
+    // node-entries-wrapper
+    columns = {
+        Default: [
+            new ListItem('NODE', RestConstants.LOM_PROP_TITLE),
+            new ListItem('NODE', 'ccm:page_variant_profiling_target_group'),
+            new ListItem('NODE', 'ccm:educationalcontext'),
+        ],
+    };
+    dataSource: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
+    // newest first: a freshly published template has to be visible without paging or searching
+    sortActive: string = RestConstants.CM_MODIFIED_DATE;
+    readonly sortColumns = [
+        new ListItemSort('NODE', RestConstants.LOM_PROP_TITLE),
+        new ListItemSort('NODE', RestConstants.CM_MODIFIED_DATE),
+    ];
+    sortDirection: SortDirection = 'desc';
+    private readonly MAX_ITEMS_PER_REQUEST: number = 50;
+    // whether a listed global template can be edited or deleted by the user
+    templateActionsAvailable: WritableSignal<boolean> = signal(false);
+
+    // whether the initial node was attempted to be selected
+    private initialSelectionMade: boolean = false;
+    // the node to select once a restored search has been listed
+    private pendingSelectedNodeId: string | null = null;
+    // the search the listed nodes were produced by; text typed afterwards is not part of it
+    private listedSearch: ListedSearch | null = null;
+    private initialized: boolean = false;
+    private destroyed: Subject<void> = new Subject<void>();
+
+    @ViewChild('nodeEntriesWrapper') nodeEntries: NodeEntriesWrapperComponent<Node>;
+
+    constructor() {
+        // setup search with debouncing
+        this.searchSubject
+            .pipe(debounceTime(500), distinctUntilChanged(), takeUntil(this.destroyed))
+            .subscribe(() => {
+                void this.updateList();
+            });
+    }
+
+    async ngOnInit(): Promise<void> {
+        const restoredSearchState: PageVariantSearchState | null = this.restoredSearchState();
+        if (restoredSearchState) {
+            this.restoreSearch(restoredSearchState);
+        } else {
+            this.selectedOption = !this.pageConfigRef
+                ? this.copyOptions[this.copyOptions.length - 1].value
+                : this.copyOptions[0].value;
+        }
+        this.copyOptionChanged.emit(this.selectedOption as CopyOption);
+        // if no page config exists, retrieve page variant templates to be chosen by the user
+        await this.updateList();
+        this.initialized = true;
+    }
+
+    async ngAfterViewInit(): Promise<void> {
+        await this.nodeEntries.initOptionsGenerator({
+            customOptions: {
+                useDefaultOptions: false,
+                addOptions: this.createTemplateOptions(),
+            },
+        });
+    }
+
+    ngOnDestroy(): void {
+        this.destroyed.next();
+        this.destroyed.complete();
+    }
+
+    /**
+     * Takes over the search of an earlier picker, including the node to select once it is listed.
+     */
+    private restoreSearch(state: PageVariantSearchState): void {
+        this.selectedOption = state.copyOption;
+        this.searchValue = state.searchValue;
+        this.searchFilters = state.searchFilters;
+        this.initialSearchFilters = state.searchFilters ?? {};
+        this.collectionFilterActive = state.collectionFilterActive;
+        this.sortActive = state.sortActive;
+        this.sortDirection = state.sortDirection;
+        this.pendingSelectedNodeId = state.selectedNodeId;
+    }
+
+    /**
+     * The search as currently entered, to be stored once its results are listed.
+     */
+    private captureSearch(): ListedSearch {
+        return {
+            copyOption: this.selectedOption as CopyOption,
+            searchValue: this.searchValue ?? '',
+            searchFilters: this.searchFilters ?? {},
+            collectionFilterActive: this.collectionFilterActive,
+            sortActive: this.sortActive,
+            sortDirection: this.sortDirection,
+        };
+    }
+
+    /**
+     * Reports the search of the listed nodes together with them and the selected one.
+     */
+    private emitSearchState(): void {
+        if (!this.listedSearch) {
+            return;
+        }
+        this.searchStateChange.emit({
+            ...this.listedSearch,
+            selectedNodeId: retrieveNodeId(this.selectedNode) ?? null,
+            nodes: this.dataSource.getData(),
+        });
+    }
+
+    /**
+     * Creates the row actions of the global templates: opening one in the editor and deleting it.
+     */
+    private createTemplateOptions(): OptionItem[] {
+        const edit: OptionItem = new OptionItem(
+            this.i18nPrefix + 'TEMPLATE_ACTIONS.EDIT',
+            'edit',
+            (node: Node, nodes: Node[]): void => {
+                this.editGlobalTemplate.emit(node ?? nodes?.[0]);
+            },
+        );
+        edit.customShowCallback = async (nodes: Node[]): Promise<boolean> =>
+            this.canEditTemplate(nodes?.[0]);
+        const remove: OptionItem = new OptionItem(
+            this.i18nPrefix + 'TEMPLATE_ACTIONS.DELETE',
+            'delete',
+            (node: Node, nodes: Node[]): void => {
+                void this.deleteGlobalTemplate(node ?? nodes?.[0]);
+            },
+        );
+        remove.customShowCallback = async (nodes: Node[]): Promise<boolean> =>
+            this.canDeleteTemplate(nodes?.[0]);
+        return [edit, remove];
+    }
+
+    /**
+     * Whether the user may open a listed global template in the editor.
+     */
+    private canEditTemplate(node: Node): boolean {
+        return (
+            this.isManageableTemplate(node) &&
+            this.nodeHelperService.getNodesRight([node], RestConstants.ACCESS_WRITE)
+        );
+    }
+
+    /**
+     * Whether the user may delete a listed global template.
+     */
+    private canDeleteTemplate(node: Node): boolean {
+        return (
+            this.isManageableTemplate(node) &&
+            this.nodeHelperService.getNodesRight([node], RestConstants.ACCESS_DELETE)
+        );
+    }
+
+    /**
+     * Whether a listed node is a global template that can be managed at all: the topic page
+     * option lists page variants instead, and the default template is left to the repository.
+     */
+    private isManageableTemplate(node: Node): boolean {
+        const listsGlobalTemplates: boolean = this.selectedOption === CopyOption.Template;
+        return listsGlobalTemplates && !!node && !isDefaultGlobalTemplate(node);
+    }
+
+    /**
+     * Deletes a global template after confirmation and drops it from the list. The search index
+     * follows the deletion with a delay, so a new search would still return the template.
+     */
+    private async deleteGlobalTemplate(node: Node): Promise<void> {
+        if (!node || !(await this.topicPageHelperService.deleteGlobalTemplate(node))) {
+            return;
+        }
+        this.dataSource.removeData([node]);
+        this.nodeEntries.getSelection().deselect(node);
+        this.updateTemplateActionsAvailable(this.dataSource.getData());
+        await this.updateSelectedNode();
+        this.globalTemplateDeleted.emit(node);
+    }
+
+    /**
+     * Updates whether the action column is shown: only when a listed global template offers one.
+     */
+    private updateTemplateActionsAvailable(nodes: Node[]): void {
+        this.templateActionsAvailable.set(
+            nodes.some(
+                (node: Node): boolean => this.canEditTemplate(node) || this.canDeleteTemplate(node),
+            ),
+        );
+    }
+
+    /**
+     * Switches to the clicked copy option and updates the list of page variants.
+     */
+    onCopyOptionChange(event: any): void {
+        this.selectedOption = event.value;
+        this.copyOptionChanged.emit(event.value);
+        // reset the initial decision to allow selecting a variant again
+        this.initialSelectionMade = false;
+        void this.updateList();
+    }
+
+    /**
+     * Handles input changes of the search field.
+     */
+    onSearchInput(event: Event): void {
+        const target = event.target as HTMLInputElement;
+        const query: string = target.value.trim();
+        this.searchSubject.next(query);
+    }
+
+    /**
+     * Clears the search field and updates the list of page variants.
+     */
+    clearSearch() {
+        this.searchValue = '';
+        void this.updateList();
+    }
+
+    /**
+     * Sets the search filters to a given value.
+     */
+    onSearchFiltersChange(filters: Values): void {
+        // the filter editor also reports the values it was started with
+        const unchanged: boolean = valuesDictIsEquivalent(filters, this.searchFilters);
+        this.searchFilters = filters;
+        if (!this.initialized || unchanged) {
+            return;
+        }
+        void this.updateList();
+    }
+
+    /**
+     * Handles the sorting of the list of page variants.
+     */
+    onSort(event: ListSortConfig) {
+        this.sortActive = event.active;
+        this.sortDirection = event.direction;
+        void this.updateList();
+    }
+
+    /**
+     * Handles the click event on a page variant.
+     */
+    onNodeClick(event: NodeClickEvent<any>) {
+        const alreadySelected: boolean = this.nodeEntries.getSelection().isSelected(event.element);
+        this.nodeEntries.getSelection().clear();
+        if (!alreadySelected) {
+            this.nodeEntries.getSelection().select(event.element);
+        }
+        void this.updateSelectedNode();
+    }
+
+    /**
+     * Keeps the use button in line with the selection, which opening the actions of a row changes
+     * as well.
+     */
+    onSelectionChange(): void {
+        void this.updateSelectedNode();
+    }
+
+    /**
+     * Whether the selected copy option can be searched for: the topic page option needs a
+     * collection to scope the search to, while the global templates are always reachable.
+     */
+    private searchScopeAvailable(): boolean {
+        return (
+            this.selectedOption === CopyOption.Template ||
+            !this.collectionFilterActive ||
+            !!this.collectionNodeId()
+        );
+    }
+
+    /**
+     * Whether the removable collection filter chip applies to the current copy option: the global
+     * templates are not scoped to a collection, so the chip is only meaningful for topic pages.
+     */
+    protected collectionFilterApplicable(): boolean {
+        return this.selectedOption === CopyOption.TopicPage && !!this.collectionNodeId();
+    }
+
+    /**
+     * Switches the search between the collection the topic page belongs to and all collections.
+     */
+    protected onCollectionFilterChange(event: MatCheckboxChange): void {
+        this.collectionFilterActive = event.checked;
+        // the result list is a different one, so the referenced variant has to be looked up and
+        // sorted to the top again
+        this.initialSelectionMade = false;
+        void this.updateList();
+    }
+
+    /**
+     * Builds the criteria that restrict the search to the selected copy option: either the global
+     * page variant templates or the page variants living inside the collection subtree.
+     */
+    private createScopeCriteria(): MdsQueryCriteria | null {
+        if (this.selectedOption === CopyOption.Template) {
+            return {
+                property: DEFAULT_PAGE_VARIANT_GLOBAL_PROP,
+                values: ['true'],
+            };
+        }
+        // without the collection restriction the page variants of all collections are searched
+        if (!this.collectionFilterActive) {
+            return null;
+        }
+        return {
+            property: DEFAULT_PAGE_VARIANT_PARENT_RECURSIVE_PROP,
+            values: [this.collectionNodeId()],
+        };
+    }
+
+    /**
+     * Builds the search request for the page variants of the selected copy option.
+     */
+    private createSearchRequest(skipCount: number = 0): SearchRequestParams {
+        const criteria: MdsQueryCriteria[] = [];
+        const scopeCriteria: MdsQueryCriteria | null = this.createScopeCriteria();
+        if (scopeCriteria) {
+            criteria.push(scopeCriteria);
+        }
+        if (this.searchValue) {
+            criteria.push({
+                property: 'ngsearchword',
+                values: [this.searchValue.trim()],
+            });
+        }
+        if (this.searchFilters && Object.keys(this.searchFilters)?.length) {
+            criteria.push(...this.searchHelperService.convertCritieria(this.searchFilters, []));
+        }
+        return {
+            query: DEFAULT_PAGE_VARIANT_QUERY_ID,
+            repository: HOME_REPOSITORY,
+            sortProperties: [this.sortActive],
+            sortAscending: [this.sortDirection === 'asc'],
+            maxItems: this.MAX_ITEMS_PER_REQUEST,
+            skipCount,
+            propertyFilter: [PROPERTY_FILTER_ALL],
+            contentType: CONTENT_TYPE_ALL,
+            metadataset: this.genericWidgetGlobalService.getDefaultMds(),
+            body: {
+                criteria,
+            },
+        };
+    }
+
+    /**
+     * Loads the next page of page variants, triggered by the fetchData output of the node entries
+     * wrapper. Without this, the list would be capped at the first request and a newly created
+     * variant or template could be missing from it entirely.
+     */
+    async loadMore(event: FetchEvent): Promise<void> {
+        if (
+            !this.searchScopeAvailable() ||
+            !this.dataSource.hasMore() ||
+            this.dataSource.isLoading
+        ) {
+            return;
+        }
+        this.dataSource.isLoading = true;
+        try {
+            const searchResult: SearchResults = await firstValueFrom(
+                this.searchService.search(this.createSearchRequest(event.offset)),
+            );
+            this.dataSource.appendData(searchResult.nodes ?? []);
+            this.updateTemplateActionsAvailable(this.dataSource.getData());
+            this.emitSearchState();
+        } finally {
+            this.dataSource.isLoading = false;
+        }
+    }
+
+    /**
+     * Updates the list of page variants based on the selected copy option and search criteria.
+     * Both copy options are resolved by the `page_variant` search query, so searching, filtering,
+     * sorting and paging are handled by the backend instead of being emulated on a fixed list.
+     */
+    async updateList(): Promise<void> {
+        const search: ListedSearch = this.captureSearch();
+        if (!this.searchScopeAvailable()) {
+            this.dataSource.setData([], null);
+            this.listedSearch = search;
+            this.templateActionsAvailable.set(false);
+            return;
+        }
+        let nodes: Node[];
+        let pagination: Pagination;
+        this.dataSource.isLoading = true;
+        try {
+            const searchResult: SearchResults = await firstValueFrom(
+                this.searchService.search(this.createSearchRequest()),
+            );
+            nodes = searchResult.nodes ?? [];
+            pagination = searchResult.pagination;
+        } finally {
+            this.dataSource.isLoading = false;
+        }
+        this.listedSearch = search;
+        // select the page variant referred to as the template (if one exists)
+        let matchingVariantNode: Node;
+        if (this.pendingSelectedNodeId) {
+            const pendingId: string = this.pendingSelectedNodeId;
+            this.pendingSelectedNodeId = null;
+            this.initialSelectionMade = true;
+            matchingVariantNode = nodes.find((n) => retrieveNodeId(n) === pendingId);
+        } else if (!this.initialSelectionMade) {
+            this.initialSelectionMade = true;
+            // retrieve either the template ref ID (copy mode: template) or the page variant ID (copy mode: topic page)
+            let nodeRefToReferTo: string;
+            if (this.pageVariantNode) {
+                nodeRefToReferTo =
+                    this.selectedOption === CopyOption.Template
+                        ? retrievePageVariantTemplateRef(this.pageVariantNode)
+                        : retrieveNodeId(this.pageVariantNode);
+            }
+            if (nodeRefToReferTo) {
+                const nodeIdToReferTo = convertNodeRefIntoNodeId(nodeRefToReferTo);
+                matchingVariantNode = nodes.find((n) => retrieveNodeId(n) === nodeIdToReferTo);
+                // sort node to the top of the list
+                if (matchingVariantNode) {
+                    const filteredNodes: Node[] = nodes.filter(
+                        (n) => retrieveNodeId(n) !== nodeIdToReferTo,
+                    );
+                    nodes = [matchingVariantNode, ...filteredNodes];
+                }
+            } else {
+                matchingVariantNode = nodes[0];
+            }
+        }
+        // update the data source
+        this.dataSource.setData(nodes, pagination ?? null);
+        this.updateTemplateActionsAvailable(nodes);
+        // give the node entries wrapper time to render the list
+        setTimeout(async () => {
+            this.nodeEntries.getSelection().clear();
+            // select the matching variant node if existing
+            if (matchingVariantNode) {
+                this.nodeEntries.getSelection().select(matchingVariantNode);
+            }
+            await this.updateSelectedNode();
+        });
+    }
+
+    /**
+     * Reports the selected node together with the search it was listed by.
+     */
+    private async updateSelectedNode(): Promise<void> {
+        this.selectedNode = this.nodeEntries.getSelection().selected[0] || null;
+        this.selectedNodeChange.emit(this.selectedNode);
+        this.emitSearchState();
+    }
+
+    protected readonly CopyOption = CopyOption;
+    protected readonly DisplayType = NodeEntriesDisplayType;
+    protected readonly HOME_REPOSITORY = HOME_REPOSITORY;
+    protected readonly InteractionType = InteractionType;
+    protected readonly Scope = Scope;
+}

@@ -165,7 +165,7 @@ export function createEditOptions({
     templateNode.group = DefaultGroups.Edit;
 
     const editCollection = new OptionItem('OPTIONS.COLLECTION_EDIT', 'edit', (object) =>
-        service.uiService.goToCollection(service.getObjects(object, data)[0], 'edit'),
+        service.collectionNavigation.edit(service.getObjects(object, data)[0]),
     );
     editCollection.constrains = [
         Constrain.HomeRepository,

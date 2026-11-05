@@ -6,6 +6,57 @@
       "TITLE": "Page thématique",
       "SEARCH_PLACEHOLDER": "Rechercher du contenu sur la page thématique ..."
     },
+    "SIDEBAR": {
+      "TITLE": "Page thématique",
+      "TITLE_DESCRIPTION": "Gérer et créer des pages thématiques et des modèles",
+      "TAB": {
+        "VARIANT": "Page thématique",
+        "TEMPLATE": "Modèle"
+      },
+      "MENU": {
+        "MANAGE": "Gérer les pages thématiques",
+        "MANAGE_DESCRIPTION": "Afficher, régénérer ou supprimer des pages et des modèles",
+        "CREATE": "Nouvelle page thématique",
+        "CREATE_DESCRIPTION": "Créer une nouvelle page thématique à partir d'une page existante",
+        "CREATE_WITH_TEMPLATE": "Nouvelle page thématique/modèle",
+        "CREATE_WITH_TEMPLATE_DESCRIPTION": "Créer une nouvelle page thématique ou un modèle à partir d'une page existante",
+        "INHERITANCE": "Héritage",
+        "INHERITANCE_DESCRIPTION": "Transmettre les pages thématiques aux sous-collections"
+      },
+      "MANAGE": {
+        "INTRO": "{{title}} a les pages thématiques suivantes :",
+        "TEMPLATES_DESCRIPTION": "transmis aux sous-collections",
+        "UP_TO_DATE": "à jour, modèle du {{date}}",
+        "MORE_ACTIONS": "Plus d'actions",
+        "INHERITED_HEADING": "Hérité de {{title}}",
+        "VARIANTS_HEADING": "Pages de cette collection",
+        "TEMPLATES_HEADING": "Modèles de cette collection",
+        "DEFAULT": "(par défaut)",
+        "CREATED": "créé par {{name}} le {{date}}",
+        "SHOW": "Afficher",
+        "REGENERATE": "Régénérer",
+        "EDIT_TEMPLATE": "Modifier le modèle",
+        "DELETE": "Supprimer",
+        "EMPTY": "Il n'existe pas encore de page thématique pour cette collection.",
+        "LOAD_ERROR": "Les pages thématiques n'ont pas pu être chargées."
+      },
+      "INHERITANCE": {
+        "INTRO": "Héritage de {{title}}",
+        "INTRO_DESCRIPTION": "Voici comment cette collection et ses sous-collections obtiennent leurs pages thématiques. « Transmettre » décide si les modèles hérités sont transmis plus bas.",
+        "STATE_OWN": "Page thématique propre – aucun héritage nécessaire",
+        "STATE_INHERITS": "hérite de {{title}}",
+        "STATE_STOPPED": "n'hérite de rien – transmission arrêtée à {{title}}",
+        "STATE_NONE": "aucune page thématique",
+        "PASSES_OWN_TEMPLATES": "transmet ses propres modèles aux sous-collections",
+        "PASSES_NOTHING_ON": "ne transmet pas l'héritage aux sous-collections",
+        "SAVED_STATE": "auparavant :",
+        "PASS_ON": "Transmettre",
+        "PASS_ON_TOOLTIP": "Transmettre les modèles hérités aux sous-collections",
+        "CHANGED_COUNT": "{{count}} collections affichées changent",
+        "SAVED": "L'héritage a été enregistré.",
+        "LOAD_ERROR": "L'héritage n'a pas pu être chargé."
+      }
+    },
     "AI": {
       "GENERATED": "Généré par IA",
       "INVALID_PROMPT": "Invite non valide"
@@ -38,7 +89,7 @@
         "CURRENT_SELECTION_ANSWER_LABEL": "Réponse pour la sélection actuelle",
         "NO_ANSWER_DEFINED": "Aucun texte n'a encore été défini pour la sélection."
       },
-      "BREADCRUMB": {
+      "VARIANT_SELECT": {
         "PAGE_VARIANT_LABEL": "Variante de page",
         "NAVIGATE_TO_PAGE_TEMPLATE": "Aller au modèle de page"
       },

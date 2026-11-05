@@ -1,0 +1,143 @@
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
+
+:host {
+    display: block;
+}
+
+.collection-general {
+    mat-form-field {
+        width: 100%;
+        textarea {
+            height: 6rem;
+            resize: none;
+        }
+    }
+    .dialog-input-area {
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+    .collection-new-owner {
+        display: flex;
+        align-items: center;
+        padding: 0 vars.$cardPadding;
+        > i {
+            margin: 5px;
+        }
+        > span {
+            flex-grow: 1;
+        }
+    }
+    .color-group {
+        display: flex;
+        flex-wrap: wrap;
+        margin: auto;
+        justify-content: center;
+        padding: 0;
+        list-style: none;
+        &:focus {
+            outline: unset;
+        }
+        &.cdk-keyboard-focused {
+            @include mixins.setGlobalKeyboardFocus();
+        }
+        .color-option {
+            display: inline-block;
+            border-radius: 4pt;
+            width: 14%;
+            height: 30px;
+            margin: 4px 3px;
+            cursor: pointer;
+        }
+        .color-selected {
+            border: 2px solid var(--borderDark);
+        }
+    }
+}
+
+.collectionImage {
+    position: relative;
+    height: 240px;
+    background-color: var(--backgroundColor);
+    overflow: hidden;
+}
+
+.collection-new-preview-infoarea {
+    position: relative;
+    min-height: 120px;
+    padding: 16px;
+    color: var(--textBlack);
+    transition: vars.$transitionNormal all;
+
+    --mat-form-field-outlined-hover-label-text-color: var(--textBlack);
+
+    @include mixins.placeholder {
+        color: var(--textLight);
+    }
+
+    input,
+    textarea {
+        background-color: transparent;
+    }
+}
+
+.collection-new-preview-infoline {
+    opacity: 0.75;
+    margin-bottom: 10px;
+}
+
+.dialog-basic-area {
+    padding: vars.$cardPadding;
+    padding-bottom: 15px;
+}
+
+.dialog-color-group {
+    min-height: 140px;
+}
+
+.card-collection-icon-container {
+    text-align: center;
+    vertical-align: middle;
+    width: 100%;
+    height: 240px;
+    background-color: var(--backgroundColor);
+    color: white;
+    cursor: pointer;
+}
+.card-image-distance {
+    height: 35px;
+}
+.card-image-icon-container {
+    height: 160px;
+    width: 160px;
+    border-radius: 160px;
+    background-color: darkgray;
+    margin: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    i {
+        font-size: 75px;
+    }
+}
+
+@media screen and (max-height: vars.$mobileHeight + vars.$mobileStage * 2) {
+    .collectionImage {
+        height: 120px;
+    }
+    .card-collection-icon-container {
+        height: 120px;
+    }
+    .card-image-icon-container {
+        margin-top: 10px;
+        height: 100px;
+        width: 100px;
+        border-radius: 100px;
+        i {
+            font-size: 60px;
+        }
+    }
+    .card-image-distance {
+        height: 0;
+    }
+}

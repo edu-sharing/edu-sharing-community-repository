@@ -19,6 +19,9 @@ import { UsagesPreviewComponent } from '../../pages/workspace-page/metadata/usag
 import { AssignmentSidebarComponent } from '../../pages/editorial-page/assignment-sidebar/assignment-sidebar.component';
 import { ResizableSidenavDirective } from '../../pages/editorial-page/resizable-sidenav.directive';
 import { AddCollectionSidebarComponent } from './add-collection-sidebar/add-collection-sidebar.component';
+import { CreateCollectionSidebarComponent } from './create-collection-sidebar/create-collection-sidebar.component';
+import { ShareCollectionSidebarComponent } from './share-collection-sidebar/share-collection-sidebar.component';
+import { CollectionInfoSidebarComponent } from '../collection-info/collection-info-sidebar/collection-info-sidebar.component';
 import { ScopeEditorialPanelComponent } from '../scopes/scope-editorial-panel/scope-editorial-panel.component';
 import { ScopeBadgesComponent } from '../scopes/scope-badges/scope-badges.component';
 
@@ -48,6 +51,9 @@ import { ScopeBadgesComponent } from '../scopes/scope-badges/scope-badges.compon
         RenderWrapperComponent,
         ResizableSidenavDirective,
         AddCollectionSidebarComponent,
+        CreateCollectionSidebarComponent,
+        CollectionInfoSidebarComponent,
+        ShareCollectionSidebarComponent,
         ScopeEditorialPanelComponent,
         ScopeBadgesComponent,
     ],

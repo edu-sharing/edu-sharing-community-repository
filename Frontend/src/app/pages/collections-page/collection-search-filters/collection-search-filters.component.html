@@ -1,0 +1,79 @@
+<es-edge-toggle
+  data-test="button-toggle-sidebar-filters-collections"
+  [side]="'start'"
+  [open]="isOpen()"
+  [visible]="showToggle()"
+  [drawer]="hostRef"
+  [measure]="'edge'"
+  [animatePane]="false"
+  [inline]="true"
+  [labelOpen]="'SEARCH.OPEN_FILTERS'"
+  [labelClose]="'SEARCH.CLOSE_FILTERS'"
+  [ariaControls]="panelId"
+  (toggled)="toggle()"
+></es-edge-toggle>
+<div
+  class="filter-bar-resizable"
+  esResizableSidenav
+  position="start"
+  storageKey="COLLECTIONS_SIDENAV_LEFT_WIDTH"
+  [defaultWidthPx]="319"
+  [minWidth]="0"
+  [minWidthPx]="269"
+  [maxWidthPx]="619"
+  [hidden]="isCollapsed()"
+  [attr.inert]="isCollapsed() ? '' : null"
+  role="region"
+  [id]="panelId"
+  [attr.aria-labelledby]="titleId"
+>
+  <div class="filter-bar-container">
+    <div class="filter-bar-heading">
+      <h2 class="filter-bar-title" [id]="titleId">{{ 'SEARCH.FILTERS' | translate }}</h2>
+    </div>
+    <div class="filter-bar-body">
+      <ng-container *ngTemplateOutlet="filterContent; context: { inDialog: false }"></ng-container>
+    </div>
+  </div>
+</div>
+
+<ng-template #dialogContent>
+  <ng-container *ngTemplateOutlet="filterContent; context: { inDialog: true }"></ng-container>
+</ng-template>
+
+<ng-template #filterContent let-inDialog="inDialog">
+  <mat-slide-toggle
+    data-test="collection-search-filter-sub-levels"
+    [ngModel]="includeSubLevels()"
+    (ngModelChange)="setIncludeSubLevels($event)"
+  >
+    {{ 'COLLECTIONS.SEARCH_FILTER_SUB_LEVELS' | translate }}
+  </mat-slide-toggle>
+  <p class="filter-hint">
+    {{
+      (includeSubLevels()
+        ? 'COLLECTIONS.SEARCH_FILTER_SUB_LEVELS_ON'
+        : 'COLLECTIONS.SEARCH_FILTER_SUB_LEVELS_OFF'
+      ) | translate
+    }}
+  </p>
+  @if (paramsApplied() && inDialog === isMobileLayout()) {
+  <es-mds-editor-wrapper
+    class="filter-editor"
+    groupId="collection_search"
+    [embedded]="true"
+    mode="search"
+    [currentValues]="filters()"
+    (currentValuesChange)="onFiltersChange($event)"
+  ></es-mds-editor-wrapper>
+  } @if (hasFilters()) {
+  <button
+    mat-button
+    class="filter-reset"
+    data-test="collection-search-filter-reset"
+    (click)="resetFilters()"
+  >
+    {{ 'CLEAR_FILTERS' | translate }}
+  </button>
+  }
+</ng-template>

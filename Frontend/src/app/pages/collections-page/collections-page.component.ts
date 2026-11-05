@@ -1,14 +1,20 @@
 import {
+    AfterContentInit,
+    afterNextRender,
     Component,
+    computed,
     ContentChild,
+    effect,
     ElementRef,
     EventEmitter,
     inject,
+    Injector,
     OnDestroy,
     signal,
     TemplateRef,
     viewChild,
     ViewChild,
+    DestroyRef,
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import {
@@ -23,6 +29,7 @@ import {
     TranslationsService,
     UIConstants,
 } from 'ngx-edu-sharing-ui';
+import { ViewToggleItem } from '../../shared/components/view-toggle-group/view-toggle-group.component';
 import { ConnectedPosition } from '@angular/cdk/overlay';
 import { combineLatest, Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
@@ -43,17 +50,35 @@ import {
     TemporaryStorageService,
     UIService,
 } from '../../core-module/core.module';
-import { Helper } from '../../core-module/rest/helper';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { NodeHelperService } from '../../services/node-helper.service';
 import { Toast } from '../../services/toast';
 import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
+import { ImprintPrivacyService } from '../../shared/components/imprint-privacy-footer/imprint-privacy-service';
 import { CollectionContentComponent } from './collection-content/collection-content.component';
-import { CollectionInfoBarComponent } from './collection-info-bar/collection-info-bar.component';
+import { CollectionHeaderBarComponent } from './collection-header-bar/collection-header-bar.component';
+import { CollectionViewStateService, CollectionViewType } from './collection-view-state.service';
 import { GlobalCollectionsPageServiceInternal } from './global-collections-page.service';
 import { OptionsHelperService } from 'src/app/services/options-helper.service';
 import { EditorialSidebarService } from '../../features/editorial-sidebar/editorial-sidebar.service';
+import { SEARCH_INPUT_QUERY_PARAM } from '../../features/topic-page/shared/types/custom-definitions';
 import { CollectionScope, CollectionScopesService } from '../../services/collection-scopes.service';
+import { CollectionDetailsService } from '../../features/collection-info/collection-details.service';
+import {
+    SearchFieldInstance,
+    SearchFieldService,
+} from '../../main/navigation/search-field/search-field.service';
+import { CollectionSearchService } from './collection-search.service';
+import {
+    COLLECTION_SEARCH_FILTERS_PARAM,
+    CollectionSearchStateService,
+} from './collection-search-state.service';
+import {
+    parseSearchFilters,
+    sameSearchFilters,
+} from '../../features/topic-page/shared/utils/search-hit-util';
+import { CollectionViewSlotsService } from './collection-view-slots.service';
+import { CollectionTopicViewService } from './collection-topic-view/collection-topic-view.service';
 
 // component class
 @Component({
@@ -61,17 +86,57 @@ import { CollectionScope, CollectionScopesService } from '../../services/collect
     templateUrl: 'collections-page.component.html',
     styleUrls: ['collections-page.component.scss'],
     // provide a new instance so to not get conflicts with other service instances
-    providers: [OptionsHelperDataService, OptionsHelperService],
+    providers: [
+        OptionsHelperDataService,
+        OptionsHelperService,
+        CollectionDetailsService,
+        CollectionViewStateService,
+        CollectionSearchStateService,
+        CollectionSearchService,
+        CollectionViewSlotsService,
+        CollectionTopicViewService,
+    ],
     standalone: false,
 })
-export class CollectionsPageComponent implements OnDestroy {
+export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
     private breadcrumbsService = inject(BreadcrumbsService);
+    readonly details = inject(CollectionDetailsService);
+    readonly viewState = inject(CollectionViewStateService);
+    readonly searchState = inject(CollectionSearchStateService);
+    private readonly searchField = inject(SearchFieldService);
+    /** the ways the user can present the content of a collection */
+    readonly displayTypeItems: ViewToggleItem<CollectionViewType>[] = [
+        {
+            id: 'grid',
+            icon: 'grid_view',
+            label: 'EDITORIAL.OPTIONS.NODES_SELECTOR.COLLECTIONS.DISPLAY_TYPE.GRID',
+        },
+        {
+            id: 'list',
+            icon: 'list',
+            label: 'EDITORIAL.OPTIONS.NODES_SELECTOR.COLLECTIONS.DISPLAY_TYPE.TABLE',
+        },
+        {
+            id: 'tree',
+            icon: 'account_tree',
+            label: 'EDITORIAL.OPTIONS.NODES_SELECTOR.COLLECTIONS.DISPLAY_TYPE.TREE',
+        },
+    ];
+    readonly topicView = inject(CollectionTopicViewService);
+    /** the view types of a collection below the root level, which also offer its topic page */
+    readonly collectionDisplayTypeItems = computed(() => [
+        ...this.displayTypeItems,
+        this.topicView.toggleItem(),
+    ]);
+    readonly breadcrumbEndSlot = inject(CollectionViewSlotsService).breadcrumbEnd;
     private collectionService = inject(RestCollectionService);
     private collectionScopesService = inject(CollectionScopesService);
     private config = inject(ConfigurationService);
     private configService = inject(ConfigService);
     private connector = inject(RestConnectorService);
     private iamService = inject(RestIamService);
+    private imprintPrivacy = inject(ImprintPrivacyService);
+    private destroyRef = inject(DestroyRef);
     private localEvents = inject(LocalEventsService);
     private mediacenterService = inject(RestMediacenterService);
     private nodeHelper = inject(NodeHelperService);
@@ -84,6 +149,7 @@ export class CollectionsPageComponent implements OnDestroy {
     private networkService = inject(RestNetworkService);
     private temporaryStorageService = inject(TemporaryStorageService);
     editorialSidebarService = inject(EditorialSidebarService);
+    private injector = inject(Injector);
     private toast = inject(Toast);
     private translations = inject(TranslationsService);
     private uiService = inject(UIService);
@@ -115,9 +181,10 @@ export class CollectionsPageComponent implements OnDestroy {
     readonly SCOPES = Scope;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
-    readonly getInfobar = () => this.infobar;
 
-    @ViewChild('infobar') infobar: CollectionInfoBarComponent;
+    private readonly headerBar = viewChild(CollectionHeaderBarComponent);
+    /** the actionbar in the header bar of the open collection */
+    readonly headerActionbar = computed(() => this.headerBar()?.actionbar());
     @ViewChild('collectionContentComponent') collectionContentRef: CollectionContentComponent;
     readonly selectionActionbar = viewChild<ActionbarComponent>('selectionActionbarRef');
     @ContentChild('collectionContentTemplate') collectionContentTemplateRef: TemplateRef<any>;
@@ -140,7 +207,21 @@ export class CollectionsPageComponent implements OnDestroy {
     tabSelected: string = RestConstants.COLLECTIONSCOPE_MY;
     isLoading = true;
     isReady = false;
-    collection: Node;
+    private currentCollection: Node;
+    get collection(): Node {
+        return this.currentCollection;
+    }
+    set collection(collection: Node) {
+        this.currentCollection = collection;
+        this.details.collection.set(collection);
+    }
+    ngAfterContentInit(): void {
+        // a host template receives the permissions of the collection, so they are requested
+        // even though no sidebar asks for them
+        if (this.collectionContentTemplateRef) {
+            this.details.activate();
+        }
+    }
     collectionSortEmitter = new EventEmitter<SortEvent>();
     collectionCustomSortEmitter = new EventEmitter<boolean>();
     referenceSortEmitter = new EventEmitter<SortEvent>();
@@ -181,6 +262,19 @@ export class CollectionsPageComponent implements OnDestroy {
     /** Categories of collections listed as tabs, empty until they are known. */
     readonly scopes = signal<CollectionScope[]>([]);
     constructor() {
+        // the topic view brings its own search field, the collection search takes it back after
+        effect(() => {
+            if (this.topicView.selected() || !this.isReady) {
+                return;
+            }
+            afterNextRender(
+                () => {
+                    this.setupSearchField();
+                    this.searchFieldInstance.setSearchString(this.searchState.query() ?? '');
+                },
+                { injector: this.injector },
+            );
+        });
         this.translations.waitForInit().subscribe(() => {
             combineLatest([
                 this.connector.isLoggedIn(),
@@ -214,6 +308,20 @@ export class CollectionsPageComponent implements OnDestroy {
                 filter((nodes) => nodes.some((node) => node.ref.id === this.collection.ref.id)),
             )
             .subscribe(() => this.navigate(this.parentCollectionId.id));
+        // The header shows the collection, so it has to follow changes made in the sidebar.
+        this.localEvents.nodesChanged
+            .pipe(
+                takeUntil(this.destroyed),
+                filter((nodes) =>
+                    nodes.some(
+                        (node) =>
+                            !this.isRootLevel &&
+                            node?.ref?.id === this.collection?.ref?.id &&
+                            !!node.collection,
+                    ),
+                ),
+            )
+            .subscribe(() => this.refreshAll());
     }
     reurl: any;
     private _collectionShare: Node;
@@ -221,6 +329,7 @@ export class CollectionsPageComponent implements OnDestroy {
     private destroyed = new Subject<void>();
 
     readonly customTemplates = this.globalCollectionsPageServiceInternal.customTemplates;
+    readonly showLanding = this.globalCollectionsPageServiceInternal.showLanding.asReadonly();
     // inject services
 
     ngOnDestroy() {
@@ -243,6 +352,18 @@ export class CollectionsPageComponent implements OnDestroy {
     navigate(id = '', addToOther = '', feedback = false) {
         UIHelper.getCommonParameters(this.route).subscribe((params) => {
             params.scope = this.tabSelected;
+            const query = this.searchState.query();
+            if (query) {
+                params[SEARCH_INPUT_QUERY_PARAM] = query;
+            }
+            if (!this.searchState.includeSubLevels()) {
+                params.subLevels = false;
+            }
+            if (Object.keys(this.searchState.filters()).length) {
+                params[COLLECTION_SEARCH_FILTERS_PARAM] = JSON.stringify(
+                    this.searchState.filters(),
+                );
+            }
             if (id && id !== '-root-') {
                 params.id = id;
             }
@@ -324,20 +445,6 @@ export class CollectionsPageComponent implements OnDestroy {
         return this.nodeHelper.getCollectionScopeInfo(this.collection);
     }
 
-    collectionEdit(): void {
-        if (this.isAllowedToEditCollection()) {
-            void this.router.navigate(
-                [
-                    UIConstants.ROUTER_PREFIX + 'collections/collection',
-                    'edit',
-                    this.collection.ref.id,
-                ],
-                { queryParams: { mainnav: this.mainnav } },
-            );
-            return;
-        }
-    }
-
     getScope() {
         return this.tabSelected ? this.tabSelected : RestConstants.COLLECTIONSCOPE_ALL;
     }
@@ -394,9 +501,34 @@ export class CollectionsPageComponent implements OnDestroy {
         } else {
             this.setCollectionId(RestConstants.ROOT);
         }
+        this.imprintPrivacy.setContextNode(id ? this.collection : null, this.destroyRef);
         this.isLoading = false;
         this.renderBreadcrumbs();
         this.isRootLevel = !id;
+    }
+
+    private searchFieldInstance: SearchFieldInstance;
+
+    /** Shows the search field of the main navigation and applies what is searched for. */
+    private setupSearchField() {
+        this.searchFieldInstance = this.searchField.enable(
+            {
+                placeholder: 'COLLECTIONS.SEARCH',
+                showFiltersButton: true,
+                filterBarVisibleStorageKey: 'collections-page-filters',
+            },
+            this.destroyed,
+        );
+        this.searchFieldInstance.onSearchTriggered().subscribe((event) => {
+            void this.router.navigate([], {
+                relativeTo: this.route,
+                queryParams: { [SEARCH_INPUT_QUERY_PARAM]: event.searchString?.trim() || null },
+                queryParamsHandling: 'merge',
+            });
+            if (!event.cleared) {
+                this.uiService.hideKeyboardIfMobile();
+            }
+        });
     }
 
     closeDialog() {
@@ -405,6 +537,28 @@ export class CollectionsPageComponent implements OnDestroy {
 
     showTabs() {
         return this.isRootLevelCollection() && this.scopes().length > 1;
+    }
+
+    /**
+     * Opens the sidebar to create a collection in the current one and removes the request from
+     * the url, so a reload does not open it again. The list sets the scope of the main navigation
+     * while it is rendered, which closes the sidebar, so it opens after that render.
+     */
+    private openCreateCollectionSidebar(): void {
+        afterNextRender(
+            () =>
+                this.editorialSidebarService.showOption({
+                    option: 'CREATE_COLLECTION',
+                    trap: false,
+                }),
+            { injector: this.injector },
+        );
+        void this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { createCollection: null },
+            queryParamsHandling: 'merge',
+            replaceUrl: true,
+        });
     }
 
     /**
@@ -435,21 +589,29 @@ export class CollectionsPageComponent implements OnDestroy {
     }
 
     private renderBreadcrumbs() {
-        this.breadcrumbsService.setNodePath([]);
+        this.topicView.reset();
         if (this.collection.ref.id === RestConstants.ROOT) {
+            this.breadcrumbsService.setNodePath([]);
+            void this.topicView.resolveCollectionViewType(this.collection, null);
             return;
         }
+        // the path of the collection before stays until this one's arrives; the properties carry
+        // the page configs parents propagate to their sub-collections
         this.nodeService
-            .getNodeParents(this.collection.ref.id, false)
-            .subscribe((data: EduData.NodeList) => {
-                const path = data.nodes.reverse();
-                if (path.length > 1) {
-                    this.parentCollectionId = new EduData.Reference(
-                        path[path.length - 2].ref.repo,
-                        path[path.length - 2].ref.id,
-                    );
-                }
-                this.breadcrumbsService.setNodePath(path);
+            .getNodeParents(this.collection.ref.id, false, [RestConstants.ALL])
+            .subscribe({
+                next: (data: EduData.ParentList) => {
+                    const path = [...data.nodes].reverse();
+                    if (path.length > 1) {
+                        this.parentCollectionId = new EduData.Reference(
+                            path[path.length - 2].ref.repo,
+                            path[path.length - 2].ref.id,
+                        );
+                    }
+                    this.breadcrumbsService.setNodePath(path);
+                    void this.topicView.resolveCollectionViewType(this.collection, data);
+                },
+                error: () => this.breadcrumbsService.setNodePath([]),
             });
     }
 
@@ -464,9 +626,39 @@ export class CollectionsPageComponent implements OnDestroy {
                 // set app to ready state
                 this.isReady = true;
                 // subscribe to parameters of url
+                this.setupSearchField();
                 this.route.queryParams.subscribe(async (params) => {
-                    const diffs = Helper.getDifferentKeys(this.params, params);
-                    if (Object.keys(diffs).length === 1 && diffs.viewType) {
+                    this.topicView.applyParams(params);
+                    this.searchState.query.set(params[SEARCH_INPUT_QUERY_PARAM] || null);
+                    this.searchState.includeSubLevels.set(params.subLevels !== 'false');
+                    const filters = parseSearchFilters(params[COLLECTION_SEARCH_FILTERS_PARAM]);
+                    if (!sameSearchFilters(filters, this.searchState.filters())) {
+                        this.searchState.filters.set(filters);
+                    }
+                    this.searchState.paramsApplied.set(true);
+                    // the topic view fills the search field itself, from the same param
+                    if (!this.topicView.selected()) {
+                        this.searchFieldInstance?.setSearchString(
+                            params[SEARCH_INPUT_QUERY_PARAM] ?? '',
+                        );
+                    }
+                    // view type, search term and the topic view's state are applied by the views, the
+                    // page stays as it is; a removed param counts as changed as well
+                    const changed = Object.keys({ ...this.params, ...params }).filter(
+                        (key) => this.params?.[key] !== params[key],
+                    );
+                    const keptKeys = [
+                        SEARCH_INPUT_QUERY_PARAM,
+                        'subLevels',
+                        COLLECTION_SEARCH_FILTERS_PARAM,
+                        'createCollection',
+                        ...this.topicView.queryParamKeys,
+                    ];
+                    if (
+                        this.params &&
+                        changed.length > 0 &&
+                        changed.every((key) => keptKeys.includes(key))
+                    ) {
                         this.params = params;
                         return;
                     }
@@ -495,6 +687,9 @@ export class CollectionsPageComponent implements OnDestroy {
                     }
                     await this.displayCollectionById(id);
                     this.dropUnlistedScope();
+                    if (params.createCollection) {
+                        this.openCreateCollectionSidebar();
+                    }
 
                     /*if (params.nodeId) {
                         let node = params.nodeId.split('/');

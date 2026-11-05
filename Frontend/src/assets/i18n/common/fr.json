@@ -388,7 +388,6 @@
     "INFO_REFERENCES": "collection",
     "INFO_REFERENCES_MULTI": "sous-collections",
     "INFO_CHILDS": "ressource",
-    "INFO_CHILDS_MULTI": "ressources",
     "INFO_NO_CONTENT": "collection vide",
     "INFO_UPDATING": "Mise à jour en cours",
     "SCOPE": {

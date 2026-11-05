@@ -6,6 +6,57 @@
       "TITLE": "Themenseite",
       "SEARCH_PLACEHOLDER": "Suche nach Inhalten auf der Themenseite ..."
     },
+    "SIDEBAR": {
+      "TITLE": "Themenseite",
+      "TITLE_DESCRIPTION": "Themenseiten und Vorlagen verwalten und neu anlegen",
+      "TAB": {
+        "VARIANT": "Themenseite",
+        "TEMPLATE": "Vorlage"
+      },
+      "MENU": {
+        "MANAGE": "Themenseiten verwalten",
+        "MANAGE_DESCRIPTION": "Seiten und Vorlagen anzeigen, neu generieren oder löschen",
+        "CREATE": "Neue Themenseite",
+        "CREATE_DESCRIPTION": "Neue Themenseite aus einer bestehenden erstellen",
+        "CREATE_WITH_TEMPLATE": "Neue Themenseite/Vorlage",
+        "CREATE_WITH_TEMPLATE_DESCRIPTION": "Neue Themenseite oder Vorlage aus einer bestehenden erstellen",
+        "INHERITANCE": "Vererbung",
+        "INHERITANCE_DESCRIPTION": "Themenseiten an Untersammlungen weitergeben"
+      },
+      "MANAGE": {
+        "INTRO": "{{title}} hat folgende Themenseiten:",
+        "TEMPLATES_DESCRIPTION": "werden an die Untersammlungen vererbt",
+        "UP_TO_DATE": "noch aktuell, Vorlage vom {{date}}",
+        "MORE_ACTIONS": "Weitere Aktionen",
+        "INHERITED_HEADING": "Geerbt von {{title}}",
+        "VARIANTS_HEADING": "Seiten an dieser Sammlung",
+        "TEMPLATES_HEADING": "Vorlagen dieser Sammlung",
+        "DEFAULT": "(Standard)",
+        "CREATED": "erstellt von {{name}} am {{date}}",
+        "SHOW": "Anzeigen",
+        "REGENERATE": "Neu generieren",
+        "EDIT_TEMPLATE": "Vorlage bearbeiten",
+        "DELETE": "Löschen",
+        "EMPTY": "Für diese Sammlung gibt es noch keine Themenseite.",
+        "LOAD_ERROR": "Die Themenseiten konnten nicht geladen werden."
+      },
+      "INHERITANCE": {
+        "INTRO": "Vererbung von {{title}}",
+        "INTRO_DESCRIPTION": "So erhalten diese Sammlung und ihre Untersammlungen ihre Themenseiten. Mit „Weitergeben“ legst du fest, ob geerbte Vorlagen weiter nach unten gereicht werden.",
+        "STATE_OWN": "Eigene Themenseite – keine Vererbung nötig",
+        "STATE_INHERITS": "erbt von {{title}}",
+        "STATE_STOPPED": "erbt nichts – Weitergabe gestoppt bei {{title}}",
+        "STATE_NONE": "keine Themenseite",
+        "PASSES_OWN_TEMPLATES": "gibt eigene Vorlagen an Untersammlungen weiter",
+        "PASSES_NOTHING_ON": "gibt Geerbtes nicht an Untersammlungen weiter",
+        "SAVED_STATE": "bisher:",
+        "PASS_ON": "Weitergeben",
+        "PASS_ON_TOOLTIP": "Geerbte Vorlagen an die Untersammlungen weitergeben",
+        "CHANGED_COUNT": "{{count}} angezeigte Sammlungen ändern sich",
+        "SAVED": "Die Vererbung wurde gespeichert.",
+        "LOAD_ERROR": "Die Vererbung konnte nicht geladen werden."
+      }
+    },
     "AI": {
       "GENERATED": "KI-generiert",
       "INVALID_PROMPT": "Prompt mit Syntax-Fehlern"
@@ -37,7 +88,7 @@
         "CURRENT_SELECTION_ANSWER_LABEL": "Antwort für die aktuelle Auswahl",
         "NO_ANSWER_DEFINED": "Bisher wurde für die Auswahl noch kein Text hinterlegt."
       },
-      "BREADCRUMB": {
+      "VARIANT_SELECT": {
         "PAGE_VARIANT_LABEL": "Seiten-Variante",
         "NAVIGATE_TO_PAGE_TEMPLATE": "Zur Seiten-Vorlage"
       },
@@ -448,7 +499,6 @@
       "SUCCESS_MESSAGE": "Die Seiten-Vorlage wurde erfolgreich erstellt"
     },
     "DEFAULT_PAGE_VARIANT_NAME": "Seiten-Variante",
-    "NAVIGATE_TO_COLLECTION_PAGE": "Zur Sammlungsseite wechseln",
     "COPY_SUFFIX": "Kopie",
     "ADD_TO_GLOBAL": {
       "PENDING_MESSAGE": "Die Seite wird zu den globalen Vorlagen hinzugefügt.",

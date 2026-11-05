@@ -1,0 +1,122 @@
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
+
+:host {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 100%;
+}
+
+.steps {
+    background: none;
+
+    // the stepper only shows the progress; the content of a step is the page below it
+    ::ng-deep .mat-horizontal-content-container {
+        display: none;
+    }
+}
+
+.content {
+    flex: 1;
+    padding: 20px;
+}
+
+.section {
+    padding: 16px 0;
+    border-bottom: 1px solid var(--borderLight);
+
+    &:first-child {
+        padding-top: 0;
+    }
+    &:last-of-type {
+        border-bottom: 0;
+    }
+    mat-form-field {
+        width: 100%;
+    }
+}
+
+.section-title {
+    margin: 0 0 8px;
+    font-size: vars.$fontSizeLarge;
+    font-weight: bold;
+}
+
+.types {
+    display: flex;
+    flex-direction: column;
+}
+
+.footer-buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.type {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.type-info {
+    margin: 0 0 8px 40px;
+    color: var(--textLight);
+
+    p {
+        margin: 0 0 4px;
+    }
+}
+
+.no-metadata {
+    margin: 0;
+    color: var(--textLight);
+}
+
+.permissions {
+    display: flex;
+    flex-direction: column;
+
+    es-share-dialog,
+    es-collection-editorial-groups-form {
+        flex: 1;
+        min-height: 0;
+    }
+}
+
+.permissions-title {
+    padding-bottom: 8px;
+    font-size: 140%;
+    font-weight: bold;
+}
+
+.permissions-description {
+    padding-bottom: 20px;
+    color: var(--textLight);
+}
+
+.location-field {
+    margin-bottom: 16px;
+
+    .caption {
+        margin-bottom: 4px;
+        color: var(--textLight);
+        font-size: 0.9em;
+    }
+
+    .location-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--textLight);
+    }
+
+    .path {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: var(--textMain);
+    }
+}

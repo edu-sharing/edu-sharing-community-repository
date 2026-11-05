@@ -4,7 +4,7 @@ import { MdsModule } from '../../features/mds/mds.module';
 import { SharedModule } from '../../shared/shared.module';
 import { EmbedPageRoutingModule } from './embed-page-routing.module';
 import { EmbedPageComponent } from './embed-page.component';
-import { GenericWidgetComponent } from '../topic-page/widgets/generic-widget/generic-widget.component';
+import { GenericWidgetComponent } from '../../features/topic-page/widgets/generic-widget/generic-widget.component';
 import { AdminPageModule } from '../admin-page/admin-page.module';
 
 @NgModule({

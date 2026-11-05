@@ -4,6 +4,9 @@
 
 $defaultColumnWidth: 145px;
 $minColumnWidth: 30%;
+// horizontal padding of a table cell as defined by the material table
+$cellPadding: 16px;
+$iconCellLeadingPadding: 24px;
 $rowHeight: vars.$nodeEntriesTableRowHeight;
 
 :host {
@@ -41,13 +44,36 @@ $rowHeight: vars.$nodeEntriesTableRowHeight;
         mat-header-cell {
             margin: 0 !important;
         }
+        // the link/wrapper spans the whole cell, including its horizontal padding, so that the
+        // entire cell is the click target rather than only the line of text
         mat-cell es-node-url {
-            width: 100%;
+            width: calc(100% + #{$cellPadding * 2});
+            margin: 0 (-$cellPadding);
+            align-self: stretch;
+            a,
+            .node-url-wrapper {
+                display: flex;
+                align-items: center;
+                padding: 0 $cellPadding;
+                min-width: 0;
+            }
             a {
                 color: var(--textBlack);
             }
+            es-list-base {
+                padding: 0;
+            }
             &.cdk-keyboard-focused {
                 @include setGlobalKeyboardFocus('border');
+            }
+        }
+        // the icon cell has a wider leading padding than the other cells
+        mat-cell.cell-icon es-node-url {
+            width: calc(100% + #{$iconCellLeadingPadding + $cellPadding});
+            margin: 0 (-$cellPadding) 0 (-$iconCellLeadingPadding);
+            .node-url-wrapper {
+                justify-content: center;
+                padding: 0 $cellPadding 0 $iconCellLeadingPadding;
             }
         }
         // primary cell of a row without a routerLink (elementInteractionType !== DefaultActionLink):

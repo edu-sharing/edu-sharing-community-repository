@@ -6,6 +6,57 @@
       "TITLE": "Pagina tematica",
       "SEARCH_PLACEHOLDER": "Cerca contenuti nella pagina tematica ..."
     },
+    "SIDEBAR": {
+      "TITLE": "Pagina tematica",
+      "TITLE_DESCRIPTION": "Gestisci e crea pagine tematiche e modelli",
+      "TAB": {
+        "VARIANT": "Pagina tematica",
+        "TEMPLATE": "Modello"
+      },
+      "MENU": {
+        "MANAGE": "Gestisci pagine tematiche",
+        "MANAGE_DESCRIPTION": "Mostra, rigenera o elimina pagine e modelli",
+        "CREATE": "Nuova pagina tematica",
+        "CREATE_DESCRIPTION": "Crea una nuova pagina tematica da una esistente",
+        "CREATE_WITH_TEMPLATE": "Nuova pagina tematica/modello",
+        "CREATE_WITH_TEMPLATE_DESCRIPTION": "Crea una nuova pagina tematica o un modello da una esistente",
+        "INHERITANCE": "Ereditarietà",
+        "INHERITANCE_DESCRIPTION": "Trasmetti le pagine tematiche alle sotto-collezioni"
+      },
+      "MANAGE": {
+        "INTRO": "{{title}} ha le seguenti pagine tematiche:",
+        "TEMPLATES_DESCRIPTION": "trasmessi alle sotto-collezioni",
+        "UP_TO_DATE": "aggiornata, modello del {{date}}",
+        "MORE_ACTIONS": "Altre azioni",
+        "INHERITED_HEADING": "Ereditato da {{title}}",
+        "VARIANTS_HEADING": "Pagine di questa collezione",
+        "TEMPLATES_HEADING": "Modelli di questa collezione",
+        "DEFAULT": "(predefinito)",
+        "CREATED": "creato da {{name}} il {{date}}",
+        "SHOW": "Mostra",
+        "REGENERATE": "Rigenera",
+        "EDIT_TEMPLATE": "Modifica modello",
+        "DELETE": "Elimina",
+        "EMPTY": "Non esiste ancora una pagina tematica per questa collezione.",
+        "LOAD_ERROR": "Non è stato possibile caricare le pagine tematiche."
+      },
+      "INHERITANCE": {
+        "INTRO": "Ereditarietà di {{title}}",
+        "INTRO_DESCRIPTION": "Così questa collezione e le sue sotto-collezioni ricevono le loro pagine tematiche. «Trasmetti» decide se i modelli ereditati vengono passati più in basso.",
+        "STATE_OWN": "Pagina tematica propria – nessuna ereditarietà necessaria",
+        "STATE_INHERITS": "eredita da {{title}}",
+        "STATE_STOPPED": "non eredita nulla – trasmissione interrotta presso {{title}}",
+        "STATE_NONE": "nessuna pagina tematica",
+        "PASSES_OWN_TEMPLATES": "trasmette i propri modelli alle sotto-collezioni",
+        "PASSES_NOTHING_ON": "non trasmette l'ereditato alle sotto-collezioni",
+        "SAVED_STATE": "finora:",
+        "PASS_ON": "Trasmetti",
+        "PASS_ON_TOOLTIP": "Trasmetti i modelli ereditati alle sotto-collezioni",
+        "CHANGED_COUNT": "{{count}} collezioni mostrate cambiano",
+        "SAVED": "L'ereditarietà è stata salvata.",
+        "LOAD_ERROR": "Non è stato possibile caricare l'ereditarietà."
+      }
+    },
     "AI": {
       "GENERATED": "Generato dall'IA",
       "INVALID_PROMPT": "Prompt non valido"
@@ -38,7 +89,7 @@
         "CURRENT_SELECTION_ANSWER_LABEL": "Risposta per la selezione attuale",
         "NO_ANSWER_DEFINED": "Per la selezione non è ancora stato definito alcun testo."
       },
-      "BREADCRUMB": {
+      "VARIANT_SELECT": {
         "PAGE_VARIANT_LABEL": "Variante di pagina",
         "NAVIGATE_TO_PAGE_TEMPLATE": "Vai al modello di pagina"
       },
