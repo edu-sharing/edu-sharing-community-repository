@@ -205,12 +205,19 @@ public class ToolPermissionBaseService {
         return getAllAvailableToolPermissions(false);
     }
     private List<String> getAllAvailableToolPermissions(boolean renew){
-        List<String> allowed=new ArrayList<>();
-        for(String permission : this.getAllToolPermissions(renew)){
-            if(hasToolPermission(permission, renew))
-                allowed.add(permission);
-        }
-        return allowed;
+        /*
+         * run all checks in one transaction: otherwise every public service call (isAdmin, hasPermission, ...)
+         * opens its own transaction (connection borrow/validate, begin, commit) for each toolpermission.
+         * read-write, because getToolPermissionNodeId may (re)create missing toolpermission nodes
+         */
+        return serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
+            List<String> allowed=new ArrayList<>();
+            for(String permission : this.getAllToolPermissions(renew)){
+                if(hasToolPermission(permission, renew))
+                    allowed.add(permission);
+            }
+            return allowed;
+        }, false);
     }
 
     public NodeRef getEdu_SharingToolPermissionsFolder() throws Throwable{
