@@ -6,6 +6,7 @@ import type { LoadedNode, NodeProperties } from './node-metadata.ts';
 
 /** exporter.lrmi from edu-sharing.reference.conf, trimmed to what the tests exercise */
 const MAPPING: LrmiMapping = {
+    enrichment: true,
     properties: {
         identifier: 'sys:node-uuid',
         name: 'cclom:title,cm:name',

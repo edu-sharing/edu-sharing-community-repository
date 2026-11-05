@@ -8,7 +8,7 @@ const SHELL = '<html><head><base href="/edu-sharing/"><title>edu-sharing</title>
 
 const CONFIG: RepositoryConfig = {
     branding: true,
-    lrmi: { properties: { name: 'cclom:title,cm:name' }, vcard: {} },
+    lrmi: { enrichment: true, properties: { name: 'cclom:title,cm:name' }, vcard: {} },
     angular: { headers: {}, customHtmlHeaders: '' },
     guest: { enabled: true },
 };
@@ -78,6 +78,16 @@ test('render view: keeps NgServlet order - license, LRMI, oEmbed, then descripti
         [...order].sort((a, b) => a - b),
     );
     assert.ok(order.every((position) => position >= 0));
+});
+
+test('render view with exporter.lrmi.enrichment off: no LRMI, the rest stays', () => {
+    const config: RepositoryConfig = { ...CONFIG, lrmi: { ...CONFIG.lrmi, enrichment: false } };
+    const head = headOf(enrichShell(SHELL, renderContext({ config })));
+    assert.doesNotMatch(head, /ld\+json/);
+    assert.match(head, /rel="license"/);
+    assert.match(head, /json\+oembed/);
+    assert.match(head, /<title>Photosynthesis – edu-sharing<\/title>/);
+    assert.match(head, /<meta name="description" content="How plants eat light">/);
 });
 
 test('render view without readable node: only the oEmbed links, as NgServlet', () => {

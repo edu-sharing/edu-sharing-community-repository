@@ -56,12 +56,20 @@ test('parses branding and the lrmi mapping from the config values', () => {
     assert.deepEqual(config.lrmi.vcard, { creator: 'ccm:lifecyclecontributer_author' });
 });
 
+test('lrmi enrichment defaults to on, only false turns it off', () => {
+    const enrichmentOf = (lrmi: unknown) => parseRepositoryConfig({ currentBackend: { exporter: { lrmi } } }).lrmi.enrichment;
+    assert.equal(enrichmentOf(undefined), true);
+    assert.equal(enrichmentOf({ properties: {} }), true);
+    assert.equal(enrichmentOf({ enrichment: true }), true);
+    assert.equal(enrichmentOf({ enrichment: false }), false);
+});
+
 test('an older backend without the mapping yields an empty one, not an error', () => {
     // guest.enabled false without a value: the reference config defaults
     // repository.guest.enabled to false, so an older backend must not unlock it
     const empty = {
         branding: false,
-        lrmi: { properties: {}, vcard: {} },
+        lrmi: { enrichment: true, properties: {}, vcard: {} },
         angular: { headers: {}, customHtmlHeaders: '' },
         guest: { enabled: false },
     };

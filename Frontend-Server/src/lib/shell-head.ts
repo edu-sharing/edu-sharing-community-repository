@@ -24,7 +24,7 @@ export interface ShellContext {
 
 /**
  * The `<head>` enrichment of `NgServlet.doGet`, in its order:
- * render view -> license link, LRMI JSON-LD, oEmbed links; render and collection
+ * render view -> license link, LRMI JSON-LD (unless `exporter.lrmi.enrichment` is off), oEmbed links; render and collection
  * view -> title and description. Every part is skipped on its own when its data is
  * missing, so a failing backend degrades to the plain shell, never to an error.
  */
@@ -36,7 +36,7 @@ export function enrichShell(html: string, context: ShellContext): string {
         if (licenseUrl) {
             head.push(`<link rel="license" href="${escapeHtml(licenseUrl)}">`);
         }
-        if (loaded !== undefined && config !== null) {
+        if (loaded !== undefined && config !== null && config.lrmi.enrichment) {
             const lrmi = buildLrmi(loaded, config.lrmi, renderUrl(context.appUrl, target.nodeId, target.version));
             head.push(`<script type="application/ld+json">${jsonForScript(lrmi)}</script>`);
         }

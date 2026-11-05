@@ -3998,6 +3998,10 @@
       "LrmiConfig": {
         "description": "exporter.lrmi: the mapping LRMITool uses",
         "properties": {
+          "enrichment": {
+            "description": "put the LRMI JSON-LD into the head of the render page (Frontend-Server), default true",
+            "type": "boolean"
+          },
           "properties": {
             "additionalProperties": {
               "type": "string"

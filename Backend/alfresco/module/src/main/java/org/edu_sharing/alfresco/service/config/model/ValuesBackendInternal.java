@@ -52,6 +52,9 @@ public class ValuesBackendInternal extends ValuesBackend {
      */
     @Data
     public static class LrmiConfig {
+        @Optional
+        @Schema(description = "put the LRMI JSON-LD into the head of the render page (Frontend-Server), default true")
+        private Boolean enrichment;
         // lrmi field -> "prop1,prop2" (first filled wins) / "prop1+prop2" (combined), short names
         @Optional
         // Map<String, Object> for ConfigBeanFactory, the values are strings

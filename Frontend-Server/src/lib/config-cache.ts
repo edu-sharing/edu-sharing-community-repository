@@ -11,7 +11,7 @@ type AngularConfig = components['schemas']['AngularConfig'];
 type Values = components['schemas']['Values'];
 type GuestConfig = components['schemas']['GuestConfig'];
 
-/** `exporter.lrmi` - the mapping `LRMITool` works with, both maps always present */
+/** `exporter.lrmi` - the mapping `LRMITool` works with, both maps always present, `enrichment` defaults to true */
 export type LrmiMapping = Readonly<Required<components['schemas']['LrmiConfig']>>;
 
 /** the fields `K` of `T` with the default applied - always present, although the spec has them optional */
@@ -304,6 +304,8 @@ export function parseRepositoryConfig(body: unknown): RepositoryConfig {
         branding: response.current?.branding === true,
         ...(response.current?.defaultLocation !== undefined && { defaultLocation: response.current.defaultLocation }),
         lrmi: {
+            // absent means on, as in the lightbend reference config
+            enrichment: backend?.exporter?.lrmi?.enrichment !== false,
             properties: backend?.exporter?.lrmi?.properties ?? {},
             vcard: backend?.exporter?.lrmi?.vcard ?? {},
         },
