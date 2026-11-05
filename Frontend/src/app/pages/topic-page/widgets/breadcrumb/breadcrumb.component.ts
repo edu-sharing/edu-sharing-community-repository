@@ -95,6 +95,11 @@ export class BreadcrumbComponent implements OnChanges, OnInit, OnDestroy {
     editorialMemberNodeIds: string[] = [];
     hasBreadcrumbExtension: WritableSignal<boolean> = signal(false);
     initialized: WritableSignal<boolean> = signal(false);
+    // the page template can be switched to, unless it is already shown
+    templateSwitchable: Signal<boolean> = computed(
+        (): boolean =>
+            this.canManagePageTemplate() && this.pageTemplateExists() && !this.templateMode(),
+    );
     // reverse Array to get the correct order for breadcrumb
     processedNodes: Signal<Node[]> = computed((): Node[] => {
         return this.parentEntries()?.nodes?.slice()?.reverse() || [];

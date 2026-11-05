@@ -788,6 +788,7 @@
     [restoredSearchState]="variantPreviewSearchState()"
     [(selectedNode)]="createVariantOrTemplateSelectedNode"
     [templateMode]="createVariantOrTemplateMode() === 'template'"
+    [pageTemplateExists]="!!collectionNodePagePropagateConfigRef"
     (copyOptionChanged)="createVariantOrTemplateCopyOption = $event"
     (editGlobalTemplate)="openGlobalTemplateFromDialog($event)"
     (globalTemplateDeleted)="onGlobalTemplateDeleted($event)"

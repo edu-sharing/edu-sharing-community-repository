@@ -1185,27 +1185,24 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         // check whether the collection node has a page propagate config
         // hint: this must be done before parsing the page config, as it might not exist and cancel the execution
         const pageConfigPropagateRef: string = retrievePageConfigPropagateRef(this.collectionNode);
-        if (await this.isPageTemplateAvailable(pageConfigPropagateRef)) {
-            this.collectionNodePagePropagateConfigRef = pageConfigPropagateRef;
-            // a collection holds at most one page template, so drop a create option that was added
-            // while none existed yet (e.g. the template was just created in this session)
-            await this.topicPageCreateOptionsService.remove(this.createPageTemplateTitle);
-        }
-        // no (loadable) page template exists, so creating one starts a new propagate config
-        else {
-            this.collectionNodePagePropagateConfigRef = null;
-            // whoever may edit the collection decides whether its sub-collections inherit a page
-            if (this.userHasEditRights()) {
-                await this.topicPageCreateOptionsService.add(
-                    this.createPageTemplateTitle,
-                    'edu-add_page_template',
-                    () => {
-                        void this.createPageTemplate();
-                    },
-                    11,
-                    Constrain.User,
-                );
-            }
+        // without a (loadable) page template, creating one starts a new propagate config
+        this.collectionNodePagePropagateConfigRef = (await this.isPageTemplateAvailable(
+            pageConfigPropagateRef,
+        ))
+            ? pageConfigPropagateRef
+            : null;
+        // whoever may edit the collection decides which pages its sub-collections inherit, e.g.
+        // one template per target group
+        if (this.userHasEditRights()) {
+            await this.topicPageCreateOptionsService.add(
+                this.createPageTemplateTitle,
+                'edu-add_page_template',
+                () => {
+                    void this.createPageTemplate();
+                },
+                11,
+                Constrain.User,
+            );
         }
         // idea: if "collectionNode" already has a page config, there is no need to search further
         if (this.collectionNode.properties[DEFAULT_PAGE_CONFIG_PROP] && !this.templateMode()) {
@@ -2411,6 +2408,33 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      */
     leaveTemplateMode(): void {
         this.templateMode.set(false);
+        this.reloadWithoutVariant();
+    }
+
+    /**
+     * Takes the collection's variant out of the URL while a template is shown in place of its
+     * page, as it belongs to no template.
+     */
+    private async detachVariantFromUrl(): Promise<void> {
+        if (this.templateMode() || this.globalTemplateNode()) {
+            return;
+        }
+        await this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { variantId: null },
+            queryParamsHandling: 'merge',
+            replaceUrl: true,
+        });
+    }
+
+    /**
+     * Reloads the collection's page, which picks its variant anew, as a variant in the URL may
+     * still be one of the templates.
+     */
+    private reloadWithoutVariant(): void {
+        const url: URL = new URL(window.location.href);
+        url.searchParams.delete('variantId');
+        window.history.replaceState(window.history.state, '', url.toString());
         window.location.reload();
     }
 
@@ -2418,6 +2442,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * Called by es-topic-page-breadcrumb navigateToTemplate output event.
      */
     async switchIntoTemplateMode(reloadNecessary: boolean = false): Promise<void> {
+        await this.detachVariantFromUrl();
         this.templateMode.set(true);
         if (reloadNecessary) {
             this.collectionNode = await this.topicPageHelperService.getNodeUncached(
@@ -2427,12 +2452,8 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         this.pageConfigNode = null;
         this.selectedVariantPosition = -1;
         this.closeSideMenus();
-        // remove the create buttons for a new page variant and a new page template: neither can be
-        // created while the template itself is being edited
-        await this.topicPageCreateOptionsService.remove(
-            this.createPageVariantTitle,
-            this.createPageTemplateTitle,
-        );
+        // while the templates are edited, only further templates can be created
+        await this.topicPageCreateOptionsService.remove(this.createPageVariantTitle);
         await this.retrievePageConfigAndSelectVariant();
     }
 
@@ -2453,6 +2474,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             return;
         }
         this.variantPreviewService.leave();
+        await this.detachVariantFromUrl();
         this.requestInProgress.set(true);
         try {
             this.globalTemplateNode.set(availableTemplateNode);
@@ -2505,7 +2527,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * Leaves the global template by reloading the collection's page.
      */
     leaveGlobalTemplateMode(): void {
-        window.location.reload();
+        this.reloadWithoutVariant();
     }
 
     /**

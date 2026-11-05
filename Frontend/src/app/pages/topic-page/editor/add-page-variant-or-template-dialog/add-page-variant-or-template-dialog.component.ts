@@ -128,6 +128,8 @@ export class AddPageVariantOrTemplateDialogComponent implements AfterViewInit, O
     @Input() pageVariantNode: Node;
     @Input() selectedNode: Node;
     templateMode: InputSignal<boolean> = input(false);
+    // the collection already passes page templates on to its sub-collections
+    pageTemplateExists: InputSignal<boolean> = input(false);
     // the search of an earlier dialog to continue with, e.g. when returning from a preview
     restoredSearchState: InputSignal<PageVariantSearchState | null> =
         input<PageVariantSearchState | null>(null);
