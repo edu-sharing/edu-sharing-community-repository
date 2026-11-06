@@ -16,6 +16,7 @@ import {
     viewChild,
     ViewChild,
     DestroyRef,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import {
@@ -97,6 +98,8 @@ import { CollectionTopicViewService } from './collection-topic-view/collection-t
         CollectionViewSlotsService,
         CollectionTopicViewService,
     ],
+    // the page state is plain fields set from promises and subscriptions
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
 export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
