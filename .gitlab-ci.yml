@@ -40,8 +40,6 @@ deploy:
       optional: true
     - job: npm security audit
       optional: true
-    - job: npm security audit frontend-server
-      optional: true
     - job: unittest frontend
       optional: true
     - job: test docker
@@ -111,18 +109,14 @@ check linting:
 npm security audit:
   <<: *frontend_job
   allow_failure: true
-  script:
-    - npm audit --omit=dev --audit-level=high
-
-npm security audit frontend-server:
-  extends: .frontend_job
-  allow_failure: true
-  # npm audit only needs the lock file - no install, no node_modules cache
+  # npm audit only needs the lock files - no install, no node_modules cache
   cache: []
-  before_script:
-    - cd Frontend-Server
+  before_script: []
   script:
-    - npm audit --omit=dev --audit-level=high
+    - rc=0
+    - (cd Frontend && npm audit --omit=dev --audit-level=high) || rc=1
+    - (cd Frontend-Server && npm audit --omit=dev --audit-level=high) || rc=1
+    - exit $rc
 
 unittest frontend:
   <<: *frontend_job
