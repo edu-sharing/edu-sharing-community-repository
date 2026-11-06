@@ -8,9 +8,6 @@ step-by-step replacement for
 **No Angular SSR** — the browser build is served as static files, the SPA shell
 is enriched at the string level exactly like `NgServlet` does it today.
 
-📖 **Planning documents: [`docs/`](docs/)** — start with
-[`docs/00-overview.md`](docs/00-overview.md).
-
 ## Requirements
 
 Node 24 (`.nvmrc`). The repository's Angular build still pins Node 22 via the
@@ -49,10 +46,6 @@ a restart.
 
 ## Configuration
 
-Environment only — see the table in
-[`docs/01-architecture.md`](docs/01-architecture.md#configuration). The important
-ones:
-
 | Variable | Default | |
 |----------|---------|---|
 | `PORT` | `8080` | |
@@ -70,8 +63,7 @@ ones:
 
 The authoritative list lives in
 [`src/routes/backend-paths.ts`](src/routes/backend-paths.ts) and is derived from
-`Backend/services/webapp/src/main/webapp/WEB-INF/web.xml`. Details and the known
-behavioural deltas: [`docs/02-routing.md`](docs/02-routing.md).
+`Backend/services/webapp/src/main/webapp/WEB-INF/web.xml`.
 
 ## Logging
 
@@ -86,5 +78,4 @@ Tomcat logs have one shape in the log aggregation:
 
 `X-B3-*` and `X-OT-*` are forwarded unchanged and asserted by a test; `X-Request-Id` is kept if it is a UUID and generated otherwise, as in the
 backend — the backend reads them into its Log4j
-`ThreadContext` and would lose the trace at this hop otherwise. See
-[`docs/05-tracing.md`](docs/05-tracing.md).
+`ThreadContext` and would lose the trace at this hop otherwise.
