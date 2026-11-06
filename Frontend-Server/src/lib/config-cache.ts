@@ -282,6 +282,8 @@ export class ConfigCache {
                 );
             }
             const config = parseRepositoryConfig(response.body);
+            // the normalized slice this server works with - what the shell pages are built from
+            this.#options.log.debug({ domain, config }, 'backend config loaded');
             this.#entries.set(domain, { config, fetchedAt: this.#now() });
             return config;
         } catch (error) {
