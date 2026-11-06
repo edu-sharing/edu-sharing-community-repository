@@ -4,6 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import zlib from 'node:zlib';
 import { after, before, test } from 'node:test';
+import { HASHED_ASSET } from '../server.ts';
 import { negotiateEncoding, StaticCache, type CachedFile } from './static-cache.ts';
 
 let root: string;
@@ -27,7 +28,7 @@ after(() => {
 });
 
 function cache(maxBytes = 16 * 1024 * 1024, maxFileBytes = 128 * 1024) {
-    return new StaticCache({ root, maxBytes, maxFileBytes, revalidateMs: 60_000, isHashed: (name) => /-[A-Z0-9]{8,}\.(js|css)$/.test(name) });
+    return new StaticCache({ root, maxBytes, maxFileBytes, revalidateMs: 60_000, isHashed: (name) => HASHED_ASSET.test(name) });
 }
 
 test('reads and compresses a file once, then answers it from memory', async () => {

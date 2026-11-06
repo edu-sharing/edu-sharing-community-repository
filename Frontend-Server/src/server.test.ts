@@ -8,7 +8,7 @@ import { after, before, test } from 'node:test';
 import type { AddressInfo } from 'node:net';
 import type { FastifyInstance } from 'fastify';
 import { buildManagementServer } from './lib/management-server.ts';
-import { buildServer } from './server.ts';
+import { buildServer, HASHED_ASSET } from './server.ts';
 import type { Config } from './config.ts';
 
 /** Records what the fake Tomcat saw, so header tunnelling can be asserted. */
@@ -128,6 +128,27 @@ test('serves static files, marking hashed bundles immutable', async () => {
     const asset = await app.inject({ method: 'GET', url: '/edu-sharing/assets/logo.svg' });
     assert.equal(asset.statusCode, 200);
     assert.doesNotMatch(asset.headers['cache-control'] as string, /immutable/);
+});
+
+test('recognizes the content hashed names angular emits, and only those', () => {
+    // real names out of an Angular 22 dist
+    const hashed = [
+        'main-IGMI5JGB.js',
+        'polyfills-JM43HSLT.js',
+        'styles-5UNCDLRF.css',
+        'chunk-1ZjW7PtH.js',
+        'chunk-_3W2q6xG.js',
+        'chunk-5eRPV-YQ.js',
+        'chunk-ozfjtmqj.js',
+        'admin-page.module-DispvVZM.js',
+    ];
+    const unhashed = ['main.js', 'polyfills.js', 'styles.css', 'cordova.js', 'ngx-extended-pdf-viewer.js', 'logo.svg'];
+    for (const name of hashed) {
+        assert.ok(HASHED_ASSET.test(name), name);
+    }
+    for (const name of unhashed) {
+        assert.ok(!HASHED_ASSET.test(name), name);
+    }
 });
 
 test('proxies the backend prefixes', async () => {
