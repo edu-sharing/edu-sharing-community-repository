@@ -146,9 +146,7 @@ config:
       ## @param config.backend.port.internal Repository service port for the config fetches only (service.port.api.internal of the service chart)
       internal: 8080
 
-  # The index name is NOT configured here - it ships as the application default
-  # (ELASTIC_INDEX in Frontend-Server/src/config.ts) and is overridden through
-  # config.extraEnv only when a deployment needs a different one.
+  # The index name is NOT configured here - the repository hands it out with its config
   elastic:
     ## @param config.elastic.host Service name of the elasticsearch index (config.search.elastic.host of the service chart)
     host: edusharing-repository-search-elastic-index

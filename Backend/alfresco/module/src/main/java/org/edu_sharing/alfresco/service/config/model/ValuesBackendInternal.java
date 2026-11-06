@@ -26,6 +26,13 @@ public class ValuesBackendInternal extends ValuesBackend {
     private AngularConfig angular;
     @Optional
     private ExporterConfig exporter;
+    /**
+     * not lightbend config: set by ConfigServiceImpl from SearchServiceElastic.WORKSPACE_INDEX,
+     * so the Frontend-Server follows the index of the release without its own configuration
+     */
+    @Optional
+    @Schema(description = "name of the elasticsearch workspace index (SearchServiceElastic.WORKSPACE_INDEX), the Frontend-Server reads node metadata from it")
+    private String elasticWorkspaceIndex;
 
     @Data
     public static class AngularConfig {

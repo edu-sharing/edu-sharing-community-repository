@@ -20,7 +20,7 @@ import { IndexHtml } from './lib/index-html.ts';
 import { registerMetrics, type ProxyReason } from './lib/metrics.ts';
 import { ElasticClient, type ElasticSearcher, isMissingIndex } from './lib/elastic-client.ts';
 import { loadNode, primaryLanguage } from './lib/elastic-node.ts';
-import { parseShellTarget } from './lib/node-metadata.ts';
+import { parseShellTarget, type ShellTarget } from './lib/node-metadata.ts';
 import { securityHeaders } from './lib/security-headers.ts';
 import { type CachedFile, negotiateEncoding, StaticCache } from './lib/static-cache.ts';
 import { enrichShell } from './lib/shell-head.ts';
@@ -144,6 +144,37 @@ export async function buildServer(config: Config, overrides: ServerOverrides = {
             app.addHook('onClose', () => client.close());
             return client;
         })();
+    /*
+     * Every workspace index name we learn (ELASTIC_INDEX override, or elasticWorkspaceIndex of
+     * the backend config) is checked once: a missing index leaves every shell without its
+     * node metadata, which the per request warn below shows only in passing. A failed check
+     * (cluster unreachable) is forgotten, so the next request retries it.
+     */
+    const checkedIndexes = new Set<string>();
+    function checkIndex(index: string): void {
+        if (checkedIndexes.has(index) || elastic.indexExists === undefined) {
+            return;
+        }
+        checkedIndexes.add(index);
+        elastic.indexExists(index).then(
+            (exists) => {
+                if (!exists) {
+                    app.log.error(
+                        { index, override: config.elasticIndex !== undefined },
+                        'elastic workspace index does not exist - shells are delivered without node metadata',
+                    );
+                }
+            },
+            (err: unknown) => {
+                checkedIndexes.delete(index);
+                app.log.debug({ err, index }, 'could not check the elastic workspace index');
+            },
+        );
+    }
+    if (config.elasticIndex !== undefined) {
+        checkIndex(config.elasticIndex);
+    }
+
     // config only - the internal port hands out ValuesBackendInternal
     const internalBackend = new BackendClient(config.backendInternalUrl, config.configTimeoutMs);
     const configCache = new ConfigCache(internalBackend, {
@@ -272,17 +303,33 @@ export async function buildServer(config: Config, overrides: ServerOverrides = {
         const skipNode = target !== undefined && configCache.peek(request.hostname)?.guest.enabled === false;
         // monotonic - a wall clock step (NTP) must not distort the duration
         const enrichmentStart = performance.now();
+        const configPromise = reachable
+            ? configCache.get(request.hostname, anonymousFor(request))
+            : Promise.resolve(configCache.peek(request.hostname));
+        // the index comes from the override or the backend config. Known (cached config) ->
+        // the query runs in parallel to the config fetch; unknown (first request of a
+        // domain) -> it waits for the config instead of going without metadata
+        let workspaceIndex = config.elasticIndex ?? configCache.peek(request.hostname)?.elasticIndex;
+        const loadFrom = async (shellTarget: ShellTarget, elasticIndex: string | undefined) => {
+            workspaceIndex = elasticIndex;
+            if (elasticIndex === undefined) {
+                request.log.debug('no elastic workspace index known (older backend, no ELASTIC_INDEX) - shell not enriched');
+                return undefined;
+            }
+            checkIndex(elasticIndex);
+            return loadNode(elastic, shellTarget, {
+                index: elasticIndex,
+                appBaseUrl: `${request.protocol}://${request.host}${ctx}`,
+                language: primaryLanguage(request.headers['accept-language']),
+            });
+        };
         const [configResult, nodeResult] = await Promise.allSettled([
-            reachable
-                ? configCache.get(request.hostname, anonymousFor(request))
-                : Promise.resolve(configCache.peek(request.hostname)),
+            configPromise,
             target === undefined || skipNode
                 ? Promise.resolve(undefined)
-                : loadNode(elastic, target, {
-                      index: config.elasticIndex,
-                      appBaseUrl: `${request.protocol}://${request.host}${ctx}`,
-                      language: primaryLanguage(request.headers['accept-language']),
-                  }),
+                : workspaceIndex !== undefined
+                  ? loadFrom(target, workspaceIndex)
+                  : configPromise.then((loaded) => loadFrom(target, loaded?.elasticIndex)),
         ]);
         if (target !== undefined && !skipNode) {
             const result = nodeResult.status === 'rejected' ? 'failed' : nodeResult.value === undefined ? 'missing' : 'ok';
@@ -290,9 +337,9 @@ export async function buildServer(config: Config, overrides: ServerOverrides = {
         }
         if (nodeResult.status === 'rejected') {
             const reason = isMissingIndex(nodeResult.reason)
-                ? 'elastic index not found - check ELASTIC_INDEX'
+                ? 'elastic index not found - check ELASTIC_INDEX / elasticWorkspaceIndex of the backend'
                 : 'loading node metadata for the shell failed';
-            request.log.warn({ err: nodeResult.reason, nodeId: target?.nodeId, index: config.elasticIndex }, reason);
+            request.log.warn({ err: nodeResult.reason, nodeId: target?.nodeId, index: workspaceIndex }, reason);
         }
         const repositoryConfig = configResult.status === 'fulfilled' ? configResult.value : null;
         const loadedNode = nodeResult.status === 'fulfilled' ? nodeResult.value : undefined;

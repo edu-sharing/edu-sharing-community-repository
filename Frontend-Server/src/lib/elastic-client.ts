@@ -9,6 +9,8 @@ export type SearchRequest = estypes.SearchRequest;
  */
 export interface ElasticSearcher {
     firstSource(request: SearchRequest): Promise<Record<string, unknown> | undefined>;
+    /** whether the index exists - optional, test fakes may leave it out */
+    indexExists?(index: string): Promise<boolean>;
 }
 
 /**
@@ -44,14 +46,18 @@ export class ElasticClient implements ElasticSearcher {
         return response.hits.hits[0]?._source;
     }
 
+    async indexExists(index: string): Promise<boolean> {
+        return this.#client.indices.exists({ index }, { requestTimeout: this.#timeoutMs });
+    }
+
     close(): Promise<void> {
         return this.#client.close();
     }
 }
 
 /**
- * True for an index that does not exist - almost always the release bumped the index
- * name (`ELASTIC_INDEX`, see config.ts) and nobody adjusted the configuration.
+ * True for an index that does not exist - a stale `ELASTIC_INDEX` override, or a backend
+ * whose `elasticWorkspaceIndex` was not created (yet), see config.ts.
  */
 export function isMissingIndex(error: unknown): boolean {
     return error instanceof errors.ResponseError && error.body?.error?.type === 'index_not_found_exception';

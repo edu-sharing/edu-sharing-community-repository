@@ -15,6 +15,7 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.service.config.model.*;
+import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -104,6 +105,7 @@ public class ConfigServiceImpl implements ConfigService, ApplicationListener<Ref
         if (internal.getAngular() == null) {
             internal.setAngular(new ValuesBackendInternal.AngularConfig());
         }
+        internal.setElasticWorkspaceIndex(SearchServiceElastic.WORKSPACE_INDEX);
         return internal;
     }
 

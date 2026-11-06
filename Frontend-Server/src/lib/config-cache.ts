@@ -46,6 +46,8 @@ export interface RepositoryConfig
      * the shell must not be enriched either - see the enrichment in server.ts.
      */
     readonly guest: Defaulted<GuestConfig, 'enabled'>;
+    /** `elasticWorkspaceIndex` - the index node metadata comes from; absent with an older backend */
+    readonly elasticIndex?: string;
 }
 
 interface Entry {
@@ -318,6 +320,7 @@ export function parseRepositoryConfig(body: unknown): RepositoryConfig {
             // false, and an older backend that does not report it must not make us enrich
             enabled: response.currentBackend?.repository?.guest?.enabled === true,
         },
+        ...(backend?.elasticWorkspaceIndex && { elasticIndex: backend.elasticWorkspaceIndex }),
     };
 }
 

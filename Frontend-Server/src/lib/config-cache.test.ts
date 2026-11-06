@@ -64,6 +64,11 @@ test('lrmi enrichment defaults to on, only false turns it off', () => {
     assert.equal(enrichmentOf({ enrichment: false }), false);
 });
 
+test('the workspace index is taken from the backend config, absent with an older backend', () => {
+    assert.equal(parseRepositoryConfig({ currentBackend: { elasticWorkspaceIndex: 'workspace_12.0' } }).elasticIndex, 'workspace_12.0');
+    assert.equal(parseRepositoryConfig({ currentBackend: {} }).elasticIndex, undefined);
+});
+
 test('an older backend without the mapping yields an empty one, not an error', () => {
     // guest.enabled false without a value: the reference config defaults
     // repository.guest.enabled to false, so an older backend must not unlock it

@@ -24,6 +24,12 @@ function str(name: string, fallback: string): string {
     return value === undefined || value === '' ? fallback : value;
 }
 
+/** undefined when the variable is unset or empty */
+function optionalStr(name: string): string | undefined {
+    const value = process.env[name];
+    return value === undefined || value === '' ? undefined : value;
+}
+
 function int(name: string, fallback: number): number {
     const value = process.env[name];
     if (value === undefined || value === '') {
@@ -119,11 +125,12 @@ export interface Config {
     /** the search cluster, same one the backend reaches through `elasticsearch.servers` */
     readonly elasticUrl: string;
     /**
-     * `SearchServiceElastic.WORKSPACE_INDEX`. Carries the release in its name, so an
-     * edu-sharing upgrade renames it - a stale value here means the index is gone and
-     * enrichment silently stops. buildServer therefore probes it at startup.
+     * Override of the workspace index. Normally unset: the index is
+     * `SearchServiceElastic.WORKSPACE_INDEX`, which carries the release in its name, and the
+     * backend hands it out with its config (`elasticWorkspaceIndex`) - so an upgrade needs no
+     * configuration here. A missing index is logged as an error, see server.ts.
      */
-    readonly elasticIndex: string;
+    readonly elasticIndex: string | undefined;
     readonly distDir: string;
     readonly proxyUnmatched: boolean;
     readonly proxyTimeoutMs: number;
@@ -171,7 +178,7 @@ export function loadConfig(): Config {
         backendUrl: str('BACKEND_URL', 'http://repository-service:8081').replace(/\/+$/, ''),
         backendInternalUrl: str('BACKEND_INTERNAL_URL', 'http://repository-service:8080').replace(/\/+$/, ''),
         elasticUrl: str('ELASTIC_URL', 'http://repository-search-elastic-index:9200').replace(/\/+$/, ''),
-        elasticIndex: str('ELASTIC_INDEX', 'workspace_11.0'),
+        elasticIndex: optionalStr('ELASTIC_INDEX'),
         distDir: path.resolve(packageRoot, str('DIST_DIR', path.join(packageRoot, 'dist'))),
         // transitional: see docs/02-routing.md - the target state is an exhaustive
         // BACKEND_PATHS list and a 404 for anything else

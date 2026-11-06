@@ -80,6 +80,8 @@ const hits: Hit[] = [];
 let external: http.Server;
 let internal: http.Server;
 let app: FastifyInstance;
+/** the config of the suite's server, for tests that build their own */
+let baseConfig: Config;
 let distDir: string;
 
 function json(response: http.ServerResponse, status: number, body: unknown, headers: http.OutgoingHttpHeaders = {}): void {
@@ -115,6 +117,7 @@ before(async () => {
                         },
                         customHtmlHeaders: CUSTOM_HTML,
                     },
+                    elasticWorkspaceIndex: 'workspace_from_backend',
                     exporter: {
                         lrmi: {
                             properties: { name: 'cclom:title,cm:name', encodingFormat: 'AlfrescoMimeType' },
@@ -169,6 +172,7 @@ before(async () => {
         staticCacheMaxBytes: 16 * 1024 * 1024,
         staticCacheMaxFileBytes: 4 * 1024 * 1024,
     };
+    baseConfig = config;
     app = await buildServer(config, { elastic: fakeElastic });
     await app.ready();
 });
@@ -302,9 +306,61 @@ test('a versioned render url is not enriched and spares the query', async () => 
     assert.match(response.body, /json\+oembed/);
 });
 
-test('the query goes to the configured index', async () => {
+test('the query goes to the ELASTIC_INDEX override, ahead of the backend index', async () => {
     await shell('/edu-sharing/components/render/public');
     assert.deepEqual(elasticQueries, [{ index: 'workspace_test', nodeId: 'public' }]);
+});
+
+test('without override the index comes from the backend config, and is checked once', async () => {
+    const checked: string[] = [];
+    const server = await buildServer(
+        { ...baseConfig, elasticIndex: undefined },
+        {
+            elastic: {
+                ...fakeElastic,
+                indexExists: async (index: string) => {
+                    checked.push(index);
+                    return true;
+                },
+            },
+        },
+    );
+    try {
+        // the first request of a domain has no cached config yet - the query waits for it
+        // instead of going without metadata
+        const first = await server.inject({ method: 'GET', url: '/edu-sharing/components/render/public', headers: { host: 'repo.example.org' } });
+        assert.match(first.body, /<title>Photosynthesis – edu-sharing<\/title>/);
+        // the second runs in parallel to the (cached) config again
+        await server.inject({ method: 'GET', url: '/edu-sharing/components/render/public', headers: { host: 'repo.example.org' } });
+        assert.deepEqual(elasticQueries, [
+            { index: 'workspace_from_backend', nodeId: 'public' },
+            { index: 'workspace_from_backend', nodeId: 'public' },
+        ]);
+        assert.deepEqual(checked, ['workspace_from_backend']);
+    } finally {
+        await server.close();
+    }
+});
+
+test('a workspace index that does not exist is logged as an error', async () => {
+    const server = await buildServer(
+        { ...baseConfig, elasticIndex: undefined },
+        { elastic: { ...fakeElastic, indexExists: async () => false } },
+    );
+    const errors: unknown[][] = [];
+    server.log.error = ((...args: unknown[]) => {
+        errors.push(args);
+    }) as typeof server.log.error;
+    try {
+        await server.inject({ method: 'GET', url: '/edu-sharing/components/render/public', headers: { host: 'repo.example.org' } });
+        // the check runs beside the request - let its promise settle
+        await new Promise((resolve) => setImmediate(resolve));
+        assert.equal(errors.length, 1);
+        assert.deepEqual(errors[0]![0], { index: 'workspace_from_backend', override: false });
+        assert.match(String(errors[0]![1]), /does not exist/);
+    } finally {
+        await server.close();
+    }
 });
 
 test('every shell page carries the security headers and custom html headers, sharing one nonce', async () => {

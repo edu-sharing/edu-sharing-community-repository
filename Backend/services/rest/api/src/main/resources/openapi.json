@@ -11320,6 +11320,10 @@
           "angular": {
             "$ref": "#/components/schemas/AngularConfig"
           },
+          "elasticWorkspaceIndex": {
+            "description": "name of the elasticsearch workspace index (SearchServiceElastic.WORKSPACE_INDEX), the Frontend-Server reads node metadata from it",
+            "type": "string"
+          },
           "exporter": {
             "$ref": "#/components/schemas/ExporterConfig"
           },
