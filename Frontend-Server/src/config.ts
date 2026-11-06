@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import type { ErrorPageConfig } from './lib/custom-error-page.ts';
 
 const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -69,6 +70,33 @@ function bool(name: string, fallback: boolean): boolean {
 }
 
 /**
+ * `ERROR_PAGE_URL` / `ERROR_PAGE_FILE` (+ `ERROR_PAGE_STATUSES`, default `502,503,504`),
+ * see lib/custom-error-page.ts. Undefined when neither is set. The file is read here,
+ * once - the page has to be there while the backend is not, and a missing file fails
+ * the startup instead of the first outage.
+ */
+function errorPage(): ErrorPageConfig | undefined {
+    const url = str('ERROR_PAGE_URL', '');
+    const file = str('ERROR_PAGE_FILE', '');
+    if (url === '' && file === '') {
+        return undefined;
+    }
+    let html: string | undefined;
+    if (file !== '') {
+        try {
+            html = fs.readFileSync(file, 'utf8');
+        } catch (error) {
+            throw new Error(`ERROR_PAGE_FILE "${file}" is not readable: ${(error as Error).message}`);
+        }
+    }
+    return {
+        statuses: str('ERROR_PAGE_STATUSES', '502,503,504'),
+        ...(url === '' ? {} : { url }),
+        ...(html === undefined ? {} : { html }),
+    };
+}
+
+/**
  * Strips a trailing slash so that `${contextPath}/foo` never yields a double slash.
  * `/edu-sharing/` and `/edu-sharing` both become `/edu-sharing`.
  */
@@ -128,6 +156,8 @@ export interface Config {
     readonly staticCacheMaxBytes: number;
     /** larger files bypass the static file cache and are streamed from disk, in bytes */
     readonly staticCacheMaxFileBytes: number;
+    /** the operator's error page for browsers instead of the angular one; undefined keeps the angular page */
+    readonly errorPage?: ErrorPageConfig | undefined;
 }
 
 export function loadConfig(): Config {
@@ -164,5 +194,6 @@ export function loadConfig(): Config {
         staticCacheMaxBytes: staticCacheBytes('STATIC_CACHE_MAX_MB'),
         // 8 MB: the largest bundles (monaco ts worker, pdf vendor) are 6-7 MB
         staticCacheMaxFileBytes: int('STATIC_CACHE_MAX_FILE_MB', 8) * MB,
+        errorPage: errorPage(),
     };
 }

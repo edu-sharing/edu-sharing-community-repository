@@ -53,6 +53,12 @@ a restart.
 | `BACKEND_URL` | `http://repository-service:8081` | Tomcat external connector, **without** context path |
 | `BACKEND_INTERNAL_URL` | `http://repository-service:8080` | Tomcat internal connector, config fetches only |
 | `DIST_DIR` | `./dist` | Angular build output |
+| `ERROR_PAGE_URL` | – | absolute url browsers are sent to on an error instead of the Angular page, `{status}` / `{next}` replaced |
+| `ERROR_PAGE_FILE` | – | html file served instead (read once at startup), `{{status}}` `{{message}}` `{{requestId}}` `{{next}}` `{{nonce}}` replaced |
+| `ERROR_PAGE_STATUSES` | `502,503,504` | statuses the custom page is used for: codes, classes (`5xx`) or `all` |
+
+Custom error pages: `src/lib/custom-error-page.ts`; Helm / Compose setup in the chart README
+(`deploy/docker/helm/frontend-server/src/main/chart/README.md`).
 
 ## How routing works
 

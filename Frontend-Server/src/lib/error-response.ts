@@ -1,5 +1,6 @@
 import { STATUS_CODES } from 'node:http';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { CustomErrorPage } from './custom-error-page.ts';
 
 /**
  * Mirrors `ErrorFilter.handleError` (also behind `ErrorPageServlet`, tomcat's error page),
@@ -10,12 +11,24 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
  *                         (`URLTool.getErrorPageUrl`)
  * * `application/json` -> `ErrorResponse` shape, `{"error":"<status>","message":...}`
  * * anything else      -> plain text
+ *
+ * With a CustomErrorPage configured for the status, browsers get that instead.
  */
 export function acceptsHtml(request: FastifyRequest): boolean {
     return (request.headers.accept ?? '').toLowerCase().includes('text/html');
 }
 
-export function sendError(request: FastifyRequest, reply: FastifyReply, contextPath: string, statusCode: number): FastifyReply {
+export function sendError(
+    request: FastifyRequest,
+    reply: FastifyReply,
+    contextPath: string,
+    statusCode: number,
+    custom?: CustomErrorPage,
+): FastifyReply {
+    if (custom?.handles(request, statusCode)) {
+        // back to the url that failed - for a proxy error a retry may well work
+        return custom.send(request, reply, statusCode, request.url, contextPath);
+    }
     const accept = (request.headers.accept ?? '').toLowerCase();
     const message = STATUS_CODES[statusCode] ?? String(statusCode);
     reply.code(statusCode);
@@ -63,8 +76,12 @@ export function isServiceUnavailablePage(url: string, contextPath: string): bool
  * "service unavailable" page, which returns to `request.url` by itself once the backend
  * answers again. Everything else gets the `ErrorResponse` shape / plain text, like `sendError`.
  */
-export function sendUnavailable(request: FastifyRequest, reply: FastifyReply, contextPath: string): FastifyReply {
+export function sendUnavailable(request: FastifyRequest, reply: FastifyReply, contextPath: string, custom?: CustomErrorPage): FastifyReply {
     reply.code(503).header('Retry-After', String(RETRY_AFTER_SECONDS));
+    if (custom?.handles(request, 503)) {
+        // the custom page has to bring the browser back itself, e.g. by a meta refresh to {{next}}
+        return custom.send(request, reply, 503, request.url, contextPath);
+    }
     if (acceptsHtml(request)) {
         const target = `${contextPath}${SERVICE_UNAVAILABLE_PATH}?${SERVICE_UNAVAILABLE_NEXT_PARAM}=${encodeURIComponent(request.url)}`;
         return reply
@@ -72,7 +89,7 @@ export function sendUnavailable(request: FastifyRequest, reply: FastifyReply, co
             .header('Cache-Control', 'no-store')
             .send(`<head><meta http-equiv="refresh" content="0;url=${escapeAttribute(target)}"></head>`);
     }
-    return sendError(request, reply, contextPath, 503);
+    return sendError(request, reply, contextPath, 503, custom);
 }
 
 function escapeAttribute(value: string): string {

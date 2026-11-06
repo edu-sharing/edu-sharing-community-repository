@@ -1,0 +1,9 @@
+{{- if and .Values.config.errorPages.html (not .Values.config.errorPages.url) }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "edusharing_common_lib.names.name" . }}-error-page
+  labels: {{ include "edusharing_common_lib.labels.app" . | nindent 4 }}
+data:
+  error-page.html: {{ .Values.config.errorPages.html | quote }}
+{{- end }}

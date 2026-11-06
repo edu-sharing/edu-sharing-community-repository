@@ -184,6 +184,19 @@ config:
     ## @param config.metrics.enabled Enable prometheus metrics scraping
     enabled: true
 
+  # Custom error page for browsers instead of the angular error page - see the README.
+  # API clients (json / plain text) always keep the regular error answer.
+  errorPages:
+    ## @param config.errorPages.statuses [array] Statuses that get the custom page - codes (503), classes (5xx) or all
+    statuses:
+      - 502
+      - 503
+      - 504
+    ## @param config.errorPages.url Absolute url browsers are sent to; {status} and {next} (url to return to, encoded) are replaced. Wins over html
+    url: ""
+    ## @param config.errorPages.html Html page served instead; {{status}}, {{message}}, {{requestId}}, {{next}} and {{nonce}} are replaced
+    html: ""
+
   ## @param config.extraEnv Additional environment variables for the frontend server
   extraEnv: {}
 

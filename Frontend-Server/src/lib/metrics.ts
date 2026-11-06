@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import fastifyMetricsModule from 'fastify-metrics';
 import type { ConfigCache, UnreachableSource } from './config-cache.ts';
+import type { ErrorPageKind } from './custom-error-page.ts';
 import type { LookupResult, StaticCache } from './static-cache.ts';
 
 /**
@@ -32,6 +33,8 @@ export interface AppMetrics {
     unavailable(kind: 'page' | 'proxy'): void;
     /** a static file request, by how the static file cache answered it */
     staticLookup(result: LookupResult): void;
+    /** a browser answered with the operator's custom error page instead of the angular one */
+    customErrorPage(kind: ErrorPageKind, statusCode: number): void;
 }
 
 /** Registers the measuring side on the app server; `/metrics` itself is served by the management server. */
@@ -83,6 +86,12 @@ export async function registerMetrics(app: FastifyInstance, configCache: ConfigC
         labelNames: ['kind'] as const,
     });
 
+    const customErrorPages = new client.Counter({
+        name: `${PREFIX}custom_error_pages_total`,
+        help: 'Browser requests answered with the custom error page (ERROR_PAGE_URL / ERROR_PAGE_FILE), by kind and status',
+        labelNames: ['kind', 'status_code'] as const,
+    });
+
     const staticLookups = new client.Counter({
         name: `${PREFIX}static_cache_requests_total`,
         help: 'Static file requests by how the in-memory cache answered them (hit, miss = read and compressed now, bypass = streamed from disk)',
@@ -109,5 +118,6 @@ export async function registerMetrics(app: FastifyInstance, configCache: ConfigC
         shellWithoutCsp: (cause) => withoutCsp.inc({ cause }),
         unavailable: (kind) => unavailableResponses.inc({ kind }),
         staticLookup: (result) => staticLookups.inc({ result }),
+        customErrorPage: (kind, statusCode) => customErrorPages.inc({ kind, status_code: String(statusCode) }),
     };
 }

@@ -23,6 +23,8 @@ spec:
       labels: {{ include "edusharing_common_lib.labels.app" . | nindent 8 }}
       annotations:
         checksum/configmap-env: {{ include (print .Template.BasePath "/configmap-env.yaml") . | sha256sum | trunc 63 }}
+        # the page is read once at startup - a change needs new pods
+        checksum/configmap-error-page: {{ include (print .Template.BasePath "/configmap-error-page.yaml") . | sha256sum | trunc 63 }}
         {{- if not .Values.global.metrics.servicemonitor.enabled }}
         prometheus.io/path: "/metrics"
         prometheus.io/port: {{ .Values.service.port.management | quote }}
@@ -94,6 +96,18 @@ spec:
         {{- with .Values.securityContext }}
         securityContext: {{ toYaml . | nindent 10 }}
         {{- end }}
+        {{- if and .Values.config.errorPages.html (not .Values.config.errorPages.url) }}
+        volumeMounts:
+        - name: error-page
+          mountPath: /app/custom
+          readOnly: true
+        {{- end }}
+      {{- if and .Values.config.errorPages.html (not .Values.config.errorPages.url) }}
+      volumes:
+      - name: error-page
+        configMap:
+          name: {{ include "edusharing_common_lib.names.name" . }}-error-page
+      {{- end }}
       {{- with .Values.global.image.pullSecrets }}
       imagePullSecrets: {{ toYaml . | nindent 8 }}
       {{- end }}

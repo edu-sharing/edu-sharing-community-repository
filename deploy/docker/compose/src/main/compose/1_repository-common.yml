@@ -31,6 +31,11 @@ services:
       CONTEXT_PATH: "${REPOSITORY_SERVICE_PATH:-/edu-sharing}"
       LOG_LEVEL: "${REPOSITORY_FRONTEND_SERVER_LOG_LEVEL:-info}"
       PROXY_UNMATCHED: "${REPOSITORY_FRONTEND_SERVER_PROXY_UNMATCHED:-true}"
+      # custom error page for browsers, empty = the angular one. ERROR_PAGE_FILE needs the
+      # file mounted, e.g. by an override file - see the frontend-server chart README
+      ERROR_PAGE_STATUSES: "${REPOSITORY_FRONTEND_SERVER_ERROR_PAGE_STATUSES:-502,503,504}"
+      ERROR_PAGE_URL: "${REPOSITORY_FRONTEND_SERVER_ERROR_PAGE_URL:-}"
+      ERROR_PAGE_FILE: "${REPOSITORY_FRONTEND_SERVER_ERROR_PAGE_FILE:-}"
     expose:
       - "8080"
     ports:

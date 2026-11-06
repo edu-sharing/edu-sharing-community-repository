@@ -89,6 +89,44 @@ then Chrome `chrome://inspect` (configure `localhost:9229`) or VS Code
 `pod/<name>` to choose. The inspector can run arbitrary code in the process: debugging
 clusters only.
 
+## Custom error pages
+
+Browsers (`Accept: text/html`) get an error page of your own instead of the angular one,
+for the statuses in `config.errorPages.statuses` (default `[502, 503, 504]`, i.e. backend
+outages; codes, classes like `5xx` or `all`). This covers the frontend server's own errors, an unreachable backend and
+tomcat's errors (they land on `components/error/<code>`). API clients keep the
+regular json / plain text answer. The status code always stays on the response.
+
+* `config.errorPages.url` - browsers are sent to this absolute url by a meta refresh,
+  `{status}` and `{next}` (absolute url to return to, url-encoded) are replaced:
+  `https://status.example.org/?code={status}&back={next}`
+* `config.errorPages.html` - the page itself, mounted from a ConfigMap and read once at
+  startup (a change rolls the pods), so it works without the backend. Placeholders,
+  html-escaped: `{{status}}`, `{{message}}`, `{{requestId}}` (the `X-Request-Id` for
+  support), `{{next}}` (path to return to) and `{{nonce}}`. The page gets its own CSP:
+  inline styles, images / fonts from `data:` and `https:`, scripts only inline with
+  `nonce="{{nonce}}"`. Nothing is served from this host, embed or link absolutely.
+
+`url` wins over `html`. Unlike the angular 503 page a custom page does not return by
+itself once the backend is back - add a refresh:
+
+```yaml
+config:
+  errorPages:
+    html: |
+      <!doctype html>
+      <html lang="en">
+      <meta charset="utf-8">
+      <meta http-equiv="refresh" content="10;url={{next}}">
+      <title>Maintenance</title>
+      <p>We are back in a moment ({{status}}).</p>
+      <p><small>Request id {{requestId}}</small></p>
+      </html>
+```
+
+If every frontend server pod is gone the ingress answers itself - that needs
+`custom-http-errors` / a default backend in ingress-nginx, not this chart.
+
 ## Parameters
 
 ### Global parameters
@@ -152,6 +190,9 @@ clusters only.
 | `config.staticCache.maxMb`                                              | Memory budget of the static file cache in MB (every type, gzip/brotli variants included); auto = 20 % of resources.limits.memory (16-256 MB), 0 disables it                       | `auto`                                                                                                                                                                                                                        |
 | `config.staticCache.maxFileMb`                                          | Larger files are streamed from disk instead of cached, in MB                                                                                                                      | `8`                                                                                                                                                                                                                           |
 | `config.metrics.enabled`                                                | Enable prometheus metrics scraping                                                                                                                                                | `true`                                                                                                                                                                                                                        |
+| `config.errorPages.statuses` | Statuses that get the custom page - codes (503), classes (5xx) or all | `[502, 503, 504]` |
+| `config.errorPages.url` | Absolute url browsers are sent to; {status} and {next} (url to return to, encoded) are replaced. Wins over html | `""` |
+| `config.errorPages.html` | Html page served instead; {{status}}, {{message}}, {{requestId}}, {{next}} and {{nonce}} are replaced | `""` |
 | `config.extraEnv`                                                       | Additional environment variables for the frontend server                                                                                                                          | `{}`                                                                                                                                                                                                                          |
 | `nodeAffinity`                                                          | Set node affinity                                                                                                                                                                 | `{}`                                                                                                                                                                                                                          |
 | `podAntiAffinity`                                                       | Set pod antiaffinity, can be "soft" or "hard"                                                                                                                                     | `soft`                                                                                                                                                                                                                        |

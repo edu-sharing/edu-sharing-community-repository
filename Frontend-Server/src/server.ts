@@ -6,8 +6,16 @@ import replyFrom from '@fastify/reply-from';
 import type { Config } from './config.ts';
 import { anonymousFor, BackendClient, isConnectionError } from './lib/backend-client.ts';
 import { ConfigCache } from './lib/config-cache.ts';
+import { CustomErrorPage } from './lib/custom-error-page.ts';
 import { defaultLocationUrl } from './lib/default-location.ts';
-import { isServiceUnavailablePage, RETRY_AFTER_SECONDS, sendError, sendUnavailable, shellErrorStatus } from './lib/error-response.ts';
+import {
+    isServiceUnavailablePage,
+    RETRY_AFTER_SECONDS,
+    SERVICE_UNAVAILABLE_NEXT_PARAM,
+    sendError,
+    sendUnavailable,
+    shellErrorStatus,
+} from './lib/error-response.ts';
 import { IndexHtml } from './lib/index-html.ts';
 import { registerMetrics, type ProxyReason } from './lib/metrics.ts';
 import { ElasticClient, type ElasticSearcher, isMissingIndex } from './lib/elastic-client.ts';
@@ -158,6 +166,17 @@ export async function buildServer(config: Config, overrides: ServerOverrides = {
         'static file cache',
     );
     const metrics = await registerMetrics(app, configCache, staticCache);
+    // validated here, so an invalid ERROR_PAGE_* fails the startup
+    const customErrorPage =
+        config.errorPage === undefined
+            ? undefined
+            : new CustomErrorPage(config.errorPage, (kind, statusCode) => metrics.customErrorPage(kind, statusCode));
+    if (config.errorPage !== undefined) {
+        if (config.errorPage.url !== undefined && config.errorPage.html !== undefined) {
+            app.log.warn('ERROR_PAGE_URL and ERROR_PAGE_FILE are both set - ERROR_PAGE_URL wins, the file is ignored');
+        }
+        app.log.info({ kind: customErrorPage?.kind, statuses: config.errorPage.statuses }, 'custom error page');
+    }
     // after the metrics subscribed to it - an early outage is counted as well
     configCache.start();
     app.addHook('onResponse', async (request, reply) => {
@@ -184,10 +203,10 @@ export async function buildServer(config: Config, overrides: ServerOverrides = {
                 if (isConnectionError(error)) {
                     configCache.markUnreachable('proxy', error.message);
                     metrics.unavailable('proxy');
-                    return sendUnavailable(request, reply, ctx);
+                    return sendUnavailable(request, reply, ctx, customErrorPage);
                 }
                 const statusCode = (error as { statusCode?: unknown }).statusCode;
-                return sendError(request, reply, ctx, typeof statusCode === 'number' ? statusCode : 502);
+                return sendError(request, reply, ctx, typeof statusCode === 'number' ? statusCode : 502, customErrorPage);
             },
             rewriteRequestHeaders: (originalRequest, headers) => {
                 const forwardedFor = headers['x-forwarded-for'];
@@ -223,15 +242,20 @@ export async function buildServer(config: Config, overrides: ServerOverrides = {
         // page needs neither and returns to this url once the backend is back
         if (!reachable && !unavailablePage) {
             metrics.unavailable('page');
-            return sendUnavailable(request, reply, ctx);
+            return sendUnavailable(request, reply, ctx, customErrorPage);
         }
         const url = request.url.slice(ctx.length);
         const errorStatus = shellErrorStatus(url);
-        if (errorStatus !== undefined) {
-            reply.code(errorStatus);
-        }
         if (unavailablePage) {
             reply.header('Retry-After', String(RETRY_AFTER_SECONDS));
+        }
+        // also where tomcat's errors land (ErrorFilter redirects to components/error/<code>)
+        if (errorStatus !== undefined && customErrorPage?.handles(request, errorStatus)) {
+            const next = unavailablePage ? new URL(request.url, 'http://localhost').searchParams.get(SERVICE_UNAVAILABLE_NEXT_PARAM) : null;
+            return customErrorPage.send(request, reply, errorStatus, next ?? `${ctx}/`, ctx);
+        }
+        if (errorStatus !== undefined) {
+            reply.code(errorStatus);
         }
         const target = reachable ? parseShellTarget(url) : undefined;
         // the config is needed on every shell page (headers, custom html) and is cached;
@@ -339,7 +363,7 @@ export async function buildServer(config: Config, overrides: ServerOverrides = {
     app.get(`${ctx}/`, async (request, reply) => {
         if (!configCache.isBackendReachable()) {
             metrics.unavailable('page');
-            return sendUnavailable(request, reply, ctx);
+            return sendUnavailable(request, reply, ctx, customErrorPage);
         }
         const repositoryConfig = await configCache.get(request.hostname, anonymousFor(request));
         return reply
@@ -415,7 +439,7 @@ export async function buildServer(config: Config, overrides: ServerOverrides = {
     // --- fallback ---------------------------------------------------------------
     app.setNotFoundHandler((request, reply) => {
         if (!request.url.startsWith(`${ctx}/`) || !config.proxyUnmatched) {
-            return sendError(request, reply, ctx, 404);
+            return sendError(request, reply, ctx, 404, customErrorPage);
         }
         // TRANSITIONAL. The target state is an exhaustive BACKEND_PATHS and a plain
         // 404 here - this branch only exists so the migration cannot break a path
