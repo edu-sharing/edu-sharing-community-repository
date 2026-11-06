@@ -10,6 +10,8 @@ variables:
   MAVEN_CLI: "-T 4 -Dnode.version=$NODE_VERSION -Ddocker.registry=$DOCKER_REGISTRY -Dhelm.deploy.url=$HELM_REGISTRY -Dhelm.deploy.type=$HELM_TYPE -Dmaven.deploy.releases=$MAVEN_DEPLOY_RELEASES -Dmaven.deploy.snapshots=$MAVEN_DEPLOY_SNAPSHOTS -Dversioning.configFile=maven-git-versioning-extension-ci.xml --batch-mode --errors --fail-fast --show-version"
   MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
   GIT_SUBMODULE_STRATEGY: recursive
+  # shallow clone - the build needs no history (versioning uses ref.slug / commit.short only)
+  GIT_DEPTH: "1"
 
 default:
   #image: maven:3.8.4-eclipse-temurin-17
@@ -54,6 +56,8 @@ deploy:
 .frontend_job: &frontend_job
   stage: test
   image: node:$NODE_VERSION-alpine
+  # no docker needed - skip the dind service of default
+  services: []
   rules:
     - if: $CI_COMMIT_BRANCH =~ /^maven\/release\/.*/ && $CI_PIPELINE_SOURCE == "pipeline" && $SKIP_TESTS != "true"
     - if: $CI_COMMIT_TAG && $CI_PIPELINE_SOURCE == "pipeline" && $SKIP_TESTS != "true"
@@ -239,6 +243,8 @@ e2e:
 check-helmreadme:
   stage: test
   image: node:lts-alpine3.20
+  # no docker needed - skip the dind service of default
+  services: []
   rules:
     - if: $SKIP_TESTS == "true"
       when: never
