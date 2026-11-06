@@ -275,11 +275,11 @@ readinessProbe:
 
 ########################################################################################################################
 
-# Node serves requests on ONE thread - a limit above 1 CPU buys (almost) nothing
-## @param resources.limits.cpu Set CPU limit on resources - 1 CPU is the sensible maximum (one request thread), scale out via replicas
-## @param resources.limits.memory Set memory limit on resources
+# Node serves requests on ONE thread - recommended maximum is about 1.5 (.5 for backpressure and metric serving)
+## @param resources.limits.cpu Set CPU limit on resources
+## @param resources.limits.memory Set memory limit on resources - recommended maximum 1GB (will be used for in-memory asset caching)
 ## @param resources.requests.cpu Set CPU for requests on resources
-## @param resources.requests.memory Set memory for requests on resources
+## @param resources.requests.memory Set memory for requests on resources - keep in sync with the limit
 resources:
   limits:
     cpu: 250m
