@@ -68,6 +68,7 @@ deploy:
     - apt-get install -y git
   script:
     - if [ "$SKIP_TESTS" = "true" ]; then MAVEN_CLI="$MAVEN_CLI -DskipTests"; fi
+    - if [ -d Frontend/node_modules ]; then MAVEN_CLI="$MAVEN_CLI -Dfrontend.install.skip=true"; fi
     - mvn $MAVEN_CLI -s .mvn/settings.xml deploy
 
 .frontend_job: &frontend_job
@@ -190,6 +191,7 @@ test docker:
     - docker login $DOCKER_REGISTRY -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
   script:
     - mkdir -p "$MAVEN_HOME"
+    - if [ -d Frontend/node_modules ]; then MAVEN_CLI="$MAVEN_CLI -Dfrontend.install.skip=true"; fi
     - mvn $MAVEN_CLI -s .mvn/settings.xml install
     - pushd deploy/docker/compose/target/compose
     - docker compose -f 1_repository-common.yml -f 1_redis-common.yml up -d
@@ -247,6 +249,7 @@ e2e:
     REPOSITORY_SERVICE_PORT: 8100
   script:
     - mkdir -p "$MAVEN_HOME"
+    - if [ -d Frontend/node_modules ]; then MAVEN_CLI="$MAVEN_CLI -Dfrontend.install.skip=true"; fi
     - mvn $MAVEN_CLI -s .mvn/settings.xml install
     - pushd deploy/docker/compose/target/compose
     - docker compose -f 1_repository-common.yml -f 1_redis-common.yml up -d

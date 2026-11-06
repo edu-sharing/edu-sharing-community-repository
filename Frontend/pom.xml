@@ -67,6 +67,8 @@
                         <phase>process-sources</phase>
                         <configuration>
                             <arguments>${npm.args.install}</arguments>
+                            <!-- CI: node_modules came from a cache keyed on package-lock.json -->
+                            <skip>${frontend.install.skip}</skip>
                         </configuration>
                     </execution>
                     <execution>

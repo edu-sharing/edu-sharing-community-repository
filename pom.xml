@@ -57,6 +57,9 @@
     <node.server.downloadRoot>https://nodejs.org/dist/</node.server.downloadRoot>
 
     <npm.args.install>install --no-audit --no-fund</npm.args.install>
+    <!-- skips the npm install of Frontend; set by CI when node_modules was restored from
+         its cache (keyed on Frontend/package-lock.json), never locally -->
+    <frontend.install.skip>false</frontend.install.skip>
     <npm.args.build>run build</npm.args.build>
 
     <postgresql.jdbc.version>42.7.13</postgresql.jdbc.version>
