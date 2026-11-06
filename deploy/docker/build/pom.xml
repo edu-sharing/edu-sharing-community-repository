@@ -40,6 +40,7 @@
   </build>
 
   <modules>
+    <module>frontend-server</module>
     <module>service</module>
     <module>transform-edu-sharing</module>
   </modules>

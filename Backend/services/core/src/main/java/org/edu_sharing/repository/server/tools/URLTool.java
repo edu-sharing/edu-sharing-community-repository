@@ -27,9 +27,12 @@
  */
 package org.edu_sharing.repository.server.tools;
 
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -142,8 +145,19 @@ public class URLTool{
 	public static String getNgMessageUrl(String messageId){
 		return URLHelper.getNgComponentsUrl()+"messages/"+messageId;
 	}
-	public static String getNgErrorUrl(String errorId){
-		return URLHelper.getNgComponentsUrl()+"error/"+errorId;
+	/**
+	 * Error page of the app (delivered by the frontend server), relative to the host of the request - the browser
+	 * stays on the domain it came from instead of being sent to the configured repository domain.
+	 *
+	 * @param errorId the status code, or "&lt;group&gt;/&lt;details&gt;" (ErrorFilterException.getAngularServletMessage) -
+	 *                every segment is url encoded
+	 */
+	public static String getErrorPageUrl(HttpServletRequest req, String errorId){
+		StringBuilder url = new StringBuilder(URLHelper.getNgComponentsUrlRelative(req)).append("error");
+		for (String segment : errorId.split("/")) {
+			url.append('/').append(java.net.URLEncoder.encode(segment, StandardCharsets.UTF_8).replace("+", "%20"));
+		}
+		return url.toString();
 	}
 
 	public static String getNgAssetsUrl(){

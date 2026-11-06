@@ -11,11 +11,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.*;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.Response;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.service.config.model.Context;
 import org.edu_sharing.repository.client.tools.I18nAngular;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.ApiService;
 import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.config.v1.model.Config;
@@ -53,13 +55,16 @@ public class ConfigApi {
             @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    public Response getConfig() {
+    public Response getConfig(@jakarta.ws.rs.core.Context HttpServletRequest req) {
         try {
             Config config = new Config();
             ConfigService configService = ConfigServiceFactory.getConfigService();
             org.edu_sharing.alfresco.service.config.model.Config configData = configService.getConfig();
             config.setGlobal(configData.values);
-            config.setCurrentBackend(configData.valuesBackend);
+            // the internal port (Frontend-Server) additionally gets the shell related config
+            config.setCurrentBackend(ApplicationInfoList.isInternalPortRequest(req)
+                    ? configData.valuesBackendInternal
+                    : configData.valuesBackend);
             try {
                 Context context = configService.getContextByDomain(ConfigServiceFactory.getCurrentDomain());
                 if (context != null) {

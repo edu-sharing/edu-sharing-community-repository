@@ -3,10 +3,12 @@ package org.edu_sharing.repository.server;
 import com.google.gson.Gson;
 import lombok.Getter;
 import org.apache.axis.utils.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.rendering.RenderingException;
 import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.repository.tools.URLHelper;
 import org.edu_sharing.restservices.DAOException;
 import org.edu_sharing.restservices.DAOMissingException;
 import org.edu_sharing.restservices.DAOSecurityException;
@@ -121,11 +123,22 @@ public class ErrorFilter implements Filter {
             }
             resp.setStatus(statusCode);
             if (accept != null && accept.toLowerCase().contains("text/html")) {
-                resp.setContentType("text/html");
-                resp.getWriter().print("<head><script nonce=\"" + SecurityHeadersFilter.ngCspNonce.get() + "\">window.location.href=\"" + URLTool.getNgErrorUrl(
+                resp.setContentType("text/html;charset=UTF-8");
+                if (isNgComponentsRequest(req)) {
+                    // the angular routes are served by the frontend server - a request for one that reached
+                    // the backend would be sent to components/error/<code>, which 404s here again (refresh loop)
+                    resp.getWriter().print("<!DOCTYPE html><html><head><title>" + statusCode + "</title></head><body><h1>"
+                            + statusCode + "</h1><p>" + StringEscapeUtils.escapeHtml4(req.getContextPath() + "/components/")
+                            + " is not served by the backend, please access it via the frontend server</p></body></html>");
+                    return;
+                }
+                // a meta refresh needs no CSP nonce (SecurityHeadersFilter does not run on every path that ends up
+                // here) - the same markup the frontend server answers its own errors with (Frontend-Server/src/lib/error-response.ts)
+                String target = URLTool.getErrorPageUrl(req,
                         (t instanceof ErrorFilterException) ? ((ErrorFilterException) t).getAngularServletMessage() :
                                 statusCode + ""
-                ) + "\";</script></head>");
+                );
+                resp.getWriter().print("<head><meta http-equiv=\"refresh\" content=\"0;url=" + StringEscapeUtils.escapeHtml4(target) + "\"></head>");
             } else if (accept != null && accept.toLowerCase().contains("application/json")) {
                 resp.setHeader("Content-Type", "application/json");
                 resp.getWriter().print(new Gson().toJson(response));
@@ -136,6 +149,15 @@ public class ErrorFilter implements Filter {
         } catch (IOException e) {
             Logger.getLogger(ErrorFilter.class).error("Fatal error delivering error to client", e);
         }
+    }
+
+    /**
+     * the failed request (the original one on an error dispatch) targets an angular route
+     */
+    static boolean isNgComponentsRequest(HttpServletRequest req) {
+        Object errorUri = req.getAttribute(RequestDispatcher.ERROR_REQUEST_URI);
+        String uri = errorUri != null ? errorUri.toString() : req.getRequestURI();
+        return uri != null && uri.startsWith(URLHelper.getNgComponentsUrlRelative(req));
     }
 
     private static void handleLogging(HttpServletRequest req, Throwable t) {

@@ -8,7 +8,7 @@ import {
     XmlAppPropertiesDialogResult,
 } from './xml-app-properties-dialog-data';
 
-const MULTILINE_PROPERTIES = ['custom_html_headers', 'public_key'];
+const MULTILINE_PROPERTIES = ['public_key'];
 
 @Component({
     selector: 'es-xml-app-properties-dialog',

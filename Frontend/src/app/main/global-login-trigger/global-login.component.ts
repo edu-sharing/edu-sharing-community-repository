@@ -2,6 +2,7 @@ import { Component, NgZone, DOCUMENT, inject, ChangeDetectionStrategy } from '@a
 import { AuthenticationService, PrimaryLogin, RestConstants } from 'ngx-edu-sharing-api';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { PlatformLocation } from '@angular/common';
+import { withLoginRedirect } from '../../util/login-redirect';
 
 @Component({
     selector: 'es-global-login',
@@ -59,7 +60,11 @@ export class GlobalLoginComponent {
             body: JSON.stringify({ credential: token }),
         }).then((r) => {
             if (r.ok)
-                window.location.href = this.platformLocation.getBaseHrefFromDOM() + 'shibboleth';
+                // back to the page the login was triggered on
+                window.location.href = withLoginRedirect(
+                    this.platformLocation.getBaseHrefFromDOM() + 'shibboleth',
+                    window.location.href,
+                );
             else console.error('Login failed:', r.status);
         });
     }

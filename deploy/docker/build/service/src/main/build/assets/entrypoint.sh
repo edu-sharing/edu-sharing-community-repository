@@ -485,17 +485,11 @@ xmlstarlet ed -L \
     ${homeProp}
 }
 
+# custom_html_headers of the home application is gone, the value lives in lightbend
+# angular.customHtmlHeaders now - drop a leftover entry of an older image
 xmlstarlet ed -L \
   -d '/properties/entry[@key="custom_html_headers"]' \
   ${homeProp}
-
-[[ -n "${my_home_custom_html_headers}" ]] && {
-  xmlstarlet ed -L \
-    -s '/properties' -t elem -n "entry" -v "${my_home_custom_html_headers}" \
-    --var entry '$prev' \
-    -i '$entry' -t attr -n "key" -v "custom_html_headers" \
-    ${homeProp}
-}
 
 [[ -n "${my_home_auth}" ]] && {
 
@@ -598,6 +592,16 @@ fi
 [[ $(hocon -f ${eduSConf} get "repository.mail.from" 2>/dev/null) ]] && {
   hocon -f ${eduSConf} unset "repository.mail.from"
 }
+# html snippet for the head of every page - a triple quoted string, so quotes and
+# line breaks of the html survive
+if [[ -n "${my_home_custom_html_headers}" ]] ; then
+  hocon -f ${eduSConf} set "angular.customHtmlHeaders" '"""'"${my_home_custom_html_headers}"'"""'
+else
+  [[ $(hocon -f ${eduSConf} get "angular.customHtmlHeaders" 2>/dev/null) ]] && {
+    hocon -f ${eduSConf} unset "angular.customHtmlHeaders"
+  }
+fi
+
 [[ -n "${my_mail_from}" ]] && {
   hocon -f ${eduSConf} set "repository.mail.from" '"'"${my_mail_from}"'"'
 }

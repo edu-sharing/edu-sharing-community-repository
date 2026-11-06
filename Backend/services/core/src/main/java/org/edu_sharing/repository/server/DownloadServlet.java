@@ -73,13 +73,13 @@ public class DownloadServlet extends SpringHttpServlet {
         String fileName = req.getParameter("fileName");
         Mode mode = req.getParameter("mode") != null ? Mode.valueOf(req.getParameter("mode")) : Mode.redirect;
         if (nodeIds != null) {
-            downloadZip(resp, nodeIds.split(","), null, null, null, fileName);
+            downloadZip(req, resp, nodeIds.split(","), null, null, null, fileName);
             return;
         }
         try {
             downloadNodeInternal(nodeId, repositoryId, req, resp, fileName, mode);
         } catch (InsufficientPermissionException e) {
-            resp.sendRedirect(URLHelper.getBaseUrl(true) + "/" + NgServlet.COMPONENTS_ERROR + "/" + HttpServletResponse.SC_FORBIDDEN);
+            resp.sendRedirect(URLHelper.getBaseUrl(true) + "/" + URLHelper.NG_COMPONENTS_ERROR + "/" + HttpServletResponse.SC_FORBIDDEN);
         }
 
     }
@@ -292,7 +292,7 @@ public class DownloadServlet extends SpringHttpServlet {
         return null;
     }
 
-    public void downloadZip(HttpServletResponse resp, String[] nodeIds, String parentNodeId, String token, String password, String zipName) throws Exception {
+    public void downloadZip(HttpServletRequest req, HttpServletResponse resp, String[] nodeIds, String parentNodeId, String token, String password, String zipName) throws Exception {
         if (zipName == null || zipName.isEmpty())
             zipName = "Download.zip";
 
@@ -325,7 +325,7 @@ public class DownloadServlet extends SpringHttpServlet {
             }
             for (String node : nodeIds) {
                 if (!globalShareService.isNodeAccessibleViaShare(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentNodeId), node)) {
-                    resp.sendRedirect(URLTool.getNgErrorUrl("" + HttpServletResponse.SC_FORBIDDEN));
+                    resp.sendRedirect(URLTool.getErrorPageUrl(req, "" + HttpServletResponse.SC_FORBIDDEN));
                     return;
                 }
 

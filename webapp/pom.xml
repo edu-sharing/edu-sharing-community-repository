@@ -26,6 +26,25 @@
         <artifactId>maven-war-plugin</artifactId>
         <configuration>
           <failOnMissingWebXml>false</failOnMissingWebXml>
+          <overlays>
+            <overlay>
+              <groupId>${project.groupId}</groupId>
+              <artifactId>edu_sharing-community-repository-backend-services-webapp</artifactId>
+            </overlay>
+            <!-- the angular app is delivered by the Frontend-Server. What the backend reads
+                 out of the war itself stays:
+                 - assets/i18n: I18nAngular (mails, mediatype labels, exports) and the bundle of
+                   /rest/config/v1/language/defaults - see Frontend-Server/docs/06-migration-phases.md, phase 6
+                 - assets/images: embedded into mails by {{image:/assets/images/...}} of the mail templates (Mail.replaceImages) -->
+            <overlay>
+              <groupId>${project.groupId}</groupId>
+              <artifactId>edu_sharing-community-repository-frontend</artifactId>
+              <includes>
+                <include>assets/i18n/**</include>
+                <include>assets/images/**</include>
+              </includes>
+            </overlay>
+          </overlays>
           <webResources>
             <resource>
               <directory>src/main/templates</directory>

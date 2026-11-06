@@ -2,12 +2,28 @@ version: '3.7'
 
 services:
 
+  repository-frontend-server:
+    # restarts on every change below the mounted build/ - pair with
+    # `npx tsc -p tsconfig.json --watch` in Frontend-Server/ for hot reload
+    command: ["node", "--watch-path=/app/build", "build/index.js"]
+    environment:
+      DEV: "true"
+      LOG_LEVEL: "${REPOSITORY_FRONTEND_SERVER_LOG_LEVEL:-debug}"
+    volumes:
+      - "${GIT_ROOT}/repository/Frontend/dist:/app/dist:ro"
+      - "${GIT_ROOT}/repository/Frontend-Server/build:/app/build:ro"
+
   repository-service:
     environment:
       CACHE_HOST: ""
       CACHE_PORT: ""
     extra_hosts:
       - "repository.127.0.0.1.nip.io:host-gateway"
+    ports:
+      # internal connector, for a Frontend-Server started on the host (npm run dev,
+      # BACKEND_INTERNAL_URL). Tomcat skips 2FA on this port - dev only, and keep
+      # COMMON_BIND_HOST on loopback unless the network is trusted
+      - "${COMMON_BIND_HOST:-127.0.0.1}:${REPOSITORY_SERVICE_PORT_HTTP_INTERNAL:-8104}:8080"
     volumes:
       - "${GIT_ROOT}/repository/Backend/alfresco/module/target/edu_sharing-community-repository-backend-alfresco-module-${org.edu_sharing:edu_sharing-community-repository-backend-alfresco-module:amp.version}.amp:/opt/alfresco/amps/alfresco/1/edu_sharing-community-repository-backend-alfresco-module-${org.edu_sharing:edu_sharing-community-repository-backend-alfresco-module:amp.version}.amp"
       - "${GIT_ROOT}/repository/Backend/services/common/target/edu_sharing-community-repository-backend-services-common-${org.edu_sharing:edu_sharing-community-repository-backend-services-common:jar.version}.jar:/opt/alfresco/tomcat/webapps/edu-sharing/WEB-INF/lib/edu_sharing-community-repository-backend-services-common-${org.edu_sharing:edu_sharing-community-repository-backend-services-common:jar.version}.jar"

@@ -19,6 +19,8 @@ public class Config implements Serializable {
 
 	@XmlElement public Values values;
 	public ValuesBackend valuesBackend;
+	/** valuesBackend plus what only the internal port gets, see ValuesBackendInternal */
+	public ValuesBackendInternal valuesBackendInternal;
 	@XmlElement public Contexts contexts;
 	@XmlElement public List<Language> language;
 	@XmlElement public Variables variables;

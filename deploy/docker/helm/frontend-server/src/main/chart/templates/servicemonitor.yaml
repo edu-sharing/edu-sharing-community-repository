@@ -1,0 +1,24 @@
+{{- if .Capabilities.APIVersions.Has "monitoring.coreos.com/v1" }}
+{{- if .Values.global.metrics.servicemonitor.enabled }}
+{{- if .Values.config.metrics.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "edusharing_common_lib.names.name" . }}-api
+  labels: {{ include "edusharing_common_lib.labels.app" . | nindent 4 }}
+    app.kubernetes.io/component: "metrics-api"
+spec:
+  endpoints:
+  - path: "/metrics"
+    port: http-metrics-api
+    interval: {{ .Values.global.metrics.scrape.interval }}
+    scrapeTimeout: {{ .Values.global.metrics.scrape.timeout }}
+  selector:
+    matchLabels: {{ include "edusharing_common_lib.labels.app" . | nindent 6 }}
+      app.kubernetes.io/component: "metrics-api"
+  namespaceSelector:
+    matchNames:
+    - {{ .Release.Namespace }}
+{{- end }}
+{{- end }}
+{{- end }}

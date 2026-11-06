@@ -157,6 +157,11 @@
     @each $key, $color in vars.$chip-colors {
         --chip-color-#{$key}: #{$color};
     }
+    // full page messages (error / "service unavailable" page, mixin messagePage) - fixed,
+    // these pages may render without the theme of the backend
+    --messagePageBackground: #444;
+    --messagePageText: #fff;
+    --messagePageLink: var(--palette-primary-100);
 }
 
 es-node-entries-wrapper {

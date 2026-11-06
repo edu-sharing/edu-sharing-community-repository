@@ -67,7 +67,6 @@ export class ApiRequestConfiguration {
             return req;
         }
         this.apiRequest.emit();
-        headers['X-Client-Trace-Id'] = this.generateTraceId();
         if (this._locale) {
             headers.locale = this._locale;
         }
@@ -86,9 +85,5 @@ export class ApiRequestConfiguration {
             setHeaders: headers,
             withCredentials: this.apiConfiguration.withCredentials,
         });
-    }
-
-    private generateTraceId(): string {
-        return crypto?.randomUUID?.() ?? '';
     }
 }

@@ -1,0 +1,12 @@
+{{- if .Values.global.cluster.pdb.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "edusharing_common_lib.names.name" . }}
+  labels: {{ include "edusharing_common_lib.labels.app" . | nindent 4 }}
+spec:
+  # stateless - no quorum to protect, only keep some replicas serving during a drain
+  maxUnavailable: {{ .Values.pdb.maxUnavailable }}
+  selector:
+    matchLabels: {{ include "edusharing_common_lib.labels.app" . | nindent 6 }}
+{{- end }}

@@ -43,6 +43,18 @@
     <node.version>24.18.0</node.version>
     <npm.version>11.4.2</npm.version>
 
+    <!-- Frontend-Server runtime; kept separate from node.version so the Angular
+         build keeps its pinned toolchain -->
+    <node.server.version>24.18.0</node.server.version>
+    <npm.server.version>11.16.0</npm.server.version>
+    <npm.server.args.install>ci</npm.server.args.install>
+
+    <!-- The super-pom points frontend-maven-plugin at the edu-sharing mirror, which
+         currently carries node-v24.18.0-linux-x64.tar.xz but not the .tar.gz the
+         plugin asks for. Until the mirror has it, this module pulls node directly.
+         Flip back to the mirror by overriding this property once it is available. -->
+    <node.server.downloadRoot>https://nodejs.org/dist/</node.server.downloadRoot>
+
     <npm.args.install>install</npm.args.install>
     <npm.args.build>run build</npm.args.build>
 
@@ -477,6 +489,13 @@
 
       <dependency>
         <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-repository-deploy-docker-build-frontend-server</artifactId>
+        <version>${project.version}</version>
+        <classifier>sources</classifier>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-repository-deploy-docker-build-service</artifactId>
         <version>${project.version}</version>
         <classifier>sources</classifier>
@@ -486,6 +505,14 @@
         <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-repository-deploy-docker-compose</artifactId>
         <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-repository-deploy-docker-helm-frontend-server</artifactId>
+        <version>${project.version}</version>
+        <type>tar.gz</type>
+        <classifier>bin</classifier>
       </dependency>
 
       <dependency>
@@ -1441,6 +1468,7 @@
     <module>config</module>
     <module>deploy</module>
     <module>Frontend</module>
+    <module>Frontend-Server</module>
     <module>webapp</module>
   </modules>
 

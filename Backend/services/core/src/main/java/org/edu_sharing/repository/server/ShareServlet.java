@@ -87,7 +87,7 @@ public class ShareServlet extends DownloadServlet {
             NodeRef finalNodeRef = nodeRef;
             AuthenticationUtil.runAsSystem(() -> {
                 String fileName= (String) serviceRegistry.getNodeService().getProperty(finalNodeRef,QName.createQName(CCConstants.CM_NAME));
-				downloadZip(resp, childIds,nodeId,token,password,fileName+".zip");
+				downloadZip(req, resp, childIds,nodeId,token,password,fileName+".zip");
                 return null;
             });
             return;

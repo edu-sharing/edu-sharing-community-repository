@@ -11,6 +11,14 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 
 @Slf4j
 public class URLHelper {
+    /**
+     * angular routes, relative to the base url - the shell pages the Frontend-Server
+     * delivers
+     */
+    public static final String NG_COMPONENTS = "components";
+    public static final String NG_COMPONENTS_RENDER = NG_COMPONENTS + "/render";
+    public static final String NG_COMPONENTS_COLLECTIONS = NG_COMPONENTS + "/collections";
+    public static final String NG_COMPONENTS_ERROR = NG_COMPONENTS + "/error";
 
     public static String getBaseUrl(boolean dynamic) {
         ApplicationInfo homeRepository = ApplicationInfoList.getHomeRepository();
@@ -109,11 +117,19 @@ public class URLHelper {
     }
 
     public static String getNgComponentsUrl(String baseUrl) {
-        return baseUrl.replaceAll("/$","") + "/components/";
+        return baseUrl.replaceAll("/$","") + "/" + NG_COMPONENTS + "/";
     }
 
     public static String getNgComponentsUrl(boolean dynamic) {
         return getNgComponentsUrl(getBaseUrl(dynamic));
+    }
+
+    /**
+     * the angular routes relative to the host of the request ({@code <contextPath>/components/}) -
+     * for redirects that keep the browser on the domain it came from
+     */
+    public static String getNgComponentsUrlRelative(HttpServletRequest req) {
+        return getNgComponentsUrl(req.getContextPath());
     }
 
     public static String getNgCollectionUrl(String nodeId, boolean dynamic) {

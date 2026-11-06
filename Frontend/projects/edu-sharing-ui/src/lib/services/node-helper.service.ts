@@ -18,6 +18,7 @@ import * as Workflow from '../types/workflow';
 import { RepoUrlService } from './repo-url.service';
 import { Params, Router } from '@angular/router';
 import { UIConstants } from '../util/ui-constants';
+import { getLicenseUrl, LICENSE_URLS } from '../util/license-url';
 import { of } from 'rxjs';
 import { NodesRightMode } from '../types/option-item';
 import { PlatformLocation } from '@angular/common';
@@ -42,22 +43,8 @@ export class NodeHelperService {
     protected toast = inject(Toast, { optional: true });
     protected router = inject(Router, { optional: true });
 
-    readonly LICENSE_URLS = {
-        CC_BY_ABOUT: 'https://creativecommons.org/licenses/list.{{language}}',
-        CC_BY: 'https://creativecommons.org/licenses/by/{{version}}/{{locale}}deed.{{language}}',
-        CC_BY_ND:
-            'https://creativecommons.org/licenses/by-nd/{{version}}/{{locale}}deed.{{language}}',
-        CC_BY_SA:
-            'https://creativecommons.org/licenses/by-sa/{{version}}/{{locale}}deed.{{language}}',
-        CC_BY_NC:
-            'https://creativecommons.org/licenses/by-nc/{{version}}/{{locale}}deed.{{language}}',
-        CC_BY_NC_ND:
-            'https://creativecommons.org/licenses/by-nc-nd/{{version}}/{{locale}}deed.{{language}}',
-        CC_BY_NC_SA:
-            'https://creativecommons.org/licenses/by-nc-sa/{{version}}/{{locale}}deed.{{language}}',
-        CC_0: 'https://creativecommons.org/publicdomain/zero/1.0/legalcode.{{language}}',
-        PDM: 'https://creativecommons.org/public-domain/pdm/',
-    } as { [key: string]: string };
+    /** @deprecated import LICENSE_URLS from '../util/license-url' instead */
+    readonly LICENSE_URLS = LICENSE_URLS;
 
     constructor() {}
 
@@ -205,18 +192,14 @@ export class NodeHelperService {
         licenseVersion: string,
         licenseLocale: string,
     ) {
-        const isV4 = licenseVersion === '4.0';
-        const locale = isV4 || !licenseLocale ? '' : licenseLocale.toLowerCase() + '/';
-        const url = this.LICENSE_URLS[licenseProperty];
-        if (!url) {
-            return of(null);
-        }
         return of(
-            url
-                .replace('{{version}}', licenseVersion)
-                .replace('{{locale}}', locale)
+            getLicenseUrl(
+                licenseProperty,
+                licenseVersion,
+                licenseLocale,
                 // use base language for de- special variants
-                .replace('{{language}}', this.translate.currentLang?.split('-')?.[0] || 'en'),
+                this.translate.currentLang?.split('-')?.[0] || 'en',
+            ),
         );
     }
 

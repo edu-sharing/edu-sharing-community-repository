@@ -9,6 +9,7 @@ import org.springframework.security.saml2.provider.service.authentication.Saml2A
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 
 import java.io.IOException;
+import org.edu_sharing.repository.tools.URLHelper;
 
 public class EduFailureHandler extends SimpleUrlAuthenticationFailureHandler {
     public EduFailureHandler() {
@@ -27,6 +28,6 @@ public class EduFailureHandler extends SimpleUrlAuthenticationFailureHandler {
         logger.error(exception.getMessage(), exception);
         String message = "SSO_UNKNOWN_ERROR";
         message = URLEncoder.encode(message.trim());
-        response.sendRedirect("/edu-sharing/components/error/"+message+"/"+message);
+        response.sendRedirect("/edu-sharing/" + URLHelper.NG_COMPONENTS_ERROR + "/" + message + "/" + message);
     }
 }

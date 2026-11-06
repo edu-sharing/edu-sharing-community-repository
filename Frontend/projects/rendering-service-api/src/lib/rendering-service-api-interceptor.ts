@@ -30,7 +30,6 @@ export class RenderingServiceApiInterceptor implements HttpInterceptor {
         // `edu-sharing-api.module.ts`.)
         const isApiRequest = req.url.startsWith(this.configuration.rootUrl);
         if (isApiRequest) {
-            headers['X-Client-Trace-Id'] = this.generateTraceId();
             if (this.nextAuthHeader) {
                 headers[this.nextAuthHeader] = this.nextAuthValue;
             }
@@ -45,9 +44,5 @@ export class RenderingServiceApiInterceptor implements HttpInterceptor {
                 withCredentials: true,
             }),
         );
-    }
-
-    private generateTraceId(): string {
-        return crypto?.randomUUID?.() ?? '';
     }
 }

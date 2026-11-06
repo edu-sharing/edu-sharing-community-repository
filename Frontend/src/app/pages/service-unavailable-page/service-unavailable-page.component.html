@@ -1,0 +1,18 @@
+<main class="message-bg">
+  <div class="message-container">
+    <img src="assets/images/message/500.svg" alt="" />
+    <div>
+      <h1>{{ texts.title }}</h1>
+      <p>{{ texts.detail }}</p>
+      <div class="link" aria-live="polite">
+        @if (checking()) {
+        <span class="checking"
+          ><es-spinner-small [diameter]="18"></es-spinner-small>{{ texts.checking }}</span
+        >
+        } @else {
+        <button type="button" (click)="retry()">{{ texts.retry }}</button>
+        }
+      </div>
+    </div>
+  </div>
+</main>

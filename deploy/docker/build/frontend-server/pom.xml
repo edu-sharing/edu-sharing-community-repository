@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.edu_sharing</groupId>
+    <artifactId>edu_sharing-community-repository-deploy-docker-build</artifactId>
+    <version>git</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+
+  <artifactId>edu_sharing-community-repository-deploy-docker-build-frontend-server</artifactId>
+  <packaging>jar</packaging>
+
+  <name>edu_sharing-community-repository-deploy-docker-build-frontend-server</name>
+
+  <properties>
+    <frontend.directory>${project.basedir}/../../../../Frontend</frontend.directory>
+    <frontend.server.directory>${project.basedir}/../../../../Frontend-Server</frontend.server.directory>
+  </properties>
+
+  <build>
+
+    <plugins>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+
+          <!-- the angular api client is generated from this spec; inside the image
+               the Backend source tree that Frontend/projects/edu-sharing-api reads
+               it from does not exist, so it travels as an artifact -->
+          <execution>
+            <id>rest-api</id>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <phase>generate-resources</phase>
+            <configuration>
+              <includeArtifactIds>
+                edu_sharing-community-repository-backend-services-rest-api
+              </includeArtifactIds>
+              <includes>openapi.json</includes>
+              <excludes>META-INF/**</excludes>
+              <outputDirectory>${project.build.directory}/build/rest-api</outputDirectory>
+              <!-- the rest-api SNAPSHOT keeps its version across rebuilds, so the
+                   unpack marker would otherwise pin a stale openapi.json -->
+              <overWriteSnapshots>true</overWriteSnapshots>
+            </configuration>
+          </execution>
+
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <executions>
+
+          <!-- sources go into the docker context unfiltered - filtering would
+               corrupt them (they contain ${...} of their own) -->
+          <execution>
+            <id>frontend-sources</id>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <phase>process-resources</phase>
+            <configuration>
+              <outputDirectory>${project.build.directory}/build/frontend</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${frontend.directory}</directory>
+                  <filtering>false</filtering>
+                  <excludes>
+                    <!-- nested too: projects/*/node_modules holds symlinks that
+                         maven-resources cannot copy -->
+                    <exclude>**/node_modules/**</exclude>
+                    <exclude>**/dist/**</exclude>
+                    <exclude>**/target/**</exclude>
+                    <exclude>**/.angular/**</exclude>
+                    <exclude>**/coverage/**</exclude>
+                    <exclude>**/playwright/out/**</exclude>
+                    <exclude>node/**</exclude>
+                  </excludes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>frontend-server-sources</id>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <phase>process-resources</phase>
+            <configuration>
+              <outputDirectory>${project.build.directory}/build/frontend-server</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${frontend.server.directory}</directory>
+                  <filtering>false</filtering>
+                  <excludes>
+                    <exclude>**/node_modules/**</exclude>
+                    <exclude>**/build/**</exclude>
+                    <!-- generated, the image build regenerates it from the copied inputs -->
+                    <exclude>src/shared/**</exclude>
+                    <exclude>**/target/**</exclude>
+                    <exclude>**/dist/**</exclude>
+                    <exclude>node/**</exclude>
+                  </excludes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>io.fabric8</groupId>
+        <artifactId>docker-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>build</id>
+            <goals>
+              <goal>build</goal>
+            </goals>
+            <phase>install</phase>
+          </execution>
+          <execution>
+            <id>push</id>
+            <goals>
+              <goal>push</goal>
+            </goals>
+            <phase>deploy</phase>
+          </execution>
+        </executions>
+        <configuration>
+          <images>
+            <image>
+              <name>${docker.repository}/${docker.prefix}-deploy-docker-build-frontend-server:${docker.tag}</name>
+            </image>
+          </images>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+            <phase>package</phase>
+          </execution>
+        </executions>
+      </plugin>
+
+    </plugins>
+
+  </build>
+
+  <dependencies>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-repository-backend-services-rest-api</artifactId>
+    </dependency>
+
+  </dependencies>
+
+</project>

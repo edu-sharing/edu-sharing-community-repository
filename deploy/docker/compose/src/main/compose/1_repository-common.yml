@@ -16,6 +16,28 @@ services:
     volumes:
       - "repository-database-volume-data:/bitnami/postgresql"
 
+  repository-frontend-server:
+    image: "${docker.repository}/${docker.prefix}-deploy-docker-build-frontend-server:${docker.tag}"
+    container_name: "repository-frontend-server_${COMPOSE_PROJECT_NAME}"
+    environment:
+      VIRTUAL_HOST: "${REPOSITORY_SERVICE_HOST:-repository.127.0.0.1.nip.io}"
+      VIRTUAL_PORT: 8080
+      VIRTUAL_DEST: /edu-sharing/
+      VIRTUAL_PATH: "${REPOSITORY_SERVICE_PATH:-/edu-sharing}/"
+      # external connector for everything proxied (2FA applies), the internal one
+      # only for the config fetches (ValuesBackendInternal)
+      BACKEND_URL: "http://repository-service:8081"
+      BACKEND_INTERNAL_URL: "http://repository-service:8080"
+      CONTEXT_PATH: "${REPOSITORY_SERVICE_PATH:-/edu-sharing}"
+      LOG_LEVEL: "${REPOSITORY_FRONTEND_SERVER_LOG_LEVEL:-info}"
+      PROXY_UNMATCHED: "${REPOSITORY_FRONTEND_SERVER_PROXY_UNMATCHED:-true}"
+    expose:
+      - "8080"
+    ports:
+      - "${COMMON_BIND_HOST:-127.0.0.1}:${REPOSITORY_FRONTEND_SERVER_PORT_HTTP:-8110}:8080"
+    depends_on:
+      - repository-service
+
   repository-mailcatcher:
     image: "${docker.registry}/${docker.common}/${docker.edu_sharing.community.common.mailcatcher.name}:${docker.edu_sharing.community.common.mailcatcher.tag}"
     container_name: "repository-mailcatcher_${COMPOSE_PROJECT_NAME}"
@@ -71,10 +93,9 @@ services:
     image: "${docker.repository}/${docker.prefix}-deploy-docker-build-service:${docker.tag}"
     container_name: "repository-service_${COMPOSE_PROJECT_NAME}"
     environment:
-      VIRTUAL_HOST: "${REPOSITORY_SERVICE_HOST:-repository.127.0.0.1.nip.io}"
-      VIRTUAL_PORT: 8080
-      VIRTUAL_DEST: /edu-sharing/
-      VIRTUAL_PATH: "${REPOSITORY_SERVICE_PATH:-/edu-sharing}/"
+      # VIRTUAL_* moved to repository-frontend-server, which is now the entry point
+      # for /edu-sharing/ and proxies backend paths here. Direct access to tomcat
+      # stays available on the host port below (REPOSITORY_SERVICE_PORT_HTTP).
       CACHE_CLUSTER: "false"
       CACHE_DATABASE: "0"
       CACHE_HOST: redis-cache
