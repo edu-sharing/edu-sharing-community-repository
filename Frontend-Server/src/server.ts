@@ -313,7 +313,7 @@ export async function buildServer(config: Config, overrides: ServerOverrides = {
         const loadFrom = async (shellTarget: ShellTarget, elasticIndex: string | undefined) => {
             workspaceIndex = elasticIndex;
             if (elasticIndex === undefined) {
-                request.log.debug('no elastic workspace index known (older backend, no ELASTIC_INDEX) - shell not enriched');
+                request.log.info('no elastic workspace index known (older backend, no ELASTIC_INDEX) - shell not enriched');
                 return undefined;
             }
             checkIndex(elasticIndex);
