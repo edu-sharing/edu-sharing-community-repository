@@ -5,7 +5,9 @@ variables:
   DOCKER_DRIVER: "$DIND_DRIVER"
   DOCKER_HOST: "$DIND_HOST"
   DOCKER_TLS_CERTDIR: "$DIND_TLS_CERTDIR"
-  MAVEN_CLI: "-Ddocker.registry=$DOCKER_REGISTRY -Dhelm.deploy.url=$HELM_REGISTRY -Dhelm.deploy.type=$HELM_TYPE -Dmaven.deploy.releases=$MAVEN_DEPLOY_RELEASES -Dmaven.deploy.snapshots=$MAVEN_DEPLOY_SNAPSHOTS -Dversioning.configFile=maven-git-versioning-extension-ci.xml --batch-mode --errors --fail-fast --show-version"
+  # node of the Angular build: the image of the frontend jobs and node.version of maven (overrides pom.xml)
+  NODE_VERSION: "24.18.0"
+  MAVEN_CLI: "-Dnode.version=$NODE_VERSION -Ddocker.registry=$DOCKER_REGISTRY -Dhelm.deploy.url=$HELM_REGISTRY -Dhelm.deploy.type=$HELM_TYPE -Dmaven.deploy.releases=$MAVEN_DEPLOY_RELEASES -Dmaven.deploy.snapshots=$MAVEN_DEPLOY_SNAPSHOTS -Dversioning.configFile=maven-git-versioning-extension-ci.xml --batch-mode --errors --fail-fast --show-version"
   MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
   GIT_SUBMODULE_STRATEGY: recursive
 
@@ -28,13 +30,14 @@ stages:
 deploy:
   stage: deploy
   cache:
-    - key: $CI_BUILD_REF_NAME
+    - key: m2-$CI_COMMIT_REF_SLUG
       paths:
         - .m2/repository
     - key:
         files:
           - Frontend/package-lock.json
-        prefix: node-modules-$NODE_VERSION
+        # separate from the alpine frontend jobs: musl vs glibc binaries
+        prefix: node-modules-mvn-$NODE_VERSION
       paths:
         - Frontend/node_modules
   rules:
@@ -49,8 +52,6 @@ deploy:
     - mvn $MAVEN_CLI -s .mvn/settings.xml deploy
 
 .frontend_job: &frontend_job
-  variables:
-    NODE_VERSION: 24.18
   stage: test
   image: node:$NODE_VERSION-alpine
   rules:
@@ -93,7 +94,6 @@ npm security audit:
 unittest frontend:
   <<: *frontend_job
   variables:
-    NODE_VERSION: 24.18
     CHROME_BIN: /usr/bin/chromium-browser
   before_script:
     - apk add chromium
@@ -113,8 +113,6 @@ unittest frontend:
 
 build storybook:
   <<: *frontend_job
-  variables:
-    NODE_VERSION: 24.18
   before_script:
     - node -v
     - npm -v
@@ -135,13 +133,14 @@ build storybook:
 test docker:
   stage: test
   cache:
-    - key: $CI_BUILD_REF_NAME
+    - key: m2-$CI_COMMIT_REF_SLUG
       paths:
         - .m2/repository
     - key:
         files:
           - Frontend/package-lock.json
-        prefix: node-modules-$NODE_VERSION
+        # separate from the alpine frontend jobs: musl vs glibc binaries
+        prefix: node-modules-mvn-$NODE_VERSION
       paths:
         - Frontend/node_modules
   artifacts:
@@ -190,13 +189,14 @@ test docker:
 e2e:
   stage: test
   cache:
-    - key: $CI_BUILD_REF_NAME
+    - key: m2-$CI_COMMIT_REF_SLUG
       paths:
         - .m2/repository
     - key:
         files:
           - Frontend/package-lock.json
-        prefix: node-modules-$NODE_VERSION
+        # separate from the alpine frontend jobs: musl vs glibc binaries
+        prefix: node-modules-mvn-$NODE_VERSION
       paths:
         - Frontend/node_modules
   artifacts:
