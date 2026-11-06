@@ -154,7 +154,7 @@ ingress:
   annotations:
     ## @param ingress.annotations.nginx.ingress.kubernetes.io/affinity Set affinity on nginx ingress
     nginx.ingress.kubernetes.io/affinity: cookie
-    ## @param ingress.annotations.nginx.ingress.kubernetes.io/session-cookie-path Set affinity cookie path - one cookie for all ingress.paths
+    ## @param ingress.annotations.nginx.ingress.kubernetes.io/session-cookie-path Set affinity cookie path - one cookie for all ingress.paths, keep it equal to config.contextPath
     nginx.ingress.kubernetes.io/session-cookie-path: /edu-sharing
     ## @param ingress.annotations.nginx.ingress.kubernetes.io/proxy-body-size Set proxy-body-size on nginx ingress
     nginx.ingress.kubernetes.io/proxy-body-size: "5g"
@@ -243,6 +243,9 @@ proxy:
 ########################################################################################################################
 
 config:
+
+  ## @param config.contextPath Public context path of the repository - base of its absolute urls (login, logout, mails, ...). Must match config.contextPath of the frontend-server chart
+  contextPath: /edu-sharing
 
   admin:
     ## @param config.admin.password Set admin password
