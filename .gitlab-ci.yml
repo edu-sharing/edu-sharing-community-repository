@@ -31,6 +31,23 @@ stages:
 
 deploy:
   stage: deploy
+  # every test job but "build storybook", which runs in parallel to the deploy.
+  # optional: the jobs are left out by their rules (SKIP_TESTS, E2E_TEST, pipeline source)
+  needs:
+    - job: check formatting
+      optional: true
+    - job: check linting
+      optional: true
+    - job: npm security audit
+      optional: true
+    - job: unittest frontend
+      optional: true
+    - job: test docker
+      optional: true
+    - job: e2e
+      optional: true
+    - job: check-helmreadme
+      optional: true
   cache:
     - key: m2-$CI_COMMIT_REF_SLUG
       paths:
