@@ -11,6 +11,10 @@
         </encoder>
     </appender>
 
+    <!-- NodeDaoConvertToRestTest lets 500 nodes fail on purpose; each one is a WARN with a full
+         stack trace ("Missing node ... skipping fetch"), tens of thousands of log lines -->
+    <logger name="org.edu_sharing.restservices.NodeDao" level="ERROR"/>
+
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
     </root>
