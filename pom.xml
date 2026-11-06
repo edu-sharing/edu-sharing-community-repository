@@ -42,7 +42,7 @@
 
     <!-- CI sets it from NODE_VERSION in .gitlab-ci.yml (-Dnode.version) - keep both in sync -->
     <node.version>24.18.0</node.version>
-    <npm.version>11.4.2</npm.version>
+    <npm.version>11.21.2</npm.version>
 
     <!-- Frontend-Server runtime; kept separate from node.version so the Angular
          build keeps its pinned toolchain -->
