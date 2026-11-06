@@ -28,8 +28,12 @@ import { createLogStream } from './lib/log-format.ts';
 import { ensureRequestId, REQUEST_ID_HEADER, traceLogBindings } from './lib/tracing.ts';
 import { ANGULAR_ROUTE_PREFIXES, BACKEND_PATHS, WEBDAV_METHODS } from './routes/backend-paths.ts';
 
-/** Angular emits `main-A1B2C3D4.js`; those are content hashed and immutable. */
-const HASHED_ASSET = /-[A-Z0-9]{8,}\.(js|css)$/;
+/**
+ * Angular emits content hashed names - entry files like `main-IGMI5JGB.js`, chunks like
+ * `chunk-1ZjW7PtH.js` / `chunk-5eRPV-YQ.js` (mixed case, `_` and `-`); those are immutable.
+ * Exactly 8 characters, so an unhashed `ngx-extended-pdf-viewer.js` does not match.
+ */
+export const HASHED_ASSET = /-[A-Za-z0-9_-]{8}\.(js|css)$/;
 
 /** package.json sits one level above both src/ and build/. */
 function serverVersion(): string {
