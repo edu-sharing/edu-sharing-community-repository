@@ -128,8 +128,17 @@ export class OptionsHelperDataService implements OnDestroy {
             console.warn('optionsHelperService not provided. No default actions will be generated');
             return;
         }
-        this.globalOptions = await this.getAvailableOptions(Target.Actionbar);
-        await this.optionsHelperService?.refreshComponents(this.components, this.getData());
+        // data and components may be replaced while the options are computed (the service can be
+        // shared, e.g. with the editorial sidebar), so the whole refresh uses those of the call
+        const components: OptionsHelperComponents = this.components;
+        const data: OptionData = this.getData();
+        this.globalOptions = await this.optionsHelperService.getAvailableOptions(
+            Target.Actionbar,
+            null,
+            components,
+            data,
+        );
+        await this.optionsHelperService.refreshComponents(components, data);
     }
 
     getAvailableOptions(target: Target, objects: Node[] = null) {
