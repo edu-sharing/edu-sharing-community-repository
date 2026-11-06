@@ -1,6 +1,7 @@
 import { randomBytes } from 'node:crypto';
 import { STATUS_CODES } from 'node:http';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import escapeHtml from 'escape-html';
 
 /**
  * Custom error pages for browsers (`Accept: text/html`), instead of the angular
@@ -71,15 +72,6 @@ export function parseStatuses(spec: string): StatusMatcher {
 /** a path on this host - an incoming `next` must never send the browser elsewhere */
 export function isLocalPath(value: string): boolean {
     return value.startsWith('/') && !value.startsWith('//') && !value.startsWith('/\\');
-}
-
-function escapeHtml(value: string): string {
-    return value
-        .replaceAll('&', '&amp;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#39;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;');
 }
 
 export class CustomErrorPage {

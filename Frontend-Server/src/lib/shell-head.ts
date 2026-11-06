@@ -1,3 +1,4 @@
+import escapeHtml from 'escape-html';
 import type { RepositoryConfig } from './config-cache.ts';
 import { buildLrmi } from './lrmi.ts';
 import type { LoadedNode, NodeProperties, ShellTarget } from './node-metadata.ts';
@@ -94,10 +95,6 @@ function firstFilled(properties: NodeProperties, keys: readonly string[]): strin
 
 function truncate(value: string, max: number): string {
     return value.length > max ? `${value.substring(0, max - 3)}...` : value;
-}
-
-export function escapeHtml(value: string): string {
-    return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 /**
