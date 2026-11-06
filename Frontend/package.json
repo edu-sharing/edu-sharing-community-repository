@@ -36,7 +36,7 @@
     "fix:format": "prettier --write src projects/*/src",
     "audit:fix": "npm audit fix; git add package.json package-lock.json && (git diff --cached --quiet -- package.json package-lock.json || git commit -m \"chore:npm audit\" -- package.json package-lock.json)",
     "test": "ng test --no-watch",
-    "test-ci": "ng test --no-watch --no-progress --browsers=ChromeHeadlessCI --reporters=verbose",
+    "test-ci": "O='--no-watch --no-progress --browsers=ChromeHeadlessCI --reporters=verbose'; ng test angular-edusharing $O & APP=$!; rc=0; for p in edu-sharing-api rendering-service-api rendering-service-lib b-api embed edu-sharing-ui; do ng test $p $O || rc=1; done; wait $APP && exit $rc",
     "pree2e": "rm -rf playwright/out && tsc --incremental -p tests/tsconfig.json",
     "e2e": "playwright test",
     "e2e-watch-compile": "rm -rf playwright/out && tsc --watch -p tests/tsconfig.json",
