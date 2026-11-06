@@ -1,6 +1,7 @@
 import {
     AfterContentInit,
     afterNextRender,
+    ChangeDetectorRef,
     Component,
     computed,
     ContentChild,
@@ -154,6 +155,7 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
     clipboardOverlayOpen = false;
     editorialSidebarService = inject(EditorialSidebarService);
     private injector = inject(Injector);
+    private changeDetectorRef = inject(ChangeDetectorRef);
     private toast = inject(Toast);
     private translations = inject(TranslationsService);
     private uiService = inject(UIService);
@@ -539,6 +541,8 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
         this.isLoading = false;
         this.renderBreadcrumbs();
         this.isRootLevel = !id;
+        // the page is not checked on every change, but the collection is set from a request
+        this.changeDetectorRef.markForCheck();
     }
 
     private searchFieldInstance: SearchFieldInstance;

@@ -496,6 +496,14 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
 
     ngOnChanges(changes: SimpleChanges) {
         if (changes.collection?.currentValue) {
+            // the lists stay rendered while another collection is shown, so they keep what was
+            // selected in the one before
+            if (
+                changes.collection.previousValue?.ref?.id !==
+                changes.collection.currentValue.ref?.id
+            ) {
+                this.clearSelection();
+            }
             this.dataSourceCollections.reset();
             this.dataSourceReferences.reset();
             // Per-card options for the sub-collections list are wired (gated on the picker
@@ -1902,8 +1910,9 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     }
 
     /**
-     * The sub-collections are not links when the page handles them itself: a click shows the
-     * information of the collection and only a double click enters it.
+     * The sub-collections are not links when the page handles them itself: in the tiles a click
+     * enters the collection, in the table and the tree a click shows the information of the
+     * collection and only a double click enters it.
      */
     collectionsInteractionType(): InteractionType {
         return this.interactionType === InteractionType.DefaultActionLink
@@ -1914,6 +1923,15 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     onCollectionClick(event: NodeClickEvent<Node | CollectionReference>) {
         if (this.interactionType !== InteractionType.DefaultActionLink) {
             this.clickItem.emit(event);
+            return;
+        }
+        // the tiles enter the collection on a click, they are selected with their checkbox
+        if (
+            this.viewState.viewType() !== 'tree' &&
+            this.viewState.collectionsDisplayType() !== NodeEntriesDisplayType.Table &&
+            !event.ctrlKey
+        ) {
+            this.openCollection(event);
             return;
         }
         const list = this.viewState.viewType() === 'tree' ? this.listTree : this.listCollections;
