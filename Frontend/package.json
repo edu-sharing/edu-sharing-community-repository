@@ -28,7 +28,7 @@
     "build:storybook": "rm -rf dist/storybook && npm run build-storybook && mv dist/storybook/angular-edusharing/* dist/storybook && rm -rf dist/storybook/angular-edusharing",
     "copy-build-to-kubernetes": "kubectl  --kubeconfig=${npm_config_kubeconfig} --namespace=${npm_config_namespace} cp ./dist/. edusharing-repository-service-0:/usr/local/tomcat/temp/0-edu-sharing/",
     "copy-build-to-kubernetes-web-components": "kubectl  --kubeconfig=${npm_config_kubeconfig} --namespace=${npm_config_namespace} cp ./dist/web-components/. edusharing-repository-service-0:/usr/local/tomcat/temp/0-edu-sharing/web-components/",
-    "copy-build-to-docker": "docker container cp ./dist/. $(docker ps --filter name=^repository-frontend-server --quiet):/app/dist/ && docker restart $(docker ps --filter name=^repository-frontend-server --quiet) && docker container cp ./dist/assets/i18n/. $(docker ps --filter name=^repository-service --quiet):/usr/local/tomcat/temp/0-edu-sharing/assets/i18n/ && docker container cp ./dist/assets/images/. $(docker ps --filter name=^repository-service --quiet):/usr/local/tomcat/temp/0-edu-sharing/assets/images/",
+    "copy-build-to-docker": "RS=$(docker ps --filter name=^repository-service --quiet) && T=$(docker exec $RS sh -c 'ls -d \"$CATALINA_HOME\"/temp/*0-edu-sharing*/assets | head -1') && docker cp ./dist/assets/i18n/. $RS:$T/i18n/ && docker cp ./dist/assets/images/. $RS:$T/images/",
     "build-and-copy-to-docker": "npm run build && npm run copy-build-to-docker",
     "check:lint": "ng lint --max-warnings=835",
     "fix:lint": "ng lint --fix",
