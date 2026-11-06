@@ -630,7 +630,7 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
     }
 
     private renderBreadcrumbs() {
-        this.topicView.reset();
+        this.topicView.reset(this.collection);
         if (this.collection.ref.id === RestConstants.ROOT) {
             this.breadcrumbsService.setNodePath([]);
             void this.topicView.resolveCollectionViewType(this.collection, null);
@@ -652,7 +652,10 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
                     this.breadcrumbsService.setNodePath(path);
                     void this.topicView.resolveCollectionViewType(this.collection, data);
                 },
-                error: () => this.breadcrumbsService.setNodePath([]),
+                error: () => {
+                    this.breadcrumbsService.setNodePath([]);
+                    this.topicView.stopWaitingForDefaultView();
+                },
             });
     }
 

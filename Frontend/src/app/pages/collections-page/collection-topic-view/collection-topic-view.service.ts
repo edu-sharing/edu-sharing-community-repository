@@ -64,6 +64,8 @@ export class CollectionTopicViewService {
             disabled: !this.available(),
         }),
     );
+    /** whether the open collection may still switch to the topic view as its default view */
+    readonly defaultViewPending = signal(false);
     /** the topic view, loaded the first time it is selected */
     readonly component = signal<Type<unknown> | null>(null);
     /** ancestors of the open collection, the collection first, as the topic view reads them */
@@ -101,9 +103,20 @@ export class CollectionTopicViewService {
     }
 
     /** Forgets the collection before while the next one loads. */
-    reset(): void {
+    reset(collection: Node): void {
         this.configured.set(false);
         this.parents.set(null);
+        // a collection set to open as a topic page shows no other view until its view is resolved
+        this.defaultViewPending.set(
+            collection.collection?.viewtype === TOPIC_PAGE_VIEW_TYPE &&
+                collection.ref.id !== this.defaultViewAppliedFor &&
+                !this.selected(),
+        );
+    }
+
+    /** Gives up waiting for the default view, e.g. when the ancestors cannot be loaded. */
+    stopWaitingForDefaultView(): void {
+        this.defaultViewPending.set(false);
     }
 
     /**
@@ -126,6 +139,7 @@ export class CollectionTopicViewService {
         const isRoot = collection.ref.id === RestConstants.ROOT;
         this.configured.set(!isRoot && hasTopicPage(collection, parents?.nodes ?? []));
         const openedByDefault = this.applyCollectionDefaultView(collection);
+        this.defaultViewPending.set(false);
         if (this.selected() && (isRoot || !this.available())) {
             this.viewState.viewType.set('grid');
         }

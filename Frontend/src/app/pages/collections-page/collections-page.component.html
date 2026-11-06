@@ -150,7 +150,8 @@
                   (valueChange)="topicView.select($event)"
                 ></es-view-toggle-group>
               </div>
-              @if (!topicView.selected()) { @if (searchState.active()) {
+              @if (!topicView.selected() && !topicView.defaultViewPending()) { @if
+              (searchState.active()) {
               <h2 class="root-bar-title mat-heading-3 search-in-collection">
                 {{
                   (searchState.query()?.trim()
@@ -212,7 +213,11 @@
                   inputs: { collection: collection, parents: topicView.parents() }
                 "
               ></ng-container>
-              } } @else {
+              } } @else if (topicView.defaultViewPending()) {
+              <section class="collections-loading-div">
+                <es-spinner></es-spinner>
+              </section>
+              } @else {
               <!-- Only this region scrolls; the breadcrumb header above stays fixed. -->
               <div class="collections-scroll">
                 <es-collection-content
