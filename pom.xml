@@ -56,7 +56,7 @@
          Flip back to the mirror by overriding this property once it is available. -->
     <node.server.downloadRoot>https://nodejs.org/dist/</node.server.downloadRoot>
 
-    <npm.args.install>install</npm.args.install>
+    <npm.args.install>install --no-audit --no-fund</npm.args.install>
     <npm.args.build>run build</npm.args.build>
 
     <postgresql.jdbc.version>42.7.13</postgresql.jdbc.version>
