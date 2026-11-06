@@ -29,9 +29,9 @@
         <artifactId>maven-dependency-plugin</artifactId>
         <executions>
 
-          <!-- the angular api client is generated from this spec; inside the image
-               the Backend source tree that Frontend/projects/edu-sharing-api reads
-               it from does not exist, so it travels as an artifact -->
+          <!-- the server build generates its api types from this spec
+               (scripts/generate-api-types.mjs); inside the image the Backend source
+               tree does not exist, so it travels as an artifact -->
           <execution>
             <id>rest-api</id>
             <goals>
@@ -51,6 +51,26 @@
             </configuration>
           </execution>
 
+          <!-- the angular build of the frontend module: the war root is its dist/.
+               Built once there instead of a second time inside the image -->
+          <execution>
+            <id>frontend-dist</id>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <phase>generate-resources</phase>
+            <configuration>
+              <includeArtifactIds>
+                edu_sharing-community-repository-frontend
+              </includeArtifactIds>
+              <includeTypes>war</includeTypes>
+              <excludes>META-INF/**,WEB-INF/**</excludes>
+              <outputDirectory>${project.build.directory}/build/dist</outputDirectory>
+              <!-- SNAPSHOT keeps its version across rebuilds - never pin a stale app -->
+              <overWriteSnapshots>true</overWriteSnapshots>
+            </configuration>
+          </execution>
+
         </executions>
       </plugin>
 
@@ -61,29 +81,25 @@
 
           <!-- sources go into the docker context unfiltered - filtering would
                corrupt them (they contain ${...} of their own) -->
+          <!-- the angular app itself comes prebuilt from the frontend war (see the
+               unpack below) - of its sources the server build only needs these two,
+               the inputs of its generated src/shared/ (scripts/sync-shared.mjs) -->
           <execution>
-            <id>frontend-sources</id>
+            <id>frontend-shared-sources</id>
             <goals>
               <goal>copy-resources</goal>
             </goals>
             <phase>process-resources</phase>
             <configuration>
-              <outputDirectory>${project.build.directory}/build/frontend</outputDirectory>
+              <outputDirectory>${project.build.directory}/build/frontend/projects/edu-sharing-ui/src/lib/util</outputDirectory>
               <resources>
                 <resource>
-                  <directory>${frontend.directory}</directory>
+                  <directory>${frontend.directory}/projects/edu-sharing-ui/src/lib/util</directory>
                   <filtering>false</filtering>
-                  <excludes>
-                    <!-- nested too: projects/*/node_modules holds symlinks that
-                         maven-resources cannot copy -->
-                    <exclude>**/node_modules/**</exclude>
-                    <exclude>**/dist/**</exclude>
-                    <exclude>**/target/**</exclude>
-                    <exclude>**/.angular/**</exclude>
-                    <exclude>**/coverage/**</exclude>
-                    <exclude>**/playwright/out/**</exclude>
-                    <exclude>node/**</exclude>
-                  </excludes>
+                  <includes>
+                    <include>VCard.ts</include>
+                    <include>license-url.ts</include>
+                  </includes>
                 </resource>
               </resources>
             </configuration>
@@ -168,6 +184,13 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>edu_sharing-community-repository-backend-services-rest-api</artifactId>
+    </dependency>
+
+    <!-- also orders this module after the frontend in the reactor -->
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-repository-frontend</artifactId>
+      <type>war</type>
     </dependency>
 
   </dependencies>

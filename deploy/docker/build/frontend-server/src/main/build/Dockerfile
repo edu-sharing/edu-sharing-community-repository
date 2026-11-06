@@ -1,29 +1,8 @@
 ########################################################################################################################
-# stage 1 - angular browser build (no SSR)
-########################################################################################################################
-
-FROM ${docker.from.node} AS frontend-build
-
-WORKDIR /build
-
-COPY frontend/ ./
-
-# Frontend/projects/edu-sharing-api generates its client from the Backend source
-# tree, which does not exist here - the spec travels as a maven artifact instead.
-# Generating it up front makes the `update-if-needed` check in `prebuild` a no-op,
-# so no build step ever reaches for ../../../Backend or for the network.
-COPY rest-api/openapi.json projects/edu-sharing-api/build/openapi.json
-
-# only dist/ leaves this stage - dropping node_modules and the caches within the same
-# RUN keeps the layer small; committing them cost ~50s on the legacy builder
-RUN set -eux \
-    && npm ci --no-audit --no-fund \
-    && npm --prefix projects/edu-sharing-api run generate-api \
-    && npm run build \
-    && rm -rf node_modules projects/*/node_modules .angular /root/.npm
-
-########################################################################################################################
-# stage 2 - typescript build of the node server
+# stage 1 - typescript build of the node server
+#
+# The angular app is not built here: dist/ is the frontend war of the same maven build
+# (unpacked by pom.xml), built once by the frontend module.
 ########################################################################################################################
 
 # alpine like the runtime, so the production node_modules copied over below are
@@ -49,7 +28,7 @@ RUN set -eux \
     && npm ci --omit=dev --no-audit --no-fund
 
 ########################################################################################################################
-# stage 3 - runtime
+# stage 2 - runtime
 ########################################################################################################################
 
 FROM ${docker.from.node.alpine}
@@ -79,7 +58,7 @@ WORKDIR /app
 COPY --from=server-build --chown=node:node /build/node_modules ./node_modules
 COPY --from=server-build --chown=node:node /build/build ./build
 COPY --from=server-build --chown=node:node /build/package.json ./package.json
-COPY --from=frontend-build --chown=node:node /build/dist ./dist
+COPY --chown=node:node dist/ ./dist
 
 USER node
 
