@@ -1,26 +1,5 @@
 {
   "TOPIC_PAGE": {
-    "SIDEBAR": {
-      "MENU": {
-        "INHERITANCE": "Vererbung"
-      },
-      "INHERITANCE": {
-        "INTRO": "Vererbung von {{title}}",
-        "INTRO_DESCRIPTION": "So erhalten diese Sammlung und ihre Untersammlungen ihre Themenseiten. Mit „Weitergeben“ legst du fest, ob geerbte Vorlagen weiter nach unten gereicht werden.",
-        "STATE_OWN": "Eigene Themenseite – keine Vererbung nötig",
-        "STATE_INHERITS": "erbt von {{title}}",
-        "STATE_STOPPED": "erbt nichts – Weitergabe gestoppt bei {{title}}",
-        "STATE_NONE": "keine Themenseite",
-        "PASSES_OWN_TEMPLATES": "gibt eigene Vorlagen an Untersammlungen weiter",
-        "PASSES_NOTHING_ON": "gibt Geerbtes nicht an Untersammlungen weiter",
-        "SAVED_STATE": "bisher:",
-        "PASS_ON": "Weitergeben",
-        "PASS_ON_TOOLTIP": "Geerbte Vorlagen an die Untersammlungen weitergeben",
-        "CHANGED_COUNT": "{{count}} angezeigte Sammlungen ändern sich",
-        "SAVED": "Die Vererbung wurde gespeichert.",
-        "LOAD_ERROR": "Die Vererbung konnte nicht geladen werden."
-      }
-    },
     "NAVIGATION": {
       "NEW_PAGE_VARIANT": "Neue Themenseite",
       "NEW_PAGE_TEMPLATE": "Neue Themenseiten-Vorlage",
