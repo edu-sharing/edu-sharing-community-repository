@@ -68,6 +68,7 @@ import {
     OptionItem,
     OptionsHelperDataService,
     Scope,
+    TemporaryStorageService,
     UIConstants,
     Values,
     VirtualNode,
@@ -161,6 +162,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     private translation = inject(TranslateService);
     private uiService = inject(UIService);
     private globalCollectionsPageService = inject(GlobalCollectionsPageService);
+    private temporaryStorageService = inject(TemporaryStorageService);
 
     /**
      * The number of collections requested per page when the tree needs all of them. A single
@@ -358,6 +360,16 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     config: ConfigValues;
 
     constructor() {
+        // the selection bar also offers "paste" without a selection: its options depend on the
+        // clipboard, which the list options helpers follow but not the separate selectionOptions
+        effect(() => {
+            this.temporaryStorageService.clipboard();
+            untracked(() => {
+                if (this.collection) {
+                    this.updateSelection();
+                }
+            });
+        });
         effect(() => {
             const viewType = this.viewState.viewType();
             untracked(() => this.onViewTypeChange(viewType));
@@ -419,6 +431,11 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                     (node.parent?.id === this.collection?.ref?.id ||
                         (this.isRootLevel && node.collection.level0)),
             );
+            // pasting on the start page does not reload the list (the index would not return the
+            // new level0 collections yet), so show them right away in the user's own collections
+            if (this.isRootLevel && this.scope === RestConstants.COLLECTIONSCOPE_MY) {
+                this.selectCreatedCollections();
+            }
         });
         this.editorialSidebarService.applyNodeEmitted
             .pipe(takeUntil(this.destroyed$))
@@ -1502,6 +1519,9 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     /** Connects the lists that are currently rendered to the options of the collection. */
     private wireListOptions() {
         this.setOptionsCollection();
+        // the selection bar's options (e.g. "paste" without a selection) refer to the collection
+        // shown; without a selection change they would still point to the previous one
+        this.updateSelection();
         void this.listReferences?.initOptionsGenerator({
             actionbar: [this.actionbarToggles],
             parent: this.collection,
