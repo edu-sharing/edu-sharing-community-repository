@@ -389,17 +389,27 @@
       <span class="tab-label">{{ 'WORKSPACE.TAB_ADVANCED' | translate }}</span>
     </ng-template>
     <div class="advanced">
-      @if (permissionsUser.length + permissionsGroup.length === 0) {
+      @if (getAdvancedPermissions().length === 0) {
       <h4 class="mat-heading-4">
         {{ 'WORKSPACE.SHARE.NO_PERMISSIONS' | translate }}
       </h4>
-      } @for (permission of permissionsGroup.concat(permissionsUser); track permission) {
-      <div>
+      } @for (permission of getAdvancedPermissions(); track permission) {
+      <div class="advancedEntry">
         <div class="advancedAuthority">
-          <i class="type material-icons">{{
-            permission.authority.authorityType === 'USER' ? 'person' : 'group'
-          }}</i
-          >{{ permission | permissionName }}
+          <i
+            [esIcon]="
+              permission.authority.authorityType === 'USER'
+                ? 'person'
+                : permission.authority.authorityType === 'EVERYONE'
+                ? 'public'
+                : 'group'
+            "
+          ></i>
+          {{
+            permission.authority.authorityType === 'EVERYONE'
+              ? 'GROUP_EVERYONE'
+              : (permission | permissionName)
+          }}
         </div>
         @for (type of ALL_PERMISSIONS; track type) {
         <div class="advancedPermission">

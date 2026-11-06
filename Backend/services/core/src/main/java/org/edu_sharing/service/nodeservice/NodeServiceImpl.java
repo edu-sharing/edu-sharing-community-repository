@@ -19,6 +19,7 @@ import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.security.OwnableService;
 import org.alfresco.service.cmr.version.Version;
+import org.alfresco.service.cmr.version.VersionDoesNotExistException;
 import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.cmr.version.VersionService;
 import org.alfresco.service.namespace.NamespaceService;
@@ -1417,8 +1418,11 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
             if (details.isRemoveContent()) {
                 removeContent(ref, CCConstants.CM_PROP_CONTENT);
                 removeContent(ref, CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW);
-                // remove childs like childobjects or preview images
+                // remove childs like childobjects or preview images, but keep usages
                 for (ChildAssociationRef child : getChildAssocs(new NodeRef(new StoreRef(storeProtocol, storeId), finalNodeId))) {
+                    if (QName.createQName(CCConstants.CCM_TYPE_USAGE).equals(nodeServiceAlfresco.getType(child.getChildRef()))) {
+                        continue;
+                    }
                     removeNode(child.getChildRef().getId(), finalNodeId, false);
                 }
             }
@@ -1857,6 +1861,19 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                 return cr.getReader();
             } else return null;
         }
+    }
+
+    @Override
+    public Serializable getVersionProperty(String protocol, String storeId, String nodeId, String property, String version){
+        VersionHistory versionHistory = versionService.getVersionHistory(new NodeRef(new StoreRef(protocol, storeId), nodeId));
+        if(versionHistory == null) return null;
+        Version versionObj;
+        try {
+            versionObj = versionHistory.getVersion(version);
+        } catch (VersionDoesNotExistException e) {
+            return null;
+        }
+        return nodeService.getProperty(versionObj.getFrozenStateNodeRef(),QName.createQName(property));
     }
 
     @Override

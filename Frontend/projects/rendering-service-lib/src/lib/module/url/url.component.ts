@@ -283,9 +283,11 @@ export class UrlComponent implements RenderModule, OnInit, OnChanges, OnDestroy 
             }
             return true;
         };
+        // In both cases the playout link is also offered as "to original page" link (iframe case:
+        // shown below the player, like the legacy rendering service did).
+        this.url = jobData?.link || '';
         if (!checkIfIframeAllowed()) {
             this.embedding = UrlEmbeddings.LINK;
-            this.url = jobData?.link || '';
             return;
         }
 

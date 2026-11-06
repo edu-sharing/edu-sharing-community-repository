@@ -301,7 +301,6 @@ export class RestConstants {
         'initiator',
         'terminator',
         'validator',
-        'redaktion',
         'editor',
         'graphical_designer',
         'technical_implementer',

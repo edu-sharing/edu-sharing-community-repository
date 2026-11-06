@@ -241,6 +241,18 @@
     <ng-container *ngTemplateOutlet="loading"></ng-container>
     } @else if ( collectionsDisplayType() === NodeEntriesDisplayType.Tree ||
     !dataSourceCollectionsFlat.isEmpty() || dataSourceCollectionsFlat.isLoading ) {
+    <!-- create a new collection for the selected nodes, shown as first entry of the tree -->
+    @if (showCreateCollection() && !(dataSourceCollectionsTree.isLoadingSubject | async)) {
+    <button
+      matRipple
+      class="create-collection-tree-entry"
+      data-test="nodes-selector-create-collection"
+      (click)="createCollectionWithSelectedNodes()"
+    >
+      <span class="create-collection-badge"><i esIcon="add"></i></span>
+      <span class="create-collection-title">{{ 'OPTIONS.NEW_COLLECTION' | translate }}</span>
+    </button>
+    }
     <es-node-entries-wrapper
       #collectionsWrapperRef
       [checkbox]="collectionsDisplayType() !== NodeEntriesDisplayType.Tree"

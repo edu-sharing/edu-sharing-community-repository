@@ -38,6 +38,27 @@ export class GlobalCollectionsPageService {
         this.internal.showLanding.set(showLanding);
     }
 
+    /**
+     * Keeps new level0 collections client side for 60s, so the start page shows them before the
+     * search index has caught up (merged as virtual nodes by the collection content).
+     */
+    async addTemporaryCollections(nodes: Node[]) {
+        if (!nodes?.length) {
+            return;
+        }
+        const collections = await this.sessionStorageService.get<Node[]>(
+            SessionStorageService.KEY_ROOT_COLLECTIONS,
+            [],
+            Store.BrowserSessionStorage,
+        );
+        await this.sessionStorageService.set(
+            SessionStorageService.KEY_ROOT_COLLECTIONS,
+            [...collections.filter((c) => !nodes.find((n) => c.ref.id === n.ref.id)), ...nodes],
+            Store.BrowserSessionStorage,
+            60,
+        );
+    }
+
     async removeTemporaryCollections(nodes: Node[]) {
         const collections = await this.sessionStorageService.get<Node[]>(
             SessionStorageService.KEY_ROOT_COLLECTIONS,

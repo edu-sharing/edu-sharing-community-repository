@@ -1,5 +1,26 @@
 {
   "TOPIC_PAGE": {
+    "SIDEBAR": {
+      "MENU": {
+        "INHERITANCE": "Inheritance"
+      },
+      "INHERITANCE": {
+        "INTRO": "Inheritance of {{title}}",
+        "INTRO_DESCRIPTION": "This is how this collection and its sub-collections get their topic pages. \"Pass on\" decides whether inherited templates are handed further down.",
+        "STATE_OWN": "Own topic page – no inheritance needed",
+        "STATE_INHERITS": "inherits from {{title}}",
+        "STATE_STOPPED": "inherits nothing – passing on stopped at {{title}}",
+        "STATE_NONE": "no topic page",
+        "PASSES_OWN_TEMPLATES": "passes its own templates on to sub-collections",
+        "PASSES_NOTHING_ON": "does not pass inherited templates on to sub-collections",
+        "SAVED_STATE": "previously:",
+        "PASS_ON": "Pass on",
+        "PASS_ON_TOOLTIP": "Pass inherited templates on to the sub-collections",
+        "CHANGED_COUNT": "{{count}} shown collections change",
+        "SAVED": "The inheritance has been saved.",
+        "LOAD_ERROR": "The inheritance could not be loaded."
+      }
+    },
     "NAVIGATION": {
       "NEW_PAGE_VARIANT": "New topic page",
       "NEW_PAGE_TEMPLATE": "New topic page template",

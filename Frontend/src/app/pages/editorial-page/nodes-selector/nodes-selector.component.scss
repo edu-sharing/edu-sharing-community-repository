@@ -1,5 +1,6 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
 @use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
+@use 'projects/edu-sharing-ui/src/lib/node-entries/mixins' as entries;
 
 @mixin tabLayout2Line() {
     mat-tab-header {
@@ -148,6 +149,33 @@
     object-fit: contain;
     vertical-align: middle;
     margin-right: 6px;
+}
+
+// "new collection" entry on top of the collections tree, styled like a top-level tree node
+.create-collection-tree-entry {
+    @include entries.tree-node-row;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    padding: 0 8px 0 36px;
+    border: none;
+    background: transparent;
+    color: vars.$textMain;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+
+    .create-collection-badge {
+        @include entries.tree-node-badge;
+    }
+
+    .create-collection-title {
+        @include entries.tree-node-title;
+        @include entries.tree-node-root-title;
+    }
 }
 
 .collection-display-type {

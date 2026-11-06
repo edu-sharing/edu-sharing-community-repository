@@ -536,7 +536,7 @@ public class PersonDao {
         if(publicStats) {
             bool.must(m -> m.term(t -> t.field("permissions.read").value(CCConstants.AUTHORITY_GROUP_EVERYONE)));
         }
-        bool.must(m -> m.term(t -> t.field("properties.cm:creator").value(getAuthorityName())));
+        bool.must(m -> m.term(t -> t.field("properties.cm:creator.keyword").value(getAuthorityName())));
         bool.mustNot(mn -> mn.term(t -> t.field("aspects").value("ccm:collection_io_reference")));
         bool.mustNot(mn -> mn.term(t -> t.field("aspects").value("ccm:io_childobject")));
         return bool;
@@ -976,13 +976,20 @@ public class PersonDao {
     }
 
     public void requestDataProtectionExport(){
-        ApplicationContextFactory.getApplicationContext().getBean(FeatureInfoDataProtectionService.class);
+        assertDataProtectionEnabled();
         dataProtectionService.requestDataProtectionExport(getUserName());
     }
 
     public String getDataProtectionNode(){
-        ApplicationContextFactory.getApplicationContext().getBean(FeatureInfoDataProtectionService.class);
+        assertDataProtectionEnabled();
         return dataProtectionService.getDataProtectionNode(getUserName());
+    }
+
+    private static void assertDataProtectionEnabled() {
+        if (ApplicationContextFactory.getApplicationContext()
+                .getBeanProvider(FeatureInfoDataProtectionService.class).getIfAvailable() == null) {
+            throw new UnsupportedOperationException("dataprotection feature is not enabled");
+        }
     }
 
     public DashboardShortcutEntry[] getDashboardShortcuts() throws Exception {

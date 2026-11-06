@@ -54,9 +54,20 @@ public class ElasticAdminService {
     static final String SCROLL_TIMEOUT = "5m";
     static final int PAGE_SIZE = 500;
     /**
-     * documents per NDJSON file inside a dump, keeps every file below the default http.max_content_length of _bulk
+     * page size of a dump: it contains the full _source (incl. fulltext and previews), so a page of PAGE_SIZE
+     * documents can exceed the maximum response size of the elastic client
+     */
+    static final int DUMP_PAGE_SIZE = 100;
+    /**
+     * maximum documents per NDJSON file inside a dump
      */
     static final int DUMP_DOCS_PER_FILE = 10000;
+    /**
+     * maximum (uncompressed) size per NDJSON file inside a dump. Keeps every file below the default
+     * http.max_content_length (100mb) of _bulk and small enough to be decoded as a single string by browser based tools
+     * (documents with fulltext or previews can be large, so the document limit alone is not sufficient)
+     */
+    static final long DUMP_MAX_BYTES_PER_FILE = 50L * 1024 * 1024;
     static final String CSV_MULTIVALUE_SEPARATOR = "; ";
 
     private final SearchServiceElastic searchServiceElastic;
@@ -123,11 +134,17 @@ public class ElasticAdminService {
         ObjectNode body = buildScrollBody(request.getQuery(), format, properties, source);
         log.info("elastic export started: index={} format={} source={} query={}", index, format, source, body);
         long count;
-        switch (format) {
-            case csv -> count = exportCsv(index, body, properties, source, out);
-            case json -> count = exportJson(index, body, properties, source, out);
-            case dump -> count = exportDump(index, body, out);
-            default -> throw new IllegalArgumentException("unsupported format " + format);
+        try {
+            switch (format) {
+                case csv -> count = exportCsv(index, body, properties, source, out);
+                case json -> count = exportJson(index, body, properties, source, out);
+                case dump -> count = exportDump(index, body, out);
+                default -> throw new IllegalArgumentException("unsupported format " + format);
+            }
+        } catch (IOException | RuntimeException e) {
+            // the response is usually already committed, the client only sees an aborted download
+            log.error("elastic export failed: index={} format={}: {}", index, format, e.getMessage(), e);
+            throw e;
         }
         log.info("elastic export finished: index={} format={} documents={}", index, format, count);
     }
@@ -188,6 +205,12 @@ public class ElasticAdminService {
      */
     @Permission(requiresGlobalAdmin = true)
     public ElasticDocInspection inspect(String nodeId, String index) throws Throwable {
+        NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
+        boolean exists = NodeServiceHelper.exists(nodeRef);
+        if (StringUtils.isBlank(index) && exists && isAuthority(nodeRef)) {
+            // persons and groups are only part of the authorities index
+            index = SearchServiceElastic.INDEX_CONSTANT_AUTHORITIES;
+        }
         index = SearchServiceElastic.validateIndexExpression(index);
         ElasticDocInspection result = new ElasticDocInspection();
         result.setNodeId(nodeId);
@@ -207,9 +230,8 @@ public class ElasticAdminService {
         }
         result.setDocuments(documents);
 
-        NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
         Map<String, List<String>> repositoryProps = new TreeMap<>();
-        if (NodeServiceHelper.exists(nodeRef)) {
+        if (exists) {
             result.setExistsInRepository(true);
             result.setRepositoryType(CCConstants.getValidLocalName(NodeServiceHelper.getType(nodeRef)));
             result.setRepositoryAspects(Arrays.stream(NodeServiceHelper.getAspects(nodeRef)).map(CCConstants::getValidLocalName).toList());
@@ -229,6 +251,11 @@ public class ElasticAdminService {
         }
         result.setProperties(diff(repositoryProps, indexProps, !documents.isEmpty(), result.isExistsInRepository()));
         return result;
+    }
+
+    private static boolean isAuthority(NodeRef nodeRef) {
+        String type = NodeServiceHelper.getType(nodeRef);
+        return CCConstants.CM_TYPE_PERSON.equals(type) || CCConstants.CM_TYPE_AUTHORITY_CONTAINER.equals(type);
     }
 
     static List<ElasticDocInspection.PropertyDiff> diff(Map<String, List<String>> repositoryProps, Map<String, List<String>> indexProps, boolean hasIndex, boolean hasRepository) {
@@ -334,7 +361,7 @@ public class ElasticAdminService {
             // most efficient order for scrolling
             body.putArray("sort").add("_doc");
         }
-        body.put("size", PAGE_SIZE);
+        body.put("size", ElasticExportFormat.dump.equals(format) ? DUMP_PAGE_SIZE : PAGE_SIZE);
         if (!ElasticExportFormat.dump.equals(format)) {
             ArrayNode includes = body.putArray("_source");
             includes.add("nodeRef");
@@ -454,30 +481,31 @@ public class ElasticAdminService {
         writeZipJson(zip, "mapping.json", mapping);
         writeZipJson(zip, "settings.json", mapper.readTree(searchServiceElastic.performRawRequest("GET", index + "/_settings", null)));
         writeZipJson(zip, "aliases.json", mapper.readTree(searchServiceElastic.performRawRequest("GET", index + "/_alias", null)));
-        Writer writer = new OutputStreamWriter(zip, StandardCharsets.UTF_8);
-        long[] fileCounter = {0};
+        // documents in the current file, bytes in the current file, number of files
+        long[] fileState = {0, 0, 0};
         long count = scroll(index, body, hit -> {
-            if (fileCounter[0] % DUMP_DOCS_PER_FILE == 0) {
-                if (fileCounter[0] > 0) {
-                    writer.flush();
-                    zip.closeEntry();
-                }
-                zip.putNextEntry(new ZipEntry(String.format("data-%05d.ndjson", fileCounter[0] / DUMP_DOCS_PER_FILE + 1)));
-            }
             ObjectNode action = mapper.createObjectNode();
             ObjectNode meta = action.putObject("index");
             if (includeIndex) {
                 meta.put("_index", hit.path("_index").asText());
             }
             meta.put("_id", hit.path("_id").asText());
-            writer.write(action.toString());
-            writer.write('\n');
-            writer.write(mapper.writeValueAsString(hit.path("_source")));
-            writer.write('\n');
-            fileCounter[0]++;
+            byte[] lines = (action + "\n" + mapper.writeValueAsString(hit.path("_source")) + "\n").getBytes(StandardCharsets.UTF_8);
+            boolean full = fileState[0] >= DUMP_DOCS_PER_FILE || (fileState[0] > 0 && fileState[1] + lines.length > DUMP_MAX_BYTES_PER_FILE);
+            if (fileState[2] == 0 || full) {
+                if (fileState[2] > 0) {
+                    zip.closeEntry();
+                }
+                fileState[2]++;
+                fileState[0] = 0;
+                fileState[1] = 0;
+                zip.putNextEntry(new ZipEntry(String.format("data-%05d.ndjson", fileState[2])));
+            }
+            zip.write(lines);
+            fileState[0]++;
+            fileState[1] += lines.length;
         });
-        writer.flush();
-        if (count > 0) {
+        if (fileState[2] > 0) {
             zip.closeEntry();
         }
         zip.finish();

@@ -25,6 +25,7 @@ export class RevocationDialogComponent {
     private nodeService = inject(NodeServiceUnwrapped);
 
     reasonControl = new FormControl('', Validators.required);
+    cleanupCollectionsControl = new FormControl(false);
     edit: boolean;
 
     constructor() {
@@ -73,6 +74,7 @@ export class RevocationDialogComponent {
                 body: {
                     reason: this.reasonControl.value,
                     removeContent: true,
+                    cleanupCollections: !this.edit && this.cleanupCollectionsControl.value,
                 },
             }),
         );

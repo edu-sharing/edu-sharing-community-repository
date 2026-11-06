@@ -34,6 +34,7 @@ import { animate, group, state, style, transition, trigger } from '@angular/anim
 import { UIAnimation } from '../../util/ui-animation';
 import { VCard } from '../../util/VCard';
 import { VCardNamePipe } from '../../pipes/vcard-name.pipe';
+import { SafeHtmlPipe } from '../../pipes/safe-html.pipe';
 
 export interface VCardEntry {
     name: string;
@@ -204,6 +205,8 @@ export class MdsWidgetComponent implements OnInit, OnDestroy, OnChanges {
 
     @ViewChild('editWrapper') editWrapper: ElementRef;
     @ViewChild(MatRipple) matRipple: MatRipple;
+    /** tags kept for html widgets (tinyMCE): the defaults plus the headings of its toolbar */
+    readonly HTML_ALLOWED_TAGS = [...SafeHtmlPipe.DEFAULT_ALLOWED_TAGS, 'h1', 'h2', 'h3', 'h4'];
     basicType = signal<string>(null);
     rawValue: { path: MdsValue[]; id: string }[];
 
@@ -385,6 +388,22 @@ export class MdsWidgetComponent implements OnInit, OnDestroy, OnChanges {
         }
         console.warn('Unsupported link type ' + link);
         return null;
+    }
+
+    /**
+     * Single-choice widgets (e.g. `singleoption`) are rendered as plain text by default. If they
+     * are `isSearchable`, they are rendered like the flat `array` entries instead, so that the
+     * value links to a search for it.
+     */
+    isSearchableOption(): boolean {
+        return (
+            !!this.widget?.definition.isSearchable &&
+            [
+                MdsWidgetType.Singleoption,
+                MdsWidgetType.RadioVertical,
+                MdsWidgetType.RadioHorizontal,
+            ].includes(this.widget.definition.type as MdsWidgetType)
+        );
     }
 
     /**

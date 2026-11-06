@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 
 /**
@@ -21,8 +21,13 @@ export class TemporaryStorageService {
     static OPTION_DISABLE_SCROLL_LAYOUT = 'option_disable_scroll_layout';
     static CUSTOM_NODE_LIST_COMPONENT = 'custom_node_list_component';
     static CUSTOM_NODE_ENTRIES_COMPONENT = 'custom_node_entries_component';
+    /** Cut/copied nodes of the workspace and collections, see {@link ClipboardObject}. */
+    static WORKSPACE_CLIPBOARD = 'workspace_clipboard';
 
     private data: any = {};
+    private readonly clipboardSignal = signal<ClipboardObject | null>(null);
+    /** Reactive view of the {@link WORKSPACE_CLIPBOARD} entry, e.g. to show a paste bar. */
+    readonly clipboard = this.clipboardSignal.asReadonly();
 
     constructor() {}
 
@@ -35,6 +40,7 @@ export class TemporaryStorageService {
 
     set(name: string, value: any) {
         this.data[name] = value;
+        this.notifyClipboard(name);
     }
 
     /**
@@ -48,6 +54,27 @@ export class TemporaryStorageService {
 
     remove(name: string) {
         this.data[name] = null;
+        this.notifyClipboard(name);
+    }
+
+    /** Removes a single node from the clipboard, clearing the clipboard when it becomes empty. */
+    removeFromClipboard(node: Node) {
+        const clip = this.clipboard();
+        if (!clip) {
+            return;
+        }
+        const nodes = clip.nodes.filter((n) => n.ref.id !== node.ref.id);
+        if (nodes.length) {
+            this.set(TemporaryStorageService.WORKSPACE_CLIPBOARD, { ...clip, nodes });
+        } else {
+            this.remove(TemporaryStorageService.WORKSPACE_CLIPBOARD);
+        }
+    }
+
+    private notifyClipboard(name: string) {
+        if (name === TemporaryStorageService.WORKSPACE_CLIPBOARD) {
+            this.clipboardSignal.set(this.data[name] ?? null);
+        }
     }
 }
 

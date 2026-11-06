@@ -28,13 +28,18 @@ export class NodeEntriesCardSmallComponent<T extends Node> {
     @Input() node: T;
     @Input() dropdown: DropdownComponent;
 
+    /**
+     * Options painted on the card (e.g. APPLY in picker mode). Like the large card, only
+     * `showAlways` options: other list options are hidden asynchronously by their show callback,
+     * which would otherwise leave an empty options strip on every card.
+     */
     optionsOnCard() {
         const options = this.entriesService.options?.[Target.List] ?? [];
         const always = options.filter((o) => o.showAlways);
         if (always.some((o) => o.showCallback([this.node]))) {
             return always;
         }
-        return options.filter((o) => o.showAsAction && o.showCallback([this.node])).slice(0, 3);
+        return [];
     }
     async openMenu(event: MouseEvent, node: T) {
         event.stopPropagation();

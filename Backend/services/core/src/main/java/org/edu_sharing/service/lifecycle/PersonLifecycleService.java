@@ -16,6 +16,7 @@ import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.transaction.TransactionService;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -198,10 +199,18 @@ public class PersonLifecycleService {
 			result.homeFolder.put(DEFAULT_SCOPE,handleHomeHolder(personNodeRef, options, null, deletedUsername));
 			List<NodeRef> filesToIgnore=result.homeFolder.get("default").
 					getElements().stream().map((e)->new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,e.getId())).collect(Collectors.toList());
+			// always processed (also if safe is disabled), a leftover safe home of a former safe usage must be cleaned up as well
 			result.homeFolder.put(CCConstants.CCM_VALUE_SCOPE_SAFE,handleHomeHolder(personNodeRef, options, CCConstants.CCM_VALUE_SCOPE_SAFE, deletedUsername));
 
+			boolean safeEnabled = isSafeEnabled();
+			if(!safeEnabled) {
+				logger.info("repository.safe.enabled is false, remaining nodes of " + userName + " are processed without scope separation");
+			}
+			// if safe is disabled, this also covers all (former) safe nodes of the user, see getNodeRefsForDeletion
 			result.sharedFolders.put(DEFAULT_SCOPE,handleForeignFiles(personNodeRef,filesToIgnore,options,null, deletedUsername));
-			result.sharedFolders.put(CCConstants.CCM_VALUE_SCOPE_SAFE,handleForeignFiles(personNodeRef,filesToIgnore,options,CCConstants.CCM_VALUE_SCOPE_SAFE, deletedUsername));
+			if(safeEnabled) {
+				result.sharedFolders.put(CCConstants.CCM_VALUE_SCOPE_SAFE, handleForeignFiles(personNodeRef, filesToIgnore, options, CCConstants.CCM_VALUE_SCOPE_SAFE, deletedUsername));
+			}
 			result.collections=handleCollections(personNodeRef,options);
 
 			handleStream(personNodeRef,options);
@@ -247,26 +256,44 @@ public class PersonLifecycleService {
 		}
 	}
 
+	/**
+	 * all nodes of the given type created by the given user in the given scope (null = default scope)
+	 * not using aspect filter since it will
+	 */
 	public List<NodeRef> getAllNodeRefs(String username, String type, String scope){
+		QName eduscopeAspect = QName.createQName(CCConstants.CCM_ASPECT_EDUSCOPE);
+		QName eduscopeName = QName.createQName(CCConstants.CCM_PROP_EDUSCOPE_NAME);
+		// same semantics as the former cmis query: node must have the eduscope aspect and the scope name must match
+		return getAllNodeRefsByCreator(username, type).stream()
+				.filter(ref -> nodeService.hasAspect(ref, eduscopeAspect))
+				.filter(ref -> Objects.equals(scope, nodeService.getProperty(ref, eduscopeName)))
+				.collect(Collectors.toList());
+	}
+
+	/**
+	 * all nodes of the given type created by the given user, regardless of their scope
+	 */
+	private List<NodeRef> getAllNodeRefsByCreator(String username, String type) {
+		// no aspect/scope filter in CMIS: the eduscope JOIN becomes "IN (select … from alf_node_aspects)", which postgres hashes over ALL eduscope nodes (seconds on large repos) -> filter in java
 		Map<String, Object> filters=new HashMap<>();
 		filters.put("cmis:createdBy",username);
-		filters.put(CCConstants.CCM_PROP_EDUSCOPE_NAME,scope);
 		return CMISSearchHelper.fetchNodesByTypeAndFilters(type,filters);
-		/*
-		SearchParameters params=new SearchParameters();
-		params.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
-		// will use the database
-		params.setLanguage(SearchService.LANGUAGE_CMIS_ALFRESCO);
-		params.setMaxItems(Integer.MAX_VALUE);
-		String query="SELECT cmis:name FROM "+CCConstants.getValidLocalName(type)+" WHERE cmis:createdBy = '"+ username + "'";
-		if(scope==null){
-			scope=
+	}
+
+	/**
+	 * nodes of the user which should be processed when deleting the user in the given scope.
+	 * If the safe feature is disabled, scopes are not separated: all nodes of the user are returned (incl. leftovers of a former safe usage),
+	 * so that they are processed in the default scope instead of being skipped
+	 */
+	private List<NodeRef> getNodeRefsForDeletion(String username, String type, String scope) {
+		if(!isSafeEnabled()) {
+			return getAllNodeRefsByCreator(username, type);
 		}
-		params.setQuery(query);
-		ResultSet result = searchService.query(params);
-		logger.info(query+": "+result.getNodeRefs().size());
-		return result.getNodeRefs();
-		*/
+		return getAllNodeRefs(username, type, scope);
+	}
+
+	private boolean isSafeEnabled() {
+		return LightbendConfigLoader.get().getBoolean("repository.safe.enabled");
 	}
 
 	private void handleStatistics(NodeRef personNodeRef, String deletedUsername, PersonDeleteOptions options) {
@@ -291,7 +318,7 @@ public class PersonLifecycleService {
 	private List<NodeRef> deleteAllOfType(NodeRef personNodeRef,String type,String scope) {
 		String username = (String)nodeService.getProperty(personNodeRef,
 				QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
-		List<NodeRef> refs = getAllNodeRefs(username,type, scope);
+		List<NodeRef> refs = getNodeRefsForDeletion(username,type, scope);
 		logger.info("Deleting all files of type " + type + "( " + refs.size() + " files)");
 		deleteAllRefs(refs);
 		return refs;
@@ -303,7 +330,7 @@ public class PersonLifecycleService {
 	public List<NodeRef> assignUserToType(NodeRef personNodeRef,String newUsername,String type,String scope) {
 		String username = (String)nodeService.getProperty(personNodeRef,
 				QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
-		List<NodeRef> refs = getAllNodeRefs(username,type, scope);
+		List<NodeRef> refs = getNodeRefsForDeletion(username,type, scope);
 		logger.info("Reassigning deleted to all files of type "+type+" ("+refs.size()+")");
 		return assignUserToNodes(newUsername, username, refs);
 	}
@@ -365,10 +392,10 @@ public class PersonLifecycleService {
 		}
 		PersonDeleteResult.CollectionCounts counts=new PersonDeleteResult.CollectionCounts();
 		String userName = (String)nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
-		List<NodeRef> collectionsMaps = getAllNodeRefs(userName,CCConstants.CCM_TYPE_MAP,null).stream().
+		List<NodeRef> collectionsMaps = getNodeRefsForDeletion(userName,CCConstants.CCM_TYPE_MAP,null).stream().
 				filter((ref)->nodeService.hasAspect(ref,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION))).
 				collect(Collectors.toList());
-		List<NodeRef> collectionsIos = getAllNodeRefs(userName,CCConstants.CCM_TYPE_IO,null).stream().
+		List<NodeRef> collectionsIos = getNodeRefsForDeletion(userName,CCConstants.CCM_TYPE_IO,null).stream().
 				filter((ref)->nodeService.hasAspect(ref,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))).
 				collect(Collectors.toList());
 		counts.setCollections(convertToElements(collectionsMaps));
@@ -455,10 +482,10 @@ public class PersonLifecycleService {
 		String userName = (String)nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
 		// getting all ios (files) and maps (folders) where this user is the creator, but not any which should be ignored
 
-		List<NodeRef> refsIO = getAllNodeRefs(userName, CCConstants.CCM_TYPE_IO,scope).stream().
+		List<NodeRef> refsIO = getNodeRefsForDeletion(userName, CCConstants.CCM_TYPE_IO,scope).stream().
 				filter((ref)->!filesToIgnore.contains(ref)).
 				collect(Collectors.toList());
-		List<NodeRef> refsMaps = getAllNodeRefs(userName, CCConstants.CCM_TYPE_MAP,scope).stream().
+		List<NodeRef> refsMaps = getNodeRefsForDeletion(userName, CCConstants.CCM_TYPE_MAP,scope).stream().
 				filter((ref)->!filesToIgnore.contains(ref)).
 				filter((ref)->!nodeService.hasAspect(ref, QName.createQName(CCConstants.CCM_ASPECT_COLLECTION))).
 				collect(Collectors.toList());

@@ -1,7 +1,7 @@
 import { Sort } from '@angular/material/sort';
 
 import { SelectionModel } from '@angular/cdk/collections';
-import { CustomOptions, OptionItem, Target } from '../types/option-item';
+import { CustomOptions, OptionItem, Scope, Target } from '../types/option-item';
 import { ListItem, ListItemSort } from '../types/list-item';
 import { CanDrop, DragData, DropAction } from '../types/drag-drop';
 import { Node } from 'ngx-edu-sharing-api';
@@ -42,6 +42,8 @@ export type ListOptionsConfig = {
     actionbar?: ActionbarComponent | ActionbarComponent[];
     parent?: Node;
     customOptions?: CustomOptions;
+    /** Scope for the options; defaults to the list's own `scope`. */
+    scope?: Scope;
 };
 
 export interface ListSortConfig extends Sort {

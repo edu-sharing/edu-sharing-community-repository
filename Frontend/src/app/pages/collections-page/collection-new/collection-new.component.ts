@@ -44,8 +44,6 @@ import {
     ConfigService,
     Node,
     NodeService,
-    SessionStorageService,
-    Store,
 } from 'ngx-edu-sharing-api';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { Observable, Subject } from 'rxjs';
@@ -67,6 +65,7 @@ import { OptionsHelperService } from '../../../services/options-helper.service';
 type Step = 'NEW' | 'GENERAL' | 'METADATA' | 'PERMISSIONS' | 'SETTINGS' | 'EDITORIAL_GROUPS';
 
 // component class
+import { GlobalCollectionsPageService } from '../global-collections-page.service';
 @Component({
     selector: 'es-collection-new',
     templateUrl: 'collection-new.component.html',
@@ -90,7 +89,7 @@ export class CollectionNewComponent implements OnInit, OnDestroy {
     private router = inject(Router);
     private toast = inject(Toast);
     private temporaryStorage = inject(TemporaryStorageService);
-    private sessionStorageService = inject(SessionStorageService);
+    private globalCollectionsPageService = inject(GlobalCollectionsPageService);
     private configLegacy = inject(ConfigurationService);
     private configService = inject(ConfigService);
     private translations = inject(TranslationsService);
@@ -768,19 +767,8 @@ export class CollectionNewComponent implements OnInit, OnDestroy {
     private async save4(collection: EduData.Node) {
         this.localEvents.nodesCreated.emit([collection]);
         if (this.parentId === RestConstants.ROOT) {
-            const collections = await this.sessionStorageService.get(
-                SessionStorageService.KEY_ROOT_COLLECTIONS,
-                [],
-                Store.BrowserSessionStorage,
-            );
-            collections.push(collection);
-            // temporary store for 60s to hold it when elastic index fails
-            await this.sessionStorageService.set(
-                SessionStorageService.KEY_ROOT_COLLECTIONS,
-                collections,
-                Store.BrowserSessionStorage,
-                60,
-            );
+            // temporary store to hold it when the elastic index is not yet updated
+            await this.globalCollectionsPageService.addTemporaryCollections([collection]);
         }
         // check if there are any nodes that should be added to this collection
         const add: { nodes: EduData.Node[]; callback: EventEmitter<any> } =

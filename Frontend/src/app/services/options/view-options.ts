@@ -45,7 +45,7 @@ export function createViewOptions({
                 console.warn(e);
             }
         }
-        void service.dialogs.openNodeInfoDialog({ nodes });
+        void service.dialogs.openNodeInfoDialog({ nodes, optionData: data });
     });
     debugNode.elementType = [];
     debugNode.onlyDesktop = true;
@@ -393,7 +393,7 @@ export function createViewOptions({
         if (!nodes) {
             return false;
         }
-        return nodes[0].downloadUrl != null;
+        return true;
     };
 
     const reportNode = new OptionItem('OPTIONS.NODE_REPORT', 'flag', (node) =>

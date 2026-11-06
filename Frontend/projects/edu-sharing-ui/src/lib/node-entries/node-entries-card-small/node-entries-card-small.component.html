@@ -57,11 +57,13 @@
   <ng-container *ngTemplateOutlet="meta"></ng-container>
   }
   <!-- bottom options strip (e.g. the APPLY button in picker mode). Assignments use the
-       top-right three-dot menu instead, so they never get this strip. -->
-  @if (!nodeHelper.isNodeAssignment(node) && entriesService.options?.[Target.List]?.length) {
+       top-right three-dot menu instead, so they never get this strip. Only rendered when there is
+       an option to paint, list options alone (e.g. dropdown-only ones) leave an empty strip. -->
+  @let cardOptions = optionsOnCard(); @if (!nodeHelper.isNodeAssignment(node) && cardOptions.length)
+  {
   <div class="card-options">
     <div class="card-options-area">
-      @for (option of optionsOnCard(); track option) {
+      @for (option of cardOptions; track option) {
       <es-option-button [option]="option" [node]="node"></es-option-button>
       }
     </div>

@@ -221,6 +221,7 @@
                   [headerActionbar]="headerActionbar"
                   [selectionActionbar]="selectionActionbar"
                   [scope]="getScope()"
+                  (scopeChange)="selectTab($event)"
                   [isRootLevel]="isRootLevelCollection()"
                   [createAllowed]="createAllowed"
                   [class.collections-master-div-notabs]="!showTabs()"
@@ -247,13 +248,15 @@
       </div>
 
       <!-- Full-width selection bar shown when sub-collections or materials are selected;
-        mirrors the search-page selection layout. State lives in es-collection-content. -->
+        mirrors the search-page selection layout. State lives in es-collection-content. Without a
+        selection it stays visible while the clipboard has content, to offer "paste". -->
       <div
         class="selection-action-bar"
         cdkOverlayOrigin
         #selectionBar="cdkOverlayOrigin"
-        [class.visible]="!!collectionContentRef?.selection?.length"
+        [class.visible]="!!collectionContentRef?.selection?.length || showClipboardBar()"
       >
+        @if (collectionContentRef?.selection?.length) {
         <button
           mat-icon-button
           class="clear-selection"
@@ -279,6 +282,26 @@
             [esIcon]="collectionContentRef?.selectionOverlayOpen ? 'expand_more' : 'expand_less'"
           ></i>
         </button>
+        } @else {
+        <button
+          mat-icon-button
+          class="clear-selection"
+          (click)="clearClipboard()"
+          [attr.aria-label]="'SEARCH.CLEAR_CLIPBOARD' | translate"
+          matTooltip="{{ 'SEARCH.CLEAR_CLIPBOARD' | translate }}"
+        >
+          <i esIcon="close"></i>
+        </button>
+        <button
+          mat-button
+          color="primary"
+          class="count"
+          (click)="clipboardOverlayOpen = !clipboardOverlayOpen"
+        >
+          {{ 'SEARCH.N_IN_CLIPBOARD' | translate : { count: clipboard()?.nodes?.length || 0 } }}
+          <i [esIcon]="clipboardOverlayOpen ? 'expand_more' : 'expand_less'"></i>
+        </button>
+        }
         <es-actionbar
           #selectionActionbarRef
           [showToggleOptions]="false"
@@ -302,6 +325,26 @@
           [columns]="collectionContentRef?.referencesColumns"
           [displayType]="viewState.referencesDisplayType()"
           (deselect)="collectionContentRef?.deselectNode($event)"
+        ></es-search-selection-overlay>
+      </ng-template>
+      <!-- clipboard counterpart of the selection overlay; removing a node takes it off the
+        clipboard -->
+      <ng-template
+        cdkConnectedOverlay
+        [cdkConnectedOverlayOrigin]="selectionBar"
+        [cdkConnectedOverlayOpen]="
+          clipboardOverlayOpen && !collectionContentRef?.selection?.length && showClipboardBar()
+        "
+        [cdkConnectedOverlayPositions]="overlayPositions"
+        [cdkConnectedOverlayWidth]="selectionBar.elementRef.nativeElement.offsetWidth"
+        [cdkConnectedOverlayHasBackdrop]="false"
+        (overlayOutsideClick)="clipboardOverlayOpen = false"
+      >
+        <es-search-selection-overlay
+          [nodes]="clipboard()?.nodes || []"
+          [columns]="collectionContentRef?.referencesColumns"
+          [displayType]="viewState.referencesDisplayType()"
+          (deselect)="removeFromClipboard($event)"
         ></es-search-selection-overlay>
       </ng-template>
     </div>

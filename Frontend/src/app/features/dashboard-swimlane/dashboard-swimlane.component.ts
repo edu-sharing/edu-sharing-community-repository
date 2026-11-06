@@ -266,10 +266,9 @@ export class DashboardSwimlaneComponent {
             void this.setGlobalOptions([newCollection]);
         } else if (this.swimlane().id === 'recent-activities') {
             this.routerLink.set('/' + UIConstants.ROUTER_PREFIX + 'editorial/activity');
-            const events = [] as StreamDetails[];
-            let i = 0;
-            for (const [key, types] of Object.entries(RECENT_ACTIVITY_EVENT_TYPES)) {
-                events.splice(i++, 0, {
+            // Fetch all activity types in parallel; Promise.all keeps the defined order.
+            const events: StreamDetails[] = await Promise.all(
+                Object.entries(RECENT_ACTIVITY_EVENT_TYPES).map(async ([key, types]) => ({
                     key,
                     result: (await firstValueFrom(
                         this.searchService.requestSearch({
@@ -288,19 +287,15 @@ export class DashboardSwimlaneComponent {
                     params: {
                         filters: JSON.stringify({ 'virtual:activityType': [key] }),
                     },
-                });
-            }
+                })),
+            );
             this.streamEvents.set(events);
         } else if (this.swimlane().id === 'shares') {
             this.routerLink.set('/' + UIConstants.ROUTER_PREFIX + 'editorial/share');
-            const events = [] as ShareDetails[];
-            [
-                ['toUser', 'toUser'],
-                ['toUserGroups', 'toUserGroups'],
-                ['fromUser', 'fromUser'],
-            ].forEach(async (k, i) => {
-                events.splice(i, 0, {
-                    key: k[0],
+            // Fetch all directions in parallel, but keep the defined order
+            const events: ShareDetails[] = await Promise.all(
+                ['toUser', 'toUserGroups', 'fromUser'].map(async (direction) => ({
+                    key: direction,
                     // Stateless requestSearch (see recentActivity above): keep the shared
                     // SearchService state untouched so the editorial share page fetches its facets.
                     result: (await firstValueFrom(
@@ -308,7 +303,7 @@ export class DashboardSwimlaneComponent {
                             metadataset: DEFAULT,
                             query: null,
                             searchMode: 'shares',
-                            direction: k[1] as any,
+                            direction: direction as any,
                             repository: HOME_REPOSITORY,
                             contentType: 'ALL',
                             maxItems: this.maxItemsEvents,
@@ -318,10 +313,10 @@ export class DashboardSwimlaneComponent {
                         }),
                     )) as SearchResultGeneric<NodeShare>,
                     params: {
-                        filters: JSON.stringify({ 'virtual:shareDirection': [k[1]] }),
+                        filters: JSON.stringify({ 'virtual:shareDirection': [direction] }),
                     },
-                });
-            });
+                })),
+            );
             this.sharesEvents.set(events);
         }
     }

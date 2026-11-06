@@ -86,6 +86,12 @@ mat-sidenav.es-mat-sidenav {
         font-weight: 500;
         white-space: nowrap;
     }
+    // static label shown instead of the selection count while only the clipboard has content
+    .clipboard-count {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
 }
 
 // The region below the tabs. It fills the card height and clips; the actual scrolling happens

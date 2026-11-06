@@ -294,6 +294,10 @@ public class SearchServiceElastic implements SearchService {
         if (jsonBody != null) {
             request.setJsonEntity(jsonBody);
         }
+        // same response size limit as the java client (the low level default is a fixed 100mb)
+        RequestOptions.Builder options = RequestOptions.DEFAULT.toBuilder();
+        options.setHttpAsyncResponseConsumerFactory(new HttpAsyncResponseConsumerFactory.HeapBufferedResponseConsumerFactory(MAX_RESPONSE_ENTITY_SIZE));
+        request.setOptions(options);
         return EntityUtils.toString(restClient.performRequest(request).getEntity(), java.nio.charset.StandardCharsets.UTF_8);
     }
 
@@ -1466,6 +1470,10 @@ public class SearchServiceElastic implements SearchService {
         eduNodeRef.setIsPublic(false);
         Map<String, List<String>> permissionsElastic = (Map) sourceAsMap.get("permissions");
         String owner = (String) sourceAsMap.get("owner");
+        eduNodeRef.setSharedWithOthers(permissionsElastic != null && permissionsElastic.values().stream()
+                .filter(Objects::nonNull)
+                .flatMap(List::stream)
+                .anyMatch(a -> !a.equals(owner) && !a.equals(CCConstants.AUTHORITY_ROLE_OWNER)));
         if (permissionsElastic != null) {
             for (Map.Entry<String, List<String>> entry : permissionsElastic.entrySet()) {
                 if ("read".equals(entry.getKey())) {

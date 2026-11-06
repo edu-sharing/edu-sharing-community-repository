@@ -247,9 +247,9 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
                 Constrain.AddObjects,
                 Constrain.User,
             ];
-            // collections can only be pasted into another collection
+            // collections and collection references can only be pasted into another collection
             pasteNodes.customShowCallback = async () =>
-                !this.optionsHelperService.clipboardContainsCollections();
+                this.optionsHelperService.canPasteIntoFolder(this._parent);
             pasteNodes.toolpermissions = [
                 RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FOLDERS,
                 RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES,

@@ -148,6 +148,10 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
     private optionsService = inject(OptionsHelperDataService);
     private networkService = inject(RestNetworkService);
     private temporaryStorageService = inject(TemporaryStorageService);
+    /** Cut/copied nodes; while not empty the bottom bar offers "paste" into the open collection. */
+    readonly clipboard = this.temporaryStorageService.clipboard;
+    /** Whether the clipboard-nodes overlay above the bottom bar is open. */
+    clipboardOverlayOpen = false;
     editorialSidebarService = inject(EditorialSidebarService);
     private injector = inject(Injector);
     private toast = inject(Toast);
@@ -301,6 +305,19 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
                 () => this.uiService.goToLogin(),
             );
         });
+        // New level0 collections (e.g. pasted on the start page) always belong to the user's own
+        // collections and are only shown (as virtual nodes until indexed) in the "my" tab.
+        this.localEvents.nodesCreated
+            .pipe(
+                takeUntil(this.destroyed),
+                filter(
+                    (nodes) =>
+                        this.isRootLevelCollection() &&
+                        this.tabSelected !== RestConstants.COLLECTIONSCOPE_MY &&
+                        nodes.some((node) => this.nodeHelper.isNodeCollection(node)),
+                ),
+            )
+            .subscribe(() => this.selectTab(RestConstants.COLLECTIONSCOPE_MY));
         // Navigate to parent collection when the current collection is deleted.
         this.localEvents.nodesDeleted
             .pipe(
@@ -397,6 +414,23 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
 
     isRootLevelCollection(): boolean {
         return this.isRootLevel;
+    }
+
+    /**
+     * Whether the bottom bar is shown without a selection, to offer pasting the clipboard into the
+     * open collection (on the start page: as level0 collections).
+     */
+    showClipboardBar(): boolean {
+        return !this.isGuest && !!this.clipboard()?.nodes?.length;
+    }
+
+    clearClipboard() {
+        this.temporaryStorageService.remove(TemporaryStorageService.WORKSPACE_CLIPBOARD);
+        this.clipboardOverlayOpen = false;
+    }
+
+    removeFromClipboard(node: Node) {
+        this.temporaryStorageService.removeFromClipboard(node);
     }
 
     isAllowedToEditCollection(): boolean {

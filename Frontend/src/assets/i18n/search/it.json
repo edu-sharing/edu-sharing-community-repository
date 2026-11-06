@@ -10,6 +10,8 @@
     "MATERIALS_NGSEARCHWORD": "I materiali",
     "N_SELECTED": "{{count}} selezionati",
     "CLEAR_SELECTION": "Annulla selezione",
+    "N_IN_CLIPBOARD": "{{count}} elemento/i negli appunti",
+    "CLEAR_CLIPBOARD": "Svuota appunti",
     "FRONTPAGE": "Materiali consigliati",
     "IGNORED_PARAMETERS": "Il risultato contiene oggetti che potrebbero non corrispondere a tutti i criteri di ricerca indicati.",
     "MAINSEARCHFIELD": "Campo di input per la ricerca",

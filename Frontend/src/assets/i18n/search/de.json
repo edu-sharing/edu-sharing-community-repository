@@ -10,6 +10,8 @@
     "MATERIALS_NGSEARCHWORD": "Materialien",
     "N_SELECTED": "{{count}} ausgewählt",
     "CLEAR_SELECTION": "Auswahl aufheben",
+    "N_IN_CLIPBOARD": "{{count}} Element(e) in der Zwischenablage",
+    "CLEAR_CLIPBOARD": "Zwischenablage leeren",
     "FRONTPAGE": "Empfohlene Materialien",
     "IGNORED_PARAMETERS": "Die Liste enthält Ergebnisse, für die nicht alle gewählten Kriterien zutreffen",
     "MAINSEARCHFIELD": "Eingabefeld für die Suche",

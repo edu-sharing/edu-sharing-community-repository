@@ -131,8 +131,4 @@ public class URLHelper {
     public static String getNgComponentsUrlRelative(HttpServletRequest req) {
         return getNgComponentsUrl(req.getContextPath());
     }
-
-    public static String getNgCollectionUrl(String nodeId, boolean dynamic) {
-       return getNgComponentsUrl(dynamic) + "collections/?id=" + nodeId;
-    }
 }

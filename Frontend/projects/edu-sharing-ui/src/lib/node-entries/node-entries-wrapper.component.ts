@@ -264,6 +264,15 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
             }
             void this.optionsHelper.refreshComponents();
         });
+        // clipboard dependent options (e.g. paste) must follow cut/copy/paste immediately
+        effect(() => {
+            this.temporaryStorageService.clipboard();
+            untracked(() => {
+                if (this.optionsHelper.getData()) {
+                    void this.optionsHelper.refreshComponents();
+                }
+            });
+        });
     }
 
     ngOnInit(): void {
@@ -588,7 +597,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     async initOptionsGenerator(config: ListOptionsConfig) {
         await this.optionsHelper.initComponents(config.actionbar, this);
         this.optionsHelper.setData({
-            scope: this.entriesService.scope,
+            scope: config.scope ?? this.entriesService.scope,
             activeObjects: this.entriesService.selection.selected,
             selectedObjects: this.entriesService.selection.selected,
             allObjects: this.dataSource.getData(),

@@ -163,8 +163,6 @@
           "EMPTY_MESSAGE": "Du hast bisher weder eine eigene Sammlung angelegt oder Zugriff auf eine Sammlung erhalten.",
           "PLACEHOLDER": "Suche nach Sammlungen",
           "RECENT_COLLECTIONS": "Zuletzt verwendet",
-          "MY_COLLECTIONS": "Meine Sammlungen",
-          "EDITORIAL_COLLECTIONS": "Redaktionelle Sammlungen",
           "DISPLAY_TYPE": {
             "LABEL": "Anzeigeart",
             "GRID": "Anzeige als Kacheln",

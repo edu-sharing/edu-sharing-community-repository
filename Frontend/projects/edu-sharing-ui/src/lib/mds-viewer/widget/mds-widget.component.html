@@ -59,11 +59,11 @@
 </es-mds-editor-widget-container>
 }
 <ng-template #widgetContent>
-  @if (['text', 'number', 'date'].includes(basicType())) {
+  @if (['text', 'number', 'date'].includes(basicType()) && !isSearchableOption()) {
   <div>{{ formatValue() }}</div>
   } @if (basicType() === 'license' && (license$ | async); as license) {
   <div><img alt="" [src]="license.icon" /> {{ license.name }}</div>
-  } @if (basicType() === 'array') {
+  } @if (basicType() === 'array' || isSearchableOption()) {
   <div>
     @for (entry of arrayEntries(); track $index) {
     <div class="array-entry">
@@ -118,6 +118,11 @@
     <span class="slider-value">{{ value()[0] }}</span
     >-<span class="slider-value">{{ value()[1] }}</span>
   </div>
+  } @if (basicType() === 'html') {
+  <div
+    class="widget-html"
+    [innerHTML]="value()?.[0] | safeHtml : { purify: true, allowedTags: HTML_ALLOWED_TAGS }"
+  ></div>
   } @if (basicType() === 'checkbox') {
   <div>{{ (value()?.[0] === 'true' ? 'YES' : 'NO') | translate }}</div>
   } @if (basicType() === 'unknown') {
