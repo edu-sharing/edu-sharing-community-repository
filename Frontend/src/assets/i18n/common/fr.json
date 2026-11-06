@@ -360,6 +360,7 @@
     "EMAIL_REQUIRED": "Veuillez fournir une adresse e-mail valide.",
     "REASON_REQUIRED": "Veuillez sélectionner le type de problème que vous rencontrez.",
     "DONE": "Merci pour votre message.",
+    "ALTCHA_REQUIRED": "Veuillez confirmer que vous n'êtes pas un robot.",
     "REASON": "Quel est le problème ?",
     "REASONS": {
       "UNAVAILABLE": "objet non disponible",

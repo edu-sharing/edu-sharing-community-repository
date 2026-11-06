@@ -48,6 +48,7 @@ export {
     AssignmentV1Service,
     ArchiveV1Service,
     AdminV1Service,
+    AltchaV1Service,
     StatisticV1Service,
     ConfigV1Service,
     StreamV1Service,
