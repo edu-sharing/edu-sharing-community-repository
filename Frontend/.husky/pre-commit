@@ -10,7 +10,12 @@ fi
 
 # GUI git clients (e.g. IDE-integrated VCS) invoke hooks with a minimal PATH that
 # does not include nvm-managed node, since it's normally only added by shell rc files.
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+# Only needed when npx is missing; a hook started from an npm script (e.g. audit:fix via a
+# system npm) already has it, and inherits npm_config_prefix, which makes nvm abort (exit 11).
+if ! command -v npx >/dev/null 2>&1; then
+    unset npm_config_prefix
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+fi
 
 npx lint-staged
