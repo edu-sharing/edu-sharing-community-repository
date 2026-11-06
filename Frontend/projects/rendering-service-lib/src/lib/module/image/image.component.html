@@ -1,10 +1,6 @@
 @if (activeObject()) {
 <div class="image-wrapper">
-  <img
-    #image
-    [src]="$safeNavigationMigration(activeObject()?.link) | rsAssetLink"
-    [alt]="node?.title || node?.name || ''"
-  />
+  <img #image [src]="activeObject()?.link | rsAssetLink" [alt]="node?.title || node?.name || ''" />
   <!--
     translate aria label
     if button has visible text -> must be in aria-label

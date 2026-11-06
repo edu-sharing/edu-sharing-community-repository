@@ -326,7 +326,7 @@
   <div
     class="list"
     cdkDropList
-    [cdkDropListData]="$safeNavigationMigration(config()?.messages)"
+    [cdkDropListData]="config()?.messages"
     (cdkDropListDropped)="drop($event)"
   >
     @if (config().messages.length > 1) {

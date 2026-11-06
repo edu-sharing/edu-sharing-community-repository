@@ -204,7 +204,7 @@
               [deleteVariantEnabled]="collectionNodePageConfigRef && userHasEditRights()"
               [editGlobalTemplateEnabled]="canEditLinkedGlobalTemplate()"
               [globalTemplateMode]="!!globalTemplateNode()"
-              [pageVariantConfigNodes]="$safeNavigationMigration(pageVariantConfigs?.nodes)"
+              [pageVariantConfigNodes]="pageVariantConfigs?.nodes"
               [pageVariantNode]="pageVariantNode()"
               [pageVariantTitle]="
                 pageVariantNode()?.title &&

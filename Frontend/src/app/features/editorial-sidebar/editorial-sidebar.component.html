@@ -95,7 +95,7 @@
         ></es-collection-info-sidebar>
         } @if (option === 'VERSION_MANAGEMENT') {
         <es-metadata-sidebar
-          [nodeSidebar]="$safeNavigationMigration($any(editorialSidebarService.nodes())?.[0])"
+          [nodeSidebar]="$any(editorialSidebarService.nodes())?.[0]"
         ></es-metadata-sidebar>
         } @if (option === 'VIEWS_AND_USAGE') {
         <es-usages-preview [nodes]="$any(editorialSidebarService.nodes())"></es-usages-preview>
@@ -126,7 +126,7 @@
         ></es-scope-editorial-panel>
         } @if (option === 'PREVIEW') {
         <es-preview-sidebar
-          [node]="$safeNavigationMigration($any(editorialSidebarService.nodes())?.[0])"
+          [node]="$any(editorialSidebarService.nodes())?.[0]"
           [editorMode]="$any(enabledOption()?.optionConfig)?.editorMode || 'viewer'"
           [groupId]="$any(enabledOption()?.optionConfig)?.groupId || 'preview_sidebar'"
           [customOptions]="

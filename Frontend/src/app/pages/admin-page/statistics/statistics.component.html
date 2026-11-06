@@ -64,7 +64,7 @@
       <mat-select
         [(ngModel)]="currentTemplate"
         (ngModelChange)="applyTemplate($event)"
-        [name]="$safeNavigationMigration(currentTemplate?.name)"
+        [name]="currentTemplate?.name"
       >
         @for (templates of groupModeTemplates; track templates) {
         <mat-option [value]="templates">

@@ -19,7 +19,7 @@
 />
 } @if (node.preview.isIcon) { @if (node.icon?.fontGlyphId) {
 <div class="icon-font">
-  <i [esIcon]="$safeNavigationMigration(node.icon?.fontGlyphId)"></i>
+  <i [esIcon]="node.icon?.fontGlyphId"></i>
 </div>
 } @if (!node.icon?.fontGlyphId) {
 <img

@@ -1,10 +1,7 @@
 <!-- tree component -->
 @if (dataSource && treeControl && dataSource.data?.length) {
 <div class="tree-container" cdkDropList [cdkDropListSortingDisabled]="true">
-  <es-dropdown
-    #dropdown
-    [options]="$safeNavigationMigration(entriesService.options?.[Target.ListDropdown])"
-  ></es-dropdown>
+  <es-dropdown #dropdown [options]="entriesService.options?.[Target.ListDropdown]"></es-dropdown>
   <button
     #menuTrigger="matMenuTrigger"
     mat-button
@@ -50,7 +47,7 @@
       <es-drag-preview
         *cdkDragPreview
         [node]="node.item"
-        [selected]="$safeNavigationMigration(entriesService.selection?.selected)"
+        [selected]="entriesService.selection?.selected"
         [item]="entriesService.columns[0]"
       ></es-drag-preview>
       }

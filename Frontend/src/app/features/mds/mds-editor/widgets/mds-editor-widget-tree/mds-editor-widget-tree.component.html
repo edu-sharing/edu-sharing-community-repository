@@ -47,7 +47,7 @@
       [formControl]="chipsControl"
       cdkDropList
       cdkDropListOrientation="mixed"
-      [cdkDropListData]="$safeNavigationMigration(chipsControl?.value)"
+      [cdkDropListData]="chipsControl?.value"
       (cdkDropListDropped)="reorderChip($event)"
     >
       <!-- @TODO removed in angular 15
@@ -230,7 +230,7 @@
       [tree]="tree"
       [source]="treeSource"
       [isMultiValue]="valueType === ValueType.MultiValue"
-      [values]="$safeNavigationMigration(chipsControl?.value)"
+      [values]="chipsControl?.value"
       [indeterminateValues]="indeterminateValues$ | async"
       [suggestions]="chipsSuggestionsSubject"
       [parentImpliesChildren]="editorMode === 'search' && (widget.includeSubcollections | async)"

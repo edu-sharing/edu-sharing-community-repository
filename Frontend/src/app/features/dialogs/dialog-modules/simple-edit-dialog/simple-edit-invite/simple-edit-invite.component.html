@@ -36,7 +36,7 @@
           organizationGroups; track group) {
           <mat-button-toggle
             class="button-toggle-org"
-            [value]="$safeNavigationMigration(organization.groups[group]?.authorityName)"
+            [value]="organization.groups[group]?.authorityName"
             [disabled]="!organization.groups[group]"
             >{{
               'SIMPLE_EDIT.INVITE.GROUP_TYPES.' + group

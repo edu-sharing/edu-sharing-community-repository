@@ -47,7 +47,7 @@ whether a tab bar will be shown. The body itself always lives in the same place 
       [inline]="true"
       [labelOpen]="'SEARCH.OPEN_FILTERS'"
       [labelClose]="'SEARCH.CLOSE_FILTERS'"
-      [ariaControls]="$safeNavigationMigration(filtersSidebarComponent()?.panelId)"
+      [ariaControls]="filtersSidebarComponent()?.panelId"
       (toggled)="toggleFilters()"
     ></es-edge-toggle>
     <es-search-page-filters-sidebar #filtersSidebarEl></es-search-page-filters-sidebar>

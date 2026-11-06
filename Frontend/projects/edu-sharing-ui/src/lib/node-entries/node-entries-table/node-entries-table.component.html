@@ -10,10 +10,7 @@
   ></es-sort-select-panel>
   }
 </ng-template>
-<es-dropdown
-  #dropdown
-  [options]="$safeNavigationMigration(entriesService.options?.[Target.ListDropdown])"
-></es-dropdown>
+<es-dropdown #dropdown [options]="entriesService.options?.[Target.ListDropdown]"></es-dropdown>
 <button
   #menuTrigger="matMenuTrigger"
   mat-button
@@ -34,8 +31,8 @@
   [dataSource]="entriesService.dataSource"
   matSort
   [matSortDisableClear]="true"
-  [matSortActive]="$safeNavigationMigration(entriesService.sort?.active)"
-  [matSortDirection]="$safeNavigationMigration(entriesService.sort?.direction)"
+  [matSortActive]="entriesService.sort?.active"
+  [matSortDirection]="entriesService.sort?.direction"
   esInfiniteScroll
   [scrollWindow]="entriesService.infiniteScrollWindow"
   (scrolled)="loadData('scroll')"
@@ -66,11 +63,11 @@
   <div matColumnDef="icon" [sticky]="isScroll">
     <mat-header-cell *matHeaderCellDef class="cell-icon">
       <span class="cdk-visually-hidden">
-        {{ 'LIST_TABLE.DUMMY_ICON_LABEL' | translate }}@if
-        ($safeNavigationMigration(entriesService.dataSource?.getTotal()) !== undefined) { ,
+        {{ 'LIST_TABLE.DUMMY_ICON_LABEL' | translate }}@if (entriesService.dataSource?.getTotal()
+        !== undefined) { ,
         {{ getEntryCountLabel().key | translate : getEntryCountLabel().params }} }
       </span>
-      @if ($safeNavigationMigration(entriesService.dataSource?.getTotal()) !== undefined) {
+      @if (entriesService.dataSource?.getTotal() !== undefined) {
       <span aria-hidden="true"
         >({{ entriesService.checkbox ? entriesService.selection.selected.length + ' / ' : ''
         }}{{ entriesService.dataSource?.getTotal() }})</span

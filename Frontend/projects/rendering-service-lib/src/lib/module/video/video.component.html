@@ -1,7 +1,7 @@
 @if (activeObject()) {
 <div class="video-wrapper">
   <video controls #video (play)="onVideoPlay()">
-    <source [src]="$safeNavigationMigration(activeObject()?.link) | rsAssetLink" />
+    <source [src]="activeObject()?.link | rsAssetLink" />
   </video>
   @if (hasMultipleResolutions) {
   <button aria-label="resolution" mat-icon-button [matMenuTriggerFor]="resolutionMenu">

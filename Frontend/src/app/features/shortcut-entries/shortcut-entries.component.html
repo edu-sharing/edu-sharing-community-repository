@@ -61,11 +61,7 @@
         @if (entry.node?.icon?.fontGlyphId || entry.icon) {
         <i [esIcon]="entry.node?.icon?.fontGlyphId || entry.icon" class="entry-icon"></i>
         } @else { @if (entry.node) {
-        <img
-          class="entry-icon"
-          [src]="$safeNavigationMigration(entry.node.icon?.url)"
-          aria-hidden="true"
-        />
+        <img class="entry-icon" [src]="entry.node.icon?.url" aria-hidden="true" />
         } }
       </div>
       <div

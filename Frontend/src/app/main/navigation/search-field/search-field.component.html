@@ -130,8 +130,8 @@ parameter that tells us which facets to request for suggestions. When there are 
 show the suggestion panel via template outlet. -->
 <es-search-field-facets
   #facets
-  [repository]="$safeNavigationMigration((mdsInfo$ | async)?.repository)"
-  [metadataSet]="$safeNavigationMigration((mdsInfo$ | async)?.metadataSet)"
+  [repository]="(mdsInfo$ | async)?.repository"
+  [metadataSet]="(mdsInfo$ | async)?.metadataSet"
   group="search_input"
   [values]="rawFilters$ | async"
   (valuesChange)="onValuesChange($event)"

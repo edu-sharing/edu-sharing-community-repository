@@ -26,7 +26,7 @@
           @if (isLoggedIn) {
           <es-breadcrumbs
             [showLanding]="true"
-            [searchQuery]="$safeNavigationMigration(searchQuery?.query)"
+            [searchQuery]="searchQuery?.query"
             [home]="'WORKSPACE.' + root"
             [canDropNodes]="canDropOnBreadcrumb"
             (dropElement)="handleDropOnBreadcrumb($event)"

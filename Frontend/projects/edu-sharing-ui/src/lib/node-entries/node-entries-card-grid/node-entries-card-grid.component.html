@@ -34,10 +34,7 @@
   (columnChooserVisibleChange)="columnChooserVisible$.next($event)"
 ></es-column-chooser>
 }
-<es-dropdown
-  #dropdown
-  [options]="$safeNavigationMigration(entriesService.options?.[Target.ListDropdown])"
-></es-dropdown>
+<es-dropdown #dropdown [options]="entriesService.options?.[Target.ListDropdown]"></es-dropdown>
 
 <!-- Do not render the list element (`role="list"` or `li`) when there are no list items. -->
 @if ( (nodes$ | async)?.length > 0 || ((entriesService.globalOptionsSubject | async)?.length > 0 &&

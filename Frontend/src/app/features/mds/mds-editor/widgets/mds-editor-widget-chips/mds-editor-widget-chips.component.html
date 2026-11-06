@@ -111,7 +111,7 @@
     #auto="matAutocomplete"
     class="mds-chip-autocomplete"
     (optionSelected)="selected($event)"
-    (optionActivated)="showTooltip($safeNavigationMigration($any($event.option)?.tooltip))"
+    (optionActivated)="showTooltip($any($event.option)?.tooltip)"
   >
     @for (value of autocompleteValues | async; track value) {
     <mat-option

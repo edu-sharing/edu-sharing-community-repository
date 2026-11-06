@@ -93,7 +93,7 @@
   >
     <div class="es-mat-sidenav-content">
       <es-editorial-sidebar
-        [primaryMode]="$safeNavigationMigration((params$ | async)?.primaryMode)"
+        [primaryMode]="(params$ | async)?.primaryMode"
         [component]="mainComponent$ | async"
         (showComponent)="goToComponent($event)"
         (closeTrigger)="editorialSidebarService.sidebarOpened.set(false)"
@@ -287,7 +287,7 @@
 </ng-template>
 @if ((isMobile$ | async) === true && editorialSidebarService.sidebarOpened()) {
 <es-editorial-sidebar
-  [primaryMode]="$safeNavigationMigration((params$ | async)?.primaryMode)"
+  [primaryMode]="(params$ | async)?.primaryMode"
   [isModal]="true"
   (closeTrigger)="editorialSidebarService.sidebarOpened.set(false)"
 ></es-editorial-sidebar>
