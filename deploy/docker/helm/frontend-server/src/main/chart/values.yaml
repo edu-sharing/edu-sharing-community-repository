@@ -61,7 +61,7 @@ global:
 
 ## @section Local parameters
 
-## @param debug Enable debugging (default global.debug): DEV mode (dev response headers, request logging) and the node inspector on the pod's 127.0.0.1:9229 - reach it with kubectl port-forward
+## @param debug Enable debugging (default global.debug): DEV mode (dev response headers, request logging), a writable /app/dist for `npm run copy-build-to-kubernetes` and the node inspector on the pod's 127.0.0.1:9229 - reach it with kubectl port-forward
 debug: false
 
 ## @param nameOverride Override name
