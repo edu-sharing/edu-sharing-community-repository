@@ -1,4 +1,4 @@
-@if ($safeNavigationMigration(data?.items) !== undefined) {
+@if (data?.items !== undefined) {
 <div class="moodle-wrapper">
   @if (showIframe) {
   <iframe [title]="node?.title ?? 'Moodle'" class="frame" [src]="sanitizedUrl"></iframe>

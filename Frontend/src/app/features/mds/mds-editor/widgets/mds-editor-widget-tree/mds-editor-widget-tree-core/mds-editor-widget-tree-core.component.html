@@ -78,8 +78,7 @@
       matTreeNodeToggle
       [hidden]="node.isHidden"
       [class.is-suggestion-ai]="
-        getIsChecked(node) &&
-        ($safeNavigationMigration(component?.isSuggestion(node)) | async)?.type === 'AI'
+        getIsChecked(node) && (component?.isSuggestion(node) | async)?.type === 'AI'
       "
       [id]="node.uid"
       [attr.aria-selected]="selectedNode === node"

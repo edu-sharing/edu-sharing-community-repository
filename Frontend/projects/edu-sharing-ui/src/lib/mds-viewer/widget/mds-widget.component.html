@@ -12,7 +12,7 @@
   <div class="edit-wrapper">
     @if ( (!isEmpty() || !widget.definition.hideIfEmpty || isEditable()) &&
     (!widget.definition.isExtended || !mdsEditorInstance ||
-    ($safeNavigationMigration(mdsEditorInstance?.shouldShowExtendedWidgets$) | async)) ) {
+    (mdsEditorInstance?.shouldShowExtendedWidgets$ | async)) ) {
     <div class="widget-wrapper">
       @if (widget.definition.caption && showCaption) {
       <div

@@ -133,7 +133,7 @@
   @if (provideLabel) {
   <span class="cdk-visually-hidden">{{ 'NODE.cclom:duration' | translate }}:</span>
   }
-  {{ $safeNavigationMigration($any(getNode()).properties['cclom:duration']?.[0]) | formatDuration }}
+  {{ $any(getNode()).properties['cclom:duration']?.[0] | formatDuration }}
 </span>
 } @case ('ccm:collection_proposal_status') {
 <span [matTooltip]="provideLabel ? (getI18n(item) | translate) : null">
