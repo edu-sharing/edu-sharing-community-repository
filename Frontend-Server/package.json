@@ -20,7 +20,8 @@
     "precheck:types": "npm run sync-shared",
     "check:types": "tsc -p tsconfig.json --noEmit",
     "pretest": "npm run sync-shared",
-    "test": "node --test \"src/**/*.test.ts\""
+    "test": "node --test \"src/**/*.test.ts\"",
+    "audit:fix": "npm audit fix; git add package.json package-lock.json && (git diff --cached --quiet -- package.json package-lock.json || git commit -m \"chore:npm audit (frontend-server)\" -- package.json package-lock.json)"
   },
   "dependencies": {
     "@elastic/elasticsearch": "^8.19.2",
