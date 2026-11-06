@@ -152,6 +152,10 @@
           <artifactId>helm-maven-plugin</artifactId>
           <configuration>
             <helmVersion>${helm.version}</helmVersion>
+            <!-- one index cache per module: with a parallel build (-T) the helm modules run
+                 concurrently, and a shared ~/.cache/helm/repository lets one dependency-build
+                 read the index another one is just rewriting -->
+            <repositoryCache>${project.build.directory}/helm/repository-cache</repositoryCache>
           </configuration>
         </plugin>
 
