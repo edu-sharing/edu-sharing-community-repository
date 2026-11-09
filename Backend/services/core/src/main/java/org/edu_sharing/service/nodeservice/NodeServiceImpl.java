@@ -1020,19 +1020,43 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
      */
     @Override
     public <T> List<T> sortNodeRefList(List<T> list, List<String> filter, SortDefinition sortDefinition) {
-        // make a copy so we have a modifiable list object
-        list = new ArrayList<>(list);
-        List<T> filtered = new ArrayList<>();
-        for (T obj : list) {
-            if (!EduSharingNodeHelper.shouldFilter(getAsNode(obj), filter)) {
-                filtered.add(obj);
+        // filtering and sorting read type, aspects and properties of every node several times (see inTransaction)
+        return inTransaction(() -> {
+            // new list, so the given list is not modified and we have a modifiable list object
+            List<T> filtered = new ArrayList<>();
+            for (T obj : list) {
+                if (!EduSharingNodeHelper.shouldFilter(getAsNode(obj), filter)) {
+                    filtered.add(obj);
+                }
+            }
+
+            Map<String, Object> cache = new HashMap<>();
+            filtered.sort((o1, o2) -> sortNodes(cache, getAsNode(o1), getAsNode(o2), sortDefinition));
+            return filtered;
+        });
+    }
+
+    /**
+     * Runs the work in one transaction.
+     * <p>
+     * nodeServiceAlfresco (alfrescoDefaultDbNodeService) has no transaction interceptor. Without a surrounding
+     * transaction every node lookup (getType, hasAspect, getProperty, ...) goes to the shared node cache, which is
+     * a remote call to another cluster member for fully-distributed caches. Inside a transaction the node is held in
+     * the transactional cache after the first lookup.
+     * <p>
+     * An already running transaction is used as is (no nested retry handling).
+     */
+    private <R> R inTransaction(RetryingTransactionHelper.RetryingTransactionCallback<R> work) {
+        if (AlfrescoTransactionSupport.getTransactionReadState() != AlfrescoTransactionSupport.TxnReadState.TXN_NONE) {
+            try {
+                return work.execute();
+            } catch (RuntimeException | Error e) {
+                throw e;
+            } catch (Throwable t) {
+                throw new RuntimeException(t);
             }
         }
-        list = filtered;
-
-        Map<String, Object> cache = new HashMap<>();
-        list.sort((o1, o2) -> sortNodes(cache, getAsNode(o1), getAsNode(o2), sortDefinition));
-        return list;
+        return serviceRegistry.getRetryingTransactionHelper().doInTransaction(work, false);
     }
 
     private <T> NodeRef getAsNode(T obj) {
@@ -1167,8 +1191,17 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
         return value;
     }
 
+    /**
+     * Lists, filters and sorts the children in one transaction (see {@link #inTransaction}).
+     * getChildAssocs preloads the child nodes into the transactional cache, so the per child lookups of filtering
+     * and sorting don't hit the (cluster) shared caches again.
+     */
     @Override
     public List<ChildAssociationRef> getChildrenChildAssociationRefAssoc(String parentID, String assocName, List<String> filter, SortDefinition sortDefinition) {
+        return inTransaction(() -> getChildrenChildAssociationRefAssocImpl(parentID, assocName, filter, sortDefinition));
+    }
+
+    private List<ChildAssociationRef> getChildrenChildAssociationRefAssocImpl(String parentID, String assocName, List<String> filter, SortDefinition sortDefinition) {
         NodeRef parentNodeRef = getParentRef(parentID);
         List<ChildAssociationRef> result;
         if (assocName == null || assocName.isEmpty()) {
