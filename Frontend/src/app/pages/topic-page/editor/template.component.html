@@ -347,6 +347,7 @@
           } @if (selectedMenuItem === (i18nPrefix + 'SIDEBAR.MENU.INHERITANCE' | translate)) {
           <es-topic-page-inheritance-sidebar
             [collectionId]="topicCollectionId()"
+            (editTemplates)="editInheritedTemplates($event)"
           ></es-topic-page-inheritance-sidebar>
           }
         </ng-container>

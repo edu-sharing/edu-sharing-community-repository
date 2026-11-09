@@ -2471,10 +2471,12 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     }
 
     /**
-     * Opens the templates the shown page is inherited from, in the collection they belong to.
+     * Opens the templates of the given collection in its template mode, by default those the
+     * shown page is inherited from.
      */
-    async editInheritedTemplates(): Promise<void> {
-        const source: Node | null = this.propagatingParentNode();
+    async editInheritedTemplates(
+        source: Node | null = this.propagatingParentNode(),
+    ): Promise<void> {
         if (!source) {
             return;
         }
