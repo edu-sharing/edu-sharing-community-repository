@@ -1,19 +1,25 @@
 import {
+    afterRenderEffect,
     ChangeDetectionStrategy,
     Component,
     computed,
+    effect,
+    ElementRef,
     inject,
     Injector,
     input,
     resource,
     ResourceRef,
     signal,
+    viewChildren,
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Node, PROPERTY_FILTER_ALL, RestConstants } from 'ngx-edu-sharing-api';
 import { catchError, firstValueFrom, map, Observable, of } from 'rxjs';
 import { Toast } from '../../../../../services/toast';
 import { SharedModule } from '../../../../../shared/shared.module';
+import { TopicLinkDirective } from '../../../shared/directives/topic-link.directive';
+import { TopicPageGlobalService } from '../../../shared/services/topic-page-global.service';
 import { TopicPageHelperService } from '../../../shared/services/topic-page-helper.service';
 import {
     ResolvedInheritance,
@@ -22,6 +28,7 @@ import {
 } from '../../../shared/utils/topic-page-inheritance-util';
 import { checkUserAccess } from '../../../shared/utils/node-util';
 import {
+    retrievePageConfig,
     retrievePageConfigPropagateRef,
     retrievePageConfigRef,
 } from '../../../shared/utils/template-util';
@@ -44,8 +51,15 @@ type Subcollections = {
     isLoading: boolean;
 };
 
+/**
+ * ancestor: read-only path from the inheritance source down to the collection of the page;
+ * current: the collection of the page; subcollection: anything below it
+ */
+type RowRole = 'ancestor' | 'current' | 'subcollection';
+
 export type InheritanceRow = {
     node: Node;
+    role: RowRole;
     depth: number;
     expandable: boolean;
     expanded: boolean;
@@ -67,19 +81,21 @@ export type InheritanceRow = {
  */
 @Component({
     selector: 'es-topic-page-inheritance-sidebar',
-    imports: [SharedModule],
+    imports: [SharedModule, TopicLinkDirective],
     templateUrl: './topic-page-inheritance-sidebar.component.html',
     styleUrls: ['./topic-page-inheritance-sidebar.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TopicPageInheritanceSidebarComponent {
     private readonly topicPageHelperService = inject(TopicPageHelperService);
+    private readonly topicPageGlobalService = inject(TopicPageGlobalService);
     private readonly toast = inject(Toast);
     private readonly injector = inject(Injector);
 
     /** the collection whose topic page is shown */
     readonly collectionId = input.required<string>();
     readonly i18nPrefix: string = 'TOPIC_PAGE.SIDEBAR.INHERITANCE.';
+    readonly topicUrlTarget: '_self' | '_blank' = this.topicPageGlobalService.getCustomUrlTarget();
     readonly isSaving = signal(false);
     // the collection uncached, its ancestors nearest first, and its sub-collections
     readonly collectionHierarchy = resource({
@@ -102,6 +118,12 @@ export class TopicPageInheritanceSidebarComponent {
     private readonly expanded = signal<Set<string>>(new Set());
     // unsaved stop flags by collection id, only those differing from the saved ones
     private readonly unsavedChanges = signal<Map<string, boolean>>(new Map());
+    // titles of the templates passed on, by propagate config ref; filled once a row shows it
+    private readonly passedTemplateTitles = signal<Map<string, string[]>>(new Map());
+    private readonly requestedPropagateConfigs = new Set<string>();
+    private readonly templateHints = viewChildren<ElementRef<HTMLElement>>('templatesHint');
+    // ids of the collections whose list of passed on templates is cut off
+    readonly truncatedTemplateHints = signal<ReadonlySet<string>>(new Set());
 
     readonly rows = computed((): InheritanceRow[] => {
         if (!this.collectionHierarchy.hasValue()) {
@@ -109,13 +131,16 @@ export class TopicPageInheritanceSidebarComponent {
         }
         const { collection, parents, subcollections } = this.collectionHierarchy.value();
         const incoming: ResolvedInheritance = resolveInheritance(collection, parents);
-        const rows: InheritanceRow[] = [];
+        const ancestors: Node[] = this.ancestorsFromSource(collection, parents);
+        const rows: InheritanceRow[] = ancestors.map((ancestor: Node, index: number) =>
+            this.ancestorRow(ancestor, index, parents),
+        );
         // the collection of the page comes with its sub-collections and always shows them
-        this.addRows(rows, collection, 0, incoming, incoming, {
+        this.addRows(rows, collection, ancestors.length, 0, incoming, incoming, {
             nodes: subcollections,
             exist: subcollections.length > 0,
             expandable: false,
-            expanded: true,
+            expanded: subcollections.length > 0,
             isLoading: this.collectionHierarchy.isLoading(),
         });
         return rows;
@@ -125,8 +150,40 @@ export class TopicPageInheritanceSidebarComponent {
     );
     readonly hasUnsavedChanges = computed((): boolean => this.unsavedChanges().size > 0);
 
+    constructor() {
+        effect(() => {
+            for (const row of this.rows()) {
+                if (row.passesOwnTemplates) {
+                    void this.loadPassedTemplateTitles(retrievePageConfigPropagateRef(row.node));
+                }
+            }
+        });
+        afterRenderEffect(() => {
+            const truncated = new Set<string>(
+                this.templateHints()
+                    .map((hint) => hint.nativeElement)
+                    .filter((element) => element.scrollWidth > element.offsetWidth)
+                    .map((element) => element.dataset['collectionId']),
+            );
+            const current: ReadonlySet<string> = this.truncatedTemplateHints();
+            if (truncated.size !== current.size || [...truncated].some((id) => !current.has(id))) {
+                this.truncatedTemplateHints.set(truncated);
+            }
+        });
+    }
+
     readonly rowLevel = (row: InheritanceRow): number => row.depth;
     readonly rowKey = (row: InheritanceRow): string => row.node.ref.id;
+
+    /** The titles of the templates a collection passes on, undefined until they are loaded. */
+    passedTemplates(row: InheritanceRow): string[] | undefined {
+        return this.passedTemplateTitles().get(retrievePageConfigPropagateRef(row.node));
+    }
+
+    /** The link to the topic page of a collection, or null where no topic page URL is known. */
+    topicUrl(node: Node): string | null {
+        return this.topicPageGlobalService.getCustomUrlFunction()?.(node) || null;
+    }
 
     setExpanded(row: InheritanceRow, expanded: boolean): void {
         const id: string = row.node.ref.id;
@@ -195,6 +252,7 @@ export class TopicPageInheritanceSidebarComponent {
         rows: InheritanceRow[],
         node: Node,
         depth: number,
+        indent: number,
         incoming: ResolvedInheritance,
         savedIncoming: ResolvedInheritance,
         subcollections: Subcollections,
@@ -206,6 +264,7 @@ export class TopicPageInheritanceSidebarComponent {
         const passesOwnTemplates: boolean = !!retrievePageConfigPropagateRef(node);
         rows.push({
             node,
+            role: indent === 0 ? 'current' : 'subcollection',
             depth,
             expandable: subcollections.expandable,
             expanded: subcollections.expanded,
@@ -229,11 +288,48 @@ export class TopicPageInheritanceSidebarComponent {
                 rows,
                 child,
                 depth + 1,
+                indent + 1,
                 this.outgoing(node, incoming, stop),
                 this.outgoing(node, savedIncoming, savedStop),
                 this.subcollectionsOf(child),
             );
         }
+    }
+
+    /**
+     * The ancestors from the nearest one passing templates on down to the direct parent,
+     * so the tree shows where inherited templates come from and where they are stopped.
+     */
+    private ancestorsFromSource(collection: Node, parents: Node[]): Node[] {
+        const ancestors: Node[] = parents.filter((parent) => parent.ref.id !== collection.ref.id);
+        const sourceIndex: number = ancestors.findIndex(
+            (parent) => !!retrievePageConfigPropagateRef(parent),
+        );
+        return sourceIndex < 0 ? [] : ancestors.slice(0, sourceIndex + 1).reverse();
+    }
+
+    /** A read-only row of an ancestor; `parents` are all ancestors of the page, nearest first. */
+    private ancestorRow(ancestor: Node, depth: number, parents: Node[]): InheritanceRow {
+        const index: number = parents.findIndex((parent) => parent.ref.id === ancestor.ref.id);
+        const state: InheritanceState = this.stateOf(
+            ancestor,
+            resolveInheritance(ancestor, parents.slice(index + 1)),
+        );
+        return {
+            node: ancestor,
+            role: 'ancestor',
+            depth,
+            expandable: false,
+            expanded: true,
+            isLoading: false,
+            state,
+            // parents never get a switch, so their own page needs no further explanation
+            stateText: state.kind === 'own' ? { key: 'STATE_OWN_PAGE' } : this.stateText(state),
+            savedStateText: null,
+            passesOwnTemplates: !!retrievePageConfigPropagateRef(ancestor),
+            passesOn: !stopsPropagation(ancestor),
+            canToggle: false,
+        };
     }
 
     /** The sub-collections of a collection below the one of the page, loaded once expanded. */
@@ -299,6 +395,31 @@ export class TopicPageInheritanceSidebarComponent {
                 ? state.at.ref.id
                 : undefined;
         return a.kind === b.kind && nodeOf(a) === nodeOf(b);
+    }
+
+    private async loadPassedTemplateTitles(propagateConfigRef: string): Promise<void> {
+        if (this.requestedPropagateConfigs.has(propagateConfigRef)) {
+            return;
+        }
+        this.requestedPropagateConfigs.add(propagateConfigRef);
+        try {
+            const configNode: Node | null = await this.topicPageHelperService.getNodeIfAvailable(
+                propagateConfigRef,
+                true,
+            );
+            const templates: (Node | null)[] = await Promise.all(
+                (retrievePageConfig(configNode).variants ?? []).map((ref: string) =>
+                    this.topicPageHelperService.getNodeIfAvailable(ref, true),
+                ),
+            );
+            const titles: string[] = templates
+                .filter((template): template is Node => !!template)
+                .map((template: Node) => template.title || template.name);
+            this.passedTemplateTitles.update((all) => new Map(all).set(propagateConfigRef, titles));
+        } catch {
+            // the row keeps its generic hint
+            this.requestedPropagateConfigs.delete(propagateConfigRef);
+        }
     }
 
     private loadSubcollections(id: string): Observable<Node[]> {
