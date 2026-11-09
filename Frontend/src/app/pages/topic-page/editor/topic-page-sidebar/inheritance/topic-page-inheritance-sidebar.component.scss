@@ -15,7 +15,7 @@
 }
 
 .intro {
-    padding: 16px 20px;
+    padding: 0 20px 16px;
 }
 
 .intro-heading {
@@ -25,9 +25,8 @@
 }
 
 .intro-description {
-    margin-top: 6px;
-    font-size: var(--fontSizeXSmall);
-    color: var(--textLight);
+    display: block;
+    margin-top: 32px;
 }
 
 .tree {

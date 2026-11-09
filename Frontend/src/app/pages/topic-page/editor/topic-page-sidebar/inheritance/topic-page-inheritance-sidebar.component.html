@@ -14,7 +14,11 @@
         | translate : { title: collectionHierarchy.value().collection | nodeTitle }
     }}
   </div>
-  <div class="intro-description">{{ i18nPrefix + 'INTRO_DESCRIPTION' | translate }}</div>
+  <es-info-message
+    class="intro-description"
+    mode="info"
+    [message]="i18nPrefix + 'INTRO_DESCRIPTION'"
+  ></es-info-message>
 </div>
 <mat-tree
   class="tree"
