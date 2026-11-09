@@ -2,6 +2,10 @@
 @use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 
 :host {
+    // lines tracing inherited templates back to their source collection, one color per source
+    --inheritanceLine1: #2f6db0;
+    --inheritanceLine2: #b5560a;
+    --inheritanceLine3: #1b7568;
     display: flex;
     flex-direction: column;
     flex: 1;
@@ -29,10 +33,54 @@
     margin-top: 32px;
 }
 
-.tree {
+.tree-wrapper {
+    position: relative;
     flex: 1;
+}
+
+.tree {
     padding: 0 20px 20px;
     background: none;
+}
+
+// drawn above the rows, which keep receiving all pointer events
+.template-lines {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.template-line {
+    fill: none;
+    stroke: var(--lineColor);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.stop-mark {
+    fill: var(--roundedContainerBackground);
+    stroke: var(--warn);
+    stroke-width: 2;
+    stroke-linecap: round;
+}
+
+// lighter variants that keep their contrast on the dark surfaces
+:host-context(body.isDarkTheme) {
+    --inheritanceLine1: #82b2e8;
+    --inheritanceLine2: #f0a35e;
+    --inheritanceLine3: #5cc4b4;
+}
+
+// the color of a collection passing templates on, shared by its line, badge and inheritors
+@for $i from 1 through 3 {
+    .line-#{$i} {
+        --lineColor: var(--inheritanceLine#{$i});
+    }
 }
 
 // every level of the hierarchy, ancestors included, indents by the same step
@@ -84,10 +132,6 @@
             opacity: 0.6;
         }
     }
-    &.changed {
-        border-left-color: var(--primary);
-        background: var(--primaryBackground50);
-    }
 }
 
 // as large as an icon button, so rows with and without one align and have the same height
@@ -117,15 +161,53 @@
     min-width: 0;
 }
 
+.row-heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+}
+
 .row-title {
     @include mixins.limitLineCount(2, 1.25);
     font-weight: bold;
     color: var(--textMain);
 }
 
+// marks a collection's own topic page, its templates for sub-collections, or an unsaved change
+.row-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 8px;
+    border: 1px solid transparent;
+    border-radius: var(--borderRadiusBadges);
+    font-size: var(--fontSizeXSmall);
+    white-space: nowrap;
+}
+
+.own-page-badge {
+    background: var(--primaryBackground100);
+    color: var(--primaryBackground900);
+}
+
+.changed-badge {
+    background: var(--primary);
+    color: var(--light-primary-text);
+}
+
+.template-badge {
+    border-color: var(--lineColor, var(--primary));
+    color: var(--lineColor, var(--primary));
+    font-weight: bold;
+    &.stopped {
+        border-style: dashed;
+        border-color: var(--textLight);
+        color: var(--textLight);
+    }
+}
+
 .row-state,
-.row-hint,
-.row-saved {
+.row-hint {
     font-size: var(--fontSizeXSmall);
     color: var(--textLight);
 }
@@ -139,7 +221,7 @@
 }
 
 .state-inherits {
-    color: var(--colorStatusPositiveText);
+    color: var(--lineColor, var(--colorStatusPositiveText));
 }
 
 .state-link {
@@ -151,16 +233,11 @@
     color: var(--warn);
 }
 
-.row-saved {
-    font-style: italic;
-}
-
-.row-toggle,
-.row-loading {
+.row-toggle {
     flex-shrink: 0;
 }
 
-// pinned to the bottom of the scrolling panel while unsaved changes are pending
+// pinned to the bottom of the scrolling panel
 .footer {
     position: sticky;
     bottom: 0;
@@ -175,14 +252,39 @@
     gap: 8px;
 }
 
+// room for the message with the count and the hint on parent collections, so the footer keeps
+// its height whether or not a message is shown
 .footer-summary {
-    font-size: var(--fontSizeXSmall);
-    color: var(--textLight);
+    flex: 1 1 0;
+    min-width: 0;
+    // the message's padding and border, the count's line, the gap and the hint's smaller line
+    min-height: calc(2 * 8px + 2px + 1.4em + 2px + 1.4 * 0.85em);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    line-height: 1.4;
+}
+
+// as wide as its text, wrapping only where the buttons need the room
+.footer-message {
+    display: block;
+    align-self: flex-start;
+    width: fit-content;
+    max-width: 100%;
+    ::ng-deep .block {
+        padding: 8px 12px;
+    }
+    ::ng-deep .message-container {
+        gap: 2px;
+    }
+    // the content is projected, the message's own text line stays empty
+    ::ng-deep .message:empty {
+        display: none;
+    }
 }
 
 .footer-parents-hint {
-    display: block;
-    color: var(--warn);
+    font-size: var(--fontSizeXSmall);
 }
 
 .footer-actions {

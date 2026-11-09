@@ -20,122 +20,166 @@
     [message]="i18nPrefix + 'INTRO_DESCRIPTION'"
   ></es-info-message>
 </div>
-<mat-tree
-  class="tree"
-  [dataSource]="rows()"
-  [levelAccessor]="rowLevel"
-  [expansionKey]="rowKey"
-  [attr.aria-label]="
-    i18nPrefix + 'INTRO' | translate : { title: collectionHierarchy.value().collection | nodeTitle }
-  "
->
-  <mat-tree-node
-    *matTreeNodeDef="let row"
-    class="row"
-    [class.root]="row.role === 'current'"
-    [class.ancestor]="row.role === 'ancestor'"
-    [class.changed]="!!row.savedStateText"
-    [style.--depth]="row.depth"
-    [isExpandable]="row.expandable"
-    [isExpanded]="row.expanded"
-    (expandedChange)="setExpanded(row, $event)"
-    (activation)="row.expandable && setExpanded(row, !row.expanded)"
+<div #treeWrapper class="tree-wrapper">
+  <svg class="template-lines" aria-hidden="true">
+    @for (drawing of lineDrawings(); track $index) { @if (drawing.kind === 'line') {
+    <path class="template-line line-{{ drawing.color }}" [attr.d]="drawing.path"></path>
+    } @else {
+    <circle class="stop-mark" r="7" [attr.cx]="drawing.cx" [attr.cy]="drawing.cy"></circle>
+    <path class="stop-mark" [attr.d]="drawing.path"></path>
+    } }
+  </svg>
+  <mat-tree
+    class="tree"
+    [dataSource]="rows()"
+    [levelAccessor]="rowLevel"
+    [expansionKey]="rowKey"
+    [attr.aria-label]="
+      i18nPrefix + 'INTRO'
+        | translate : { title: collectionHierarchy.value().collection | nodeTitle }
+    "
   >
-    <span class="expand-slot">
-      @if (row.expandable) {
-      <button
-        mat-icon-button
-        type="button"
-        tabindex="-1"
-        [attr.aria-label]="
-          (row.expanded ? 'COLLAPSE' : 'EXPAND') | translate : { element: row.node | nodeTitle }
-        "
-        (click)="setExpanded(row, !row.expanded)"
-      >
-        <i [esIcon]="row.expanded ? 'expand_more' : 'chevron_right'"></i>
-      </button>
-      } @else if (row.expanded) {
-      <i class="expand-indicator" esIcon="expand_more" [aria]="false"></i>
-      }
-    </span>
-    <i class="row-icon" esIcon="layers" [aria]="false"></i>
-    <div class="row-text">
-      <div class="row-title">{{ row.node | nodeTitle }}</div>
-      <div class="row-state state-{{ row.state.kind }}">
-        @if (row.state.kind === 'inherits' && templatesUrl(row.state.from); as url) {
-        {{ i18nPrefix + 'STATE_INHERITS_FROM' | translate }}
-        <a
-          class="state-link"
-          [href]="url"
-          (click)="openTemplates($event, row.state.from)"
-          (keydown.enter)="$event.stopPropagation()"
-          >{{ row.state.from | nodeTitle }}</a
-        >
-        } @else {
-        {{ i18nPrefix + row.stateText.key | translate : row.stateText.params }}
-        }
-      </div>
-      @if (row.passesOwnTemplates) { @if (passedTemplates(row)?.length) {
-      <div
-        #templatesHint
-        class="row-hint templates-hint"
-        [attr.data-collection-id]="row.node.ref.id"
-        [matTooltip]="
-          truncatedTemplateHints().has(row.node.ref.id) ? passedTemplates(row).join(', ') : null
-        "
-      >
-        {{
-          i18nPrefix + (passedTemplates(row).length === 1 ? 'PASSES_TEMPLATE' : 'PASSES_TEMPLATES')
-            | translate : { count: passedTemplates(row).length }
-        }}
-        {{ passedTemplates(row).join(', ') }}
-      </div>
-      } @else {
-      <div class="row-hint">{{ i18nPrefix + 'PASSES_OWN_TEMPLATES' | translate }}</div>
-      } } @else if (!row.passesOn) {
-      <div class="row-hint">{{ i18nPrefix + 'PASSES_NOTHING_ON' | translate }}</div>
-      } @if (row.savedStateText) {
-      <div class="row-saved">
-        {{ i18nPrefix + 'SAVED_STATE' | translate }}
-        {{ i18nPrefix + row.savedStateText.key | translate : row.savedStateText.params }}
-      </div>
-      }
-    </div>
-    @if (row.canToggle) {
-    <mat-slide-toggle
-      class="row-toggle"
-      [checked]="row.passesOn"
-      [disabled]="isSaving()"
-      [matTooltip]="i18nPrefix + 'PASS_ON_TOOLTIP' | translate"
-      (change)="setPassesOn(row, $event.checked)"
-      >{{ i18nPrefix + 'PASS_ON' | translate }}</mat-slide-toggle
+    <mat-tree-node
+      *matTreeNodeDef="let row"
+      class="row"
+      [class.root]="row.role === 'current'"
+      [class.ancestor]="row.role === 'ancestor'"
+      [style.--depth]="row.depth"
+      [attr.data-row-id]="row.node.ref.id"
+      [isExpandable]="row.expandable"
+      [isExpanded]="row.expanded"
+      (expandedChange)="setExpanded(row, $event)"
+      (activation)="row.expandable && setExpanded(row, !row.expanded)"
     >
-    } @if (row.isLoading) {
-    <es-spinner-small class="row-loading"></es-spinner-small>
-    }
-  </mat-tree-node>
-</mat-tree>
-@if (hasUnsavedChanges()) {
+      <span class="expand-slot">
+        @if (row.isLoading) {
+        <es-spinner-small></es-spinner-small>
+        } @else if (row.expandable) {
+        <button
+          mat-icon-button
+          type="button"
+          tabindex="-1"
+          [attr.aria-label]="
+            (row.expanded ? 'COLLAPSE' : 'EXPAND') | translate : { element: row.node | nodeTitle }
+          "
+          (click)="setExpanded(row, !row.expanded)"
+        >
+          <i [esIcon]="row.expanded ? 'expand_more' : 'chevron_right'"></i>
+        </button>
+        } @else if (row.expanded) {
+        <i class="expand-indicator" esIcon="expand_more" [aria]="false"></i>
+        }
+      </span>
+      <i class="row-icon" esIcon="layers" [aria]="false"></i>
+      <div class="row-text">
+        <div class="row-heading">
+          <span class="row-title">{{ row.node | nodeTitle }}</span>
+          @if (row.hasOwnPage) {
+          <span class="row-badge own-page-badge">{{
+            i18nPrefix + 'OWN_PAGE_BADGE' | translate
+          }}</span>
+          } @if (row.passesOwnTemplates) {
+          <span
+            class="row-badge template-badge line-{{ lineColorOf(row.node) }}"
+            [class.stopped]="!row.passesOn"
+            >{{ i18nPrefix + 'TEMPLATE_BADGE' | translate }}</span
+          >
+          } @if (row.savedStateText || row.toggled) { @let savedState = savedDescription(row);
+          <span class="row-badge changed-badge" [matTooltip]="savedState"
+            >{{ i18nPrefix + 'CHANGED_BADGE' | translate
+            }}<span class="cdk-visually-hidden">, {{ savedState }}</span></span
+          >
+          }
+        </div>
+        @if (row.state.kind !== 'own') {
+        <div
+          class="row-state state-{{ row.state.kind }} {{
+            row.state.kind === 'inherits' ? 'line-' + lineColorOf(row.state.from) : ''
+          }}"
+        >
+          @if (row.state.kind === 'inherits' && templatesUrl(row.state.from); as url) {
+          {{ i18nPrefix + 'STATE_INHERITS_FROM' | translate }}
+          <a
+            class="state-link"
+            [href]="url"
+            (click)="openTemplates($event, row.state.from)"
+            (keydown.enter)="$event.stopPropagation()"
+            >{{ row.state.from | nodeTitle }}</a
+          >
+          } @else {
+          {{ i18nPrefix + row.stateText.key | translate : row.stateText.params }}
+          }
+        </div>
+        } @if (row.passesOwnTemplates) { @if (passedTemplates(row)?.length) {
+        <div
+          #templatesHint
+          class="row-hint templates-hint"
+          [attr.data-collection-id]="row.node.ref.id"
+          [matTooltip]="
+            truncatedTemplateHints().has(row.node.ref.id) ? passedTemplates(row).join(', ') : null
+          "
+        >
+          {{
+            i18nPrefix +
+              (row.passesOn ? 'PASSES_TEMPLATE' : 'KEEPS_TEMPLATE') +
+              (passedTemplates(row).length === 1 ? '' : 'S')
+              | translate : { count: passedTemplates(row).length }
+          }}
+          {{ passedTemplates(row).join(', ') }}
+        </div>
+        } @else {
+        <div class="row-hint">
+          {{
+            i18nPrefix + (row.passesOn ? 'PASSES_OWN_TEMPLATES' : 'KEEPS_OWN_TEMPLATES') | translate
+          }}
+        </div>
+        } }
+      </div>
+      @if (row.canToggle) {
+      <mat-slide-toggle
+        class="row-toggle"
+        [checked]="row.passesOn"
+        [disabled]="isSaving()"
+        [matTooltip]="i18nPrefix + 'PASS_ON_TOOLTIP' | translate"
+        (change)="setPassesOn(row, $event.checked)"
+        >{{ i18nPrefix + 'PASS_ON' | translate }}</mat-slide-toggle
+      >
+      }
+    </mat-tree-node>
+  </mat-tree>
+</div>
 <div class="footer">
-  <span class="footer-summary">
-    {{ i18nPrefix + 'CHANGED_COUNT' | translate : { count: changedCount() } }}
-    @if (changesParents()) {
-    <span class="footer-parents-hint">{{ i18nPrefix + 'CHANGES_PARENTS' | translate }}</span>
+  <div class="footer-summary">
+    @if (hasUnsavedChanges()) {
+    <es-info-message class="footer-message" [mode]="changesParents() ? 'warning' : 'info'">
+      <span class="footer-count">{{
+        i18nPrefix + (changedCount() === 1 ? 'CHANGED_COUNT_ONE' : 'CHANGED_COUNT')
+          | translate : { count: changedCount() }
+      }}</span>
+      @if (changesParents()) {
+      <span class="footer-parents-hint">{{ i18nPrefix + 'CHANGES_PARENTS' | translate }}</span>
+      }
+    </es-info-message>
     }
-  </span>
+  </div>
   <div class="footer-actions">
-    <button mat-button type="button" [disabled]="isSaving()" (click)="discardChanges()">
+    <button
+      mat-button
+      type="button"
+      [disabled]="isSaving() || !hasUnsavedChanges()"
+      (click)="discardChanges()"
+    >
       {{ 'CANCEL' | translate }}
     </button>
     <button
       mat-flat-button
       color="primary"
       type="button"
-      [disabled]="isSaving()"
+      [disabled]="isSaving() || !hasUnsavedChanges()"
       (click)="saveChanges()"
     >
       {{ 'APPLY' | translate }}
     </button>
   </div>
 </div>
-} }
+}
