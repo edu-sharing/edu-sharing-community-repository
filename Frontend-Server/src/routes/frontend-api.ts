@@ -145,7 +145,7 @@ export async function frontendApi(app: FastifyInstance, options: FrontendApiOpti
                 .header('Vary', 'Accept-Encoding');
             const ifNoneMatch = request.headers['if-none-match'];
             if (ifNoneMatch !== undefined && ifNoneMatch.split(',').some((tag) => tag.trim().replace(/^W\//, '') === bundle.etag)) {
-                return reply.code(304).send(null);
+                return reply.code(304).send();
             }
             const encoding = negotiateEncoding(request.headers['accept-encoding'], bundle);
             if (encoding !== 'identity') {

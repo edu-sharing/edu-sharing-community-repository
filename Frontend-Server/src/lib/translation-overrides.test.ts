@@ -7,11 +7,13 @@ import { applyOverrides, TranslationOverrides, UnknownContextError } from './tra
 const log = { debug() {}, info() {}, warn() {}, error() {} } as unknown as FastifyBaseLogger;
 
 const values = {
-    globalLanguage: [
-        { language: 'de', string: [{ key: 'SAVE', value: 'Sichern' }, { key: 'WORKSPACE.TITLE', value: 'Global' }] },
-        { language: 'de', string: [{ key: 'SAVE', value: 'ignored, the first block wins' }] },
-        { language: 'en', string: [{ key: 'SAVE', value: 'Store' }] },
-    ],
+    currentBackend: {
+        language: [
+            { language: 'de', string: [{ key: 'SAVE', value: 'Sichern' }, { key: 'WORKSPACE.TITLE', value: 'Global' }] },
+            { language: 'de', string: [{ key: 'SAVE', value: 'ignored, the first block wins' }] },
+            { language: 'en', string: [{ key: 'SAVE', value: 'Store' }] },
+        ],
+    },
 };
 const contexts = [
     {
