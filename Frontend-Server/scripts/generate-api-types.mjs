@@ -16,8 +16,9 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SPEC = path.resolve(root, '../Backend/services/rest/api/src/main/resources/openapi.json');
 const TARGET = path.resolve(root, 'src/shared/api-types.ts');
 
-// node metadata (node-metadata.ts) and the config response (config-cache.ts)
-const ROOT_SCHEMAS = ['NodeEntry', 'NodeVersionEntry', 'Config'];
+// node metadata (node-metadata.ts), the config response (config-cache.ts) and the
+// contexts with their translation overrides (translation-overrides.ts)
+const ROOT_SCHEMAS = ['NodeEntry', 'NodeVersionEntry', 'Config', 'Context'];
 
 const REF_PREFIX = '#/components/schemas/';
 

@@ -280,13 +280,13 @@ describe('TranslationLoader', () => {
                 expect(getSpy.calls.count()).toBe(0);
             });
 
-            it('should call observeTranslationOverrides', async () => {
+            it('should not call observeTranslationOverrides (the repository applies them)', async () => {
                 const getConfigLanguageSpy = spyOn(
                     config,
                     'observeTranslationOverrides',
                 ).and.callThrough();
                 await callGetTranslation('de');
-                expect(getConfigLanguageSpy.calls.count()).toBe(1);
+                expect(getConfigLanguageSpy.calls.count()).toBe(0);
             });
 
             it('should call observeDefaultTranslations', async () => {

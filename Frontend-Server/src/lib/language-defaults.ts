@@ -1,14 +1,13 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { promisify } from 'node:util';
-import zlib from 'node:zlib';
-import type { CachedFile } from './static-cache.ts';
 
-const brotli = promisify(zlib.brotliCompress);
-const gzip = promisify(zlib.gzip);
-
-/** a bundle in every encoding it is sent in */
-export type Bundle = Required<Pick<CachedFile, 'identity' | 'br' | 'gzip'>>;
+/** level 1 of the translations: the default translations of one language */
+export interface Defaults {
+    /** shared by every caller - never modify, see applyOverrides */
+    readonly translations: Readonly<Record<string, unknown>>;
+    /** changes with every rebuild (dev: changed files) - part of the cache key of the merged translations */
+    readonly version: string;
+}
 
 /**
  * What the app sends in `X-Edu-Sharing-Language`: `de`, `en`, `de-informal`, `de-no-binnen-i` ...
@@ -30,7 +29,8 @@ export function isLanguage(language: string): boolean {
 }
 
 /**
- * `GET /rest/config/v1/language/defaults`, port of `I18nAngular.getLanguageStrings`: the
+ * Level 1 of the translations, port of `I18nAngular.getLanguageStrings` (formerly
+ * `GET /rest/config/v1/language/defaults`): the
  * `<language>.json` of every scope directory below `assets/i18n`, top level keys merged
  * into one object. The files are part of the image, so every bundle is built once.
  *
@@ -42,44 +42,42 @@ export function isLanguage(language: string): boolean {
 export class LanguageDefaults {
     readonly #dir: string;
     readonly #revalidate: boolean;
-    readonly #bundles = new Map<string, { signature: string; bundle: Promise<Bundle | undefined> }>();
+    readonly #entries = new Map<string, { signature: string; defaults: Promise<Defaults | undefined> }>();
+    #builds = 0;
 
     /**
      * @param i18nDir `dist/assets/i18n`
      * @param revalidate true: check the files (size, mtime) on every request and rebuild
-     *   a bundle whose files changed - dev, where the mounted build changes. A few stats
-     *   instead of reading, merging and compressing ~250 KB per request.
+     *   the translations whose files changed - dev, where the mounted build changes. A few
+     *   stats instead of reading and merging ~250 KB per request.
      */
     constructor(i18nDir: string, { revalidate }: { revalidate: boolean }) {
         this.#dir = i18nDir;
         this.#revalidate = revalidate;
     }
 
-    /**
-     * The bundle, undefined for a language no scope has a file for - the caller hands
-     * those to the backend, which answers as before.
-     */
-    async get(language: string): Promise<Bundle | undefined> {
+    /** undefined for a language no scope has a file for */
+    async get(language: string): Promise<Defaults | undefined> {
         if (!isLanguage(language)) {
             return undefined;
         }
         const signature = this.#revalidate ? await this.#signature(language) : '';
-        const cached = this.#bundles.get(language);
+        const cached = this.#entries.get(language);
         if (cached !== undefined && cached.signature === signature) {
-            return cached.bundle;
+            return cached.defaults;
         }
         const entry = {
             signature,
             // a failed build (unreadable file) is not kept, the next request tries again
-            bundle: this.#build(language).catch((err: unknown) => {
-                if (this.#bundles.get(language) === entry) {
-                    this.#bundles.delete(language);
+            defaults: this.#build(language).catch((err: unknown) => {
+                if (this.#entries.get(language) === entry) {
+                    this.#entries.delete(language);
                 }
                 throw err;
             }),
         };
-        this.#bundles.set(language, entry);
-        return entry.bundle;
+        this.#entries.set(language, entry);
+        return entry.defaults;
     }
 
     async #scopes(): Promise<string[]> {
@@ -129,16 +127,8 @@ export class LanguageDefaults {
         return found ? result : undefined;
     }
 
-    async #build(language: string): Promise<Bundle | undefined> {
-        const merged = await this.merge(language);
-        if (merged === undefined) {
-            return undefined;
-        }
-        const identity = Buffer.from(JSON.stringify(merged), 'utf8');
-        const [br, gz] = await Promise.all([
-            brotli(identity, { params: { [zlib.constants.BROTLI_PARAM_QUALITY]: 6, [zlib.constants.BROTLI_PARAM_SIZE_HINT]: identity.length } }),
-            gzip(identity, { level: 6 }),
-        ]);
-        return { identity, br, gzip: gz };
+    async #build(language: string): Promise<Defaults | undefined> {
+        const translations = await this.merge(language);
+        return translations === undefined ? undefined : { translations, version: `${++this.#builds}` };
     }
 }

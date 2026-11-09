@@ -114,6 +114,13 @@ const PROXY_CONFIG = [
         configure: repoConfigure,
     },
     {
+        // the api of the frontend server (translations) - not served by tomcat
+        context: ['/edu-sharing/frontend-api'],
+        target: process.env.FRONTEND_SERVER_URL || 'http://repository.127.0.0.1.nip.io:8110',
+        secure: false,
+        changeOrigin: true,
+    },
+    {
         context: ['/rest', '/eduservlet', '/preview', '/themes'],
         target: process.env.BACKEND_URL + '/edu-sharing',
         secure: false,

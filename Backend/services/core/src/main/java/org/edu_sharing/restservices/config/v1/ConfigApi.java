@@ -15,16 +15,15 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.Response;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.service.config.model.Context;
-import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.ApiService;
 import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.config.v1.model.Config;
-import org.edu_sharing.restservices.config.v1.model.Language;
 import org.edu_sharing.restservices.config.v1.model.Variables;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.service.admin.RepositoryConfigFactory;
 import org.edu_sharing.service.admin.model.RepositoryConfig;
+import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.config.ConfigService;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.config.DynamicConfig;
@@ -33,6 +32,7 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Path("/config/v1")
 @Tag(name = "CONFIG v1")
@@ -87,7 +87,7 @@ public class ConfigApi {
     @GET
     @SecurityRequirements
     @Path("/context/")
-    @Operation(summary = "get all available repository context objects", description = "Retrieves all available context objects")
+    @Operation(summary = "get all available repository context objects", description = "Retrieves all available context objects. The translation overrides (language) only for admins and on the internal port")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Context[].class))),
             @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -97,11 +97,17 @@ public class ConfigApi {
             @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public Response getAvailableContext(
+            @jakarta.ws.rs.core.Context HttpServletRequest req,
             @Parameter(description = "Include static contexts (from the client.config.xml). Defaults to false", required = false, schema = @Schema(defaultValue="false")) @QueryParam("includeStatic") Boolean includeStatic
     ) {
         try {
             ConfigService configService = ConfigServiceFactory.getConfigService();
             List<Context> context = configService.getAvailableContext(includeStatic != null && includeStatic);
+            // the translation overrides only for the Frontend-Server (internal port), which applies them
+            // to the translations it serves, and for admins, who edit them - not for every guest page
+            if (!ApplicationInfoList.isInternalPortRequest(req) && !AuthorityServiceFactory.getInstance().getLocalService().isGlobalAdmin()) {
+                context = context.stream().map(ConfigApi::withoutLanguage).collect(Collectors.toList());
+            }
             return Response.status(Response.Status.OK).entity(context).build();
         } catch (Throwable t) {
             logger.error(t.getMessage(), t);
@@ -167,38 +173,6 @@ public class ConfigApi {
     public Response getSystemMessages() {
         try {
             return Response.status(Response.Status.OK).entity(RepositoryConfigFactory.getSystemMessages()).build();
-        } catch (Throwable t) {
-            logger.error(t.getMessage(), t);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
-        }
-    }
-
-    @GET
-    @SecurityRequirements
-    @Path("/language")
-    @Operation(summary = "get override strings for the current language", description = "Language strings")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Language.class))),
-            @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-    })
-    public Response getLanguage() {
-        try {
-            Language language = new Language();
-            language.setCurrentLanguage(AuthenticationToolAPI.getInstance().getCurrentLanguage());
-
-            language.setGlobal(getActiveLanguage(ConfigServiceFactory.getConfigService().getConfig().language));
-            try {
-                language.setCurrent(getActiveLanguage(ConfigServiceFactory.getConfigService().getConfigByDomain(ConfigServiceFactory.getCurrentDomain()).language));
-            } catch (IllegalArgumentException e) {
-                logger.debug(e.getMessage());
-                language.setCurrent(language.getGlobal());
-
-            }
-            return Response.status(Response.Status.OK).entity(language).build();
         } catch (Throwable t) {
             logger.error(t.getMessage(), t);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
@@ -297,7 +271,17 @@ public class ConfigApi {
         return map;
     }
 
-    private Map<String, String> getActiveLanguage(List<org.edu_sharing.alfresco.service.config.model.Language> languages) {
-        return convertKeyValue(ConfigServiceFactory.getLanguageData(languages));
+    /** a copy without the translation overrides - the contexts are cached, never modify them */
+    private static Context withoutLanguage(Context context) {
+        if (context == null) {
+            return null;
+        }
+        Context copy = new Context();
+        copy.id = context.id;
+        copy.domain = context.domain;
+        copy.values = context.values;
+        copy.variables = context.variables;
+        copy.scopeGroup = context.scopeGroup;
+        return copy;
     }
 }

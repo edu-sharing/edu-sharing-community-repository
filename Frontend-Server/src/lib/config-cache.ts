@@ -141,6 +141,14 @@ export class ConfigCache {
         return this.#options.pollIntervalMs <= 0 || this.#lastCacheUpdate !== Number.NEGATIVE_INFINITY || this.#entries.size > 0;
     }
 
+    /**
+     * `lastCacheUpdate` of the backend as last seen, -Infinity before the first poll - moves
+     * with every config reload, for caches built from other config endpoints
+     */
+    configVersion(): number {
+        return this.#lastCacheUpdate;
+    }
+
     /** the domains a config is cached for */
     domains(): string[] {
         return [...this.#entries.keys()];

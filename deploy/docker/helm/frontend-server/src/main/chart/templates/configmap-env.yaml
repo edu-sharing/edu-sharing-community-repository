@@ -22,6 +22,7 @@ data:
   LOG_LEVEL: {{ .Values.config.logLevel | quote }}
   PROXY_UNMATCHED: {{ .Values.config.proxyUnmatched | quote }}
   ENRICH_TIMEOUT_MS: {{ .Values.config.enrichTimeoutMs | quote }}
+  SHUTDOWN_TIMEOUT_MS: {{ .Values.config.shutdownTimeoutMs | quote }}
   CONFIG_TIMEOUT_MS: {{ .Values.config.configCache.timeoutMs | quote }}
   CONFIG_POLL_INTERVAL_MS: {{ .Values.config.configCache.pollIntervalMs | quote }}
   CONFIG_MAX_AGE_MS: {{ .Values.config.configCache.maxAgeMs | quote }}

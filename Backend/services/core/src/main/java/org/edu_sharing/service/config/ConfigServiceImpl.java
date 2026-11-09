@@ -91,6 +91,9 @@ public class ConfigServiceImpl implements ConfigService, ApplicationListener<Ref
         }
         config.valuesBackend = getLightbendMapped();
         config.valuesBackendInternal = getLightbendMappedInternal();
+        // the translation overrides of the client.config.xml - internal only, the Frontend-Server
+        // merges them (and those of the contexts) into the translations it serves
+        config.valuesBackendInternal.setLanguage(config.language);
         is.close();
         configCache.put(CACHE_KEY, config);
         return config;
@@ -164,7 +167,15 @@ public class ConfigServiceImpl implements ConfigService, ApplicationListener<Ref
                     .map(CheckedFunction.wrap(x -> objectMapper.readValue(x, Context.class), null))
                     .filter(Objects::nonNull).collect(Collectors.toList());
             if (includeStatic) {
-                result.addAll(contextCacheById.getKeys().stream().filter(c -> result.stream().noneMatch(d -> d.id.equals(c))).map(contextCacheById::get).collect(Collectors.toList()));
+                // the static contexts come from the cache - fill it first, it is empty after a
+                // start or config refresh until a domain or id lookup happened
+                buildContextCache();
+                result.addAll(contextCacheById.getKeys().stream()
+                        .filter(c -> result.stream().noneMatch(d -> d.id.equals(c)))
+                        .map(contextCacheById::get)
+                         // the marker entry of an empty cache
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList()));
             }
             return result;
         });

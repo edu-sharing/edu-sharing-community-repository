@@ -20,7 +20,8 @@ const app = Fastify({ logger: false });
 await registerOpenApi(app, CONTEXT_PATH);
 await app.register(frontendApi, {
     prefix: `${CONTEXT_PATH}${FRONTEND_API_PATH}`,
-    languageDefaults: { get: async () => undefined },
+    translations: { get: async () => undefined },
+    overrides: { resolve: async () => ({ overrides: {}, version: '', complete: false }) },
 });
 await app.ready();
 const spec = `${JSON.stringify(app.swagger(), null, 2)}\n`;

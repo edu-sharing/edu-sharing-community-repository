@@ -73,9 +73,11 @@ export class TranslationLoader implements TranslateLoader {
                     // Default to empty dictionary if we got nothing
                     map((translations) => translations || {}),
                 ),
-                translationOverrides: this.configService
-                    .observeTranslationOverrides()
-                    .pipe(first()),
+                // the translations of the repository source come with the overrides applied
+                translationOverrides:
+                    this.getSource() === 'repository'
+                        ? of(null)
+                        : this.configService.observeTranslationOverrides().pipe(first()),
             })
             .pipe(
                 map(({ originalTranslations, translationOverrides }) => {

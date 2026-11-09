@@ -9,8 +9,15 @@ const app = await buildServer(config);
 const managementServer = config.managementPort > 0 ? buildManagementServer(app, { backendUrl: config.backendUrl }) : undefined;
 
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {
-    process.on(signal, () => {
+    process.once(signal, () => {
         app.log.info({ signal }, 'shutting down');
+        // app.close() waits for every running request - a long proxied one (a download, a hanging
+        // backend call) kept the process alive, refusing new requests, until it was killed
+        // (node --watch in dev waits forever)
+        setTimeout(() => {
+            app.log.warn({ timeoutMs: config.shutdownTimeoutMs }, 'requests still running after the shutdown timeout, exiting anyway');
+            process.exit(0);
+        }, config.shutdownTimeoutMs).unref();
         void Promise.all([app.close(), managementServer?.close()]).then(() => process.exit(0));
     });
 }

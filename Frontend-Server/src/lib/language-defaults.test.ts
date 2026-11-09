@@ -2,7 +2,6 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import zlib from 'node:zlib';
 import { after, before, test } from 'node:test';
 import { isLanguage, LanguageDefaults, scopeOrder } from './language-defaults.ts';
 
@@ -64,13 +63,12 @@ test('get: unknown or invalid language -> undefined', async () => {
     assert.equal(await defaults.get('../de'), undefined);
 });
 
-test('get: bundle in identity, brotli and gzip', async () => {
-    const bundle = await new LanguageDefaults(root, { revalidate: false }).get('de');
-    assert.ok(bundle);
+test('get: the merged translations with a version', async () => {
+    const defaults = await new LanguageDefaults(root, { revalidate: false }).get('de');
+    assert.ok(defaults);
     const expected = await new LanguageDefaults(root, { revalidate: true }).merge('de');
-    assert.deepEqual(JSON.parse(bundle.identity.toString('utf8')), expected);
-    assert.deepEqual(zlib.brotliDecompressSync(bundle.br), bundle.identity);
-    assert.deepEqual(zlib.gunzipSync(bundle.gzip), bundle.identity);
+    assert.deepEqual(defaults.translations, expected);
+    assert.equal(typeof defaults.version, 'string');
 });
 
 test('get: cached, rebuilt on a changed file with revalidate', async () => {
@@ -83,8 +81,8 @@ test('get: cached, rebuilt on a changed file with revalidate', async () => {
     write('workspace', 'de', { WORKSPACE: 'geändert' });
     try {
         const second = await uncached.get('de');
-        assert.notDeepEqual(first?.identity, second?.identity);
-        assert.match(second!.identity.toString('utf8'), /geändert/);
+        assert.notEqual(first?.version, second?.version);
+        assert.equal(second?.translations.WORKSPACE, 'geändert');
     } finally {
         write('workspace', 'de', { SAVE: 'Speichern (workspace)', WORKSPACE: 'Arbeitsbereich' });
     }
@@ -96,7 +94,7 @@ test('get: invalid json rejects, the next call tries again', async () => {
     try {
         await assert.rejects(defaults.get('en'));
         write('broken', 'en', { OK: 'ok' });
-        assert.deepEqual(JSON.parse((await defaults.get('en'))!.identity.toString('utf8')), { OK: 'ok' });
+        assert.deepEqual((await defaults.get('en'))?.translations, { OK: 'ok' });
     } finally {
         fs.rmSync(path.join(root, 'broken'), { recursive: true, force: true });
     }

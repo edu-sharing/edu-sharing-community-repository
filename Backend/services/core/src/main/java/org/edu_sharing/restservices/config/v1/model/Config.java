@@ -3,7 +3,6 @@ package org.edu_sharing.restservices.config.v1.model;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import org.edu_sharing.alfresco.service.config.model.Language;
 import org.edu_sharing.alfresco.service.config.model.Values;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -25,5 +24,4 @@ public class Config {
 	public Object currentBackend;
 	private Values current;
 	private Values global;
-	private Language language;
 }

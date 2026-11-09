@@ -26,7 +26,14 @@
         "type": "object",
         "properties": {},
         "additionalProperties": true,
-        "description": "Nested dictionary of translations, the top level keys of every scope below assets/i18n merged"
+        "description": "Nested dictionary of translations: the top level keys of every scope below assets/i18n merged, the overrides of the client config applied"
+      },
+      "TranslationOverrides": {
+        "type": "object",
+        "description": "Flat translation overrides of the client config, dotted keys (WORKSPACE.TOAST.SAVED)",
+        "additionalProperties": {
+          "type": "string"
+        }
       }
     }
   },
@@ -34,12 +41,22 @@
     "/v1/i18n/{language}": {
       "get": {
         "operationId": "getTranslations",
-        "summary": "Default translations of the app for one language",
+        "summary": "Translations of the app for one language, with the overrides of the client config",
         "tags": [
           "TRANSLATIONS v1"
         ],
-        "description": "The translations of the frontend build, formerly GET /rest/config/v1/language/defaults of the repository (without the overrides of the client config, see /rest/config/v1/language).",
+        "description": "The translations of the frontend build (formerly GET /rest/config/v1/language/defaults) with the overrides of the client config on top (formerly GET /rest/config/v1/language): the ones of the context given by `context` (404 if unknown), else of the context of the domain, else the global ones. Overrides are kept per base language - de-informal gets those of de.",
         "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[^/\\\\\\s]{1,200}$"
+            },
+            "in": "query",
+            "name": "context",
+            "required": false,
+            "description": "id of the config context to use instead of the one of the domain - Config.contextId of GET /rest/config/v1/values, which also reflects a context an admin enforced for the session"
+          },
           {
             "schema": {
               "type": "string",
@@ -53,7 +70,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Nested dictionary of translations, the top level keys of every scope below assets/i18n merged",
+            "description": "Nested dictionary of translations: the top level keys of every scope below assets/i18n merged, the overrides of the client config applied",
             "content": {
               "application/json": {
                 "schema": {
@@ -62,8 +79,65 @@
               }
             }
           },
+          "304": {
+            "description": "Not modified (If-None-Match)"
+          },
           "404": {
-            "description": "No translations for this language",
+            "description": "No translations for this language, or an unknown context",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrontendApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/i18n/{language}/overrides": {
+      "get": {
+        "operationId": "getTranslationOverrides",
+        "summary": "Only the overrides of the client config for one language",
+        "tags": [
+          "TRANSLATIONS v1"
+        ],
+        "description": "For clients that load the default translations themselves (dev builds read assets/i18n directly). The same overrides getTranslations applies.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[^/\\\\\\s]{1,200}$"
+            },
+            "in": "query",
+            "name": "context",
+            "required": false,
+            "description": "id of the config context to use instead of the one of the domain - Config.contextId of GET /rest/config/v1/values, which also reflects a context an admin enforced for the session"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z]{2}(-[a-z0-9]+)*$"
+            },
+            "in": "path",
+            "name": "language",
+            "required": true,
+            "description": "e.g. de, en, de-informal"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Flat translation overrides of the client config, dotted keys (WORKSPACE.TOAST.SAVED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TranslationOverrides"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown context",
             "content": {
               "application/json": {
                 "schema": {

@@ -19,6 +19,8 @@ import {
 } from './lib/error-response.ts';
 import { IndexHtml } from './lib/index-html.ts';
 import { LanguageDefaults } from './lib/language-defaults.ts';
+import { TranslationOverrides } from './lib/translation-overrides.ts';
+import { Translations } from './lib/translations.ts';
 import { registerOpenApi } from './lib/openapi.ts';
 import { registerMetrics, type ProxyReason } from './lib/metrics.ts';
 import { ElasticClient, type ElasticSearcher, isMissingIndex } from './lib/elastic-client.ts';
@@ -83,6 +85,10 @@ export async function buildServer(config: Config, overrides: ServerOverrides = {
     });
 
     // Never parse a body - everything with one is proxied, so it is streamed through.
+    // The built-in json / text parsers go first: '*' only applies to types without a parser
+    // of their own, so a json body was parsed (an empty one rejected with 400) before tomcat
+    // ever saw it.
+    app.removeAllContentTypeParsers();
     app.addContentTypeParser('*', (_request, payload, done) => done(null, payload));
 
     // the WebDAV verbs of /webdav (Tomcat's WebDAV servlet) - fastify only routes the
@@ -410,11 +416,22 @@ export async function buildServer(config: Config, overrides: ServerOverrides = {
         await app.register(swaggerUi, { routePrefix: `${ctx}${FRONTEND_API_PATH}/docs` });
         app.get(`${ctx}${FRONTEND_API_PATH}/openapi.json`, { schema: { hide: true } }, () => app.swagger());
     }
+    // translations: level 1 the files of the build, level 2 the overrides of the client
+    // config (internal port, follows the config reloads of the backend), level 3 both merged
+    const translationOverrides = new TranslationOverrides(internalBackend, {
+        contextPath: ctx,
+        configVersion: () => configCache.configVersion(),
+        maxAgeMs: config.configMaxAgeMs,
+        log: app.log.child({ name: 'translation-overrides' }),
+    });
     await app.register(frontendApi, {
         prefix: `${ctx}${FRONTEND_API_PATH}`,
-        // the translations the backend bundled out of the frontend.war overlay - this
-        // server has the same files in its dist
-        languageDefaults: new LanguageDefaults(path.join(config.distDir, 'assets', 'i18n'), { revalidate: config.dev }),
+        translations: new Translations({
+            defaults: new LanguageDefaults(path.join(config.distDir, 'assets', 'i18n'), { revalidate: config.dev }),
+            overrides: translationOverrides,
+            log: app.log.child({ name: 'translations' }),
+        }),
+        overrides: translationOverrides,
     });
 
     // --- backend ----------------------------------------------------------------

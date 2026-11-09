@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
-import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, of, Subject, throwError } from 'rxjs';
 import {
+    catchError,
     distinctUntilChanged,
     filter,
     map,
@@ -67,6 +68,16 @@ export class ConfigService {
         switchReplay(() => this.configV1.getVariables()),
         map((variables) => variables.current ?? null),
     );
+    /**
+     * The config context of the session (`Config.contextId`), also one an admin enforced for it.
+     * Passed to the frontend server, which knows no session.
+     */
+    private readonly contextId$: Observable<string | undefined> = this.config$.pipe(
+        take(1),
+        map((config) => config?.contextId ?? undefined),
+        // without the config the frontend server falls back to the context of the domain
+        catchError(() => of(undefined)),
+    );
     private readonly defaultTranslations$ = this.localeSubject.pipe(
         filter((locale) => locale !== null),
         distinctUntilChanged(),
@@ -74,8 +85,13 @@ export class ConfigService {
             of({
                 locale: locale?.locale,
                 language: locale?.language,
-                // served by the frontend server, not by the repository
-                dict: this.translationsV1.getTranslations({ language: locale?.language as string }),
+                // served by the frontend server, the overrides of the client config already applied
+                dict: this.withContext((context) =>
+                    this.translationsV1.getTranslations({
+                        language: locale?.language as string,
+                        ...(context ? { context } : {}),
+                    }),
+                ),
             }),
         ),
         shareReplay(1),
@@ -87,10 +103,42 @@ export class ConfigService {
     private readonly translationOverrides$ = this.localeSubject.pipe(
         filter((locale) => locale !== null),
         distinctUntilChanged(),
-        switchMap(() => this.configV1.getLanguage()),
-        map((language) => language.current ?? null),
+        switchMap((locale) =>
+            this.withContext((context) =>
+                this.translationsV1.getTranslationOverrides({
+                    language: locale?.language as string,
+                    ...(context ? { context } : {}),
+                }),
+            ),
+        ),
+        map((overrides) => overrides ?? null),
         shareReplay(1),
     );
+
+    /**
+     * Runs `request` with the context of the session. The frontend server answers an unknown
+     * context with 404 (e.g. one created a moment ago that it has not seen yet) - then once more
+     * without, so the app still gets the translations of its domain. A warning only: no toast,
+     * the frontend api is not handled by the error handler of the REST api anyway.
+     */
+    private withContext<T>(request: (context?: string) => Observable<T>): Observable<T> {
+        return this.contextId$.pipe(
+            switchMap((context) =>
+                request(context).pipe(
+                    catchError((error: unknown) => {
+                        if (context && (error as { status?: number })?.status === 404) {
+                            console.warn(
+                                `translations: context ${context} unknown to the frontend server, using the one of the domain`,
+                                error,
+                            );
+                            return request(undefined);
+                        }
+                        return throwError(() => error);
+                    }),
+                ),
+            ),
+        );
+    }
 
     /**
      * Returns the current system configuration.
@@ -195,6 +243,9 @@ export class ConfigService {
 
     /**
      * Returns translation overrides.
+     *
+     * Only for clients that load the default translations themselves (dev builds read
+     * `assets/i18n` directly) - `observeDefaultTranslations` has them applied already.
      *
      * The observable will update on locale changes.
      *

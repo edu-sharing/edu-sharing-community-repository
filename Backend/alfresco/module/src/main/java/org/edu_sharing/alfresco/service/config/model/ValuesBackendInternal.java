@@ -1,10 +1,12 @@
 package org.edu_sharing.alfresco.service.config.model;
 
 import com.typesafe.config.Optional;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -33,6 +35,16 @@ public class ValuesBackendInternal extends ValuesBackend {
     @Optional
     @Schema(description = "name of the elasticsearch workspace index (SearchServiceElastic.WORKSPACE_INDEX), the Frontend-Server reads node metadata from it")
     private String elasticWorkspaceIndex;
+    /**
+     * not lightbend config: the {@code <language>} overrides of the client.config.xml, set by
+     * ConfigServiceImpl - internal only, the app gets them applied by the Frontend-Server
+     * (/frontend-api/v1/i18n/{language}). Those of the contexts come with GET /config/v1/context/
+     */
+    @Optional
+    // on the array: a plain @Schema of a list property lands on the item schema (Language)
+    @ArraySchema(arraySchema = @Schema(description = "translation overrides of the global config (client.config.xml), all languages; "
+            + "the Frontend-Server merges them (and those of the contexts) into /frontend-api/v1/i18n/{language}"))
+    private List<Language> language;
 
     @Data
     public static class AngularConfig {
