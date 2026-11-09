@@ -32,7 +32,8 @@
   <mat-tree-node
     *matTreeNodeDef="let row"
     class="row"
-    [class.root]="row.depth === 0"
+    [class.root]="row.role === 'current'"
+    [class.ancestor]="row.role === 'ancestor'"
     [class.changed]="!!row.savedStateText"
     [style.--depth]="row.depth"
     [isExpandable]="row.expandable"
@@ -40,7 +41,6 @@
     (expandedChange)="setExpanded(row, $event)"
     (activation)="row.expandable && setExpanded(row, !row.expanded)"
   >
-    @if (row.depth > 0) {
     <span class="expand-slot">
       @if (row.expandable) {
       <button
@@ -54,18 +54,46 @@
       >
         <i [esIcon]="row.expanded ? 'expand_more' : 'chevron_right'"></i>
       </button>
+      } @else if (row.expanded) {
+      <i class="expand-indicator" esIcon="expand_more" [aria]="false"></i>
       }
     </span>
-    }
     <i class="row-icon" esIcon="layers" [aria]="false"></i>
     <div class="row-text">
       <div class="row-title">{{ row.node | nodeTitle }}</div>
       <div class="row-state state-{{ row.state.kind }}">
+        @if (row.state.kind === 'inherits' && topicUrl(row.state.from); as url) {
+        {{ i18nPrefix + 'STATE_INHERITS_FROM' | translate }}
+        <a
+          class="state-link"
+          [href]="url"
+          [target]="topicUrlTarget"
+          [esTopicLink]="row.state.from"
+          (keydown.enter)="$event.stopPropagation()"
+          >{{ row.state.from | nodeTitle }}</a
+        >
+        } @else {
         {{ i18nPrefix + row.stateText.key | translate : row.stateText.params }}
+        }
       </div>
-      @if (row.passesOwnTemplates) {
+      @if (row.passesOwnTemplates) { @if (passedTemplates(row)?.length) {
+      <div
+        #templatesHint
+        class="row-hint templates-hint"
+        [attr.data-collection-id]="row.node.ref.id"
+        [matTooltip]="
+          truncatedTemplateHints().has(row.node.ref.id) ? passedTemplates(row).join(', ') : null
+        "
+      >
+        {{
+          i18nPrefix + (passedTemplates(row).length === 1 ? 'PASSES_TEMPLATE' : 'PASSES_TEMPLATES')
+            | translate : { count: passedTemplates(row).length }
+        }}
+        {{ passedTemplates(row).join(', ') }}
+      </div>
+      } @else {
       <div class="row-hint">{{ i18nPrefix + 'PASSES_OWN_TEMPLATES' | translate }}</div>
-      } @else if (!row.passesOn) {
+      } } @else if (!row.passesOn) {
       <div class="row-hint">{{ i18nPrefix + 'PASSES_NOTHING_ON' | translate }}</div>
       } @if (row.savedStateText) {
       <div class="row-saved">
