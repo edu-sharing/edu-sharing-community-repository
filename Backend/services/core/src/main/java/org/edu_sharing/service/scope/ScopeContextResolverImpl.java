@@ -93,7 +93,7 @@ public class ScopeContextResolverImpl implements ScopeContextResolver {
         String selected = getSelectedScope();
         if (selected != null) {
             Optional<ScopeDefinition> definition = definitionService.getDefinition(selected);
-            if (definition.isPresent() && definitionService.isMember(selected)) {
+            if (definition.isPresent() && canEdit(selected)) {
                 return Optional.of(ActiveScope.builder()
                         .definition(definition.get())
                         .role(ScopeRole.EDITOR)
@@ -107,8 +107,15 @@ public class ScopeContextResolverImpl implements ScopeContextResolver {
         return Optional.empty();
     }
 
+    /**
+     * members of the scope group and global admins work as editors of a scope
+     */
+    private boolean canEdit(String scopeId) {
+        return definitionService.isMember(scopeId) || authorityService.isGlobalAdmin();
+    }
+
     private ScopeRole getRoleInContext(String contextId, String scopeId) {
-        if (definitionService.isMember(scopeId)) {
+        if (canEdit(scopeId)) {
             return ScopeRole.EDITOR;
         }
         GuestConfig guest = guestService.getConfig(contextId);
@@ -123,7 +130,9 @@ public class ScopeContextResolverImpl implements ScopeContextResolver {
     @ScopesFeature
     public List<ScopeInfo> getAvailableScopes() {
         List<ScopeInfo> result = new ArrayList<>();
-        for (ScopeDefinition definition : definitionService.getScopesOfCurrentUser()) {
+        // global admins can switch to every scope
+        List<ScopeDefinition> editable = authorityService.isGlobalAdmin() ? definitionService.getAllScopes() : definitionService.getScopesOfCurrentUser();
+        for (ScopeDefinition definition : editable) {
             result.add(ScopeInfo.builder()
                     .scopeId(definition.getScopeId())
                     .displayName(definition.getDisplayName())
@@ -162,7 +171,7 @@ public class ScopeContextResolverImpl implements ScopeContextResolver {
         if (definitionService.getDefinition(scopeId).isEmpty()) {
             throw new ScopeNotFoundException("unknown scope " + scopeId);
         }
-        if (!definitionService.isMember(scopeId)) {
+        if (!canEdit(scopeId)) {
             throw new InsufficientPermissionException("not a member of scope " + scopeId);
         }
         session.setAttribute(CCConstants.SESSION_SCOPE_ACTIVE, scopeId);
@@ -172,7 +181,7 @@ public class ScopeContextResolverImpl implements ScopeContextResolver {
     public <T> T runWithScope(String scopeId, Callable<T> work) throws Exception {
         ScopeDefinition definition = definitionService.getDefinition(scopeId)
                 .orElseThrow(() -> new ScopeNotFoundException("unknown scope " + scopeId));
-        boolean member = definitionService.isMember(scopeId);
+        boolean member = canEdit(scopeId);
         ActiveScope previous = THREAD_SCOPE.get();
         THREAD_SCOPE.set(ActiveScope.builder()
                 .definition(definition)

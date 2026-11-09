@@ -19,6 +19,8 @@ public final class ScopeSearchFilter {
     public static final String FIELD_SCOPE_IDS = "scope_ids";
     public static final String FIELD_SCOPE_IDS_PUBLISHED = "scope_ids_published";
     public static final String FIELD_SCOPE_IDS_EXCLUDED = "scope_ids_excluded";
+    /** scope group a collection belongs to (ccm:collection_scope_group, no assignments for collections) */
+    public static final String FIELD_COLLECTION_SCOPE_GROUP = "properties.ccm:collection_scope_group";
 
     private ScopeSearchFilter() {
     }
@@ -61,5 +63,48 @@ public final class ScopeSearchFilter {
             b.should(published);
             return b;
         }));
+    }
+
+    /**
+     * filter inside the active scope including collections: collections have no assignments, they belong to the scope
+     * via ccm:collection_scope_group and are visible by their ACL only. All other nodes use the content filter.
+     * <pre>
+     * (collection AND collection_scope_group = scope AND ACL) OR (NOT collection AND contentFilter)
+     * </pre>
+     *
+     * @param contentFilter the filter for content, see {@link #build}
+     */
+    public static Query withCollections(ActiveScope scope, Query contentFilter, Supplier<Query> aclFilter) {
+        String scopeId = scope.getScopeId();
+        return Query.of(q -> q.bool(b -> b
+                .minimumShouldMatch("1")
+                .should(s -> s.bool(collections -> collections
+                        .filter(isCollection())
+                        .filter(f -> f.term(t -> t.field(FIELD_COLLECTION_SCOPE_GROUP + ".keyword").value(scopeId)))
+                        .filter(aclFilter.get())))
+                .should(s -> s.bool(content -> content
+                        .mustNot(isCollection())
+                        .filter(contentFilter)))));
+    }
+
+    /**
+     * collection filter for searches that keep their regular ACL filter (no active scope, or a search with an
+     * explicit authority scope / additional permissions inside the active scope)
+     *
+     * @param scopeId the active scope, null if the user works globally: collections of a scope are only visible
+     *                inside that scope
+     */
+    public static Query collectionsOfScope(String scopeId) {
+        if (scopeId == null) {
+            return Query.of(q -> q.bool(b -> b.mustNot(m -> m.exists(e -> e.field(FIELD_COLLECTION_SCOPE_GROUP)))));
+        }
+        return Query.of(q -> q.bool(b -> b
+                .minimumShouldMatch("1")
+                .should(s -> s.term(t -> t.field(FIELD_COLLECTION_SCOPE_GROUP + ".keyword").value(scopeId)))
+                .should(s -> s.bool(other -> other.mustNot(isCollection())))));
+    }
+
+    private static Query isCollection() {
+        return Query.of(q -> q.match(m -> m.field("aspects").query(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_COLLECTION))));
     }
 }

@@ -118,6 +118,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -1123,17 +1124,18 @@ public class SearchServiceElastic implements SearchService {
         // an empty list requests no additional permissions (the search page always sends one): same as none
         boolean extraPermissions = permissions != null && !permissions.isEmpty();
         // scopes: mds searches inside an active scope see only this scope, the scope filter replaces the acl filter
-        Optional<ActiveScope> activeScope = query != null && authorityScope == null && !extraPermissions ? getActiveScope() : Optional.empty();
+        Optional<ActiveScope> currentScope = query != null ? getActiveScope() : Optional.empty();
+        Optional<ActiveScope> activeScope = authorityScope == null && !extraPermissions ? currentScope : Optional.empty();
         if (activeScope.isPresent()) {
             ActiveScope scope = activeScope.get();
 
             ScopeRole role = ScopeSearchFilter.searchRole(scope, scopeRole);
-            Query scopeFilter = ScopeSearchFilter.build(scope, role,
-                    () -> Query.of(q -> q.bool(getReadPermissionsQuery(QueryBuilders.bool()).build())),
+            Supplier<Query> aclFilter = () -> Query.of(q -> q.bool(getReadPermissionsQuery(QueryBuilders.bool()).build()));
+            Query scopeFilter = ScopeSearchFilter.build(scope, role, aclFilter,
                     role == ScopeRole.EDITOR ? getScopeBaseQueries(scope) : List.of());
             queryBuilderGlobalConditions = QueryBuilders.bool()
                     .must(must -> must.match(match -> match.field("nodeRef.storeRef.protocol").query(storeRefProtocol)))
-                    .filter(scopeFilter);
+                    .filter(ScopeSearchFilter.withCollections(scope, scopeFilter, aclFilter));
         }
         if (extraPermissions) {
             BoolQuery.Builder permissionsFilter = QueryBuilders.bool().must(must -> must.bool(queryGlobalConditionsFactory::apply));
@@ -1143,6 +1145,10 @@ public class SearchServiceElastic implements SearchService {
                 permissionsFilter.should(s -> s.bool(bool -> getPermissionsQuery(bool, "permissions." + permission)));
             }
             queryBuilderGlobalConditions = permissionsFilter;
+        }
+        // scopes: collections of a scope are only visible inside it (searches with the scope filter handle this above)
+        if (query != null && activeScope.isEmpty() && isScopesAvailable()) {
+            queryBuilderGlobalConditions.filter(ScopeSearchFilter.collectionsOfScope(currentScope.map(ActiveScope::getScopeId).orElse(null)));
         }
 
         if (scoped) {
@@ -1157,6 +1163,10 @@ public class SearchServiceElastic implements SearchService {
             processSpecialFilters(query, queryBuilderGlobalConditions);
         }
         return queryBuilderGlobalConditions;
+    }
+
+    private boolean isScopesAvailable() {
+        return scopeContextResolver != null && scopeContextResolver.getIfAvailable() != null;
     }
 
     private Optional<ActiveScope> getActiveScope() {

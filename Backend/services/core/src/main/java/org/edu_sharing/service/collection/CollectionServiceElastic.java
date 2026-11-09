@@ -458,10 +458,17 @@ public class CollectionServiceElastic implements CollectionService {
             }
 
             Map<String, Object> props = asProps(collection);
-            // collections created by an editor inside the active scope belong to that scope (not inherited by the content)
-            scopeContextResolver.resolve()
-                    .filter(scope -> scope.getRole() == ScopeRole.EDITOR)
-                    .ifPresent(scope -> props.put(CCConstants.CCM_PROP_COLLECTION_SCOPE_GROUP, scope.getScopeId()));
+            // collections created by an editor inside the active scope belong to that scope (not inherited by the content),
+            // sub collections belong to the scope of their parent
+            String parentScopeGroup = parentId == null ? null : AuthenticationUtil.runAsSystem(() ->
+                    NodeServiceHelper.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentId), CCConstants.CCM_PROP_COLLECTION_SCOPE_GROUP));
+            if (parentScopeGroup != null) {
+                props.put(CCConstants.CCM_PROP_COLLECTION_SCOPE_GROUP, parentScopeGroup);
+            } else {
+                scopeContextResolver.resolve()
+                        .filter(scope -> scope.getRole() == ScopeRole.EDITOR)
+                        .ifPresent(scope -> props.put(CCConstants.CCM_PROP_COLLECTION_SCOPE_GROUP, scope.getScopeId()));
+            }
             return AuthenticationUtil.runAsSystem(() -> {
                 try {
                     new DuplicateFinder().transformToSafeName(client.getChildren(parentIdLocal), props);
