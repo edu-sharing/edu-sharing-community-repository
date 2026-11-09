@@ -42,6 +42,8 @@
               <includes>
                 <include>assets/i18n/**</include>
                 <include>assets/images/**</include>
+                <!-- third-party license list of the frontend, read by VersionService.getLicenses() (/about/v1/licenses) -->
+                <include>WEB-INF/licenses/**</include>
               </includes>
             </overlay>
           </overlays>
