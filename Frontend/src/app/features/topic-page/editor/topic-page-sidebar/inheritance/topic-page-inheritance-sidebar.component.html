@@ -8,12 +8,6 @@
 </div>
 } @else {
 <div class="intro">
-  <div class="intro-heading">
-    {{
-      i18nPrefix + 'INTRO'
-        | translate : { title: collectionHierarchy.value().collection | nodeTitle }
-    }}
-  </div>
   <es-info-message
     class="intro-description"
     mode="info"
@@ -150,6 +144,13 @@
 </div>
 <div class="footer">
   <div class="footer-summary">
+    <!-- reserves the height of the longest message, so the footer never grows -->
+    <es-info-message class="footer-message footer-message-sizer" mode="warning" aria-hidden="true">
+      <span class="footer-count">{{
+        i18nPrefix + 'CHANGED_COUNT' | translate : { count: 99 }
+      }}</span>
+      <span class="footer-parents-hint">{{ i18nPrefix + 'CHANGES_PARENTS' | translate }}</span>
+    </es-info-message>
     @if (hasUnsavedChanges()) {
     <es-info-message class="footer-message" [mode]="changesParents() ? 'warning' : 'info'">
       <span class="footer-count">{{
