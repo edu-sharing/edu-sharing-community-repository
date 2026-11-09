@@ -33,8 +33,8 @@
             </overlay>
             <!-- the angular app is delivered by the Frontend-Server. What the backend reads
                  out of the war itself stays:
-                 - assets/i18n: I18nAngular (mails, mediatype labels, exports) and the bundle of
-                   /rest/config/v1/language/defaults - see Frontend-Server/docs/06-migration-phases.md, phase 6
+                 - assets/i18n: I18nAngular (mails, mediatype labels, exports). The app's bundle
+                   comes from the Frontend-Server (/frontend-api/v1/i18n/{language})
                  - assets/images: embedded into mails by {{image:/assets/images/...}} of the mail templates (Mail.replaceImages) -->
             <overlay>
               <groupId>${project.groupId}</groupId>

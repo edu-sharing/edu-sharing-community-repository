@@ -69,8 +69,7 @@ export type JsonGetter = Pick<BackendClient, 'getJson'>;
  * a call can land on a pod that does not know the session - the result would be
  * unreliable rather than authenticated. Every call goes out anonymously.
  *
- * Temporary. What it costs and what has to be in place to bring it back:
- * docs/02-routing.md, "No identity is forwarded".
+ * Temporary. What it costs and what has to be in place to bring it back
  */
 
 /** Domain and trace of a browser request, but no identity - for public data like the config. */

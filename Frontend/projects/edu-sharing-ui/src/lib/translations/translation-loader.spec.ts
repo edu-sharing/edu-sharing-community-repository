@@ -90,7 +90,7 @@ describe('TranslationLoader', () => {
                 await callGetTranslation('de');
                 expect(getSpy.calls.count()).toBe(TRANSLATION_LIST.length);
                 expect(getSpy.calls.first().args).toEqual(['assets/i18n/common/de.json']);
-                expect(getSpy.calls.mostRecent().args).toEqual(['assets/i18n/override/de.json']);
+                expect(getSpy.calls.mostRecent().args).toEqual(['assets/i18n/stream/de.json']);
             });
 
             it('should call observeTranslationOverrides', async () => {

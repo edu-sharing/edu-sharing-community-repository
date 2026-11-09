@@ -3,6 +3,7 @@ import path from 'node:path';
 import Fastify, { LogController, type FastifyInstance, type FastifyReply, type FastifyRequest } from 'fastify';
 import fastifyStatic from '@fastify/static';
 import replyFrom from '@fastify/reply-from';
+import swaggerUi from '@fastify/swagger-ui';
 import type { Config } from './config.ts';
 import { anonymousFor, BackendClient, isConnectionError } from './lib/backend-client.ts';
 import { ConfigCache } from './lib/config-cache.ts';
@@ -17,6 +18,8 @@ import {
     shellErrorStatus,
 } from './lib/error-response.ts';
 import { IndexHtml } from './lib/index-html.ts';
+import { LanguageDefaults } from './lib/language-defaults.ts';
+import { registerOpenApi } from './lib/openapi.ts';
 import { registerMetrics, type ProxyReason } from './lib/metrics.ts';
 import { ElasticClient, type ElasticSearcher, isMissingIndex } from './lib/elastic-client.ts';
 import { loadNode, primaryLanguage } from './lib/elastic-node.ts';
@@ -27,6 +30,7 @@ import { enrichShell } from './lib/shell-head.ts';
 import { createLogStream } from './lib/log-format.ts';
 import { ensureRequestId, REQUEST_ID_HEADER, traceLogBindings } from './lib/tracing.ts';
 import { ANGULAR_ROUTE_PREFIXES, BACKEND_PATHS, WEBDAV_METHODS } from './routes/backend-paths.ts';
+import { FRONTEND_API_PATH, frontendApi } from './routes/frontend-api.ts';
 
 /**
  * Angular emits content hashed names - entry files like `main-IGMI5JGB.js`, chunks like
@@ -398,6 +402,21 @@ export async function buildServer(config: Config, overrides: ServerOverrides = {
 
     // health: on the management server, see lib/management-server.ts
 
+    // --- frontend api: answered here, never by tomcat
+    if (config.dev) {
+        // dev only: the spec of the running code and a swagger ui on it. The checked in
+        // openapi.json (npm run generate:openapi) is what the angular client is built from
+        await registerOpenApi(app, ctx);
+        await app.register(swaggerUi, { routePrefix: `${ctx}${FRONTEND_API_PATH}/docs` });
+        app.get(`${ctx}${FRONTEND_API_PATH}/openapi.json`, { schema: { hide: true } }, () => app.swagger());
+    }
+    await app.register(frontendApi, {
+        prefix: `${ctx}${FRONTEND_API_PATH}`,
+        // the translations the backend bundled out of the frontend.war overlay - this
+        // server has the same files in its dist
+        languageDefaults: new LanguageDefaults(path.join(config.distDir, 'assets', 'i18n'), { revalidate: config.dev }),
+    });
+
     // --- backend ----------------------------------------------------------------
     for (const backendPath of BACKEND_PATHS) {
         app.all(`${ctx}${backendPath}`, (request, reply) => toBackend(request, reply));
@@ -495,7 +514,6 @@ export async function buildServer(config: Config, overrides: ServerOverrides = {
         // TRANSITIONAL. The target state is an exhaustive BACKEND_PATHS and a plain
         // 404 here - this branch only exists so the migration cannot break a path
         // nobody anticipated, and so these warnings tell us which paths to add.
-        // Removal plan: docs/06-migration-phases.md, phase 2.
         request.log.warn({ path: request.url, method: request.method }, 'unmatched path, proxying to backend');
         return toBackend(request, reply, 'unmatched');
     });

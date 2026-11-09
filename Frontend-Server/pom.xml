@@ -70,6 +70,19 @@
                     </execution>
 
                     <execution>
+                        <!-- openapi.json is generated from the route schemas and checked in -
+                             the angular client is built from it. Fails on a stale spec -->
+                        <id>frontend-server-check-openapi</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <phase>test</phase>
+                        <configuration>
+                            <arguments>run check:openapi</arguments>
+                        </configuration>
+                    </execution>
+
+                    <execution>
                         <id>frontend-server-test</id>
                         <goals>
                             <goal>npm</goal>

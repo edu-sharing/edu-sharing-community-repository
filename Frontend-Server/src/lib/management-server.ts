@@ -21,7 +21,7 @@ export function buildManagementServer(app: FastifyInstance, options: { backendUr
     // make kubernetes restart every frontend server
     management.get('/health/liveness', async () => ({ status: 'ok' }));
     // stays up when the backend goes away later: the pods answer with the
-    // "service unavailable" page then (docs/04-deployment.md, backend unreachable)
+    // "service unavailable" page then
     management.get('/health/readiness', async () => ({ status: 'ok' }));
 
     return management;

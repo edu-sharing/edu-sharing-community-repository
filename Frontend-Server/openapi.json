@@ -1,0 +1,84 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "edu-sharing Frontend-Server API",
+    "description": "Endpoints the frontend server answers itself, without the repository.",
+    "version": "1.0"
+  },
+  "components": {
+    "schemas": {
+      "FrontendApiError": {
+        "type": "object",
+        "required": [
+          "error",
+          "message"
+        ],
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "Translations": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true,
+        "description": "Nested dictionary of translations, the top level keys of every scope below assets/i18n merged"
+      }
+    }
+  },
+  "paths": {
+    "/v1/i18n/{language}": {
+      "get": {
+        "operationId": "getTranslations",
+        "summary": "Default translations of the app for one language",
+        "tags": [
+          "TRANSLATIONS v1"
+        ],
+        "description": "The translations of the frontend build, formerly GET /rest/config/v1/language/defaults of the repository (without the overrides of the client config, see /rest/config/v1/language).",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z]{2}(-[a-z0-9]+)*$"
+            },
+            "in": "path",
+            "name": "language",
+            "required": true,
+            "description": "e.g. de, en, de-informal"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Nested dictionary of translations, the top level keys of every scope below assets/i18n merged",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Translations"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No translations for this language",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FrontendApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "/edu-sharing/frontend-api"
+    }
+  ]
+}

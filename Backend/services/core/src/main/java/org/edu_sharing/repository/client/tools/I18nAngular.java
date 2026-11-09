@@ -24,30 +24,6 @@ public class I18nAngular {
         return getTranslationAngular(scope,key,AuthenticationToolAPI.getInstance().getCurrentAngularLanguage());
     }
 
-    public static JSONObject getLanguageStrings() throws Exception{
-        String language=AuthenticationToolAPI.getInstance().getCurrentAngularLanguage();
-        ServletContext context = Context.getCurrentInstance().getRequest().getSession().getServletContext();
-        File[] dirs = new File(context.getRealPath("/assets/i18n/")).listFiles(File::isDirectory);
-        JSONObject result=new JSONObject();
-        for(File dir : dirs) {
-            File i18n = new File(dir, language + ".json");
-            // fallback to the base language
-            if(language.startsWith("de-") && !i18n.exists()) {
-                // ignore missing files
-                continue;
-            }
-            String json = FileUtils.readFileToString(i18n,"UTF-8");
-            JSONObject jsonObject = new JSONObject(json);
-            try {
-                for (String key : JSONObject.getNames(jsonObject)) {
-                    result.put(key, jsonObject.get(key));
-                }
-            }catch(NullPointerException e){
-                // the override is usually empty, can be ignored
-            }
-        }
-        return result;
-    }
     /**
      * Get the translation
      * @param scope equals the folder name in assets/i18n, e.g. workspace, common, search

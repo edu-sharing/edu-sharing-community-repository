@@ -55,7 +55,7 @@ export interface StaticCacheOptions {
  * The static files of the app - of any type up to `maxFileBytes` - read (and compressed)
  * once per pod and then answered from memory: no open / read / close through the libuv
  * threadpool and no stream buffers per request - the costliest part of serving the
- * bundles (see docs/04-deployment.md).
+ * bundles.
  *
  * Bounded in bytes (lru-cache `maxSize`), entries are handed out by reference, never
  * copied. Files with a content hash in their name never change and never expire; the few
@@ -155,7 +155,7 @@ export class StaticCache {
  * The variant for an `Accept-Encoding` header: brotli before gzip, identity when the
  * client takes neither (or excludes them with `q=0`) or the variant was not worth keeping.
  */
-export function negotiateEncoding(acceptEncoding: string | undefined, file: CachedFile): Encoding {
+export function negotiateEncoding(acceptEncoding: string | undefined, file: Pick<CachedFile, 'br' | 'gzip'>): Encoding {
     const accepted = new Map<string, number>();
     for (const part of (acceptEncoding ?? '').toLowerCase().split(',')) {
         const [name, ...params] = part.trim().split(';');

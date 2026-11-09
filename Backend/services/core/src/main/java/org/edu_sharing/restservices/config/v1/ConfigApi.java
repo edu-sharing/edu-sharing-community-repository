@@ -15,7 +15,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.Response;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.service.config.model.Context;
-import org.edu_sharing.repository.client.tools.I18nAngular;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.ApiService;
@@ -152,27 +151,6 @@ public class ConfigApi {
         }
     }
 
-
-    @GET
-    @SecurityRequirements
-    @Path("/language/defaults")
-    @Operation(summary = "get all inital language strings for angular")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Object.class))),
-            @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-    })
-    public Response getLanguageDefaults() {
-        try {
-            return Response.status(Response.Status.OK).entity(I18nAngular.getLanguageStrings().toString()).build();
-        } catch (Throwable t) {
-            logger.error(t.getMessage(), t);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
-        }
-    }
 
     @GET
     @SecurityRequirements

@@ -26,7 +26,6 @@ export const TRANSLATION_LIST = [
     'profiles',
     'services',
     'stream',
-    'override',
 ];
 
 type Dictionary = { [key: string]: string | Dictionary };

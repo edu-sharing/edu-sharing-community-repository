@@ -3,3 +3,4 @@ node_modules/
 # generated sources
 build/
 src/lib/api/
+src/lib/frontend-api/

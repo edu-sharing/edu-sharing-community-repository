@@ -180,7 +180,7 @@ export function loadConfig(): Config {
         elasticUrl: str('ELASTIC_URL', 'http://repository-search-elastic-index:9200').replace(/\/+$/, ''),
         elasticIndex: optionalStr('ELASTIC_INDEX'),
         distDir: path.resolve(packageRoot, str('DIST_DIR', path.join(packageRoot, 'dist'))),
-        // transitional: see docs/02-routing.md - the target state is an exhaustive
+        // transitional: the target state is an exhaustive
         // BACKEND_PATHS list and a 404 for anything else
         proxyUnmatched: bool('PROXY_UNMATCHED', true),
         // matches nginx.ingress.kubernetes.io/proxy-read-timeout: 180

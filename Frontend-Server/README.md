@@ -43,6 +43,11 @@ a restart.
 | `npm start` | run the compiled server |
 | `npm test` | unit + routing tests (fake backend, no network) |
 | `npm run check:types` | type check only |
+| `npm run generate:openapi` | write `openapi.json` from the route schemas of `src/routes/frontend-api.ts` (checked in; `ngx-edu-sharing-api` generates its client from it) |
+| `npm run check:openapi` | fail if `openapi.json` is not up to date (runs in the maven build) |
+
+With `DEV=true` the running server also serves its spec at `/edu-sharing/frontend-api/openapi.json`
+and a Swagger UI at `/edu-sharing/frontend-api/docs`.
 
 ## Configuration
 

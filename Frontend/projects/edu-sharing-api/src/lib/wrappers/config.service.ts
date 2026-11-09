@@ -17,6 +17,7 @@ import { switchReplay } from '../utils/rxjs-operators/switch-replay';
 import { Values } from '../api/models/values';
 import { Variables as Vars } from '../api/models/variables';
 import { ValuesBackend } from '../api/models/values-backend';
+import { TranslationsV1Service } from '../frontend-api/services';
 
 export type ClientConfig = Values;
 export type ClientConfigBackend = ValuesBackend;
@@ -40,6 +41,7 @@ export const LANGUAGES: { [key: string]: Locale } = {
 })
 export class ConfigService {
     private configV1 = inject(ConfigV1Service);
+    private translationsV1 = inject(TranslationsV1Service);
     private apiRequestConfiguration = inject(ApiRequestConfiguration);
 
     private readonly updateTrigger = new Subject<void>();
@@ -72,7 +74,8 @@ export class ConfigService {
             of({
                 locale: locale?.locale,
                 language: locale?.language,
-                dict: this.configV1.getLanguageDefaults(),
+                // served by the frontend server, not by the repository
+                dict: this.translationsV1.getTranslations({ language: locale?.language as string }),
             }),
         ),
         shareReplay(1),
