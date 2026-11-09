@@ -1402,7 +1402,7 @@ public class NodeApi {
                 StringUtils.isBlank(assocType) ? assocType : null, obeyMds != Boolean.FALSE);
 
         if (fileInputStream != null) {
-            nodeDao.changeContent(fileInputStream, null, versionComment);
+            child.changeContent(fileInputStream, null, versionComment);
         }
 
         NodeEntry response = new NodeEntry();

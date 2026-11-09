@@ -75,6 +75,7 @@ import { CardDialogRef } from '../../../features/dialogs/card-dialog/card-dialog
 import {
     DELETE_OR_CANCEL,
     GenericDialogButton,
+    OK_OR_CANCEL,
     YES_OR_NO,
 } from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { QrDialogModule } from '../../../features/dialogs/dialog-modules/qr-dialog/qr-dialog.module';
@@ -136,6 +137,7 @@ import {
     DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP,
     DEFAULT_WIDGET_CONFIG_PROP,
     DEFAULT_WIDGET_NAME_PREFIX,
+    OPEN_PAGE_TEMPLATE_QUERY_PARAM,
     SEARCH_FILTERS_QUERY_PARAM,
     SEARCH_INPUT_QUERY_PARAM,
     SWIMLANE_TYPE_OPTIONS,
@@ -196,6 +198,7 @@ import {
     retrievePromptFromAiConfig,
     retrieveTopicColor,
 } from '../shared/utils/template-util';
+import { findInheritanceSource } from '../shared/utils/topic-page-inheritance-util';
 import { BreadcrumbComponent } from '../widgets/breadcrumb/breadcrumb.component';
 import { GenericWidgetComponent } from '../widgets/generic-widget/generic-widget.component';
 import { GenericWidgetGlobalService } from '../widgets/generic-widget/generic-widget-global.service';
@@ -219,6 +222,7 @@ import { SwimlaneBackgroundShapeComponent } from './swimlane-background-shape/sw
 import { SwimlaneSettingsDialogComponent } from './swimlane/swimlane-settings-dialog/swimlane-settings-dialog.component';
 import { SwimlaneConfigurationButtonsComponent } from './swimlane-configuration-buttons/swimlane-configuration-buttons.component';
 import { TopicPageFiltersSidebarComponent } from './topic-page-filters-sidebar/topic-page-filters-sidebar.component';
+import { TopicPageInheritanceSidebarComponent } from './topic-page-sidebar/inheritance/topic-page-inheritance-sidebar.component';
 
 @Component({
     imports: [
@@ -248,6 +252,7 @@ import { TopicPageFiltersSidebarComponent } from './topic-page-filters-sidebar/t
         TooltipAriaLabelDirective,
         TopicHeaderComponent,
         TopicPageFiltersSidebarComponent,
+        TopicPageInheritanceSidebarComponent,
         TranslateModule,
         VarDirective,
     ],
@@ -487,6 +492,10 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     // set while a global template is edited in place of the collection's page; the collection
     // only provides the topic and sub-collections the preview is resolved for
     globalTemplateNode: WritableSignal<Node | null> = signal(null);
+    // whether the side menu offers the inheritance of the collection's pages
+    canManageInheritance: Signal<boolean> = computed(
+        (): boolean => this.userHasEditRights() && !this.globalTemplateNode(),
+    );
     editMode: WritableSignal<boolean> = signal(false);
     filterPanelOpen: WritableSignal<boolean> = signal(false);
     readonly sidebarOpen: Signal<boolean> = computed(
@@ -510,7 +519,15 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     private inheritedPageConfigCopy: Promise<void> | null = null;
     collectionNodePagePropagateConfigRef: string;
     parentEntries: WritableSignal<ParentEntries> = signal(null);
-    propagatingParentNode: Node;
+    // the ancestor whose templates the shown page is inherited from
+    propagatingParentNode: WritableSignal<Node | null> = signal(null);
+    // whether the user may edit the templates the shown page is inherited from
+    propagatingParentEditable: Signal<boolean> = computed((): boolean => {
+        const node: Node | null = this.propagatingParentNode();
+        return !!node && checkUserAccess(node);
+    });
+    // the collection's templates open once it is loaded, as asked for by an inheriting collection
+    private pageTemplateRequested: boolean = false;
     convertedBreadcrumbNodeId: Signal<string> = computed((): string =>
         convertNodeRefIntoNodeId(this.breadcrumbNodeId()),
     );
@@ -696,6 +713,8 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * page config and statistics.
      */
     async ngOnInit(): Promise<void> {
+        this.pageTemplateRequested =
+            !!this.route.snapshot.queryParams[OPEN_PAGE_TEMPLATE_QUERY_PARAM];
         // @TODO
         // retrieve the custom sidebar options (note: options with the same name are filtered out)
         // note:
@@ -977,6 +996,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             }
             // retrieve the page config node and select the proper variant to define the breadcrumbNodeId, headerNodeId + swimlanes
             await this.retrievePageConfigAndSelectVariant(variantId);
+            await this.openRequestedPageTemplate();
 
             // initial load finished (page structure loaded)
             this.initialLoadSuccessfully.set(true);
@@ -1178,15 +1198,15 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         // check whether the collection node has a page propagate config
         // hint: this must be done before parsing the page config, as it might not exist and cancel the execution
         const pageConfigPropagateRef: string = retrievePageConfigPropagateRef(this.collectionNode);
-        if (await this.isPageTemplateAvailable(pageConfigPropagateRef)) {
-            this.collectionNodePagePropagateConfigRef = pageConfigPropagateRef;
-            // a collection holds at most one page template, so drop a create option that was added
-            // while none existed yet (e.g. the template was just created in this session)
-            await this.topicPageCreateOptionsService.remove(this.createPageTemplateTitle);
-        }
-        // no (loadable) page template exists, so creating one starts a new propagate config
-        else {
-            this.collectionNodePagePropagateConfigRef = null;
+        // without a (loadable) page template, creating one starts a new propagate config
+        this.collectionNodePagePropagateConfigRef = (await this.isPageTemplateAvailable(
+            pageConfigPropagateRef,
+        ))
+            ? pageConfigPropagateRef
+            : null;
+        // whoever may edit the collection decides which pages its sub-collections inherit, e.g.
+        // one template per target group
+        if (this.userHasEditRights()) {
             await this.topicPageCreateOptionsService.add(
                 this.createPageTemplateTitle,
                 'edu-add_page_template',
@@ -1194,7 +1214,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                     void this.createPageTemplate();
                 },
                 11,
-                Constrain.Admin,
+                Constrain.User,
             );
         }
         // idea: if "collectionNode" already has a page config, there is no need to search further
@@ -1429,15 +1449,12 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         // the goal is to add another page variant to the existing (propagated) page config
         this.startEditing(this.i18nPrefix + 'CREATE_PAGE_VARIANT.PENDING_MESSAGE');
 
-        // a collection without an own page config (none or only an inherited one) gets a new page
-        // config holding just the variant built from the selected source
-        const ownPageConfigMissing: boolean =
-            !this.collectionNodePageConfigRef || !this.pageVariantConfigs?.nodes?.length;
-        if (ownPageConfigMissing) {
+        // a collection without any page gets a new page config holding just the new variant
+        if (!this.pageVariantConfigs?.nodes?.length) {
             await this.createCustomConfig(sourceNode);
             return;
         }
-        // check for custom page node existence and create it if necessary
+        // an inherited page is copied first, so the new variant is added next to its variants
         await this.checkForCustomPageNodeExistence();
         // check for pageConfigNode existence
         if (!retrieveNodeId(this.pageConfigNode)) {
@@ -2352,9 +2369,31 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         if (this.variantPreview()) {
             return;
         }
+        if (!this.editMode() && !(await this.confirmEditingInheritedPage())) {
+            return;
+        }
         this.editMode.set(!this.editMode());
         this.checkAccordionExpansionState();
         this.closeSideMenus();
+    }
+
+    /**
+     * Asks before an inherited page is edited, as the first change gives the collection a copy of
+     * its own. Resolves true right away for any other page.
+     */
+    private async confirmEditingInheritedPage(): Promise<boolean> {
+        const source: Node | null = this.propagatingParentNode();
+        if (!source || this.templateMode() || this.globalTemplateNode()) {
+            return true;
+        }
+        const dialogRef = await this.dialogs.openGenericDialog({
+            title: this.i18nPrefix + 'INHERITED_PAGE.EDIT_HEADING',
+            message: this.i18nPrefix + 'INHERITED_PAGE.EDIT_MESSAGE',
+            messageParameters: { title: source.title || source.name },
+            buttons: OK_OR_CANCEL,
+            closable: Closable.Casual,
+        });
+        return (await firstValueFrom(dialogRef.afterClosed())) === 'OK';
     }
 
     /**
@@ -2401,13 +2440,83 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      */
     leaveTemplateMode(): void {
         this.templateMode.set(false);
+        this.reloadWithoutVariant();
+    }
+
+    /**
+     * Takes the collection's variant out of the URL while a template is shown in place of its
+     * page, as it belongs to no template.
+     */
+    private async detachVariantFromUrl(): Promise<void> {
+        if (this.templateMode() || this.globalTemplateNode()) {
+            return;
+        }
+        await this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { variantId: null },
+            queryParamsHandling: 'merge',
+            replaceUrl: true,
+        });
+    }
+
+    /**
+     * Reloads the collection's page, which picks its variant anew, as a variant in the URL may
+     * still be one of the templates.
+     */
+    private reloadWithoutVariant(): void {
+        const url: URL = new URL(window.location.href);
+        url.searchParams.delete('variantId');
+        window.history.replaceState(window.history.state, '', url.toString());
         window.location.reload();
+    }
+
+    /**
+     * Opens the templates the shown page is inherited from, in the collection they belong to.
+     */
+    async editInheritedTemplates(): Promise<void> {
+        const source: Node | null = this.propagatingParentNode();
+        if (!source) {
+            return;
+        }
+        const url: string | null =
+            this.topicPageGlobalService.getCustomUrlFunction()?.(source) || null;
+        if (this.navigateInPlace()) {
+            this.pageTemplateRequested = true;
+            await this.loadTopicInPlace({ collectionId: retrieveNodeId(source), url });
+            return;
+        }
+        if (url) {
+            const target: URL = new URL(url, window.location.href);
+            target.searchParams.set(OPEN_PAGE_TEMPLATE_QUERY_PARAM, 'true');
+            window.location.assign(target.toString());
+        }
+    }
+
+    /**
+     * Switches into the template mode once if the page was opened to edit the collection's
+     * templates and the user may do so.
+     */
+    private async openRequestedPageTemplate(): Promise<void> {
+        if (!this.pageTemplateRequested) {
+            return;
+        }
+        this.pageTemplateRequested = false;
+        await this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { [OPEN_PAGE_TEMPLATE_QUERY_PARAM]: null },
+            queryParamsHandling: 'merge',
+            replaceUrl: true,
+        });
+        if (this.userHasEditRights() && this.collectionNodePagePropagateConfigRef) {
+            await this.switchIntoTemplateMode();
+        }
     }
 
     /**
      * Called by es-topic-page-breadcrumb navigateToTemplate output event.
      */
     async switchIntoTemplateMode(reloadNecessary: boolean = false): Promise<void> {
+        await this.detachVariantFromUrl();
         this.templateMode.set(true);
         if (reloadNecessary) {
             this.collectionNode = await this.topicPageHelperService.getNodeUncached(
@@ -2417,12 +2526,8 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         this.pageConfigNode = null;
         this.selectedVariantPosition = -1;
         this.closeSideMenus();
-        // remove the create buttons for a new page variant and a new page template: neither can be
-        // created while the template itself is being edited
-        await this.topicPageCreateOptionsService.remove(
-            this.createPageVariantTitle,
-            this.createPageTemplateTitle,
-        );
+        // while the templates are edited, only further templates can be created
+        await this.topicPageCreateOptionsService.remove(this.createPageVariantTitle);
         await this.retrievePageConfigAndSelectVariant();
     }
 
@@ -2443,6 +2548,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             return;
         }
         this.variantPreviewService.leave();
+        await this.detachVariantFromUrl();
         this.requestInProgress.set(true);
         try {
             this.globalTemplateNode.set(availableTemplateNode);
@@ -2495,7 +2601,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * Leaves the global template by reloading the collection's page.
      */
     leaveGlobalTemplateMode(): void {
-        window.location.reload();
+        this.reloadWithoutVariant();
     }
 
     /**
@@ -2657,18 +2763,15 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             pageRef = retrievePageConfigPropagateRef(node);
         }
         this.collectionNodePageConfigRef = pageRef;
+        this.propagatingParentNode.set(null);
         // otherwise, iterate the parents to retrieve the pageConfigPropagateRef if set
         if (!pageRef) {
             const parents: ParentEntries = await this.topicPageHelperService.getNodeParents(
                 retrieveNodeId(node),
             );
-            this.propagatingParentNode = parents.nodes.find(
-                (parent: Node) =>
-                    retrieveNodeId(node) !== retrieveNodeId(parent) &&
-                    !!retrievePageConfigPropagateRef(parent),
-            );
-            if (this.propagatingParentNode) {
-                pageRef = retrievePageConfigPropagateRef(this.propagatingParentNode);
+            this.propagatingParentNode.set(findInheritanceSource(node, parents.nodes ?? []));
+            if (this.propagatingParentNode()) {
+                pageRef = retrievePageConfigPropagateRef(this.propagatingParentNode());
             }
             this.pageVariantReloadNecessary = true;
         }
@@ -3091,6 +3194,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         this.collectionNodePageConfigRef = prependWorkspacePrefix(
             retrieveNodeId(this.pageConfigNode),
         );
+        this.propagatingParentNode.set(null);
     }
 
     /**
@@ -3361,7 +3465,10 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         }
         this.templateVariantNode.set(templateNode);
 
-        const i18nExtension: string = 'SIDE_MENU.CONFIG_PAGE_VARIANT.TEMPLATE_UPDATE.';
+        // without a newer template, regenerating resets the variant to the template it is based on
+        const i18nExtension: string =
+            'SIDE_MENU.CONFIG_PAGE_VARIANT.TEMPLATE_UPDATE.' +
+            (this.templateUpdateAvailable() ? '' : 'RESET_');
         const dialogRef = await this.dialogs.openGenericDialog({
             title: this.i18nPrefix + i18nExtension + 'HEADING',
             message: this.i18nPrefix + i18nExtension + 'MESSAGE',

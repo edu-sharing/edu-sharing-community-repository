@@ -1,5 +1,26 @@
 {
   "TOPIC_PAGE": {
+    "SIDEBAR": {
+      "MENU": {
+        "INHERITANCE": "Ereditarietà"
+      },
+      "INHERITANCE": {
+        "INTRO": "Ereditarietà di {{title}}",
+        "INTRO_DESCRIPTION": "Così questa collezione e le sue sotto-collezioni ricevono le loro pagine tematiche. «Trasmetti» decide se i modelli ereditati vengono passati più in basso.",
+        "STATE_OWN": "Pagina tematica propria – nessuna ereditarietà necessaria",
+        "STATE_INHERITS": "eredita da {{title}}",
+        "STATE_STOPPED": "non eredita nulla – trasmissione interrotta presso {{title}}",
+        "STATE_NONE": "nessuna pagina tematica",
+        "PASSES_OWN_TEMPLATES": "trasmette i propri modelli alle sotto-collezioni",
+        "PASSES_NOTHING_ON": "non trasmette l'ereditato alle sotto-collezioni",
+        "SAVED_STATE": "finora:",
+        "PASS_ON": "Trasmetti",
+        "PASS_ON_TOOLTIP": "Trasmetti i modelli ereditati alle sotto-collezioni",
+        "CHANGED_COUNT": "{{count}} collezioni mostrate cambiano",
+        "SAVED": "L'ereditarietà è stata salvata.",
+        "LOAD_ERROR": "Non è stato possibile caricare l'ereditarietà."
+      }
+    },
     "NAVIGATION": {
       "NEW_PAGE_VARIANT": "Nuova pagina tematica",
       "NEW_PAGE_TEMPLATE": "Nuovo modello di pagina tematica",
@@ -200,17 +221,19 @@
         "LABEL": "Impostazioni",
         "HEADING": "Impostazioni della variante di pagina tematica",
         "WARN_TEXT": "Non tutti i campi dei parametri obbligatori sono stati compilati. Non potete annullare l'operazione.",
-        "DUPLICATE_WARN_TEXT": "Esiste già una variante di pagina tematica con gli stessi parametri.",
+        "DUPLICATE_WARN_TEXT": "Un'altra variante di questa pagina tematica ha già gli stessi parametri. Scegliete altri valori, affinché sia chiaro a chi viene mostrata quale variante.",
         "TITLE": "Titolo della variante",
         "TITLE_PLACEHOLDER": "Variante di pagina tematica per xyz",
         "EDUCATION_LEVEL_LABEL": "Livello di istruzione",
         "TARGET_GROUP_LABEL": "Gruppo target",
         "DELETE_VARIANT": "Elimina variante",
         "DEFINE_PARAMETERS": "Definisci parametri",
-        "DUPLICATE_PARAMETERS": "Rilevato duplicato in una variante esistente"
+        "DUPLICATE_PARAMETERS": "Stessi parametri di un'altra variante"
       },
       "CONFIG_PAGE_TEMPLATE": {
         "HEADING": "Impostazioni del modello di pagina tematica",
+        "DUPLICATE_WARN_TEXT": "Un altro modello di questa collezione ha già gli stessi parametri. Scegliete altri valori, affinché sia chiaro quale modello ricevono le sottocollezioni e per chi.",
+        "DUPLICATE_PARAMETERS": "Stessi parametri di un altro modello",
         "TITLE": "Titolo del modello",
         "TITLE_PLACEHOLDER": "Modello di pagina tematica per xyz",
         "DELETE_VARIANT": "Elimina modello"
@@ -388,6 +411,12 @@
     "SAVE_CONFIG_ERROR_MESSAGE": "Si è verificato un errore durante il caricamento di una risorsa. Ricaricate la pagina.",
     "DEFAULT_PAGE_TEMPLATE_NAME": "Modello di pagina",
     "DEFAULT_PAGE_VARIANT_NAME": "Variante di pagina",
+    "CREATE_PAGE_TEMPLATE": {
+      "EXISTING_TEMPLATE": {
+        "INFO_HEADING": "Questa collezione ha già dei modelli di pagina.",
+        "INFO_TEXT": "Aggiungete un altro modello solo per un altro gruppo target o livello di istruzione. Un modello esistente può anche essere adattato direttamente."
+      }
+    },
     "CREATE_PAGE_VARIANT": {
       "HEADING": "Crea nuova pagina tematica",
       "EXISTING_VARIANT": {
@@ -397,8 +426,8 @@
         "INFO_LIST_ITEM_TWO": "È possibile adattare un modello esistente?"
       },
       "EXISTING_TOPIC_PAGE": {
-        "INFO_HEADING": "Esiste già una pagina tematica per questa collezione.",
-        "INFO_TEXT": "Potete crearne una copia e adattarla, rimuovere i suoi filtri e scegliere un'altra pagina tematica come base, oppure creare una nuova variante a partire da un modello."
+        "INFO_HEADING": "Questa collezione eredita la sua pagina tematica da una collezione superiore.",
+        "INFO_TEXT": "Le varianti ereditate vengono riprese come copie e la nuova variante viene aggiunta. Gli aggiornamenti del modello potranno essere applicati in seguito."
       },
       "CREATE_COPY_OF_LABEL": "Crea copia di:",
       "COPY_OPTIONS": {
@@ -432,6 +461,12 @@
       "VIEW": "Vi trovate attualmente nella modalità di visualizzazione del modello.",
       "EDIT": "Vi trovate attualmente nella modalità di modifica del modello.",
       "END": "Esci dalla modalità modello"
+    },
+    "INHERITED_PAGE": {
+      "INFO": "Questa pagina tematica è ereditata da «{{title}}». Le modifiche apportate qui creano una copia propria per questa collezione.",
+      "EDIT_TEMPLATES": "Modifica i modelli lì",
+      "EDIT_HEADING": "Modificare la pagina tematica ereditata?",
+      "EDIT_MESSAGE": "Le vostre modifiche creano una copia propria della pagina di «{{title}}». Con «Rigenera» potete tuttavia sincronizzarla manualmente con il modello, perdendo i vostri adattamenti."
     },
     "SWIMLANE_COMPLETION": {
       "INFO": "Sezioni che richiedono un intervento:",

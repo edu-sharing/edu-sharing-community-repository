@@ -9,6 +9,7 @@ import { PageVariantConfig } from '../types/page-variant-config';
 import { SwimlaneRepeatService } from './swimlane-repeat.service';
 import { TopicPageHelperService } from './topic-page-helper.service';
 import { TopicPageVariantCopyService } from './topic-page-variant-copy.service';
+import { TopicPageVariantNodesService } from './topic-page-variant-nodes.service';
 
 const node = (id: string, properties: object = {}): Node =>
     ({ ref: { id }, name: id, properties } as unknown as Node);
@@ -19,6 +20,7 @@ const variantNode = (id: string, config: object): Node =>
 describe('TopicPageVariantCopyService', () => {
     let service: TopicPageVariantCopyService;
     let helper: jasmine.SpyObj<TopicPageHelperService>;
+    let nodes: jasmine.SpyObj<TopicPageVariantNodesService>;
     let created: number;
     // properties written per node ID, as JSON parsed where the value is JSON
     let written: Map<string, { [property: string]: unknown }>;
@@ -44,10 +46,15 @@ describe('TopicPageVariantCopyService', () => {
                 return node(id);
             },
         );
+        nodes = jasmine.createSpyObj<TopicPageVariantNodesService>('TopicPageVariantNodesService', [
+            'copyProfilingProperties',
+        ]);
+        nodes.copyProfilingProperties.and.resolveTo(null);
         TestBed.configureTestingModule({
             providers: [
                 TopicPageVariantCopyService,
                 { provide: TopicPageHelperService, useValue: helper },
+                { provide: TopicPageVariantNodesService, useValue: nodes },
                 {
                     provide: SwimlaneRepeatService,
                     useValue: { expandRepeats: async (): Promise<void> => undefined },
@@ -90,6 +97,16 @@ describe('TopicPageVariantCopyService', () => {
                 'copy-of-widget-b',
             );
             void expect(copiedB.structure.swimlanes[0].grid[0].temporaryNodeId).toBeUndefined();
+        });
+
+        it('keeps the profiling of each copied variant', async () => {
+            const a: Node = variantNode('a', config('widget-a'));
+            const b: Node = variantNode('b', config('widget-b'));
+            await service.copyPageConfig(node('collection'), [a, b], '', -1, null, context);
+            void expect(nodes.copyProfilingProperties.calls.allArgs()).toEqual([
+                [a, 'created-2'],
+                [b, 'created-3'],
+            ]);
         });
 
         it('falls back to the default position when the shown variant is not copied', async () => {

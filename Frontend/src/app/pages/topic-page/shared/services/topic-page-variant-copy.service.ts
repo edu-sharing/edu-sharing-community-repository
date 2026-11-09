@@ -34,6 +34,7 @@ import {
 } from '../utils/template-util';
 import { SwimlaneRepeatService } from './swimlane-repeat.service';
 import { TopicPageHelperService } from './topic-page-helper.service';
+import { TopicPageVariantNodesService } from './topic-page-variant-nodes.service';
 
 /**
  * A widget added to a page whose config is copied in the same step: it is created in the copy of
@@ -56,6 +57,7 @@ export interface PendingWidget {
 export class TopicPageVariantCopyService {
     private swimlaneRepeatService = inject(SwimlaneRepeatService);
     private topicPageHelperService = inject(TopicPageHelperService);
+    private topicPageVariantNodesService = inject(TopicPageVariantNodesService);
 
     /**
      * Gives a collection a page config of its own, holding a copy of each given (inherited)
@@ -91,6 +93,11 @@ export class TopicPageVariantCopyService {
                 DEFAULT_PAGE_VARIANT_NAME_PREFIX + uuidv4(),
                 DEFAULT_PAGE_VARIANT_CONFIG_ASPECT,
                 properties,
+            );
+            // a copy is shown to the same target group and educational context as its source
+            await this.topicPageVariantNodesService.copyProfilingProperties(
+                variantNode,
+                retrieveNodeId(pageConfigVariantNode),
             );
             pageVariants.push(prependWorkspacePrefix(retrieveNodeId(pageConfigVariantNode)));
             if (selectedVariantRefId.includes(retrieveNodeId(variantNode))) {

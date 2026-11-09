@@ -83,6 +83,18 @@
       {{ i18nPrefix + 'TEMPLATE_MODE_ACTIVE.END' | translate }}
     </button>
   </es-info-message>
+  } @else if (userHasEditRights() && propagatingParentNode()) {
+  <es-info-message mode="info" class="template-mode">
+    {{
+      i18nPrefix + 'INHERITED_PAGE.INFO'
+        | translate : { title: (propagatingParentNode() | nodeTitle) }
+    }}
+    @if (propagatingParentEditable()) {
+    <button mat-flat-button color="primary" (click)="editInheritedTemplates()">
+      {{ i18nPrefix + 'INHERITED_PAGE.EDIT_TEMPLATES' | translate }}
+    </button>
+    }
+  </es-info-message>
   } @if (editMode() && userHasEditRights() && swimlaneCompletionCounts(); as counts) {
   <es-info-message mode="warning" class="template-mode swimlane-completion">
     <span>
@@ -112,6 +124,7 @@
         [isProcessing]="requestInProgress()"
         [nodeId]="convertedBreadcrumbNodeId()"
         [propagatedNodeId]="convertedPropagatedBreadcrumbNodeId()"
+        [canManagePageTemplate]="userHasEditRights()"
         [pageTemplateExists]="!!collectionNodePagePropagateConfigRef"
         [pageVariantNode]="pageVariantNode()"
         [pageVariantConfigNodes]="pageVariantConfigs?.nodes || []"
@@ -279,6 +292,19 @@
             [title]="i18nPrefix + 'SIDE_MENU.CONFIG_PAGE_VARIANT.LABEL' | translate"
             (itemClicked)="collapsibleItemClicked($event)"
           ></es-side-menu-item>
+          @if (canManageInheritance()) {
+          <es-side-menu-item
+            [disabled]="
+              selectedMenuItem ===
+                (i18nPrefix + 'SIDE_MENU.CONFIG_PAGE_VARIANT.LABEL' | translate) &&
+              !pageVariantSettingsValid()
+            "
+            icon="account_tree"
+            [selectedMenuItem]="selectedMenuItem"
+            [title]="i18nPrefix + 'SIDEBAR.MENU.INHERITANCE' | translate"
+            (itemClicked)="collapsibleItemClicked($event)"
+          ></es-side-menu-item>
+          }
         </ng-container>
         <ng-container slot="content">
           @if ( selectedMenuItem === (i18nPrefix + 'SIDE_MENU.CONFIG_PAGE_VARIANT.LABEL' |
@@ -318,6 +344,10 @@
               (settingsValidityChanged)="pageVariantSettingsValid.set($event)"
             ></es-configure-page-variant-or-template>
           </div>
+          } @if (selectedMenuItem === (i18nPrefix + 'SIDEBAR.MENU.INHERITANCE' | translate)) {
+          <es-topic-page-inheritance-sidebar
+            [collectionId]="topicCollectionId()"
+          ></es-topic-page-inheritance-sidebar>
           }
         </ng-container>
       </es-side-menu-wrapper>
@@ -770,6 +800,7 @@
     [restoredSearchState]="variantPreviewSearchState()"
     [(selectedNode)]="createVariantOrTemplateSelectedNode"
     [templateMode]="createVariantOrTemplateMode() === 'template'"
+    [pageTemplateExists]="!!collectionNodePagePropagateConfigRef"
     (copyOptionChanged)="createVariantOrTemplateCopyOption = $event"
     (editGlobalTemplate)="openGlobalTemplateFromDialog($event)"
     (globalTemplateDeleted)="onGlobalTemplateDeleted($event)"

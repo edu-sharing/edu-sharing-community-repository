@@ -11,11 +11,11 @@
       <es-node-url [node]="node" [mode]="'link'">
         <ng-container *ngTemplateOutlet="nodeTitle; context: { node }"></ng-container>
       </es-node-url>
-      } @if (!last || pageVariantConfigNodes().length || (isAdmin() && pageTemplateExists())) {
+      } @if (!last || pageVariantConfigNodes().length || templateSwitchable()) {
       <i esIcon="chevron_right"></i>
       }
     </li>
-    } @if (pageVariantConfigNodes().length || (isAdmin() && pageTemplateExists())) {
+    } @if (pageVariantConfigNodes().length || templateSwitchable()) {
     <li class="es-topic-page-breadcrumb-list-item">
       <mat-form-field class="select-config-field" appearance="outline" subscriptSizing="dynamic">
         <mat-label>
@@ -24,8 +24,7 @@
         <!-- hint: use default mat-select over es-dropdown due to being implemented as mat-menu -->
         <mat-select
           [disabled]="
-            (pageVariantConfigNodes().length === 1 || isProcessing()) &&
-            !(isAdmin() && pageTemplateExists() && !templateMode())
+            (pageVariantConfigNodes().length === 1 || isProcessing()) && !templateSwitchable()
           "
           [value]="pageVariantNode?.ref.id"
           (selectionChange)="selectVariant($event.value)"
@@ -38,7 +37,7 @@
                 : (i18nPrefix + 'PAGE_VARIANT_LABEL' | translate) + ' ' + (i + 1)
             }}
           </mat-option>
-          } @if (isAdmin() && pageTemplateExists()) {
+          } @if (templateSwitchable()) {
           <mat-option class="navigate-to-template" [value]="navigateToTemplateValue">
             {{ i18nPrefix + 'NAVIGATE_TO_PAGE_TEMPLATE' | translate }}
           </mat-option>

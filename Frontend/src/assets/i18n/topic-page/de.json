@@ -1,5 +1,26 @@
 {
   "TOPIC_PAGE": {
+    "SIDEBAR": {
+      "MENU": {
+        "INHERITANCE": "Vererbung"
+      },
+      "INHERITANCE": {
+        "INTRO": "Vererbung von {{title}}",
+        "INTRO_DESCRIPTION": "So erhalten diese Sammlung und ihre Untersammlungen ihre Themenseiten. Mit „Weitergeben“ legst du fest, ob geerbte Vorlagen weiter nach unten gereicht werden.",
+        "STATE_OWN": "Eigene Themenseite – keine Vererbung nötig",
+        "STATE_INHERITS": "erbt von {{title}}",
+        "STATE_STOPPED": "erbt nichts – Weitergabe gestoppt bei {{title}}",
+        "STATE_NONE": "keine Themenseite",
+        "PASSES_OWN_TEMPLATES": "gibt eigene Vorlagen an Untersammlungen weiter",
+        "PASSES_NOTHING_ON": "gibt Geerbtes nicht an Untersammlungen weiter",
+        "SAVED_STATE": "bisher:",
+        "PASS_ON": "Weitergeben",
+        "PASS_ON_TOOLTIP": "Geerbte Vorlagen an die Untersammlungen weitergeben",
+        "CHANGED_COUNT": "{{count}} angezeigte Sammlungen ändern sich",
+        "SAVED": "Die Vererbung wurde gespeichert.",
+        "LOAD_ERROR": "Die Vererbung konnte nicht geladen werden."
+      }
+    },
     "NAVIGATION": {
       "NEW_PAGE_VARIANT": "Neue Themenseite",
       "NEW_PAGE_TEMPLATE": "Neue Themenseiten-Vorlage",
@@ -203,7 +224,7 @@
         "LABEL": "Einstellungen",
         "HEADING": "Einstellungen der Themenseiten-Variante",
         "WARN_TEXT": "Nicht alle erforderlichen Parameter-Felder sind ausgefüllt. Du kannst den Vorgang nicht abbrechen.",
-        "DUPLICATE_WARN_TEXT": "Es existiert bereits eine Themenseiten-Variante mit den gleichen Parametern.",
+        "DUPLICATE_WARN_TEXT": "Eine andere Variante dieser Themenseite hat bereits dieselben Parameter. Wähle andere Werte, damit eindeutig ist, wem welche Variante angezeigt wird.",
         "TITLE": "Titel der Variante",
         "TITLE_PLACEHOLDER": "Themenseiten-Variante für xyz",
         "EDUCATION_LEVEL_LABEL": "Bildungsstufe",
@@ -211,20 +232,24 @@
         "TEMPLATE_UPDATE": {
           "TOOLTIP": "Eine neue Version der verwendeten Vorlage ist verfügbar.",
           "TOOLTIP_AVAILABLE": "ACHTUNG: neue Vorlage vom {{date}}",
-          "TOOLTIP_UP_TO_DATE": "Vorlage noch aktuell",
+          "TOOLTIP_UP_TO_DATE": "Vorlage aktuell: setzt den Seiteninhalt auf den Stand der Vorlage zurück",
           "TEMPLATE_MISSING": "Die verknüpfte Vorlage ist nicht mehr verfügbar.",
           "HEADING": "Seiten-Variante aktualisieren",
-          "MESSAGE": "Möchtest du die Seiten-Variante auf Grundlage der neuen Vorlage aktualisieren? Änderungen am Seiteninhalt gehen dabei verloren."
+          "MESSAGE": "Möchtest du die Seiten-Variante auf Grundlage der neuen Vorlage aktualisieren? Änderungen am Seiteninhalt gehen dabei verloren.",
+          "RESET_HEADING": "Seiten-Variante zurücksetzen",
+          "RESET_MESSAGE": "Möchtest du den Seiteninhalt auf den Stand der Vorlage zurücksetzen? Deine Anpassungen am Seiteninhalt gehen dabei verloren."
         },
         "REGENERATE_VARIANT": "Neu generieren",
         "DELETE_VARIANT": "Variante löschen",
         "ADD_TO_GLOBAL_TEMPLATES": "Zu globalen Vorlagen hinzufügen",
         "EDIT_GLOBAL_TEMPLATE": "Globale Vorlage bearbeiten",
         "DEFINE_PARAMETERS": "Definiere Parameter",
-        "DUPLICATE_PARAMETERS": "Duplikat in existierender Variante erkannt"
+        "DUPLICATE_PARAMETERS": "Gleiche Parameter wie eine andere Variante"
       },
       "CONFIG_PAGE_TEMPLATE": {
         "HEADING": "Einstellungen der Themenseiten-Vorlage",
+        "DUPLICATE_WARN_TEXT": "Eine andere Vorlage dieser Sammlung hat bereits dieselben Parameter. Wähle andere Werte, damit eindeutig ist, welche Vorlage die Unterebenen für wen erhalten.",
+        "DUPLICATE_PARAMETERS": "Gleiche Parameter wie eine andere Vorlage",
         "TITLE": "Titel der Vorlage",
         "TITLE_PLACEHOLDER": "Themenseiten-Vorlage für xyz",
         "DELETE_VARIANT": "Vorlage löschen",
@@ -408,6 +433,10 @@
     "DEFAULT_PAGE_TEMPLATE_NAME": "Seiten-Vorlage",
     "CREATE_PAGE_TEMPLATE": {
       "HEADING": "Neue Themenseiten-Vorlage erstellen",
+      "EXISTING_TEMPLATE": {
+        "INFO_HEADING": "Diese Sammlung hat bereits Seiten-Vorlagen.",
+        "INFO_TEXT": "Lege eine weitere Vorlage nur für eine andere Zielgruppe oder Bildungsstufe an. Eine bestehende Vorlage lässt sich auch direkt anpassen."
+      },
       "PENDING_MESSAGE": "Eine neue Seiten-Vorlage wird erstellt und geladen.",
       "SUCCESS_MESSAGE": "Die Seiten-Vorlage wurde erfolgreich erstellt"
     },
@@ -431,8 +460,8 @@
         "INFO_LIST_ITEM_TWO": "Kann eine vorhandene Vorlage angepasst werden?"
       },
       "EXISTING_TOPIC_PAGE": {
-        "INFO_HEADING": "Es gibt bereits eine Themenseite zu dieser Sammlung.",
-        "INFO_TEXT": "Du kannst diese anpassen, um eine Kopie davon zu erstellen oder eine neue Variante aus einer Vorlage erstellen."
+        "INFO_HEADING": "Diese Sammlung erbt ihre Themenseite von einer übergeordneten Sammlung.",
+        "INFO_TEXT": "Die geerbten Varianten werden als Kopie übernommen und die neue Variante kommt hinzu. Aktualisierungen der Vorlage lassen sich später übernehmen."
       },
       "CREATE_COPY_OF_LABEL": "Erstelle Kopie von:",
       "COPY_OPTIONS": {
@@ -472,6 +501,12 @@
       "END": "Vorlagen-Modus beenden"
     },
     "GLOBAL_TEMPLATE_UNAVAILABLE": "Die globale Vorlage existiert nicht mehr.",
+    "INHERITED_PAGE": {
+      "INFO": "Diese Themenseite ist von „{{title}}“ geerbt. Änderungen hier erzeugen eine eigene Kopie für diese Sammlung.",
+      "EDIT_TEMPLATES": "Vorlagen dort bearbeiten",
+      "EDIT_HEADING": "Geerbte Themenseite bearbeiten?",
+      "EDIT_MESSAGE": "Deine Änderungen erzeugen eine eigene Kopie der Seite von „{{title}}“. Per „Neu generieren“ lässt sie sich jedoch manuell mit der Vorlage abgleichen, deine Anpassungen gehen dabei verloren."
+    },
     "GLOBAL_TEMPLATE_MODE_ACTIVE": {
       "VIEW": "Du siehst die globale Vorlage „{{title}}“.",
       "EDIT": "Du bearbeitest die globale Vorlage „{{title}}“. Themenseiten, die aus ihr erstellt wurden, können die Änderungen per „Neu generieren“ übernehmen.",

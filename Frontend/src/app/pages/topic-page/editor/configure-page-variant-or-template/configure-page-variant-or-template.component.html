@@ -2,7 +2,10 @@
 <div class="config-page-variant-or-template">
   @if (!variableInputValid()) {
   <es-info-message mode="error" class="info-message">
-    {{ i18nPrefix + (isDuplicate() ? 'DUPLICATE_WARN_TEXT' : 'WARN_TEXT') | translate }}
+    {{
+      (isDuplicate() ? duplicateI18nPrefix() + 'DUPLICATE_WARN_TEXT' : i18nPrefix + 'WARN_TEXT')
+        | translate
+    }}
   </es-info-message>
   }
   <mat-form-field appearance="outline" subscriptSizing="dynamic">
@@ -44,7 +47,7 @@
       <button
         mat-stroked-button
         [color]="templateUpdateAvailable() ? 'warn' : 'primary'"
-        [disabled]="!templateUpdateAvailable()"
+        [disabled]="!templateNode()"
         (click)="triggerRegenerate()"
       >
         <i esIcon="sync"></i>

@@ -74,6 +74,12 @@ export class ConfigurePageVariantOrTemplateComponent implements AfterViewInit, O
         }
         return this.templateMode() ? this.templateI18nPrefix : this.i18nPrefix;
     });
+    // a collection's templates are told apart like its variants, by their parameters
+    duplicateI18nPrefix: Signal<string> = computed(() =>
+        this.templateMode() && !this.globalTemplateMode()
+            ? this.templateI18nPrefix
+            : this.i18nPrefix,
+    );
     deleteEnabled: Signal<boolean> = computed(() =>
         this.globalTemplateMode()
             ? this.deleteGlobalTemplateEnabled()
@@ -109,8 +115,9 @@ export class ConfigurePageVariantOrTemplateComponent implements AfterViewInit, O
         this.variableInputValid()
             ? null
             : this.translateService.instant(
-                  this.i18nPrefix +
-                      (this.isDuplicate() ? 'DUPLICATE_PARAMETERS' : 'DEFINE_PARAMETERS'),
+                  this.isDuplicate()
+                      ? this.duplicateI18nPrefix() + 'DUPLICATE_PARAMETERS'
+                      : this.i18nPrefix + 'DEFINE_PARAMETERS',
               ),
     );
     furtherExistingPageVariants: Signal<Node[]> = computed(() =>
