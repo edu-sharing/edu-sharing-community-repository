@@ -8,6 +8,7 @@ import {
     inject,
     Injector,
     input,
+    output,
     resource,
     ResourceRef,
     signal,
@@ -18,7 +19,7 @@ import { Node, PROPERTY_FILTER_ALL, RestConstants } from 'ngx-edu-sharing-api';
 import { catchError, firstValueFrom, map, Observable, of } from 'rxjs';
 import { Toast } from '../../../../../services/toast';
 import { SharedModule } from '../../../../../shared/shared.module';
-import { TopicLinkDirective } from '../../../shared/directives/topic-link.directive';
+import { OPEN_PAGE_TEMPLATE_QUERY_PARAM } from '../../../shared/types/custom-definitions';
 import { TopicPageGlobalService } from '../../../shared/services/topic-page-global.service';
 import { TopicPageHelperService } from '../../../shared/services/topic-page-helper.service';
 import {
@@ -81,7 +82,7 @@ export type InheritanceRow = {
  */
 @Component({
     selector: 'es-topic-page-inheritance-sidebar',
-    imports: [SharedModule, TopicLinkDirective],
+    imports: [SharedModule],
     templateUrl: './topic-page-inheritance-sidebar.component.html',
     styleUrls: ['./topic-page-inheritance-sidebar.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -95,7 +96,8 @@ export class TopicPageInheritanceSidebarComponent {
     /** the collection whose topic page is shown */
     readonly collectionId = input.required<string>();
     readonly i18nPrefix: string = 'TOPIC_PAGE.SIDEBAR.INHERITANCE.';
-    readonly topicUrlTarget: '_self' | '_blank' = this.topicPageGlobalService.getCustomUrlTarget();
+    /** Asks the page to open the templates of the given collection in its template mode. */
+    readonly editTemplates = output<Node>();
     readonly isSaving = signal(false);
     // the collection uncached, its ancestors nearest first, and its sub-collections
     readonly collectionHierarchy = resource({
@@ -205,9 +207,31 @@ export class TopicPageInheritanceSidebarComponent {
         return this.passedTemplateTitles().get(retrievePageConfigPropagateRef(row.node));
     }
 
-    /** The link to the topic page of a collection, or null where no topic page URL is known. */
-    topicUrl(node: Node): string | null {
-        return this.topicPageGlobalService.getCustomUrlFunction()?.(node) || null;
+    /** The link opening a collection's templates, or null where no topic page URL is known. */
+    templatesUrl(node: Node): string | null {
+        const url: string | null =
+            this.topicPageGlobalService.getCustomUrlFunction()?.(node) || null;
+        if (!url) {
+            return null;
+        }
+        const target: URL = new URL(url, window.location.href);
+        target.searchParams.set(OPEN_PAGE_TEMPLATE_QUERY_PARAM, 'true');
+        return target.toString();
+    }
+
+    /** Lets the page open the templates on a plain click; other clicks follow the link. */
+    openTemplates(event: MouseEvent, node: Node): void {
+        if (
+            event.button !== 0 ||
+            event.ctrlKey ||
+            event.metaKey ||
+            event.shiftKey ||
+            event.altKey
+        ) {
+            return;
+        }
+        event.preventDefault();
+        this.editTemplates.emit(node);
     }
 
     setExpanded(row: InheritanceRow, expanded: boolean): void {
