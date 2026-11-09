@@ -21,6 +21,7 @@
         "PASS_ON": "Transmettre",
         "PASS_ON_TOOLTIP": "Transmettre les modèles hérités aux sous-collections",
         "CHANGED_COUNT": "{{count}} collections affichées changent",
+        "CHANGES_PARENTS": "Les modifications des collections parentes s'appliquent aussi à leurs autres sous-collections, non affichées ici.",
         "SAVED": "L'héritage a été enregistré.",
         "LOAD_ERROR": "L'héritage n'a pas pu être chargé."
       }

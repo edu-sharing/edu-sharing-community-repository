@@ -21,6 +21,7 @@
         "PASS_ON": "Pass on",
         "PASS_ON_TOOLTIP": "Pass inherited templates on to the sub-collections",
         "CHANGED_COUNT": "{{count}} shown collections change",
+        "CHANGES_PARENTS": "Changes to parent collections also apply to their other sub-collections, which are not shown here.",
         "SAVED": "The inheritance has been saved.",
         "LOAD_ERROR": "The inheritance could not be loaded."
       }

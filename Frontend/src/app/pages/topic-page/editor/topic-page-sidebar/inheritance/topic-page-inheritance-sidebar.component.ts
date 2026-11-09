@@ -130,13 +130,31 @@ export class TopicPageInheritanceSidebarComponent {
             return [];
         }
         const { collection, parents, subcollections } = this.collectionHierarchy.value();
-        const incoming: ResolvedInheritance = resolveInheritance(collection, parents);
         const ancestors: Node[] = this.ancestorsFromSource(collection, parents);
-        const rows: InheritanceRow[] = ancestors.map((ancestor: Node, index: number) =>
-            this.ancestorRow(ancestor, index, parents),
+        const rows: InheritanceRow[] = [];
+        // what reaches the topmost row, then passed down the path including unsaved changes
+        const topmost: Node = ancestors[0] ?? collection;
+        const above: Node[] = parents.slice(
+            parents.findIndex((parent) => parent.ref.id === topmost.ref.id) + 1,
         );
+        let incoming: ResolvedInheritance = resolveInheritance(topmost, above);
+        let savedIncoming: ResolvedInheritance = incoming;
+        ancestors.forEach((ancestor: Node, depth: number) => {
+            // each parent leads to the next one on the path, or to the collection of the page
+            const next: Subcollections = {
+                nodes: [],
+                exist: true,
+                expandable: false,
+                expanded: true,
+                isLoading: false,
+            };
+            rows.push(this.buildRow(ancestor, 'ancestor', depth, incoming, savedIncoming, next));
+            const savedStop: boolean = stopsPropagation(ancestor);
+            incoming = this.outgoing(ancestor, incoming, this.stopOf(ancestor));
+            savedIncoming = this.outgoing(ancestor, savedIncoming, savedStop);
+        });
         // the collection of the page comes with its sub-collections and always shows them
-        this.addRows(rows, collection, ancestors.length, 0, incoming, incoming, {
+        this.addRows(rows, collection, ancestors.length, 0, incoming, savedIncoming, {
             nodes: subcollections,
             exist: subcollections.length > 0,
             expandable: false,
@@ -149,6 +167,13 @@ export class TopicPageInheritanceSidebarComponent {
         (): number => this.rows().filter((row: InheritanceRow) => row.savedStateText).length,
     );
     readonly hasUnsavedChanges = computed((): boolean => this.unsavedChanges().size > 0);
+    // a parent's switch also reaches its other sub-collections, which the tree does not show
+    readonly changesParents = computed((): boolean =>
+        this.rows().some(
+            (row: InheritanceRow) =>
+                row.role === 'ancestor' && this.unsavedChanges().has(row.node.ref.id),
+        ),
+    );
 
     constructor() {
         effect(() => {
@@ -257,29 +282,8 @@ export class TopicPageInheritanceSidebarComponent {
         savedIncoming: ResolvedInheritance,
         subcollections: Subcollections,
     ): void {
-        const savedStop: boolean = stopsPropagation(node);
-        const stop: boolean = this.unsavedChanges().get(node.ref.id) ?? savedStop;
-        const state: InheritanceState = this.stateOf(node, incoming);
-        const savedState: InheritanceState = this.stateOf(node, savedIncoming);
-        const passesOwnTemplates: boolean = !!retrievePageConfigPropagateRef(node);
-        rows.push({
-            node,
-            role: indent === 0 ? 'current' : 'subcollection',
-            depth,
-            expandable: subcollections.expandable,
-            expanded: subcollections.expanded,
-            isLoading: subcollections.isLoading,
-            state,
-            stateText: this.stateText(state),
-            savedStateText: this.sameState(state, savedState) ? null : this.stateText(savedState),
-            passesOwnTemplates,
-            passesOn: !stop,
-            canToggle:
-                subcollections.exist &&
-                !passesOwnTemplates &&
-                (!!incoming.source || stop) &&
-                checkUserAccess(node),
-        });
+        const role: RowRole = indent === 0 ? 'current' : 'subcollection';
+        rows.push(this.buildRow(node, role, depth, incoming, savedIncoming, subcollections));
         if (!subcollections.expanded) {
             return;
         }
@@ -289,11 +293,51 @@ export class TopicPageInheritanceSidebarComponent {
                 child,
                 depth + 1,
                 indent + 1,
-                this.outgoing(node, incoming, stop),
-                this.outgoing(node, savedIncoming, savedStop),
+                this.outgoing(node, incoming, this.stopOf(node)),
+                this.outgoing(node, savedIncoming, stopsPropagation(node)),
                 this.subcollectionsOf(child),
             );
         }
+    }
+
+    private buildRow(
+        node: Node,
+        role: RowRole,
+        depth: number,
+        incoming: ResolvedInheritance,
+        savedIncoming: ResolvedInheritance,
+        subcollections: Subcollections,
+    ): InheritanceRow {
+        const stop: boolean = this.stopOf(node);
+        const state: InheritanceState = this.stateOf(node, incoming);
+        const savedState: InheritanceState = this.stateOf(node, savedIncoming);
+        const passesOwnTemplates: boolean = !!retrievePageConfigPropagateRef(node);
+        // parents never explain a missing switch, so their own page needs no further words
+        const text = (s: InheritanceState): StateText =>
+            role === 'ancestor' && s.kind === 'own' ? { key: 'STATE_OWN_PAGE' } : this.stateText(s);
+        return {
+            node,
+            role,
+            depth,
+            expandable: subcollections.expandable,
+            expanded: subcollections.expanded,
+            isLoading: subcollections.isLoading,
+            state,
+            stateText: text(state),
+            savedStateText: this.sameState(state, savedState) ? null : text(savedState),
+            passesOwnTemplates,
+            passesOn: !stop,
+            canToggle:
+                subcollections.exist &&
+                !passesOwnTemplates &&
+                (!!incoming.source || stop) &&
+                checkUserAccess(node),
+        };
+    }
+
+    /** Whether the collection stops passing on what it inherits, unsaved changes included. */
+    private stopOf(node: Node): boolean {
+        return this.unsavedChanges().get(node.ref.id) ?? stopsPropagation(node);
     }
 
     /**
@@ -306,30 +350,6 @@ export class TopicPageInheritanceSidebarComponent {
             (parent) => !!retrievePageConfigPropagateRef(parent),
         );
         return sourceIndex < 0 ? [] : ancestors.slice(0, sourceIndex + 1).reverse();
-    }
-
-    /** A read-only row of an ancestor; `parents` are all ancestors of the page, nearest first. */
-    private ancestorRow(ancestor: Node, depth: number, parents: Node[]): InheritanceRow {
-        const index: number = parents.findIndex((parent) => parent.ref.id === ancestor.ref.id);
-        const state: InheritanceState = this.stateOf(
-            ancestor,
-            resolveInheritance(ancestor, parents.slice(index + 1)),
-        );
-        return {
-            node: ancestor,
-            role: 'ancestor',
-            depth,
-            expandable: false,
-            expanded: true,
-            isLoading: false,
-            state,
-            // parents never get a switch, so their own page needs no further explanation
-            stateText: state.kind === 'own' ? { key: 'STATE_OWN_PAGE' } : this.stateText(state),
-            savedStateText: null,
-            passesOwnTemplates: !!retrievePageConfigPropagateRef(ancestor),
-            passesOn: !stopsPropagation(ancestor),
-            canToggle: false,
-        };
     }
 
     /** The sub-collections of a collection below the one of the page, loaded once expanded. */
