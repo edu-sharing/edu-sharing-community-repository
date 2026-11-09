@@ -77,7 +77,14 @@ export class TranslationLoader implements TranslateLoader {
                 translationOverrides:
                     this.getSource() === 'repository'
                         ? of(null)
-                        : this.configService.observeTranslationOverrides().pipe(first()),
+                        : this.configService.observeTranslationOverrides().pipe(
+                              first(),
+                              // the bundled translations stay usable without the overrides
+                              catchError((e) => {
+                                  console.warn('Error loading translation overrides', e);
+                                  return of(null);
+                              }),
+                          ),
             })
             .pipe(
                 map(({ originalTranslations, translationOverrides }) => {
@@ -126,9 +133,9 @@ export class TranslationLoader implements TranslateLoader {
                     );
                 }),
                 map((translations) => this.replaceGenderCharacter(translations)),
-                catchError((error, obs) => {
+                catchError((error) => {
                     console.error(error);
-                    return of(error);
+                    return of({});
                 }),
             );
     }
