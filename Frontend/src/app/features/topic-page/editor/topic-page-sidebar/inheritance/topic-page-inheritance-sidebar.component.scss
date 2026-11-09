@@ -176,6 +176,11 @@
     color: var(--textLight);
 }
 
+.footer-parents-hint {
+    display: block;
+    color: var(--warn);
+}
+
 .footer-actions {
     display: flex;
     gap: 8px;

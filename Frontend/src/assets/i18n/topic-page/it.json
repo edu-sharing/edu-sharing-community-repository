@@ -57,6 +57,7 @@
         "PASS_ON": "Trasmetti",
         "PASS_ON_TOOLTIP": "Trasmetti i modelli ereditati alle sotto-collezioni",
         "CHANGED_COUNT": "{{count}} collezioni mostrate cambiano",
+        "CHANGES_PARENTS": "Le modifiche alle collezioni superiori valgono anche per le loro altre sotto-collezioni, non mostrate qui.",
         "SAVED": "L'ereditarietà è stata salvata.",
         "LOAD_ERROR": "Non è stato possibile caricare l'ereditarietà."
       }

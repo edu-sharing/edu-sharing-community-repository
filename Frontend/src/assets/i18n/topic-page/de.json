@@ -57,6 +57,7 @@
         "PASS_ON": "Weitergeben",
         "PASS_ON_TOOLTIP": "Geerbte Vorlagen an die Untersammlungen weitergeben",
         "CHANGED_COUNT": "{{count}} angezeigte Sammlungen ändern sich",
+        "CHANGES_PARENTS": "Änderungen an übergeordneten Sammlungen gelten auch für deren andere Untersammlungen, die hier nicht angezeigt werden.",
         "SAVED": "Die Vererbung wurde gespeichert.",
         "LOAD_ERROR": "Die Vererbung konnte nicht geladen werden."
       }

@@ -120,6 +120,9 @@
 <div class="footer">
   <span class="footer-summary">
     {{ i18nPrefix + 'CHANGED_COUNT' | translate : { count: changedCount() } }}
+    @if (changesParents()) {
+    <span class="footer-parents-hint">{{ i18nPrefix + 'CHANGES_PARENTS' | translate }}</span>
+    }
   </span>
   <div class="footer-actions">
     <button mat-button type="button" [disabled]="isSaving()" (click)="discardChanges()">
