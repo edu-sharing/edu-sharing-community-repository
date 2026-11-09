@@ -481,6 +481,8 @@ config:
     host: edusharing-repository-mongo
     ## @param config.mongo.port Set mongo DB port
     port: 27017
+    ## @param config.mongo.replicas Set number of mongo DB replicaset members; values greater than 1 expand config.mongo.host into the statefulset members (host-0, host-1, ...), 1 uses config.mongo.host as is (external mongo DB)
+    replicas: 3
     ## @param config.mongo.database Set mongo DB name
     database: repository
     ## @param config.mongo.username Set mongo DB username
