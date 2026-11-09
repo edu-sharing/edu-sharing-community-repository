@@ -135,7 +135,7 @@ unittest frontend:
     - ([[ -d node_modules ]] || npm ci)
     - mkdir -p projects/edu-sharing-api/build/
     - cp ../Backend/services/rest/api/src/main/resources/openapi.json projects/edu-sharing-api/build/openapi.json
-add     - cp ../Frontend-Server/openapi.json projects/edu-sharing-api/build/frontend-api.json
+    - cp ../Frontend-Server/openapi.json projects/edu-sharing-api/build/frontend-api.json
     - cd projects/edu-sharing-api
     - npm run generate-api
     - cd ../..
