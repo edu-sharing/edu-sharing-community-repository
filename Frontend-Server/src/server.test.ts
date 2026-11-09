@@ -34,6 +34,8 @@ before(async () => {
     fs.writeFileSync(path.join(distDir, 'main-A1B2C3D4.js'), 'console.log(1);');
     fs.mkdirSync(path.join(distDir, 'assets'));
     fs.writeFileSync(path.join(distDir, 'assets', 'logo.svg'), '<svg/>');
+    fs.mkdirSync(path.join(distDir, 'assets', 'i18n', 'common'), { recursive: true });
+    fs.writeFileSync(path.join(distDir, 'assets', 'i18n', 'common', 'de.json'), JSON.stringify({ SAVE: 'Speichern' }));
     fs.mkdirSync(path.join(distDir, 'web-components', 'app'), { recursive: true });
     fs.writeFileSync(path.join(distDir, 'web-components', 'app', 'main.js'), 'console.log(2);');
 
@@ -168,9 +170,10 @@ test('web components carry Access-Control-Allow-Origin: *, as WebComponentsFilte
     assert.equal(other.headers['access-control-allow-origin'], undefined);
 });
 
-test('/assets/i18n wins over the static /assets delivery', async () => {
-    const response = await app.inject({ method: 'GET', url: '/edu-sharing/assets/i18n/de.json' });
-    assert.equal(response.body, 'backend:/edu-sharing/assets/i18n/de.json');
+test('/assets/i18n comes from dist, not from tomcat', async () => {
+    const response = await app.inject({ method: 'GET', url: '/edu-sharing/assets/i18n/common/de.json' });
+    assert.equal(response.statusCode, 200);
+    assert.deepEqual(response.json(), { SAVE: 'Speichern' });
 });
 
 test('proxies unmatched paths instead of answering with the shell', async () => {
