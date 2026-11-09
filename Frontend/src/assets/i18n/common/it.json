@@ -105,7 +105,7 @@
   "ORIGINAL_DELETED": "Contenuto eliminato",
   "ORIGINAL_DELETED_INFO": "Solo i metadati sono accessibili",
   "COMMON_API_ERROR": "Si è verificato un errore. Riprovare.",
-  "COMMON_API_ERROR_TITLE": "Dettagli dell'errore ({{data}})",
+  "COMMON_API_ERROR_TITLE": "Dettagli dell'errore ({{date}})",
   "RENDERSERVICE_API_ERROR": "errore durante il raggiungimento del servizio di rendering. Si prega di segnalare questo errore all'amministratore.",
   "SYSTEM_FOLDER_DELETE_ERROR": "Questa cartella di sistema non può essere eliminata",
   "GENERIC_QUOTA_ERROR_TITLE": "Non è stato possibile eseguire l'operazione perché è stata superata la quota di caricamento.",
