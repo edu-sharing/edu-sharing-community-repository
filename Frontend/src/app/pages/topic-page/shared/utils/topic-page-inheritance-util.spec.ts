@@ -38,10 +38,10 @@ describe('findInheritanceSource', () => {
         expect(findInheritanceSource(colors, [optics, collection('physics'), wlo])).toBeNull();
     });
 
-    it('passes the templates of a stopping collection itself on', () => {
+    it('passes no templates on below a collection stopping its own ones', () => {
         const colors = collection('colors');
         const optics = collection('optics', { stops: true, propagates: true });
-        expect(findInheritanceSource(colors, [optics, wlo])).toBe(optics);
+        expect(findInheritanceSource(colors, [optics, wlo])).toBeNull();
     });
 });
 
@@ -50,6 +50,14 @@ describe('resolveInheritance', () => {
 
     it('reports where inherited templates were stopped', () => {
         const optics = collection('optics', { stops: true });
+        expect(resolveInheritance(collection('colors'), [optics, wlo])).toEqual({
+            source: null,
+            stoppedAt: optics,
+        });
+    });
+
+    it('reports a collection stopping its own templates', () => {
+        const optics = collection('optics', { stops: true, propagates: true });
         expect(resolveInheritance(collection('colors'), [optics, wlo])).toEqual({
             source: null,
             stoppedAt: optics,

@@ -12,9 +12,11 @@ import {
     resource,
     ResourceRef,
     signal,
+    viewChild,
     viewChildren,
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { TranslateService } from '@ngx-translate/core';
 import { Node, PROPERTY_FILTER_ALL, RestConstants } from 'ngx-edu-sharing-api';
 import { catchError, firstValueFrom, map, Observable, of } from 'rxjs';
 import { Toast } from '../../../../../services/toast';
@@ -69,12 +71,29 @@ export type InheritanceRow = {
     stateText: StateText;
     // the state as saved, set while unsaved changes alter it
     savedStateText: StateText | null;
+    hasOwnPage: boolean;
     passesOwnTemplates: boolean;
-    // whether the collection passes on what it inherits, unsaved changes included
+    // whether the collection passes templates on, its own or inherited, unsaved changes included
     passesOn: boolean;
-    // the "pass on" switch only matters for a collection receiving templates it could pass on
+    // the "pass on" switch only matters for a collection with templates it could pass on
     canToggle: boolean;
+    // whether the user switched passing on for this collection without saving yet
+    toggled: boolean;
 };
+
+/** A line from a collection passing its templates on to the shown rows inheriting them. */
+type TemplateLine = { sourceId: string; color: number; targetIds: string[] };
+
+/** The drawing of a template line, or of a stop mark below a collection passing nothing on. */
+type LineDrawing =
+    | { kind: 'line'; color: number; path: string }
+    | { kind: 'stop'; path: string; cx: number; cy: number };
+
+// number of line colors before they repeat, see --inheritanceLine* in the stylesheet
+const LINE_COLORS: number = 3;
+// radius of the bend from a line into a row, and the size of its arrow head
+const LINE_BEND: number = 8;
+const LINE_ARROW: number = 6;
 
 /**
  * Shows how a collection and its sub-collections inherit topic pages, and lets the user decide
@@ -91,6 +110,7 @@ export class TopicPageInheritanceSidebarComponent {
     private readonly topicPageHelperService = inject(TopicPageHelperService);
     private readonly topicPageGlobalService = inject(TopicPageGlobalService);
     private readonly toast = inject(Toast);
+    private readonly translate = inject(TranslateService);
     private readonly injector = inject(Injector);
 
     /** the collection whose topic page is shown */
@@ -126,6 +146,10 @@ export class TopicPageInheritanceSidebarComponent {
     private readonly templateHints = viewChildren<ElementRef<HTMLElement>>('templatesHint');
     // ids of the collections whose list of passed on templates is cut off
     readonly truncatedTemplateHints = signal<ReadonlySet<string>>(new Set());
+    private readonly treeWrapper = viewChild<ElementRef<HTMLElement>>('treeWrapper');
+    // changes whenever the tree is resized, so the lines are measured again
+    private readonly treeSize = signal(0);
+    readonly lineDrawings = signal<LineDrawing[]>([]);
 
     readonly rows = computed((): InheritanceRow[] => {
         if (!this.collectionHierarchy.hasValue()) {
@@ -165,8 +189,48 @@ export class TopicPageInheritanceSidebarComponent {
         });
         return rows;
     });
+    readonly templateLines = computed((): TemplateLine[] => {
+        const rows: InheritanceRow[] = this.rows();
+        const lines: TemplateLine[] = [];
+        for (const row of rows) {
+            if (!row.passesOwnTemplates) {
+                continue;
+            }
+            // given even while stopped, so turning passing on keeps the colors of the others
+            const color: number = this.lineColorFor(row.node.ref.id);
+            if (!row.passesOn) {
+                continue;
+            }
+            lines.push({
+                sourceId: row.node.ref.id,
+                color,
+                targetIds: rows
+                    .filter(
+                        (target) =>
+                            target.state.kind === 'inherits' &&
+                            target.state.from.ref.id === row.node.ref.id,
+                    )
+                    .map((target) => target.node.ref.id),
+            });
+        }
+        return lines;
+    });
+    // the line color of every collection passing templates on, by its id
+    private readonly lineColors = computed(
+        (): Map<string, number> =>
+            new Map(this.templateLines().map((line) => [line.sourceId, line.color])),
+    );
+    // line colors by collection id, kept once given so switching or expanding never recolors
+    private readonly lineColorAssignments = new Map<string, number>();
+    // the collections marked as changed: switched ones, shown or not, and shown ones affected
     readonly changedCount = computed(
-        (): number => this.rows().filter((row: InheritanceRow) => row.savedStateText).length,
+        (): number =>
+            new Set([
+                ...this.unsavedChanges().keys(),
+                ...this.rows()
+                    .filter((row: InheritanceRow) => row.savedStateText)
+                    .map((row: InheritanceRow) => row.node.ref.id),
+            ]).size,
     );
     readonly hasUnsavedChanges = computed((): boolean => this.unsavedChanges().size > 0);
     // a parent's switch also reaches its other sub-collections, which the tree does not show
@@ -197,10 +261,61 @@ export class TopicPageInheritanceSidebarComponent {
                 this.truncatedTemplateHints.set(truncated);
             }
         });
+        effect((onCleanup) => {
+            const wrapper: HTMLElement | undefined = this.treeWrapper()?.nativeElement;
+            if (!wrapper) {
+                return;
+            }
+            const observer = new ResizeObserver(() => this.treeSize.update((size) => size + 1));
+            observer.observe(wrapper);
+            onCleanup(() => observer.disconnect());
+        });
+        afterRenderEffect(() => {
+            this.treeSize();
+            this.passedTemplateTitles();
+            const drawings: LineDrawing[] = this.measureLines();
+            if (JSON.stringify(drawings) !== JSON.stringify(this.lineDrawings())) {
+                this.lineDrawings.set(drawings);
+            }
+        });
     }
 
     readonly rowLevel = (row: InheritanceRow): number => row.depth;
     readonly rowKey = (row: InheritanceRow): string => row.node.ref.id;
+
+    /** The line color of a collection with templates, given on its first appearance. */
+    private lineColorFor(id: string): number {
+        if (!this.lineColorAssignments.has(id)) {
+            this.lineColorAssignments.set(id, (this.lineColorAssignments.size % LINE_COLORS) + 1);
+        }
+        return this.lineColorAssignments.get(id);
+    }
+
+    /** The line color of the collection passing on the given one's templates, if drawn. */
+    lineColorOf(source: Node): number | undefined {
+        return this.lineColors().get(source.ref.id);
+    }
+
+    /** What changes for a row when applying: its saved state and, if switched, its pass on. */
+    savedDescription(row: InheritanceRow): string {
+        const before: string[] = [];
+        if (row.savedStateText) {
+            before.push(
+                this.translate.instant(
+                    this.i18nPrefix + row.savedStateText.key,
+                    row.savedStateText.params,
+                ),
+            );
+        }
+        if (row.toggled) {
+            before.push(
+                this.translate.instant(
+                    this.i18nPrefix + (row.passesOn ? 'NOT_PASSED_ON' : 'PASSED_ON'),
+                ),
+            );
+        }
+        return `${this.translate.instant(this.i18nPrefix + 'SAVED_STATE')} ${before.join(', ')}`;
+    }
 
     /** The titles of the templates a collection passes on, undefined until they are loaded. */
     passedTemplates(row: InheritanceRow): string[] | undefined {
@@ -336,9 +451,6 @@ export class TopicPageInheritanceSidebarComponent {
         const state: InheritanceState = this.stateOf(node, incoming);
         const savedState: InheritanceState = this.stateOf(node, savedIncoming);
         const passesOwnTemplates: boolean = !!retrievePageConfigPropagateRef(node);
-        // parents never explain a missing switch, so their own page needs no further words
-        const text = (s: InheritanceState): StateText =>
-            role === 'ancestor' && s.kind === 'own' ? { key: 'STATE_OWN_PAGE' } : this.stateText(s);
         return {
             node,
             role,
@@ -347,16 +459,93 @@ export class TopicPageInheritanceSidebarComponent {
             expanded: subcollections.expanded,
             isLoading: subcollections.isLoading,
             state,
-            stateText: text(state),
-            savedStateText: this.sameState(state, savedState) ? null : text(savedState),
+            stateText: this.stateText(state),
+            savedStateText: this.sameState(state, savedState) ? null : this.stateText(savedState),
+            hasOwnPage: !!retrievePageConfigRef(node),
             passesOwnTemplates,
             passesOn: !stop,
+            toggled: this.unsavedChanges().has(node.ref.id),
             canToggle:
                 subcollections.exist &&
-                !passesOwnTemplates &&
-                (!!incoming.source || stop) &&
+                (passesOwnTemplates || !!incoming.source || stop) &&
                 checkUserAccess(node),
         };
+    }
+
+    /**
+     * Draws each template line from below the chevron of its source down the tree, bending into
+     * every inheriting row; rows passing nothing on to their shown children get a stop mark.
+     */
+    private measureLines(): LineDrawing[] {
+        const wrapper: HTMLElement | undefined = this.treeWrapper()?.nativeElement;
+        if (!wrapper) {
+            return [];
+        }
+        const origin: DOMRect = wrapper.getBoundingClientRect();
+        const rowElement = (id: string): HTMLElement | null =>
+            wrapper.querySelector(`[data-row-id="${CSS.escape(id)}"]`);
+        // where a line leaves a row: centered below its chevron
+        const exit = (element: HTMLElement): { x: number; y: number } => {
+            const slot: DOMRect = element.querySelector('.expand-slot').getBoundingClientRect();
+            return {
+                x: Math.round(slot.left + slot.width / 2 - origin.left),
+                y: Math.round(slot.top + slot.height / 2 + 12 - origin.top),
+            };
+        };
+        const drawings: LineDrawing[] = [];
+        for (const line of this.templateLines()) {
+            const source: HTMLElement | null = rowElement(line.sourceId);
+            const targets: HTMLElement[] = line.targetIds
+                .map(rowElement)
+                .filter((element): element is HTMLElement => !!element);
+            if (!source || !targets.length) {
+                continue;
+            }
+            const start = exit(source);
+            const segments: string[] = [];
+            let end: number = start.y;
+            for (const target of targets) {
+                const slot: DOMRect = target.querySelector('.expand-slot').getBoundingClientRect();
+                const y: number = Math.round(slot.top + slot.height / 2 - origin.top);
+                // ends before the chevron, or before the icon of a row without one
+                const tip: number = Math.round(
+                    (target.querySelector('.expand-slot > *')
+                        ? slot.left + 10
+                        : target.querySelector('.row-icon').getBoundingClientRect().left - 4) -
+                        origin.left,
+                );
+                const bend: number = Math.max(0, Math.min(LINE_BEND, tip - start.x - LINE_ARROW));
+                segments.push(
+                    `M${start.x} ${y - bend} Q${start.x} ${y} ${start.x + bend} ${y} H${tip}`,
+                    `M${tip - LINE_ARROW} ${y - LINE_ARROW / 1.5} L${tip} ${y} L${
+                        tip - LINE_ARROW
+                    } ${y + LINE_ARROW / 1.5}`,
+                );
+                end = Math.max(end, y - bend);
+            }
+            segments.unshift(`M${start.x} ${start.y} V${end}`);
+            drawings.push({ kind: 'line', color: line.color, path: segments.join(' ') });
+        }
+        const rows: InheritanceRow[] = this.rows();
+        rows.forEach((row: InheritanceRow, index: number) => {
+            const element: HTMLElement | null = rowElement(row.node.ref.id);
+            if (
+                row.passesOn ||
+                !row.canToggle ||
+                !element ||
+                !(rows[index + 1]?.depth > row.depth)
+            ) {
+                return;
+            }
+            const { x, y } = exit(element);
+            drawings.push({
+                kind: 'stop',
+                path: `M${x} ${y} V${y + 8} M${x - 4} ${y + 19} L${x + 4} ${y + 11}`,
+                cx: x,
+                cy: y + 15,
+            });
+        });
+        return drawings;
     }
 
     /** Whether the collection stops passing on what it inherits, unsaved changes included. */
@@ -396,7 +585,7 @@ export class TopicPageInheritanceSidebarComponent {
         stop: boolean,
     ): ResolvedInheritance {
         if (retrievePageConfigPropagateRef(node)) {
-            return { source: node, stoppedAt: null };
+            return stop ? { source: null, stoppedAt: node } : { source: node, stoppedAt: null };
         }
         if (stop && incoming.source) {
             return { source: null, stoppedAt: node };
