@@ -76,6 +76,8 @@ export interface TopicPageSidebarHost {
     deleteEntry(entry: TopicPageEntry): Promise<void>;
     // opens the template the entry was built from in the editor
     editTemplate(entry: TopicPageEntry): Promise<void>;
+    // opens the templates of the given collection in its template mode
+    editInheritedTemplates(source: Node): Promise<void>;
 }
 
 /**

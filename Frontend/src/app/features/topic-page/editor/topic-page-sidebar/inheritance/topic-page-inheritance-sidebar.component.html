@@ -62,13 +62,12 @@
     <div class="row-text">
       <div class="row-title">{{ row.node | nodeTitle }}</div>
       <div class="row-state state-{{ row.state.kind }}">
-        @if (row.state.kind === 'inherits' && topicUrl(row.state.from); as url) {
+        @if (row.state.kind === 'inherits' && templatesUrl(row.state.from); as url) {
         {{ i18nPrefix + 'STATE_INHERITS_FROM' | translate }}
         <a
           class="state-link"
           [href]="url"
-          [target]="topicUrlTarget"
-          [esTopicLink]="row.state.from"
+          (click)="openTemplates($event, row.state.from)"
           (keydown.enter)="$event.stopPropagation()"
           >{{ row.state.from | nodeTitle }}</a
         >
