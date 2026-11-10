@@ -164,14 +164,7 @@
                   ) | translate : { query: searchState.query(), count: searchState.hitCount() }
                 }}
               </h2>
-              }
-              <es-collection-header-bar
-                [collection]="collection"
-                [orderModeAvailable]="!!collectionContentRef?.canOrder()"
-                [orderModeActive]="!!collectionContentRef?.isOrderModeActive()"
-                (orderModeToggle)="collectionContentRef?.onOrderModeToggle($event)"
-              ></es-collection-header-bar>
-              } } @if (isRootLevelCollection() && !isLoading) {
+              } } } @if (isRootLevelCollection() && !isLoading) {
               <div class="breadcrumb-space root-bar" data-test="collections-root-bar">
                 <h2 class="root-bar-title mat-heading-3">
                   @if (searchState.active()) {
@@ -218,8 +211,16 @@
                 <es-spinner></es-spinner>
               </section>
               } @else {
-              <!-- Only this region scrolls; the breadcrumb header above stays fixed. -->
+              <!-- Only this region scrolls, including the collection header; the breadcrumb above stays fixed. -->
               <div class="collections-scroll">
+                @if (collection && !isRootLevelCollection()) {
+                <es-collection-header-bar
+                  [collection]="collection"
+                  [orderModeAvailable]="!!collectionContentRef?.canOrder()"
+                  [orderModeActive]="!!collectionContentRef?.isOrderModeActive()"
+                  (orderModeToggle)="collectionContentRef?.onOrderModeToggle($event)"
+                ></es-collection-header-bar>
+                }
                 <es-collection-content
                   #collectionContentComponent
                   [collection]="collection"
