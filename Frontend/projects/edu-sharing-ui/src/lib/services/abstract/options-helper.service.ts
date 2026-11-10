@@ -50,6 +50,11 @@ export abstract class OptionsHelperService {
     wrapOptionCallbacks(data: OptionData) {
         if (data.customOptions?.addOptions) {
             for (const option of data.customOptions.addOptions) {
+                // an entry without callback only overrides fields of an existing option (see
+                // `applyExternalOptions`); wrapping it would replace that option's callback
+                if (!option.callback && !(option as any).originalCallback) {
+                    continue;
+                }
                 if (!(option as any).originalCallback) {
                     (option as any).originalCallback = option.callback;
                 }
