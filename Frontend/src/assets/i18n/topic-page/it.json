@@ -26,9 +26,10 @@
         "NOT_PASSED_ON": "non trasmette",
         "PASS_ON": "Trasmetti",
         "PASS_ON_TOOLTIP": "Trasmetti i modelli alle sotto-collezioni",
-        "CHANGED_COUNT": "{{count}} collezioni cambiano applicando le modifiche.",
-        "CHANGED_COUNT_ONE": "1 collezione cambia applicando le modifiche.",
-        "CHANGES_PARENTS": "Le modifiche alle collezioni superiori valgono anche per le loro altre sotto-collezioni, non mostrate qui.",
+        "CHANGED_COUNT": "{{count}} collezioni verranno modificate.",
+        "CHANGED_COUNT_ONE": "1 collezione verrà modificata.",
+        "CHANGED_COUNT_WITH_PARENTS": "{{count}} collezioni verranno modificate, altre fuori da questa vista.",
+        "CHANGED_COUNT_ONE_WITH_PARENTS": "1 collezione verrà modificata, altre fuori da questa vista.",
         "SAVED": "L'ereditarietà è stata salvata.",
         "LOAD_ERROR": "Non è stato possibile caricare l'ereditarietà."
       }
