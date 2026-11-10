@@ -198,6 +198,14 @@ export class ScopesService {
         return this.api.updateScope({ repository: HOME_REPOSITORY, scopeId, body });
     }
 
+    /**
+     * converts an existing organization into a scope group (one way); the content of its shared folder
+     * gets its entries in the background (bulk job)
+     */
+    convertToScope(scopeId: string, body: Parameters<ScopeV1Service['convertToScope']>[0]['body']) {
+        return this.api.convertToScope({ repository: HOME_REPOSITORY, scopeId, body });
+    }
+
     private fetchActiveScope(): Observable<ActiveScope | null> {
         return this.api.getCurrentScope({ repository: HOME_REPOSITORY }).pipe(
             // 204 (global) has no body

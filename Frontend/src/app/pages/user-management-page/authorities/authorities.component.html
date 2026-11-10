@@ -602,6 +602,31 @@
   </form>
   }
 </ng-template>
+<ng-template #convertScopeTemplate>
+  <div class="convert-scope">
+    <ul>
+      <li>{{ 'SCOPES.ADMIN.CONVERT_PERMISSIONS' | translate }}</li>
+      <li>{{ 'SCOPES.ADMIN.CONVERT_IMPORT' | translate }}</li>
+      <li>{{ 'SCOPES.ADMIN.CONVERT_CONFIGURE' | translate }}</li>
+    </ul>
+    @if (convertScopeDeviations.length) {
+    <es-info-message mode="warning">
+      {{ 'SCOPES.ADMIN.CONVERT_DEVIATIONS' | translate }}
+      <ul class="convert-scope-deviations">
+        @for (deviation of convertScopeDeviations; track $index) {
+        <li>
+          <span class="convert-scope-authority">{{ deviation.authority }}:</span>
+          {{ deviation.permissions }}
+        </li>
+        }
+      </ul>
+    </es-info-message>
+    }
+    <es-info-message mode="warning">{{
+      'SCOPES.ADMIN.CONVERT_ONE_WAY' | translate
+    }}</es-info-message>
+  </div>
+</ng-template>
 <ng-template #faTemplate>
   <form [formGroup]="faForm" class="fa-config">
     <es-info-message mode="info">{{ 'PERMISSIONS.2FA.DESCRIPTION' | translate }}</es-info-message>

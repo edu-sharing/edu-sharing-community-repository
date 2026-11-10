@@ -1864,6 +1864,16 @@
       "EMPTY": "No scopes available",
       "CREATED": "Scope created",
       "UPDATED": "Scope saved",
+      "CONVERT": "Convert to editorial scope",
+      "CONVERT_TITLE": "Convert to editorial scope",
+      "CONVERT_MESSAGE": "The organization \"{{name}}\" will become an editorial scope.",
+      "CONVERT_PERMISSIONS": "Members get collaborator instead of consumer permissions on the organization folder, so they can create and edit content there.",
+      "CONVERT_IMPORT": "Content already in the organization folder is added to the editorial scope in the background, like an upload. Existing entries stay unchanged.",
+      "CONVERT_CONFIGURE": "Afterwards the configuration of the editorial scope opens (metadata set, field list).",
+      "CONVERT_DEVIATIONS": "The permissions of the organization folder differ from the default. They are kept and also apply to the content of the editorial scope:",
+      "CONVERT_ONE_WAY": "The conversion can't be undone.",
+      "CONVERT_CONFIRM": "Convert",
+      "CONVERTED": "Organization converted to an editorial scope, existing content is being added",
       "VISIBILITY": {
         "INTERNAL": "Internal",
         "PUBLIC": "Public"

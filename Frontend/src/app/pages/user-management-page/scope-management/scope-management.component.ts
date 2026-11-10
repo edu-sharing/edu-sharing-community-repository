@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, effect, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -67,6 +67,20 @@ const DEFAULT_FIELD_VALUES: Record<
 /** mandatory field of every scope: the inventory decision controls publishing */
 const MANDATORY_FIELD = RestConstants.CCM_PROP_EDITORIAL_INVENTORY;
 
+/**
+ * field list of a scope without configuration (e.g. an organization converted to a scope): only the
+ * mandatory inventory decision with its defaults, `replaces` is derived by the backend
+ */
+export function defaultScopeFields(): ScopeField[] {
+    return [
+        {
+            id: MANDATORY_FIELD,
+            visibility: 'internal',
+            ...DEFAULT_FIELD_VALUES[MANDATORY_FIELD],
+        },
+    ];
+}
+
 type ScopeDraft = {
     /** null while creating a new scope */
     scopeId: string | null;
@@ -119,7 +133,7 @@ const FREE_TEXT_WIDGETS: string[] = [
         TranslateModule,
     ],
 })
-export class ScopeManagementComponent {
+export class ScopeManagementComponent implements OnInit {
     private scopesService = inject(ScopesService);
     private mdsService = inject(MdsService);
     private scopeMdsService = inject(ScopeMdsService);
@@ -127,6 +141,12 @@ export class ScopeManagementComponent {
     private searchService = inject(SearchService);
     private translate = inject(TranslateService);
     private toast = inject(Toast);
+
+    /**
+     * scope whose editor is opened initially, e.g. right after converting an organization (the
+     * list comes from the search index and may not contain it yet)
+     */
+    readonly initialScope = input<ScopeDefinition | null>(null);
 
     protected readonly MANDATORY_FIELDS = [MANDATORY_FIELD];
     protected readonly Scope = Scope;
@@ -302,8 +322,14 @@ export class ScopeManagementComponent {
     );
 
     constructor() {
-        this.refresh();
         effect(() => this.draftMds.set(this.draft()?.mds ?? null));
+    }
+
+    ngOnInit(): void {
+        this.refresh();
+        if (this.initialScope()) {
+            this.edit(this.initialScope());
+        }
     }
 
     refresh(then?: () => void) {

@@ -85,6 +85,15 @@ public interface ScopeService {
 
     ScopeBulkStatus getBulkStatus(String scopeId, String jobId);
 
+    /**
+     * the organization was converted to a scope group: creates the entries of the content already in its shared
+     * folder like an upload would (uploadValues of the field list), as an asynchronous bulk job. Existing entries stay
+     * unchanged. Called by {@link ScopeDefinitionService#convertToScope}, global admins only
+     *
+     * @return the id of the job, null if the scope has no shared folder
+     */
+    String startFolderImport(String scopeId);
+
     // --- lifecycle
 
     /**

@@ -320,3 +320,19 @@ label.search {
         margin-top: 30px;
     }
 }
+
+.convert-scope {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    ul {
+        margin: 0;
+        padding-left: 20px;
+    }
+    .convert-scope-deviations {
+        margin-top: 5px;
+    }
+    .convert-scope-authority {
+        font-weight: bold;
+    }
+}

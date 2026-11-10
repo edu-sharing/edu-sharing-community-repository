@@ -150,23 +150,66 @@ public class ScopeDefinitionServiceImpl implements ScopeDefinitionService {
             String scopeId = org.alfresco.service.cmr.security.PermissionService.GROUP_PREFIX + group;
             NodeRef groupRef = alfAuthorityService.getAuthorityNodeRef(scopeId);
             NodeRef folder = (NodeRef) nodeService.getProperty(groupRef, OrganisationService.PROP_EDUGROUP_EDU_HOMEDIR);
-
-            Map<QName, Serializable> properties = new HashMap<>();
-            properties.put(QName.createQName(CCConstants.CCM_PROP_SCOPE_MDS), mds);
-            properties.put(QName.createQName(CCConstants.CCM_PROP_SCOPE_FIELDS), ScopeDefinitionJson.write(fields == null ? List.of() : fields));
-            properties.put(QName.createQName(CCConstants.CCM_PROP_SCOPE_FOLDER), folder);
-            properties.put(QName.createQName(CCConstants.CCM_PROP_SCOPE_SETTINGS), writePresentation(presentation));
-            nodeService.addAspect(groupRef, QName.createQName(CCConstants.CCM_ASPECT_SCOPE_GROUP), properties);
-            nodeService.setProperty(groupRef, QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE), CCConstants.GROUP_TYPE_SCOPE);
-
-            // shared folder: members can create and edit, not only read (concept §4.7)
-            permissionService.deletePermission(folder, scopeId, PermissionService.CONSUMER);
-            permissionService.setPermission(folder, scopeId, CCConstants.PERMISSION_COLLABORATOR, true);
+            markAsScope(scopeId, groupRef, folder, mds, fields, presentation);
             return group;
         }));
         String scopeId = org.alfresco.service.cmr.security.PermissionService.GROUP_PREFIX + groupName;
         log.info("scope group {} created", scopeId);
         return getDefinition(scopeId).orElseThrow();
+    }
+
+    @Override
+    @Permission(requiresGlobalAdmin = true)
+    public ScopeDefinition convertToScope(String scopeId, String mds, List<ScopeField> fields, ScopePresentation presentation) {
+        validateFields(fields);
+        validatePresentation(presentation);
+        AuthenticationUtil.runAsSystem(() -> retryingTransactionHelper.doInTransaction(() -> {
+            NodeRef groupRef = scopeId == null || !scopeId.startsWith(org.alfresco.service.cmr.security.PermissionService.GROUP_PREFIX)
+                    ? null : alfAuthorityService.getAuthorityNodeRef(scopeId);
+            if (groupRef == null) {
+                throw new IllegalArgumentException("unknown group " + scopeId);
+            }
+            Map<QName, Serializable> properties = nodeService.getProperties(groupRef);
+            NodeRef folder = (NodeRef) properties.get(OrganisationService.PROP_EDUGROUP_EDU_HOMEDIR);
+            if (folder == null || !nodeService.exists(folder)) {
+                throw new IllegalArgumentException(scopeId + " is no organization (no shared folder)");
+            }
+            String groupType = (String) properties.get(QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE));
+            if (CCConstants.GROUP_TYPE_SCOPE.equals(groupType)) {
+                throw new IllegalArgumentException(scopeId + " is already a scope group");
+            }
+            if (org.edu_sharing.alfresco.service.AuthorityService.MEDIA_CENTER_GROUP_TYPE.equals(groupType)) {
+                throw new IllegalArgumentException(scopeId + " is a media center");
+            }
+            if (properties.get(QName.createQName(CCConstants.CCM_PROP_EDUSCOPE_NAME)) != null) {
+                throw new IllegalArgumentException(scopeId + " belongs to an edu scope");
+            }
+            String scopeMds = mds != null ? mds : (String) nodeService.getProperty(folder, QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET));
+            markAsScope(scopeId, groupRef, folder, scopeMds, fields, presentation);
+            return null;
+        }));
+        log.info("organization {} converted to a scope group", scopeId);
+        // after the commit: the job reads the definition
+        String jobId = scopeServiceFactory.getObject().getLocalService().startFolderImport(scopeId);
+        log.info("import of the shared folder of scope {}: bulk job {}", scopeId, jobId);
+        return getDefinition(scopeId).orElseThrow();
+    }
+
+    /**
+     * marks the group as scope group: definition (aspect ccm:scopeGroup), group type and Collaborator for the members
+     * on the shared folder (concept §4.7: members can create and edit, not only read). Runs inside the transaction
+     */
+    private void markAsScope(String scopeId, NodeRef groupRef, NodeRef folder, String mds, List<ScopeField> fields, ScopePresentation presentation) {
+        Map<QName, Serializable> properties = new HashMap<>();
+        properties.put(QName.createQName(CCConstants.CCM_PROP_SCOPE_MDS), mds);
+        properties.put(QName.createQName(CCConstants.CCM_PROP_SCOPE_FIELDS), ScopeDefinitionJson.write(fields == null ? List.of() : fields));
+        properties.put(QName.createQName(CCConstants.CCM_PROP_SCOPE_FOLDER), folder);
+        properties.put(QName.createQName(CCConstants.CCM_PROP_SCOPE_SETTINGS), writePresentation(presentation));
+        nodeService.addAspect(groupRef, QName.createQName(CCConstants.CCM_ASPECT_SCOPE_GROUP), properties);
+        nodeService.setProperty(groupRef, QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE), CCConstants.GROUP_TYPE_SCOPE);
+
+        permissionService.deletePermission(folder, scopeId, PermissionService.CONSUMER);
+        permissionService.setPermission(folder, scopeId, CCConstants.PERMISSION_COLLABORATOR, true);
     }
 
     @Override

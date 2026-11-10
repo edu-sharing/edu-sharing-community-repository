@@ -19,6 +19,7 @@
           [mode]="'ORG'"
           [searchQuery]="searchQuery"
           (selection)="selected = $event ? $any($event[0]) : null"
+          (convertedToScope)="openConvertedScope($event)"
         ></es-permissions-authorities>
       </ng-template>
     </mat-tab>
@@ -29,7 +30,7 @@
       bodyClass="data-test-permissions-body-scopes"
     >
       <ng-template matTabContent>
-        <es-scope-management #scopeManagement>
+        <es-scope-management #scopeManagement [initialScope]="convertedScope">
           <!-- the scope groups are organizations: same list and options, plus their configuration -->
           @if (!scopeManagement.draft()) {
           <es-permissions-authorities

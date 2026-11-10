@@ -1864,6 +1864,16 @@
       "EMPTY": "Keine Redaktionen vorhanden",
       "CREATED": "Redaktion angelegt",
       "UPDATED": "Redaktion gespeichert",
+      "CONVERT": "In Redaktion umwandeln",
+      "CONVERT_TITLE": "In Redaktion umwandeln",
+      "CONVERT_MESSAGE": "Die Organisation „{{name}}“ wird zu einer Redaktion.",
+      "CONVERT_PERMISSIONS": "Mitglieder erhalten im Organisationsordner Mitarbeiter- statt Betrachter-Rechte, damit sie dort Inhalte anlegen und bearbeiten können.",
+      "CONVERT_IMPORT": "Inhalte, die bereits im Organisationsordner liegen, werden im Hintergrund wie ein Upload in die Redaktion übernommen. Bestehende Einträge bleiben unverändert.",
+      "CONVERT_CONFIGURE": "Anschließend öffnet sich die Konfiguration der Redaktion (Metadatenset, Feldliste).",
+      "CONVERT_DEVIATIONS": "Die Rechte des Organisationsordners weichen vom Standard ab. Diese Rechte bleiben erhalten und gelten auch für die Inhalte der Redaktion:",
+      "CONVERT_ONE_WAY": "Die Umwandlung kann nicht rückgängig gemacht werden.",
+      "CONVERT_CONFIRM": "Umwandeln",
+      "CONVERTED": "Organisation in Redaktion umgewandelt, vorhandene Inhalte werden übernommen",
       "VISIBILITY": {
         "INTERNAL": "Intern",
         "PUBLIC": "Öffentlich"

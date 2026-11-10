@@ -1,5 +1,7 @@
 package org.edu_sharing.service.scope;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,6 +15,9 @@ import java.util.Set;
 /**
  * Bulk change of assignments. Either nodeIds or search is set. The search is resolved inside the job with the
  * permissions of the user who started it.
+ * <p>
+ * {@link #folderId} and {@link #createOnly} are internal (import of the shared folder when an organization is
+ * converted to a scope, see {@link ScopeService#startFolderImport}) and can't be set via the api.
  */
 @Data
 @NoArgsConstructor
@@ -36,4 +41,12 @@ public class ScopeBulkRequest implements Serializable {
     /** true: remove the assignments instead of setting properties */
     private boolean delete;
     private String reason;
+    /** internal: all content below this folder (recursive, no child objects), instead of nodeIds / search */
+    @JsonIgnore
+    @Schema(hidden = true)
+    private String folderId;
+    /** internal: only create missing entries, existing entries stay unchanged */
+    @JsonIgnore
+    @Schema(hidden = true)
+    private boolean createOnly;
 }

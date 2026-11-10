@@ -39,6 +39,18 @@ public interface ScopeDefinitionService {
     ScopeDefinition createScope(String name, String displayName, String mds, List<ScopeField> fields, ScopePresentation presentation);
 
     /**
+     * converts an existing organization into a scope group (one way): marks the group like {@link #createScope} does
+     * and gives the group Collaborator instead of Consumer on its shared folder (other permissions of the folder stay
+     * unchanged). Afterwards the content already in the shared folder gets its entries like an upload, as bulk job
+     * ({@link ScopeService#startFolderImport}). Global admins only (operator).
+     *
+     * @param mds null: the metadataset of the shared folder
+     * @throws IllegalArgumentException if the group is no organization, already a scope group or a special
+     *                                  organization (media center, edu scope)
+     */
+    ScopeDefinition convertToScope(String scopeId, String mds, List<ScopeField> fields, ScopePresentation presentation);
+
+    /**
      * replaces mds, field list and presentation settings (null removes them) of a scope group. Global admins only
      * (operator).
      */

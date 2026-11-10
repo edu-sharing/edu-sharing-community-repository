@@ -25,8 +25,11 @@ import {
     HOME_REPOSITORY,
     IamV1Service,
     Node,
+    NodeService,
     OrganizationV1Service,
     QrCode2Fa,
+    ScopeDefinition,
+    ScopesService,
     User,
     UserProfileEdit,
 } from 'ngx-edu-sharing-api';
@@ -89,6 +92,10 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { AuthoritySearchMode } from '../../../shared/components/authority-search-input/authority-search-input.component';
 import { Closable } from '../../../features/dialogs/card-dialog/card-dialog-config';
 import { DomSanitizer } from '@angular/platform-browser';
+import { defaultScopeFields } from '../scope-management/scope-management.component';
+
+/** an entry of the shared folder's permissions that differs from the organization default */
+type FolderPermissionDeviation = { authority: string; permissions: string };
 
 @Component({
     selector: 'es-permissions-authorities',
@@ -111,6 +118,8 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     private iam = inject(RestIamService);
     private iamService = inject(IamV1Service);
     private node = inject(RestNodeService);
+    private nodeApi = inject(NodeService);
+    private scopesService = inject(ScopesService);
     private nodeHelper = inject(NodeHelperService);
     private optionsHelperService = inject(OptionsHelperDataService);
     private organization = inject(RestOrganizationService);
@@ -134,6 +143,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     @ViewChild('exclude') excludeRef: TemplateRef<unknown>;
     @ViewChild('faTemplate') faTemplate: TemplateRef<unknown>;
     @ViewChild('faCode') faCode: TemplateRef<unknown>;
+    @ViewChild('convertScopeTemplate') convertScopeTemplate: TemplateRef<unknown>;
     @ViewChild('actionbar') actionbar: ActionbarComponent;
     @ViewChild('actionbarActions') actionbarActions: ActionbarComponent;
     @ViewChild('passwordRef') passwordRef: InputPasswordComponent;
@@ -263,6 +273,10 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     @Output() configureScope = new EventEmitter<string>();
     /** scope group whose members should be managed (authority name), see `groupType` */
     @Output() manageScopeMembers = new EventEmitter<string>();
+    /** an organization was converted to a scope group (see `convertToScope`) */
+    @Output() convertedToScope = new EventEmitter<ScopeDefinition>();
+    /** permissions of the shared folder that differ from the organization default, shown before converting */
+    convertScopeDeviations: FolderPermissionDeviation[] = [];
     @Output() selection = new EventEmitter<GenericAuthority[]>();
     @Output() setTab = new EventEmitter<number>();
     public editMembers: GenericAuthority | 'ALL';
@@ -487,6 +501,29 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                 scopeMembers.priority = 6;
                 scopeMembers.constrains = [Constrain.NoBulk];
                 options.push(scopeMembers);
+            }
+            if (this._mode === 'ORG' && !this.isScopeList()) {
+                const convert = new OptionItem(
+                    'SCOPES.ADMIN.CONVERT',
+                    'auto_stories',
+                    (data: Organization) => this.convertToScope(this.getList(data)[0]),
+                );
+                convert.elementType = [ElementType.Group];
+                convert.group = DefaultGroups.Edit;
+                convert.priority = 40;
+                convert.constrains = [Constrain.NoBulk, Constrain.Admin];
+                convert.customShowCallback = async (nodes) => {
+                    // the list entries carry groupType in addition to the profile
+                    const org = nodes?.[0] as unknown as Organization & { groupType?: string };
+                    const type = org?.groupType ?? org?.profile?.groupType;
+                    return (
+                        this.scopesService.enabled() &&
+                        !!org?.sharedFolder &&
+                        type !== RestConstants.GROUP_TYPE_SCOPE &&
+                        type !== RestConstants.GROUP_TYPE_MEDIA_CENTER
+                    );
+                };
+                options.push(convert);
             }
             if (this._mode === 'ORG' && !this.isScopeList()) {
                 const global = new OptionItem(
@@ -1253,6 +1290,90 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             }
         });
     }
+    /**
+     * converts the organization into a scope group (one way) after a confirmation that lists the
+     * permissions of its shared folder differing from the organization default (members:
+     * Consumer, org admins: Coordinator): members get Collaborator, the content already in the
+     * folder gets its entries in the background
+     */
+    private async convertToScope(org: Organization) {
+        this.toast.showProgressSpinner();
+        try {
+            this.convertScopeDeviations = await this.getFolderPermissionDeviations(org);
+        } catch (e) {
+            // the permissions are only shown as a hint, converting still works
+            console.warn('could not load the permissions of the shared folder', e);
+            this.convertScopeDeviations = [];
+        } finally {
+            this.toast.closeProgressSpinner();
+        }
+        const dialog = await this.dialogs.openGenericDialog({
+            title: 'SCOPES.ADMIN.CONVERT_TITLE',
+            message: 'SCOPES.ADMIN.CONVERT_MESSAGE',
+            messageParameters: { name: org.profile?.displayName ?? org.authorityName },
+            contentTemplate: this.convertScopeTemplate,
+            minWidth: 500,
+            buttons: [
+                { label: 'CANCEL', config: { color: 'standard' } },
+                { label: 'SCOPES.ADMIN.CONVERT_CONFIRM', config: { color: 'primary' } },
+            ],
+        });
+        if ((await firstValueFrom(dialog.afterClosed())) !== 'SCOPES.ADMIN.CONVERT_CONFIRM') {
+            return;
+        }
+        this.toast.showProgressSpinner();
+        try {
+            const scope = await firstValueFrom(
+                this.scopesService.convertToScope(org.authorityName, {
+                    // the metadataset of the shared folder
+                    mds: null,
+                    fields: defaultScopeFields(),
+                }),
+            );
+            this.toast.toast('SCOPES.ADMIN.CONVERTED');
+            this.convertedToScope.emit(scope);
+        } catch (e) {
+            this.toast.error(e);
+        } finally {
+            this.toast.closeProgressSpinner();
+        }
+    }
+
+    private async getFolderPermissionDeviations(
+        org: Organization,
+    ): Promise<FolderPermissionDeviation[]> {
+        const permissions = await firstValueFrom(this.nodeApi.getPermissions(org.sharedFolder.id));
+        const isDefault = (authority: string, groupType: string, granted: string[]) =>
+            granted.length === 1 &&
+            ((authority === org.authorityName &&
+                granted[0] === RestConstants.PERMISSION_CONSUMER) ||
+                (groupType === RestConstants.GROUP_TYPE_ADMINISTRATORS &&
+                    granted[0] === RestConstants.PERMISSION_COORDINATOR));
+        return [
+            ...(permissions.localPermissions?.permissions ?? []),
+            ...(permissions.inheritedPermissions ?? []),
+        ]
+            .filter(
+                (ace) =>
+                    !isDefault(
+                        ace.authority?.authorityName,
+                        ace.group?.groupType,
+                        ace.permissions ?? [],
+                    ),
+            )
+            .map((ace) => ({
+                authority:
+                    ace.authority?.authorityName === RestConstants.AUTHORITY_EVERYONE
+                        ? this.translate.instant('GROUP_EVERYONE')
+                        : ace.group?.displayName ??
+                          ([ace.user?.firstName, ace.user?.lastName].filter((n) => !!n).join(' ') ||
+                              ace.authority?.authorityName),
+                permissions: (ace.permissions ?? [])
+                    .map((p) => this.translate.instant('PERMISSION_TYPE.' + p))
+                    .join(', '),
+            }));
+    }
+
     private refresh() {
         this.discardLoadedAuthorities();
         this.nodeEntries.getSelection().clear();

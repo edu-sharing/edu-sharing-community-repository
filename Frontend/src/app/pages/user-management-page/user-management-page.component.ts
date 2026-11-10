@@ -4,6 +4,7 @@ import {
     HOME_REPOSITORY,
     OrganizationV1Service,
     RestConstants,
+    ScopeDefinition,
     ScopesService,
 } from 'ngx-edu-sharing-api';
 import {
@@ -53,6 +54,8 @@ export class UserManagementPageComponent implements OnInit, OnDestroy {
     public tab: number = 0;
     public searchQuery: string;
     selected: Organization;
+    /** organization just converted to a scope: the scope tab opens its configuration */
+    convertedScope: ScopeDefinition | null = null;
     public isAdmin = false;
     public disabled = false;
     public isLoading = true;
@@ -167,9 +170,20 @@ export class UserManagementPageComponent implements OnInit, OnDestroy {
             if (tab === 0) {
                 this.selected = null;
             }
+            // the scope tab only opens the converted scope once
+            this.convertedScope = null;
             this.searchQuery = null;
             this.tab = tab;
         }
+        this.updateSearchField();
+    }
+
+    /** an organization was converted to a scope: configure it in the scope tab */
+    openConvertedScope(scope: ScopeDefinition) {
+        this.selected = null;
+        this.searchQuery = null;
+        this.convertedScope = scope;
+        this.tab = this.visibleTabs.indexOf('SCOPES');
         this.updateSearchField();
     }
 

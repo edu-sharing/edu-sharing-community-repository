@@ -44997,6 +44997,88 @@
         ]
       }
     },
+    "/scope/v1/{repository}/admin/scopes/{scopeId}/convert": {
+      "post": {
+        "description": "One way: marks the organization as scope group, gives its members Collaborator on the shared folder and starts a bulk job creating the entries of the content already in the shared folder (uploadValues of the field list). Admin only. mds = null uses the metadataset of the shared folder.",
+        "operationId": "convertToScope",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "authority name of the organization",
+            "in": "path",
+            "name": "scopeId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScopeUpdateRequestDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScopeDefinition"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          }
+        },
+        "summary": "Convert an existing organization into a scope group",
+        "tags": [
+          "SCOPE v1"
+        ]
+      }
+    },
     "/scope/v1/{repository}/changes": {
       "get": {
         "description": "Entries ordered by (at, seq). Same cursor contract as the share info oplog. Admin / system user only.",

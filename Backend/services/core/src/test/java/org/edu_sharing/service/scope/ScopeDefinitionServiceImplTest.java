@@ -120,6 +120,45 @@ class ScopeDefinitionServiceImplTest {
         verify(permissionService).setPermission(FOLDER_REF, SCOPE, CCConstants.PERMISSION_COLLABORATOR, true);
     }
 
+    @Test
+    void convertOrganization() throws Exception {
+        groupProperties.put(OrganisationService.PROP_EDUGROUP_EDU_HOMEDIR, FOLDER_REF);
+        when(nodeService.exists(FOLDER_REF)).thenReturn(true);
+        when(nodeService.getProperty(FOLDER_REF, QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET))).thenReturn("mds_org");
+        List<ScopeField> fields = List.of(ScopeField.builder().id("ccm:editorial_inventory").uploadValues(List.of("accepted")).build());
+
+        ScopeDefinition definition = underTest.convertToScope(SCOPE, null, fields, null);
+
+        assertEquals(SCOPE, definition.getScopeId());
+        // no mds given: the one of the shared folder
+        assertEquals("mds_org", definition.getMds());
+        assertEquals("folder", definition.getFolderId());
+        assertEquals(CCConstants.GROUP_TYPE_SCOPE, groupProperties.get(QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE)));
+        verify(organisationService, never()).createOrganization(any(), any(), any(), any());
+        verify(permissionService).deletePermission(FOLDER_REF, SCOPE, PermissionService.CONSUMER);
+        verify(permissionService).setPermission(FOLDER_REF, SCOPE, CCConstants.PERMISSION_COLLABORATOR, true);
+        verify(scopeService).startFolderImport(SCOPE);
+    }
+
+    @Test
+    void convertRejectsNoOrganizationsAndScopes() {
+        // no shared folder
+        assertThrows(IllegalArgumentException.class, () -> underTest.convertToScope(SCOPE, null, List.of(), null));
+        assertThrows(IllegalArgumentException.class, () -> underTest.convertToScope("someone", null, List.of(), null));
+
+        groupProperties.put(OrganisationService.PROP_EDUGROUP_EDU_HOMEDIR, FOLDER_REF);
+        when(nodeService.exists(FOLDER_REF)).thenReturn(true);
+        for (String type : List.of(CCConstants.GROUP_TYPE_SCOPE, org.edu_sharing.alfresco.service.AuthorityService.MEDIA_CENTER_GROUP_TYPE)) {
+            groupProperties.put(QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE), type);
+            assertThrows(IllegalArgumentException.class, () -> underTest.convertToScope(SCOPE, null, List.of(), null), type);
+        }
+        groupProperties.remove(QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE));
+        groupProperties.put(QName.createQName(CCConstants.CCM_PROP_EDUSCOPE_NAME), CCConstants.CCM_VALUE_SCOPE_SAFE);
+        assertThrows(IllegalArgumentException.class, () -> underTest.convertToScope(SCOPE, null, List.of(), null));
+
+        verifyNoInteractions(permissionService, scopeService);
+    }
+
     /**
      * enforced by PermissionChecking (proxy), not inside the methods
      */
@@ -128,6 +167,7 @@ class ScopeDefinitionServiceImplTest {
         for (Method method : List.of(
                 ScopeDefinitionServiceImpl.class.getMethod("createScope", String.class, String.class, String.class, List.class, ScopePresentation.class),
                 ScopeDefinitionServiceImpl.class.getMethod("updateScope", String.class, String.class, List.class, ScopePresentation.class),
+                ScopeDefinitionServiceImpl.class.getMethod("convertToScope", String.class, String.class, List.class, ScopePresentation.class),
                 ScopeDefinitionServiceImpl.class.getMethod("getAllScopes"),
                 ScopeDefinitionServiceImpl.class.getMethod("getScopeOnlyProperties"))) {
             Permission permission = method.getAnnotation(Permission.class);

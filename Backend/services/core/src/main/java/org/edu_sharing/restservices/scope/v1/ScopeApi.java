@@ -120,6 +120,24 @@ public class ScopeApi {
         return Response.ok(getDefinitionService().createScope(request.getName(), request.getDisplayName(), request.getMds(), request.getFields(), request.getPresentation())).build();
     }
 
+    @POST
+    @Path("/{repository}/admin/scopes/{scopeId}/convert")
+    @Operation(summary = "Convert an existing organization into a scope group",
+            description = "One way: marks the organization as scope group, gives its members Collaborator on the shared folder and starts a bulk job creating the entries of the content already in the shared folder (uploadValues of the field list). Admin only. mds = null uses the metadataset of the shared folder.")
+    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = ScopeDefinition.class)))
+    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    public Response convertToScope(
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = "authority name of the organization", required = true) @PathParam("scopeId") String scopeId,
+            ScopeUpdateRequestDTO request) {
+        if (request == null) {
+            throw new BadRequestException("body must be set");
+        }
+        return Response.ok(getDefinitionService().convertToScope(scopeId, request.getMds(), request.getFields(), request.getPresentation())).build();
+    }
+
     @PUT
     @Path("/{repository}/admin/scopes/{scopeId}")
     @Operation(summary = "Change mds, field list and presentation settings of a scope group", description = "Admin only. presentation = null removes the settings.")

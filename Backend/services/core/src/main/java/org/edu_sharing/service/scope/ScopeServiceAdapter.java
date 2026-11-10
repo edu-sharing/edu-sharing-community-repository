@@ -80,6 +80,11 @@ public class ScopeServiceAdapter implements ScopeService {
     }
 
     @Override
+    public String startFolderImport(String scopeId) {
+        return null;
+    }
+
+    @Override
     public void onUpload(String scopeId, String nodeId, String uploader) {
     }
 
