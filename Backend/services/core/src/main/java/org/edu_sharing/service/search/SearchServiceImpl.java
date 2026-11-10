@@ -24,12 +24,14 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.repository.client.rpc.EduGroup;
+import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LogTime;
+import org.edu_sharing.repository.server.tools.cache.UserCache;
 import org.edu_sharing.restservices.search.v1.model.SearchFacet;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.restservices.shared.NodeSearch;
@@ -62,6 +64,8 @@ public class SearchServiceImpl implements SearchService {
 	private MCAlfrescoAPIClient baseClient;
 
 	private ToolPermissionService toolPermissionService;
+
+	UserCache userCache = alfApplicationContext.getBean(UserCache.class);
 
 	public SearchServiceImpl(String applicationId) {
 		this.applicationId = applicationId;
@@ -210,40 +214,56 @@ public class SearchServiceImpl implements SearchService {
 
 		List<String> list = new ArrayList<>();
 		if (pattern != null && !pattern.isEmpty()) {
+			String patternLower = pattern.toLowerCase();
+			// if the pattern is a UUID (e.g. an esuid based username) it can only ever match the
+			// authority name, never a display/first/last name, so we can skip the expensive resolution
+			boolean patternIsUuid = isUuid(pattern);
 			for (String authority : list2) {
-				
-				NodeRef authorityNodeRef = serviceRegistry.getAuthorityService().getAuthorityNodeRef(authority);
-				
+
 				String name = authority;
 
 				String toCompare = "" + name;
-				
+
+				if (toCompare.toLowerCase().contains(patternLower)){
+					list.add(authority);
+					if(patternIsUuid) {
+						// only one entry when an uuid was requested
+						break;
+					} else {
+						continue;
+					}
+				}
+
+				if (patternIsUuid) {
+					continue;
+				}
+
 				if (name.startsWith(PermissionService.GROUP_PREFIX)) {
-					name = name.substring(PermissionService.GROUP_PREFIX.length());
-					
+					NodeRef authorityNodeRef = serviceRegistry.getAuthorityService().getAuthorityNodeRef(authority);
 					if(authorityNodeRef != null) {
 						String displayName = (String)serviceRegistry.getNodeService().getProperty(authorityNodeRef, ContentModel.PROP_AUTHORITY_DISPLAY_NAME);
 						if(displayName != null) {
 							toCompare += displayName;
 						}
 					}
-						
-					
 				}else {
-					if(authorityNodeRef != null) {
-						String firstName = (String)serviceRegistry.getNodeService().getProperty(authorityNodeRef, ContentModel.PROP_FIRSTNAME);
-						String lastName = (String)serviceRegistry.getNodeService().getProperty(authorityNodeRef, ContentModel.PROP_LASTNAME);
-						if(firstName != null) {
-							toCompare+=firstName;
-						}
-						if(lastName != null) {
-							toCompare+=lastName;
-						}
+					User user = userCache.getUser(name);
+					String firstName = null;
+					String lastName = null;
+					if(user != null){
+						firstName = user.getGivenName();
+						lastName = user.getSurname();
+					}
+					if(firstName != null) {
+						toCompare+=firstName;
+					}
+					if(lastName != null) {
+						toCompare+=lastName;
 					}
 				}
 				
 				
-				if (toCompare.toLowerCase().contains(pattern.toLowerCase()))
+				if (toCompare.toLowerCase().contains(patternLower))
 					list.add(authority);
 			}
 		} else {
@@ -269,6 +289,15 @@ public class SearchServiceImpl implements SearchService {
 		int count = list.size();
 		list = limitList(list, skipCount, maxValues);
 		return new SearchResult<String>(list, skipCount, count);
+	}
+
+	private static boolean isUuid(String value) {
+		try {
+			UUID.fromString(value);
+			return true;
+		} catch (IllegalArgumentException e) {
+			return false;
+		}
 	}
 	@Override
 	public SearchResult<String> searchUsers(String _pattern, boolean globalSearch, int _skipCount, int _maxValues,
