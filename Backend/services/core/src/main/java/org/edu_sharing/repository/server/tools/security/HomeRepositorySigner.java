@@ -9,7 +9,9 @@ import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
+import java.security.MessageDigest;
 import java.security.PrivateKey;
+import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.Signature;
 import java.util.Base64;
 
@@ -78,6 +80,58 @@ public class HomeRepositorySigner {
         } catch (GeneralSecurityException e) {
             throw new SigningFailedException("could not sign with " + algorithm, e);
         }
+    }
+
+    /** The raw signature of {@code data} with the given algorithm (what a JWS carries, Base64url-encoded by the caller). */
+    public byte[] signBytes(byte[] data, String algorithm) {
+        try {
+            Signature signature = Signature.getInstance(algorithm);
+            signature.initSign(privateKey());
+            signature.update(data);
+            return signature.sign();
+        } catch (GeneralSecurityException e) {
+            throw new SigningFailedException("could not sign with " + algorithm, e);
+        }
+    }
+
+    /**
+     * The JWS name ({@code RS256}, {@code RS384}, {@code RS512}) of the configured algorithm. Any other algorithm cannot be named in a JWS here.
+     */
+    public String jwsAlgorithm() {
+        switch (algorithm) {
+            case "SHA256withRSA":
+                return "RS256";
+            case "SHA384withRSA":
+                return "RS384";
+            case "SHA512withRSA":
+                return "RS512";
+            default:
+                throw new SigningFailedException("the algorithm " + algorithm + " has no JWS name");
+        }
+    }
+
+    /**
+     * The RFC 7638 thumbprint (SHA-256, Base64url) of the public key that belongs to the private key of this repository: what a JWS names in {@code kid},
+     * so that the receiver finds the key it has pinned. Derived from the private key, so it is always the key that really signs.
+     */
+    public String jwkThumbprint() {
+        try {
+            if (!(privateKey() instanceof RSAPrivateCrtKey)) {
+                throw new SigningFailedException("the key of this repository is no RSA key with its public parts");
+            }
+            RSAPrivateCrtKey key = (RSAPrivateCrtKey) privateKey();
+            // the members in lexicographic order, no blanks, as RFC 7638 says
+            String json = "{\"e\":\"" + unsigned(key.getPublicExponent()) + "\",\"kty\":\"RSA\",\"n\":\"" + unsigned(key.getModulus()) + "\"}";
+            return Base64.getUrlEncoder().withoutPadding().encodeToString(MessageDigest.getInstance("SHA-256").digest(json.getBytes(StandardCharsets.UTF_8)));
+        } catch (GeneralSecurityException e) {
+            throw new SigningFailedException("could not read the key of this repository", e);
+        }
+    }
+
+    private static String unsigned(java.math.BigInteger value) {
+        byte[] bytes = value.toByteArray();
+        int start = bytes.length > 1 && bytes[0] == 0 ? 1 : 0;
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(java.util.Arrays.copyOfRange(bytes, start, bytes.length));
     }
 
     /** The home application with its keys; a method of its own so that a test can replace it. */
