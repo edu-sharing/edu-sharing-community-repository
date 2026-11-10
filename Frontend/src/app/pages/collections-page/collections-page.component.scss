@@ -171,7 +171,7 @@ mat-tab-group {
         .collections-right {
             // same inset as a collection without tabs, see `.collections-master-div-notabs`
             es-collection-content {
-                padding: 30px 35px 0 35px;
+                padding: 30px 20px 0 20px;
             }
         }
     }
@@ -265,8 +265,9 @@ section {
     height: 25px;
     padding: 4px;
 }
+// the inset of the collection header and the breadcrumb row
 .collections-master-div-notabs {
-    padding: 0 35px;
+    padding: 0 20px;
 }
 
 .table-tab-title-short {
@@ -285,7 +286,8 @@ section {
 .breadcrumb-space {
     // Unified secondary-bar height/style, matching the tab header and the selection bar.
     min-height: vars.$secondaryBarHeight;
-    padding: 0 10px 0 20px;
+    // the same inset on both sides as the collection header below
+    padding: 0 20px;
     background: var(--roundedContainerBackground);
     @include mixins.materialShadowBottom();
     display: flex;
