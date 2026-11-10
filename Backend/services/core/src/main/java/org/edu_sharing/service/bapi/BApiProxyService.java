@@ -36,9 +36,6 @@ public class BApiProxyService {
 
     private final RequestUserSigner requestUserSigner;
 
-    /** The format of the signature on the user, the same string as {@code EduUserSignature.VERSION} of the B-API. */
-    public static final String USER_SIGNATURE_SCHEME = "bapi-user-v1";
-
     private final List<String> ignoreHeader = List.of(
             HttpHeaders.AUTHORIZATION,
             HttpHeaders.COOKIE,
@@ -49,7 +46,7 @@ public class BApiProxyService {
 
     /**
      * Headers of the client that never go on to the B-API: the repository sets these itself. {@code X-Edu-*} is what the B-API takes as the word
-     * of the repository (the user it vouches for and its signature), {@code X-API-KEY} is the key of the repository.
+     * of the repository (the user assertion it vouches with), {@code X-API-KEY} is the key of the repository.
      */
     private static boolean isReservedHeader(String name) {
         return name.regionMatches(true, 0, "x-edu-", 0, 6) || "x-api-key".equalsIgnoreCase(name);
@@ -57,7 +54,7 @@ public class BApiProxyService {
 
     /**
      * forward including auth headers based on user. The user the B-API acts for is signed with the key of this repository (see
-     * {@link RequestUserSigner}): without the signature the B-API does not accept it.
+     * {@link RequestUserSigner}, header {@code X-Edu-User-Assertion}): without it the B-API does not accept it.
      *
      * @param path bapi target path (without leading "/")
      */
@@ -78,7 +75,7 @@ public class BApiProxyService {
                 .connectTimeout(Duration.parse(bApiProxyConfig.getCallTimeout()))
                 .writeTimeout(Duration.parse(bApiProxyConfig.getCallTimeout()))
                 .readTimeout(Duration.parse(bApiProxyConfig.getCallTimeout()))
-                // a second try would send the same nonce again, which the B-API refuses as a replay
+                // a second try would send the same jti again, which the B-API refuses as a replay
                 .retryOnConnectionFailure(false)
                 .build();
         String uri = bApiProxyConfig.getUri();
@@ -115,15 +112,8 @@ public class BApiProxyService {
         try {
             okhttp3.HttpUrl url = unsigned.url();
             String pathAndQuery = url.encodedPath() + (url.encodedQuery() != null ? "?" + url.encodedQuery() : "");
-            RequestUserSigner.SignedHeaders signed = requestUserSigner.sign(USER_SIGNATURE_SCHEME, apiKey, method.name(), pathAndQuery, authenticatedUser);
-            request = unsigned.newBuilder()
-                    .header(RequestUserSigner.HEADER_USER, signed.user())
-                    .header(RequestUserSigner.HEADER_APP_ID, signed.appId())
-                    .header(RequestUserSigner.HEADER_TIMESTAMP, signed.timestamp())
-                    .header(RequestUserSigner.HEADER_NONCE, signed.nonce())
-                    .header(RequestUserSigner.HEADER_SIGNATURE, signed.signature())
-                    .header(RequestUserSigner.HEADER_ALGORITHM, signed.algorithm())
-                    .build();
+            String assertion = requestUserSigner.sign(bApiProxyConfig.getAudience(), apiKey, method.name(), pathAndQuery, authenticatedUser);
+            request = unsigned.newBuilder().header(RequestUserSigner.HEADER, assertion).build();
         } catch (HomeRepositorySigner.SigningFailedException e) {
             // this repository cannot vouch for the user (no key): nothing is sent, the B-API would refuse it anyway
             log.error("bapi proxy: the user could not be signed: {}", e.getMessage());
