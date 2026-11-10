@@ -173,6 +173,10 @@
   "collectionNew_storeChanges": "speichern",
   "collectionNew_placeholderTitle": "Titel Ihrer Sammlung",
   "collectionNew_placeholderDescription": "Worum geht es in Ihrer Sammlung?",
+  "collectionNew_previewTitle": "Meine neue Sammlung",
+  "collectionNew_labelTitle": "Titel",
+  "collectionNew_labelDescription": "Beschreibung",
+  "collectionNew_labelColor": "Farbe",
   "collections_noCollections": "Es sind keine öffentlichen Sammlungen verfügbar.",
   "collections_noOrgaCollections": "Sie wurden bisher zu keiner Sammlung eingeladen."
 }

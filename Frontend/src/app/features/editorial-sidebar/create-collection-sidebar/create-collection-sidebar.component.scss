@@ -95,28 +95,3 @@
     padding-bottom: 20px;
     color: var(--textLight);
 }
-
-.location-field {
-    margin-bottom: 16px;
-
-    .caption {
-        margin-bottom: 4px;
-        color: var(--textLight);
-        font-size: 0.9em;
-    }
-
-    .location-bar {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        color: var(--textLight);
-    }
-
-    .path {
-        min-width: 0;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        color: var(--textMain);
-    }
-}

@@ -74,7 +74,6 @@
       "CREATE_COLLECTION": {
         "TITLE": "Sammlung erstellen",
         "EDIT_TITLE": "Sammlung bearbeiten",
-        "LOCATION_ROOT": "Meine Sammlungen",
         "STEPS": "Schritte",
         "STEP": {
           "DESIGN": "Gestalten",

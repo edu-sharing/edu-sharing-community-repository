@@ -13,14 +13,9 @@
             resize: none;
         }
     }
-    .dialog-input-area {
-        padding-top: 0;
-        padding-bottom: 0;
-    }
     .collection-new-owner {
         display: flex;
         align-items: center;
-        padding: 0 vars.$cardPadding;
         > i {
             margin: 5px;
         }
@@ -29,10 +24,10 @@
         }
     }
     .color-group {
-        display: flex;
-        flex-wrap: wrap;
-        margin: auto;
-        justify-content: center;
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 8px;
+        margin: 0;
         padding: 0;
         list-style: none;
         &:focus {
@@ -42,11 +37,8 @@
             @include mixins.setGlobalKeyboardFocus();
         }
         .color-option {
-            display: inline-block;
             border-radius: 4pt;
-            width: 14%;
-            height: 30px;
-            margin: 4px 3px;
+            height: 36px;
             cursor: pointer;
         }
         .color-selected {
@@ -55,89 +47,75 @@
     }
 }
 
-.collectionImage {
-    position: relative;
-    height: 240px;
-    background-color: var(--backgroundColor);
+// the preview of the collection: the image on the collection colour and, below it, how the title
+// and the description appear on the card
+.collection-preview {
+    border-radius: 4px;
     overflow: hidden;
 }
 
-.collection-new-preview-infoarea {
+.collectionImage {
     position: relative;
-    min-height: 120px;
-    padding: 16px;
+    height: 96px;
+    overflow: hidden;
+
+    // the image button sits near the top edge of the strip instead of its bottom
+    ::ng-deep .image-container > .button-group {
+        top: 12px;
+    }
+}
+
+.collection-preview-text {
+    min-height: 56px;
+    padding: 12px 16px;
     color: var(--textBlack);
     transition: vars.$transitionNormal all;
+    overflow-wrap: anywhere;
 
-    --mat-form-field-outlined-hover-label-text-color: var(--textBlack);
-
-    @include mixins.placeholder {
+    .preview-title {
+        font-size: 120%;
+    }
+    .preview-description {
+        margin-top: 4px;
         color: var(--textLight);
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
     }
-
-    input,
-    textarea {
-        background-color: transparent;
-    }
 }
 
-.collection-new-preview-infoline {
-    opacity: 0.75;
-    margin-bottom: 10px;
+// the fields sit on the plain background below the preview
+.collection-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-top: 24px;
 }
 
-.dialog-basic-area {
-    padding: vars.$cardPadding;
-    padding-bottom: 15px;
-}
-
-.dialog-color-group {
-    min-height: 140px;
+.field-label {
+    margin-bottom: 6px;
+    font-weight: 500;
 }
 
 .card-collection-icon-container {
-    text-align: center;
-    vertical-align: middle;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 100%;
-    height: 240px;
-    background-color: var(--backgroundColor);
+    height: 96px;
     color: white;
     cursor: pointer;
 }
-.card-image-distance {
-    height: 35px;
-}
 .card-image-icon-container {
-    height: 160px;
-    width: 160px;
-    border-radius: 160px;
-    background-color: darkgray;
-    margin: auto;
+    height: 64px;
+    width: 64px;
+    border-radius: 50%;
+    background-color: color-mix(in srgb, white 30%, transparent);
     display: flex;
     align-items: center;
     justify-content: center;
     i {
-        font-size: 75px;
-    }
-}
-
-@media screen and (max-height: vars.$mobileHeight + vars.$mobileStage * 2) {
-    .collectionImage {
-        height: 120px;
-    }
-    .card-collection-icon-container {
-        height: 120px;
-    }
-    .card-image-icon-container {
-        margin-top: 10px;
-        height: 100px;
-        width: 100px;
-        border-radius: 100px;
-        i {
-            font-size: 60px;
-        }
-    }
-    .card-image-distance {
-        height: 0;
+        font-size: 32px;
     }
 }

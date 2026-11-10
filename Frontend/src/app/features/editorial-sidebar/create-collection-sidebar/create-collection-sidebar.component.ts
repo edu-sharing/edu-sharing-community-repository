@@ -22,9 +22,8 @@ import {
     NodeService,
     ROOT,
 } from 'ngx-edu-sharing-api';
-import { rxResource } from '@angular/core/rxjs-interop';
 import { MatStepper, MatStepperModule } from '@angular/material/stepper';
-import { firstValueFrom, of } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { AuthorityNamePipe, LocalEventsService } from 'ngx-edu-sharing-ui';
 import { RestConnectorService, RestConstants, RestHelper } from '../../../core-module/core.module';
 import { Toast } from '../../../services/toast';
@@ -212,30 +211,6 @@ export class CreateCollectionSidebarComponent {
     private readonly singleStep = computed(
         () => (this.option()?.optionConfig as EditCollectionConfig)?.step ?? null,
     );
-
-    /** the collections from the top level down to the one the new collection is created in */
-    private readonly parentPath = rxResource({
-        params: () => {
-            const parent = this.parent();
-            return parent && parent.ref.id !== ROOT && !this.isEdit() ? parent.ref.id : null;
-        },
-        stream: ({ params }) =>
-            params ? this.nodeApi.getParents(params, { fullPath: false }) : of(null),
-    });
-    /** `null` when the location is not shown (editing keeps the collection where it is) */
-    protected readonly location = computed<string[] | null>(() => {
-        if (this.isEdit()) {
-            return null;
-        }
-        const parent = this.parent();
-        if (!parent || parent.ref.id === ROOT) {
-            return [];
-        }
-        // until the path has arrived, the collection itself is the best known location
-        const path = this.parentPath.hasValue() ? this.parentPath.value()?.nodes : null;
-        const nodes = path?.length ? [...path].reverse() : [parent];
-        return nodes.map((node) => node.title || node.name);
-    });
 
     constructor() {
         void this.init();

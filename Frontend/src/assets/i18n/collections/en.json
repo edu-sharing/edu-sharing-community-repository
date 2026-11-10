@@ -177,5 +177,9 @@
   "collectionNew_storeChanges": "save changes",
 
   "collectionNew_placeholderTitle": "title of your collection",
-  "collectionNew_placeholderDescription": "Whats is your collection about?"
+  "collectionNew_placeholderDescription": "Whats is your collection about?",
+  "collectionNew_previewTitle": "My new collection",
+  "collectionNew_labelTitle": "Title",
+  "collectionNew_labelDescription": "Description",
+  "collectionNew_labelColor": "Color"
 }

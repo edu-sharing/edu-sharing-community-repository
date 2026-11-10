@@ -16,17 +16,6 @@
 </mat-stepper>
 } @switch (step()) { @case ('DESIGN') {
 <div class="content">
-  @if (location(); as path) {
-  <section class="location-field" data-test="create-collection-location">
-    <div class="caption">{{ 'WORKSPACE.FILE_LOCATION' | translate }}</div>
-    <div class="location-bar">
-      <i esIcon="layers" aria-hidden="true"></i>
-      <span class="path">{{
-        path.length ? path.join(' › ') : (i18nPrefix + 'LOCATION_ROOT' | translate)
-      }}</span>
-    </div>
-  </section>
-  }
   <es-collection-design-form
     [collection]="draft"
     [colors]="colors"

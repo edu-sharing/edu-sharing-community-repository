@@ -74,7 +74,6 @@
       "CREATE_COLLECTION": {
         "TITLE": "Create collection",
         "EDIT_TITLE": "Edit collection",
-        "LOCATION_ROOT": "My collections",
         "STEPS": "Steps",
         "STEP": {
           "DESIGN": "Design",

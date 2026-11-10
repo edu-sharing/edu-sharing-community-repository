@@ -515,11 +515,13 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         if (changes.collection?.currentValue) {
             // the lists stay rendered while another collection is shown, so they keep what was
             // selected in the one before
-            if (
-                changes.collection.previousValue?.ref?.id !==
-                changes.collection.currentValue.ref?.id
-            ) {
+            const previousId = changes.collection.previousValue?.ref?.id;
+            if (previousId !== changes.collection.currentValue.ref?.id) {
                 this.clearSelection();
+                // what the sidebar shows belongs to the collection that was left
+                if (previousId) {
+                    this.editorialSidebarService.close();
+                }
             }
             this.dataSourceCollections.reset();
             this.dataSourceReferences.reset();

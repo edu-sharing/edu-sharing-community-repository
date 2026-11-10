@@ -1,43 +1,53 @@
 <div class="collection-general">
-  <div class="collectionImage">
-    <!-- reuse the MDS preview widget so the image sources (upload / clipboard / search) stay in
-         sync with the node preview widget. Host-controlled: it hands back the chosen file or the
-         delete request via (previewChange) and the host persists it on save -->
-    <es-mds-editor-widget-preview
-      [standalone]="true"
-      [deleteAsOption]="deleteAsOption()"
-      [menuIcon]="menuIcon()"
-      [cropPreview]="false"
-      [standaloneNode]="$any(collection())"
-      (previewChange)="previewChange.emit($event)"
-    >
-      <ng-template #previewPlaceholder>
-        <div class="card-collection-icon-container">
-          <div class="card-image-distance"></div>
-          <div
-            class="card-image-icon-container"
-            [style.background-color]="collection().collection.color"
-          >
-            <i esIcon="layers"></i>
+  <div class="collection-preview">
+    <div class="collectionImage" [style.background-color]="collection().collection.color">
+      <!-- reuse the MDS preview widget so the image sources (upload / clipboard / search) stay in
+           sync with the node preview widget. Host-controlled: it hands back the chosen file or the
+           delete request via (previewChange) and the host persists it on save -->
+      <es-mds-editor-widget-preview
+        [standalone]="true"
+        [deleteAsOption]="deleteAsOption()"
+        [menuIcon]="menuIcon()"
+        [cropPreview]="false"
+        [standaloneNode]="$any(collection())"
+        (previewChange)="previewChange.emit($event)"
+      >
+        <ng-template #previewPlaceholder>
+          <div class="card-collection-icon-container">
+            <div class="card-image-icon-container">
+              <i esIcon="layers"></i>
+            </div>
           </div>
-        </div>
-      </ng-template>
-    </es-mds-editor-widget-preview>
+        </ng-template>
+      </es-mds-editor-widget-preview>
+    </div>
+    <div
+      class="collection-preview-text"
+      [style.background-color]="
+        'color-mix(in srgb, ' + collection().collection.color + ' 20%, transparent)'
+      "
+    >
+      <div class="preview-title">
+        {{ collection().title?.trim() || ('collectionNew_previewTitle' | translate) }}
+      </div>
+      @if (collection().collection.description?.trim()) {
+      <div class="preview-description">{{ collection().collection.description }}</div>
+      }
+    </div>
   </div>
-  <div
-    class="collection-new-preview-infoarea"
-    [style.background-color]="
-      'color-mix(in srgb, ' + collection().collection.color + ' 20%, transparent)'
-    "
-  >
-    <div class="dialog-basic-area dialog-input-area">
-      <mat-form-field>
-        <mat-label>{{ 'collectionNew_placeholderTitle' | translate }}</mat-label>
+  <div class="collection-form">
+    <div class="field">
+      <label class="field-label" for="collection-design-form-title"
+        >{{ 'collectionNew_labelTitle' | translate }} *</label
+      >
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
         <!-- Autofocus and autocomplete don't work well together here, because the autocomplete
              list will open before the card animation finishes. -->
         <input
           matInput
+          id="collection-design-form-title"
           class="title"
+          [placeholder]="'collectionNew_placeholderTitle' | translate"
           [ngModel]="collection().title"
           (ngModelChange)="setTitle($event)"
           autofocus
@@ -45,10 +55,16 @@
           data-test="new-collection-name-input"
         />
       </mat-form-field>
-      <mat-form-field>
-        <mat-label>{{ 'collectionNew_placeholderDescription' | translate }}</mat-label>
+    </div>
+    <div class="field">
+      <label class="field-label" for="collection-design-form-description">{{
+        'collectionNew_labelDescription' | translate
+      }}</label>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
         <textarea
           matInput
+          id="collection-design-form-description"
+          [placeholder]="'collectionNew_placeholderDescription' | translate"
           [ngModel]="collection().collection.description"
           (ngModelChange)="setDescription($event)"
         ></textarea>
@@ -94,9 +110,9 @@
       }
     </div>
     }
-    <div class="dialog-basic-area dialog-color-group">
-      <div id="collection-design-form-color-picker-label" class="collection-new-preview-infoline">
-        {{ 'collectionNew_setColor' | translate }}
+    <div class="field color-field">
+      <div id="collection-design-form-color-picker-label" class="field-label">
+        {{ 'collectionNew_labelColor' | translate }}
       </div>
       <ul
         class="color-group"
