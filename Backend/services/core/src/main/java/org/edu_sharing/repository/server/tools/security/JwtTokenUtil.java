@@ -48,7 +48,8 @@ public class JwtTokenUtil {
                 .signWith(privateKey)
                 .compact();
 
-        log.info("JWT: {}", jwt);
+        // never log the token: it is a credential for the rendering service and holds name, e-mail and affiliation of the user
+        log.debug("rendering JWT created for node {} (user {})", nodeId, username);
         return jwt;
     }
 }
