@@ -31,6 +31,18 @@ class HomeRepositorySignerTest {
     }
 
     @Test
+    void namesItsKeyForAJwsAndGivesRawSignatures() throws Exception {
+        HomeRepositorySigner signer = signer("SHA512withRSA");
+        assertEquals(KID, signer.jwkThumbprint(), "RFC 7638 thumbprint of the public key that belongs to the private one");
+        assertEquals("RS512", signer.jwsAlgorithm());
+        assertEquals("RS256", signer("SHA256withRSA").jwsAlgorithm());
+        assertEquals("RS384", signer("SHA384withRSA").jwsAlgorithm());
+        assertThrows(HomeRepositorySigner.SigningFailedException.class, () -> signer("SHA1withRSA").jwsAlgorithm());
+        byte[] raw = signer.signBytes("hello".getBytes(java.nio.charset.StandardCharsets.UTF_8), "SHA512withRSA");
+        assertEquals(signer.sign("hello"), java.util.Base64.getEncoder().encodeToString(raw));
+    }
+
+    @Test
     void withoutAHomeApplicationAnAppIdOrAKeyItFailsWithItsOwnException() {
         ApplicationInfo noKey = Mockito.mock(ApplicationInfo.class);
         when(noKey.getAppId()).thenReturn(APP_ID);
