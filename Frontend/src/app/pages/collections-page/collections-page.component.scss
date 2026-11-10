@@ -166,14 +166,12 @@ mat-tab-group {
         padding-top: 30px;
     }
 
-    &.collectionsContainerNoSidebar {
-        padding: 0 10%;
-    }
     &.collectionsContainerTabs {
         padding: 0;
         .collections-right {
+            // same inset as a collection without tabs, see `.collections-master-div-notabs`
             es-collection-content {
-                padding: 40px 10% 0 10%;
+                padding: 30px 35px 0 35px;
             }
         }
     }
