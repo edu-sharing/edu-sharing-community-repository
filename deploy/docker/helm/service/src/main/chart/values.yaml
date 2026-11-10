@@ -489,6 +489,8 @@ config:
     username: repository
     ## @param config.mongo.password Set mongo DB password
     password: ""
+    ## @param config.mongo.authSource Authentication database of the mongo DB user, appended as ?authSource=... to the connection uri (empty = omit the option)
+    authSource: admin
 
   oidc:
     ## @param config.oidc.enabled Enable OpenID Connect authentication
