@@ -10,6 +10,7 @@ import {
 import { retrieveNodeId } from '../../../shared/utils/template-util';
 import {
     createOptionLabel,
+    TOPIC_PAGE_SIDEBAR_HOST,
     TopicPageSidebarHost,
     TopicPageSidebarService,
 } from '../topic-page-sidebar.service';
@@ -41,7 +42,7 @@ export class TopicPageManageSidebarComponent {
     readonly i18nPrefix: string = 'TOPIC_PAGE.SIDEBAR.MANAGE.';
     readonly settingsPrefix: string = 'TOPIC_PAGE.SIDE_MENU.CONFIG_PAGE_VARIANT.';
     readonly templateUpdatePrefix: string = this.settingsPrefix + 'TEMPLATE_UPDATE.';
-    readonly host: TopicPageSidebarHost = this.topicPageSidebarService.host;
+    readonly host: TopicPageSidebarHost = inject(TOPIC_PAGE_SIDEBAR_HOST);
     readonly busy = signal(false);
     // the actions of the entry whose menu is open
     readonly menuOptions = signal<OptionItem[]>([]);

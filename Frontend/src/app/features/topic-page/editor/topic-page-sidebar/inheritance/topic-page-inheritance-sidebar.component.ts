@@ -34,7 +34,7 @@ import {
     retrievePageConfigPropagateRef,
     retrievePageConfigRef,
 } from '../../../shared/utils/template-util';
-import { TopicPageSidebarService } from '../topic-page-sidebar.service';
+import { TOPIC_PAGE_SIDEBAR_HOST, TopicPageSidebarHost } from '../topic-page-sidebar.service';
 
 type InheritanceState =
     | { kind: 'own' }
@@ -113,9 +113,9 @@ export class TopicPageInheritanceSidebarComponent {
     private readonly translate = inject(TranslateService);
     private readonly injector = inject(Injector);
 
+    private readonly host: TopicPageSidebarHost = inject(TOPIC_PAGE_SIDEBAR_HOST);
     /** the collection whose topic page is shown */
-    private readonly topicPageSidebarService = inject(TopicPageSidebarService);
-    readonly collectionId: Signal<string> = this.topicPageSidebarService.host.collectionNodeId;
+    readonly collectionId: Signal<string> = this.host.collectionNodeId;
     readonly i18nPrefix: string = 'TOPIC_PAGE.SIDEBAR.INHERITANCE.';
     readonly isSaving = signal(false);
     // the collection uncached, its ancestors nearest first, and its sub-collections
@@ -345,7 +345,7 @@ export class TopicPageInheritanceSidebarComponent {
             return;
         }
         event.preventDefault();
-        void this.topicPageSidebarService.host?.editInheritedTemplates(node);
+        void this.host.editInheritedTemplates(node);
     }
 
     setExpanded(row: InheritanceRow, expanded: boolean): void {

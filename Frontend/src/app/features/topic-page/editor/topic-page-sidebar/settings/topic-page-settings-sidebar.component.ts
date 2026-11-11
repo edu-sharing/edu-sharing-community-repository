@@ -3,9 +3,9 @@ import { SharedModule } from '../../../../../shared/shared.module';
 import { retrieveNodeId } from '../../../shared/utils/template-util';
 import { ConfigurePageVariantOrTemplateComponent } from '../../configure-page-variant-or-template/configure-page-variant-or-template.component';
 import {
+    TOPIC_PAGE_SIDEBAR_HOST,
     TopicPageSettings,
     TopicPageSidebarHost,
-    TopicPageSidebarService,
 } from '../topic-page-sidebar.service';
 
 /**
@@ -21,7 +21,7 @@ import {
     changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class TopicPageSettingsSidebarComponent {
-    readonly host: TopicPageSidebarHost = inject(TopicPageSidebarService).host;
+    readonly host: TopicPageSidebarHost = inject(TOPIC_PAGE_SIDEBAR_HOST);
 
     // the form reads its values once, so another node starts it anew
     settingsKey(settings: TopicPageSettings): string {

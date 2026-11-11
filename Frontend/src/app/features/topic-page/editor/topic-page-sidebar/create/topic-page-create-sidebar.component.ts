@@ -10,6 +10,7 @@ import {
     PageVariantSearchState,
 } from '../../page-variant-or-template-picker/page-variant-or-template-picker.component';
 import {
+    TOPIC_PAGE_SIDEBAR_HOST,
     TopicPageSidebarHost,
     TopicPageSidebarService,
     TopicPageSidebarTab,
@@ -43,7 +44,7 @@ export class TopicPageCreateSidebarComponent {
 
     readonly i18nPrefix: string = 'TOPIC_PAGE.SIDEBAR.';
     readonly TAB_ICONS = TAB_ICONS;
-    readonly host: TopicPageSidebarHost = this.topicPageSidebarService.host;
+    readonly host: TopicPageSidebarHost = inject(TOPIC_PAGE_SIDEBAR_HOST);
     readonly tabs = this.host.creationKinds;
     // the tab the option was opened with, as long as the user picked no other one
     readonly selectedTab = linkedSignal<TopicPageSidebarTab>(() => {

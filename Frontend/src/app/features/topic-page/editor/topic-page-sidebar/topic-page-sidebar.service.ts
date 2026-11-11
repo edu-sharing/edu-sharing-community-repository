@@ -1,4 +1,4 @@
-import { inject, Injectable, Signal } from '@angular/core';
+import { inject, Injectable, InjectionToken, Signal } from '@angular/core';
 import { MdsWidget, Node } from 'ngx-edu-sharing-api';
 import { OptionConfig } from '../../../editorial-sidebar/editorial-sidebar.component';
 import { EditorialSidebarService } from '../../../editorial-sidebar/editorial-sidebar.service';
@@ -57,7 +57,7 @@ export type TopicPageSettings = {
 };
 
 /**
- * The topic page as the sidebar option acts on it. Implemented by the topic page editor.
+ * The topic page as the sidebar option acts on it, provided by the topic page editor.
  */
 export interface TopicPageSidebarHost {
     // the collection the topic page belongs to
@@ -110,22 +110,17 @@ export interface TopicPageSidebarHost {
     deleteGlobalTemplate(): Promise<void>;
 }
 
+/** the page the entries of the topic page's sidebar menu act on */
+export const TOPIC_PAGE_SIDEBAR_HOST = new InjectionToken<TopicPageSidebarHost>(
+    'TOPIC_PAGE_SIDEBAR_HOST',
+);
+
 /**
- * Connects the topic page's option in the editorial sidebar with the page it belongs to.
+ * Opens and closes the entries of the topic page's menu in the editorial sidebar.
  */
 @Injectable()
 export class TopicPageSidebarService {
     private editorialSidebarService = inject(EditorialSidebarService);
-
-    private _host: TopicPageSidebarHost | null = null;
-
-    get host(): TopicPageSidebarHost | null {
-        return this._host;
-    }
-
-    attach(host: TopicPageSidebarHost): void {
-        this._host = host;
-    }
 
     /**
      * Opens the creation on the given tab, with a way back to the menu.

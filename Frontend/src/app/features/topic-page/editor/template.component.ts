@@ -245,6 +245,7 @@ import {
     TOPIC_PAGE_MANAGE_OPTION,
     TOPIC_PAGE_SETTINGS_OPTION,
     TOPIC_PAGE_SIDEBAR_OPTION,
+    TOPIC_PAGE_SIDEBAR_HOST,
     TOPIC_PAGE_SIDEBAR_OPTIONS,
     TopicPageSettings,
     TopicPageSidebarHost,
@@ -312,6 +313,11 @@ const isEditableTarget = (target: EventTarget | null): boolean =>
         TopicPageVariantPreviewService,
         TopicPageSidebarService,
         TopicPageManageService,
+        // the sidebar's entries are rendered with this injector and act on this page
+        {
+            provide: TOPIC_PAGE_SIDEBAR_HOST,
+            useFactory: (): TopicPageSidebarHost => inject(TemplateComponent).topicPageSidebarHost,
+        },
     ],
     selector: 'es-template-page',
     templateUrl: './template.component.html',
@@ -379,7 +385,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
 
     constructor() {
         this.variantPreviewService.attach(this.variantPreviewHost);
-        this.topicPageSidebarService.attach(this.topicPageSidebarHost);
         // offered only while there is something to manage or create; registering rebuilds the
         // option list, whereas a `customShowCallback` would only be asked again on the next
         // selection change
@@ -3013,7 +3018,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     };
 
     // the collection's page as the topic page's sidebar option acts on it
-    private readonly topicPageSidebarHost: TopicPageSidebarHost = {
+    readonly topicPageSidebarHost: TopicPageSidebarHost = {
         collectionNodeId: this.topicCollectionId,
         pageVariantNode: this.collectionPageVariantNode,
         pageConfigRef: (): string | null => this.collectionNodePageConfigRef ?? null,
