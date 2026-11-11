@@ -1,0 +1,17 @@
+@let settings = host.settings(); @if (settings) { @for (shown of [settings]; track
+settingsKey(shown)) {
+<es-configure-page-variant-or-template
+  [addToGlobalTemplatesEnabled]="host.canAddToGlobalTemplates()"
+  [deleteGlobalTemplateEnabled]="shown.canDeleteGlobalTemplate"
+  [globalTemplateMode]="shown.globalTemplateMode"
+  [pageVariantConfigNodes]="shown.configNodes"
+  [pageVariantNode]="shown.node"
+  [pageVariantTitle]="shown.title"
+  [selectDimensions]="shown.dimensions"
+  [templateMode]="shown.templateMode"
+  [viewModes]="['checkbox', 'checkbox']"
+  (addToGlobalTemplatesClicked)="host.addToGlobalTemplates($event)"
+  (applyChangesClicked)="host.applySettings($event)"
+  (deleteGlobalTemplateClicked)="host.deleteGlobalTemplate()"
+></es-configure-page-variant-or-template>
+} }

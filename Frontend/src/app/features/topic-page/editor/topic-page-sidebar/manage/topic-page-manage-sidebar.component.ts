@@ -1,5 +1,6 @@
 import { Component, computed, inject, resource, signal } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
+import { OptionItem } from 'ngx-edu-sharing-ui';
 import { SharedModule } from '../../../../../shared/shared.module';
 import {
     TopicPageEntries,
@@ -25,7 +26,7 @@ type EntrySection = {
 
 /**
  * Entry of the topic page's sidebar menu that lists the pages and templates of the collection, to
- * show, regenerate or delete them.
+ * show, regenerate, publish as a global template or delete them.
  */
 @Component({
     selector: 'es-topic-page-manage-sidebar',
@@ -38,10 +39,12 @@ export class TopicPageManageSidebarComponent {
     private readonly manageService = inject(TopicPageManageService);
 
     readonly i18nPrefix: string = 'TOPIC_PAGE.SIDEBAR.MANAGE.';
-    readonly templateUpdatePrefix: string =
-        'TOPIC_PAGE.SIDE_MENU.CONFIG_PAGE_VARIANT.TEMPLATE_UPDATE.';
+    readonly settingsPrefix: string = 'TOPIC_PAGE.SIDE_MENU.CONFIG_PAGE_VARIANT.';
+    readonly templateUpdatePrefix: string = this.settingsPrefix + 'TEMPLATE_UPDATE.';
     readonly host: TopicPageSidebarHost = this.topicPageSidebarService.host;
     readonly busy = signal(false);
+    // the actions of the entry whose menu is open
+    readonly menuOptions = signal<OptionItem[]>([]);
     readonly createLabel = computed((): string => createOptionLabel(this.host.creationKinds()));
     private readonly revision = signal(0);
     // the shown page changes when it is regenerated, so the list is read again with it
@@ -104,6 +107,37 @@ export class TopicPageManageSidebarComponent {
         return [person?.firstName, person?.lastName].filter((part) => !!part).join(' ');
     }
 
+    /**
+     * The actions of the entry's menu besides showing and regenerating it.
+     */
+    entryOptions(entry: TopicPageEntry): OptionItem[] {
+        const options: OptionItem[] = [];
+        if (entry.templateEditTarget) {
+            options.push(
+                new OptionItem(this.i18nPrefix + 'EDIT_TEMPLATE', 'edit', () =>
+                    this.editTemplate(entry),
+                ),
+            );
+        }
+        if (entry.kind === 'inherited') {
+            return options;
+        }
+        if (this.host.canAddToGlobalTemplates()) {
+            const addToGlobalTemplates = new OptionItem(
+                this.settingsPrefix + 'ADD_TO_GLOBAL_TEMPLATES',
+                'public',
+                () => this.addToGlobalTemplates(entry),
+            );
+            // a global template is told apart from the others by its parameters
+            addToGlobalTemplates.isEnabled = this.host.parametersComplete(entry.node);
+            options.push(addToGlobalTemplates);
+        }
+        options.push(
+            new OptionItem(this.i18nPrefix + 'DELETE', 'delete', () => this.delete(entry)),
+        );
+        return options;
+    }
+
     async show(entry: TopicPageEntry): Promise<void> {
         await this.run(() => this.host.showEntry(entry));
     }
@@ -114,6 +148,10 @@ export class TopicPageManageSidebarComponent {
 
     async editTemplate(entry: TopicPageEntry): Promise<void> {
         await this.run(() => this.host.editTemplate(entry));
+    }
+
+    async addToGlobalTemplates(entry: TopicPageEntry): Promise<void> {
+        await this.run(() => this.host.addEntryToGlobalTemplates(entry));
     }
 
     async delete(entry: TopicPageEntry): Promise<void> {

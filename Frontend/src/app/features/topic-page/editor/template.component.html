@@ -85,7 +85,7 @@
       </div>
       }
 
-      <!-- RIGHT SIDE MENU WITH MULTIPLE COLLAPSIBLE ITEMS -->
+      <!-- RIGHT SIDE MENU WITH MULTIPLE COLLAPSIBLE ITEMS; edit mode has its settings in the sidebar -->
       @if (!editMode()) {
       <es-side-menu-wrapper
         [mobileHidden]="sidebarMobileHidden()"
@@ -168,71 +168,6 @@
           } @else {
           <es-spinner></es-spinner>
           } }
-        </ng-container>
-      </es-side-menu-wrapper>
-      } @else {
-      <!-- RIGHT SIDE MENU WITH MULTIPLE COLLAPSIBLE ITEMS (EDIT MODE) -->
-      <es-side-menu-wrapper
-        [closeDisabled]="
-          selectedMenuItem === (i18nPrefix + 'SIDE_MENU.CONFIG_PAGE_VARIANT.LABEL' | translate) &&
-          !pageVariantSettingsValid()
-        "
-        [selectedMenuItem]="selectedMenuItem"
-        [sideMenuHidden]="!showSidebar()"
-        (closeContentView)="selectedMenuItem = ''"
-      >
-        <ng-container slot="menu">
-          <es-side-menu-item
-            [disabled]="
-              selectedMenuItem ===
-                (i18nPrefix + 'SIDE_MENU.CONFIG_PAGE_VARIANT.LABEL' | translate) &&
-              !pageVariantSettingsValid()
-            "
-            icon="manage_accounts"
-            [selectedMenuItem]="selectedMenuItem"
-            [title]="i18nPrefix + 'SIDE_MENU.CONFIG_PAGE_VARIANT.LABEL' | translate"
-            (itemClicked)="collapsibleItemClicked($event)"
-          ></es-side-menu-item>
-        </ng-container>
-        <ng-container slot="content">
-          @if ( selectedMenuItem === (i18nPrefix + 'SIDE_MENU.CONFIG_PAGE_VARIANT.LABEL' |
-          translate) ) {
-          <div>
-            <h2 class="side-menu-header mat-heading-4 font-bold">
-              {{ i18nPrefix + 'SIDE_MENU.' + settingsI18nSection() + '.HEADING' | translate }}
-            </h2>
-            <es-configure-page-variant-or-template
-              [addToGlobalTemplatesEnabled]="canAddToGlobalTemplates()"
-              [deleteGlobalTemplateEnabled]="canDeleteGlobalTemplate()"
-              [deleteVariantEnabled]="collectionNodePageConfigRef && userHasEditRights()"
-              [editGlobalTemplateEnabled]="canEditLinkedGlobalTemplate()"
-              [globalTemplateMode]="!!globalTemplateNode()"
-              [pageVariantConfigNodes]="pageVariantConfigs?.nodes"
-              [pageVariantNode]="pageVariantNode()"
-              [pageVariantTitle]="
-                pageVariantNode()?.title &&
-                !pageVariantNode()?.title.includes(pageVariantConfigPrefix)
-                  ? (pageVariantNode() | nodeTitle)
-                  : (i18nPrefix + 'WIDGET.VARIANT_SELECT.PAGE_VARIANT_LABEL' | translate) +
-                    ' ' +
-                    (pageVariantNodeIndex + 1)
-              "
-              [selectDimensions]="selectDimensions"
-              [templateMode]="templateMode()"
-              [templateNode]="templateVariantNode()"
-              [templateUpdateAvailable]="templateUpdateAvailable()"
-              [templateMissing]="templateMissing()"
-              [viewModes]="['checkbox', 'checkbox']"
-              (addToGlobalTemplatesClicked)="addCurrentVariantToGlobalTemplates($event)"
-              (applyChangesClicked)="applyPageVariant($event)"
-              (deleteGlobalTemplateClicked)="deleteGlobalTemplate()"
-              (deletePageVariantClicked)="deletePageVariant()"
-              (editGlobalTemplateClicked)="switchIntoGlobalTemplateMode(linkedGlobalTemplate())"
-              (regenerateClicked)="regeneratePageVariant()"
-              (settingsValidityChanged)="pageVariantSettingsValid.set($event)"
-            ></es-configure-page-variant-or-template>
-          </div>
-          }
         </ng-container>
       </es-side-menu-wrapper>
       }

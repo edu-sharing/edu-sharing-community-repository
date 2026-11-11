@@ -227,7 +227,6 @@ import {
     PageVariantSearchState,
 } from './page-variant-or-template-picker/page-variant-or-template-picker.component';
 import { AddSwimlaneBorderButtonComponent } from './add-swimlane-button/add-swimlane-border-button.component';
-import { ConfigurePageVariantOrTemplateComponent } from './configure-page-variant-or-template/configure-page-variant-or-template.component';
 import { SwimlaneComponent } from './swimlane/swimlane.component';
 import { SwimlaneBackgroundShapeComponent } from './swimlane-background-shape/swimlane-background-shape.component';
 import { SwimlaneSettingsDialogComponent } from './swimlane/swimlane-settings-dialog/swimlane-settings-dialog.component';
@@ -238,13 +237,16 @@ import { findInheritanceSource } from '../shared/utils/topic-page-inheritance-ut
 import { TopicPageCreateSidebarComponent } from './topic-page-sidebar/create/topic-page-create-sidebar.component';
 import { TopicPageInheritanceSidebarComponent } from './topic-page-sidebar/inheritance/topic-page-inheritance-sidebar.component';
 import { TopicPageManageSidebarComponent } from './topic-page-sidebar/manage/topic-page-manage-sidebar.component';
+import { TopicPageSettingsSidebarComponent } from './topic-page-sidebar/settings/topic-page-settings-sidebar.component';
 import {
     createOptionLabel,
     TOPIC_PAGE_CREATE_OPTION,
     TOPIC_PAGE_INHERITANCE_OPTION,
     TOPIC_PAGE_MANAGE_OPTION,
+    TOPIC_PAGE_SETTINGS_OPTION,
     TOPIC_PAGE_SIDEBAR_OPTION,
     TOPIC_PAGE_SIDEBAR_OPTIONS,
+    TopicPageSettings,
     TopicPageSidebarHost,
     TopicPageSidebarService,
 } from './topic-page-sidebar/topic-page-sidebar.service';
@@ -259,8 +261,9 @@ const OPEN_MENU_LABEL_KEYS: Record<string, string> = {
     profiling: 'TOPIC_PAGE.SIDE_MENU.PROFILING.LABEL',
     topicTree: 'TOPIC_PAGE.SIDE_MENU.TOPIC_TREE.LABEL',
     statistics: 'TOPIC_PAGE.SIDE_MENU.STATISTICS.LABEL',
-    settings: 'TOPIC_PAGE.SIDE_MENU.CONFIG_PAGE_VARIANT.LABEL',
 };
+// `openMenu` value that opens the settings of the shown page in the sidebar
+const OPEN_SETTINGS_SIDEBAR_PARAM = 'settings';
 
 // the app-wide shortcuts only skip text inputs; textareas and rich text keep their own undo too
 const isEditableTarget = (target: EventTarget | null): boolean =>
@@ -273,7 +276,6 @@ const isEditableTarget = (target: EventTarget | null): boolean =>
         AiTextPromptPipe,
         CdkAccordionModule,
         ColorPickerComponent,
-        ConfigurePageVariantOrTemplateComponent,
         EditableTextComponent,
         FilterSwimlaneTypePipe,
         FilterUnfinishedSwimlanesPipe,
@@ -384,9 +386,14 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         effect((): void => {
             const canManage: boolean = this.canManage();
             const canCreate: boolean = this.creationKinds().length > 0;
+            const canConfigure: boolean = this.canConfigure();
+            const settingsLabel: string = this.settingsLabel();
             untracked((): void => {
-                if (canManage || canCreate) {
-                    this.registerSidebarOptions(canManage, canCreate);
+                if (!canConfigure) {
+                    this.topicPageSidebarService.closeSettings();
+                }
+                if (canManage || canCreate || canConfigure) {
+                    this.registerSidebarOptions(canManage, canCreate, canConfigure, settingsLabel);
                 } else {
                     this.topicPageSidebarService.close();
                     this.unregisterSidebarOptions();
@@ -656,38 +663,16 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         setBusy: (busy: boolean): void => this.requestInProgress.set(busy),
     };
     pageVariantNodeIndex: number = 0;
-    pageVariantSettingsValid: WritableSignal<boolean> = signal(true);
     templateVariantNode: WritableSignal<Node | null> = signal(null);
-    // set while the page variant references a template that is no longer available
-    templateMissing: WritableSignal<boolean> = signal(false);
     templateUpdateAvailable: Signal<boolean> = computed(() =>
         isTemplateUpdateAvailable(this.templateVariantNode(), this.pageVariantNode()),
     );
-    // the global template the page was created from; the collection's own template is edited in
-    // template mode and the repository-maintained default template not at all
-    linkedGlobalTemplate: Signal<Node | null> = computed(() =>
-        this.topicPageGlobalTemplatesService.asLinkedGlobalTemplate(this.templateVariantNode()),
-    );
-    canEditLinkedGlobalTemplate: Signal<boolean> = computed(() => {
-        const templateNode: Node = this.linkedGlobalTemplate();
-        return (
-            !!templateNode &&
-            this.nodeHelperService.getNodesRight([templateNode], ApiRestConstants.ACCESS_WRITE)
-        );
-    });
     canDeleteGlobalTemplate: Signal<boolean> = computed(() => {
         const templateNode: Node = this.globalTemplateNode();
         return (
             !!templateNode &&
             this.nodeHelperService.getNodesRight([templateNode], ApiRestConstants.ACCESS_DELETE)
         );
-    });
-    // the i18n section of the settings menu matching the edited node
-    settingsI18nSection: Signal<string> = computed(() => {
-        if (this.globalTemplateNode()) {
-            return 'CONFIG_GLOBAL_TEMPLATE';
-        }
-        return this.templateMode() ? 'CONFIG_PAGE_TEMPLATE' : 'CONFIG_PAGE_VARIANT';
     });
     // set while listed nodes are shown in place of the collection's page; such a preview never
     // writes, as the shown node belongs to no page of this collection
@@ -737,6 +722,24 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     canManage: Signal<boolean> = computed(
         (): boolean => !this.isGuest() && this.userHasEditRights() && !this.globalTemplateNode(),
     );
+    // whether the shown page, template or global template can be configured in the sidebar; like
+    // the list of pages, in view mode too
+    canConfigure: Signal<boolean> = computed(
+        (): boolean =>
+            !this.isGuest() &&
+            this.userHasEditRights() &&
+            !this.variantPreview() &&
+            !!this.pageVariantNode(),
+    );
+    // the sidebar entry of the settings names what they configure
+    settingsLabel: Signal<string> = computed((): string => {
+        if (this.globalTemplateNode()) {
+            return 'TOPIC_PAGE.SIDEBAR.MENU.SETTINGS_GLOBAL_TEMPLATE';
+        }
+        return this.templateMode()
+            ? 'TOPIC_PAGE.SIDEBAR.MENU.SETTINGS_TEMPLATE'
+            : 'TOPIC_PAGE.SIDEBAR.MENU.SETTINGS_VARIANT';
+    });
     pageVariantReloadNecessary: boolean = false;
     qrCodeUrl: Signal<string> = this.topicPageShareService.qrCodeUrl;
     selectedVariantPosition: number = -1;
@@ -1474,7 +1477,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             this.pageVariantNodeIndex = this.pageVariantConfigs.nodes.findIndex(
                 (n) => retrieveNodeId(n) === this.pageVariantNodeId(),
             );
-            this.pageVariantSettingsValid.set(true);
             const pageVariant: PageVariantConfig = retrievePageVariantConfig(
                 this.pageVariantNode(),
             );
@@ -1527,7 +1529,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         this.pageVariantNode.set(node);
         this.pageVariantNodeIndex = 0;
         this.selectedVariantPosition = 0;
-        this.pageVariantSettingsValid.set(true);
         this.pageConfigCheckFailed.set(false);
         // neither the anchor color nor the AI headings of the page shown before may stay
         this.anchorItemColor = null;
@@ -1672,8 +1673,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * Applies the changes made to the currently selected page variant.
      */
     async applyPageVariant(changesMap: Map<string, string | string[]>): Promise<void> {
-        // reset validity variable
-        this.pageVariantSettingsValid.set(true);
         this.startEditing();
         if (!changesMap.size) {
             this.closeSideMenus();
@@ -1755,25 +1754,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         if (reloadedIndex >= 0) {
             this.pageVariantNodeIndex = reloadedIndex;
         }
-    }
-
-    /**
-     * Deletes the currently selected page variant or template, see `deleteVariantOfConfig`.
-     */
-    async deletePageVariant(): Promise<void> {
-        if (
-            !this.collectionNodePageConfigRef ||
-            !this.userHasEditRights() ||
-            this.globalTemplateNode() ||
-            this.variantPreview()
-        ) {
-            return;
-        }
-        await this.deleteVariantOfConfig(
-            this.pageConfigNode,
-            this.pageVariantNode(),
-            this.templateMode(),
-        );
     }
 
     /**
@@ -2552,6 +2532,10 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             if (this.canManage()) {
                 this.topicPageSidebarService.openManage();
             }
+        } else if (params.openMenu === OPEN_SETTINGS_SIDEBAR_PARAM) {
+            if (this.canConfigure()) {
+                this.topicPageSidebarService.openSettings();
+            }
         } else if (labelKey) {
             this.collapsibleItemClicked(this.translate.instant(labelKey));
         } else {
@@ -3083,7 +3067,76 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             );
         },
         editTemplate: (entry: TopicPageEntry): Promise<void> => this.editEntryTemplate(entry),
+        settings: (): TopicPageSettings | null => this.pageSettings(),
+        applySettings: async (changes: Map<string, string | string[]>): Promise<void> => {
+            if (await this.confirmSettingsChanges(changes)) {
+                await this.applyPageVariant(changes);
+            }
+        },
+        canAddToGlobalTemplates: this.canAddToGlobalTemplates,
+        addToGlobalTemplates: async (changes: Map<string, string | string[]>): Promise<void> => {
+            if (await this.confirmSettingsChanges(changes)) {
+                await this.addCurrentVariantToGlobalTemplates(changes);
+            }
+        },
+        addEntryToGlobalTemplates: async (entry: TopicPageEntry): Promise<void> => {
+            if (entry.kind === 'inherited' || !this.parametersComplete(entry.node)) {
+                return;
+            }
+            await this.showEntry(entry);
+            await this.addCurrentVariantToGlobalTemplates(new Map());
+        },
+        parametersComplete: (node: Node): boolean => this.parametersComplete(node),
+        deleteGlobalTemplate: (): Promise<void> => this.deleteGlobalTemplate(),
     };
+
+    /**
+     * The page, template or global template shown in the editor as its settings edit it, or null
+     * while it cannot be configured.
+     */
+    private pageSettings(): TopicPageSettings | null {
+        const node: Node | null = this.pageVariantNode();
+        if (!this.canConfigure() || !node) {
+            return null;
+        }
+        // pages created without a title carry a generated one, which is not shown
+        const ownTitle: boolean =
+            !!node.title && !node.title.includes(this.pageVariantConfigPrefix);
+        return {
+            node,
+            title: ownTitle
+                ? node.title
+                : this.translate.instant(
+                      this.i18nPrefix + 'WIDGET.VARIANT_SELECT.PAGE_VARIANT_LABEL',
+                  ) +
+                  ' ' +
+                  (this.pageVariantNodeIndex + 1),
+            configNodes: this.pageVariantConfigs?.nodes ?? [],
+            dimensions: this.selectDimensions,
+            templateMode: this.templateMode(),
+            globalTemplateMode: !!this.globalTemplateNode(),
+            canDeleteGlobalTemplate: this.canDeleteGlobalTemplate(),
+        };
+    }
+
+    /**
+     * Asks before settings changes give an inherited page a copy of its own, unless that was
+     * confirmed on entering the edit mode.
+     */
+    private async confirmSettingsChanges(
+        changes: Map<string, string | string[]>,
+    ): Promise<boolean> {
+        return !changes.size || this.editMode() || this.confirmEditingInheritedPage();
+    }
+
+    /**
+     * Whether every parameter that tells the pages of a config apart is set on the given node.
+     */
+    private parametersComplete(node: Node): boolean {
+        return Array.from(this.selectDimensions.keys()).every(
+            (key: string): boolean => !!node?.properties?.[key]?.length,
+        );
+    }
 
     /**
      * Shows a page or template listed in the sidebar in place of the current one. Leaving the
@@ -3132,7 +3185,12 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * Offers the topic page's menu in the editorial sidebar with the entries the user can use,
      * rendered with the services of this page.
      */
-    private registerSidebarOptions(canManage: boolean, canCreate: boolean): void {
+    private registerSidebarOptions(
+        canManage: boolean,
+        canCreate: boolean,
+        canConfigure: boolean,
+        settingsLabel: string,
+    ): void {
         this.editorialSidebarService.registerCustomOption({
             id: TOPIC_PAGE_SIDEBAR_OPTION,
             label: 'TOPIC_PAGE.SIDEBAR.TITLE',
@@ -3141,6 +3199,13 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             customShowCallback: async (nodes) => !nodes?.length,
         });
         const entries = [
+            {
+                id: TOPIC_PAGE_SETTINGS_OPTION,
+                label: settingsLabel,
+                icon: 'manage_accounts',
+                component: TopicPageSettingsSidebarComponent,
+                offered: canConfigure,
+            },
             {
                 id: TOPIC_PAGE_MANAGE_OPTION,
                 label: 'TOPIC_PAGE.SIDEBAR.MENU.MANAGE',
@@ -3195,7 +3260,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             pageVariantConfigs: this.pageVariantConfigs,
             pageVariantNode: this.pageVariantNode(),
             pageVariantNodeIndex: this.pageVariantNodeIndex,
-            pageVariantSettingsValid: this.pageVariantSettingsValid(),
             persistedSwimlanes: this.persistedSwimlanes,
             propagatedBreadcrumbNodeId: this.propagatedBreadcrumbNodeId(),
             propagatedHeaderNodeId: this.propagatedHeaderNodeId(),
@@ -3223,7 +3287,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         this.pageConfigCheckFailed.set(restoreState.pageConfigCheckFailed);
         this.pageVariantConfigs = restoreState.pageVariantConfigs;
         this.pageVariantNodeIndex = restoreState.pageVariantNodeIndex;
-        this.pageVariantSettingsValid.set(restoreState.pageVariantSettingsValid);
         this.selectedVariantPosition = restoreState.selectedVariantPosition;
         this.persistedSwimlanes = restoreState.persistedSwimlanes;
         this.swimlanes = restoreState.swimlanes;
@@ -3505,14 +3568,8 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         if (variantNodeId) {
             await this.navigateToVariant(variantNodeId);
         }
-        setTimeout(async () => {
-            // on variant change, do not keep the fragments
-            await this.router.navigate([], {
-                relativeTo: this.route,
-                queryParams: { openMenu: 'settings' },
-                queryParamsHandling: 'merge',
-            });
-        }, 500);
+        // the new variant is loaded and the settings entry registered by then
+        setTimeout((): void => this.topicPageSidebarService.openSettings(), 500);
     }
 
     /**
@@ -3847,7 +3904,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         this.pageVariantNodeIndex = this.pageVariantConfigs.nodes.findIndex(
             (n) => retrieveNodeId(n) === this.pageVariantNodeId(),
         );
-        this.pageVariantSettingsValid.set(true);
         const pageVariant: PageVariantConfig = retrievePageVariantConfig(this.pageVariantNode());
         if (!pageVariant || !pageVariant.structure) {
             console.error(
@@ -3944,14 +4000,12 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     private async loadTemplateVariantNode(): Promise<void> {
         if (!this.pageVariantNode()) {
             this.templateVariantNode.set(null);
-            this.templateMissing.set(false);
             return;
         }
         const templateRef: string =
             this.pageVariantNode().properties?.[DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP]?.[0];
         if (!templateRef) {
             this.templateVariantNode.set(null);
-            this.templateMissing.set(false);
             return;
         }
         const pageVariantNode: Node = this.pageVariantNode();
@@ -3965,10 +4019,8 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 return;
             }
             this.templateVariantNode.set(templateNode);
-            this.templateMissing.set(!templateNode);
         } catch {
             this.templateVariantNode.set(null);
-            this.templateMissing.set(false);
         }
     }
 
@@ -3987,7 +4039,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         );
         if (!templateNode) {
             this.templateVariantNode.set(null);
-            this.templateMissing.set(true);
             this.toast.error(
                 null,
                 this.i18nPrefix + 'SIDE_MENU.CONFIG_PAGE_VARIANT.TEMPLATE_UPDATE.TEMPLATE_MISSING',
@@ -4106,7 +4157,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      */
     private closeSideMenus(): void {
         this.selectedMenuItem = '';
-        this.pageVariantSettingsValid.set(true);
+        this.topicPageSidebarService.closeSettings();
     }
 
     /**

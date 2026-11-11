@@ -14,6 +14,12 @@
         "TEMPLATE": "Modèle"
       },
       "MENU": {
+        "SETTINGS_VARIANT": "Paramètres de la variante",
+        "SETTINGS_VARIANT_DESCRIPTION": "Définir le titre et les paramètres de la variante affichée",
+        "SETTINGS_TEMPLATE": "Paramètres du modèle",
+        "SETTINGS_TEMPLATE_DESCRIPTION": "Définir le titre et les paramètres du modèle affiché",
+        "SETTINGS_GLOBAL_TEMPLATE": "Paramètres du modèle global",
+        "SETTINGS_GLOBAL_TEMPLATE_DESCRIPTION": "Définir le titre et les paramètres du modèle global",
         "MANAGE": "Gérer les pages thématiques",
         "MANAGE_DESCRIPTION": "Afficher, régénérer ou supprimer des pages et des modèles",
         "CREATE": "Nouvelle page thématique",
@@ -261,25 +267,20 @@
         "HEADING": "Arborescence thématique de {{topic}}"
       },
       "CONFIG_PAGE_VARIANT": {
-        "LABEL": "Paramètres",
-        "HEADING": "Paramètres de la variante de page thématique",
-        "WARN_TEXT": "Tous les champs de paramètres requis ne sont pas remplis. Vous ne pouvez pas annuler l'opération.",
+        "WARN_TEXT": "Tous les champs de paramètres requis ne sont pas remplis.",
         "DUPLICATE_WARN_TEXT": "Une autre variante de cette page thématique a déjà les mêmes paramètres. Choisissez d'autres valeurs afin qu'il soit clair à qui chaque variante est affichée.",
         "TITLE": "Titre de la variante",
         "TITLE_PLACEHOLDER": "Variante de page thématique pour xyz",
         "EDUCATION_LEVEL_LABEL": "Niveau d'éducation",
         "TARGET_GROUP_LABEL": "Groupe cible",
-        "DELETE_VARIANT": "Supprimer la variante",
         "DEFINE_PARAMETERS": "Définir les paramètres",
         "DUPLICATE_PARAMETERS": "Mêmes paramètres qu'une autre variante"
       },
       "CONFIG_PAGE_TEMPLATE": {
-        "HEADING": "Paramètres du modèle de page thématique",
         "DUPLICATE_WARN_TEXT": "Un autre modèle de cette collection a déjà les mêmes paramètres. Choisissez d'autres valeurs afin qu'il soit clair quel modèle les sous-collections reçoivent pour qui.",
         "DUPLICATE_PARAMETERS": "Mêmes paramètres qu'un autre modèle",
         "TITLE": "Titre du modèle",
-        "TITLE_PLACEHOLDER": "Modèle de page thématique pour xyz",
-        "DELETE_VARIANT": "Supprimer le modèle"
+        "TITLE_PLACEHOLDER": "Modèle de page thématique pour xyz"
       }
     },
     "ADD_PAGE_TEMPLATE": {

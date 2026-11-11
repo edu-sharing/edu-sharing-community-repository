@@ -19,12 +19,13 @@ import { DEFAULT, HOME_REPOSITORY, MdsWidget, Node, RestConstants } from 'ngx-ed
 import { Values } from 'ngx-edu-sharing-ui';
 import { MdsModule } from '../../../mds/mds.module';
 import { SharedModule } from '../../../../shared/shared.module';
+import { SidebarStickyFooterComponent } from '../../../editorial-sidebar/sidebar-sticky-footer/sidebar-sticky-footer.component';
 import { retrieveNodeId } from '../../shared/utils/template-util';
 import { GenericWidgetGlobalService } from '../../widgets/generic-widget/generic-widget-global.service';
 
 @Component({
     selector: 'es-configure-page-variant-or-template',
-    imports: [SharedModule, MdsModule],
+    imports: [SharedModule, MdsModule, SidebarStickyFooterComponent],
     templateUrl: 'configure-page-variant-or-template.component.html',
     changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['configure-page-variant-or-template.component.scss'],
@@ -38,9 +39,6 @@ export class ConfigurePageVariantOrTemplateComponent implements AfterViewInit, O
 
     addToGlobalTemplatesEnabled: InputSignal<boolean> = input(false);
     deleteGlobalTemplateEnabled: InputSignal<boolean> = input(false);
-    deleteVariantEnabled: InputSignal<boolean> = input(false);
-    // the page is linked to a global template the user may edit
-    editGlobalTemplateEnabled: InputSignal<boolean> = input(false);
     // the configured node is a global template itself, not a variant or template of a collection
     globalTemplateMode: InputSignal<boolean> = input(false);
     pageVariantConfigNodes: InputSignal<Node[]> = input([]);
@@ -48,10 +46,6 @@ export class ConfigurePageVariantOrTemplateComponent implements AfterViewInit, O
     @Input() pageVariantTitle: string;
     selectDimensions: InputSignal<Map<string, MdsWidget>> = input(new Map<string, MdsWidget>());
     templateMode: InputSignal<boolean> = input(false);
-    templateNode: InputSignal<Node> = input<Node>(null);
-    templateUpdateAvailable: InputSignal<boolean> = input(false);
-    // the referenced template is no longer available, so there is nothing to regenerate from
-    templateMissing: InputSignal<boolean> = input(false);
     @Input() viewIcons: string[] = [];
     @Input() viewLabels: string[] = [];
     @Input() viewModes: string[] = ['checkbox'];
@@ -62,10 +56,6 @@ export class ConfigurePageVariantOrTemplateComponent implements AfterViewInit, O
         Map<string, string | string[]>
     >();
     @Output() deleteGlobalTemplateClicked: EventEmitter<void> = new EventEmitter<void>();
-    @Output() deletePageVariantClicked: EventEmitter<void> = new EventEmitter<void>();
-    @Output() editGlobalTemplateClicked: EventEmitter<void> = new EventEmitter<void>();
-    @Output() regenerateClicked: EventEmitter<void> = new EventEmitter<void>();
-    @Output() settingsValidityChanged: EventEmitter<boolean> = new EventEmitter<boolean>();
 
     private translateService = inject(TranslateService);
 
@@ -82,36 +72,10 @@ export class ConfigurePageVariantOrTemplateComponent implements AfterViewInit, O
             ? this.templateI18nPrefix
             : this.i18nPrefix,
     );
-    deleteEnabled: Signal<boolean> = computed(() =>
-        this.globalTemplateMode()
-            ? this.deleteGlobalTemplateEnabled()
-            : this.deleteVariantEnabled(),
+    // pages and templates of a collection are deleted from the list of its pages
+    deleteEnabled: Signal<boolean> = computed(
+        () => this.globalTemplateMode() && this.deleteGlobalTemplateEnabled(),
     );
-    templateModifiedDate: Signal<string> = computed(() => {
-        const timestamp = this.templateNode()?.properties?.[RestConstants.CM_MODIFIED_DATE]?.[0];
-        if (!timestamp) return '';
-        return new Date(Number(timestamp)).toLocaleDateString('de-DE', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-        });
-    });
-    regenerateTooltip: Signal<string> = computed(() => {
-        if (this.templateMissing()) {
-            return this.translateService.instant(
-                `${this.i18nPrefix}TEMPLATE_UPDATE.TEMPLATE_MISSING`,
-            );
-        }
-        if (this.templateUpdateAvailable()) {
-            return this.translateService.instant(
-                `${this.i18nPrefix}TEMPLATE_UPDATE.TOOLTIP_AVAILABLE`,
-                { date: this.templateModifiedDate() },
-            );
-        }
-        return this.translateService.instant(
-            `${this.i18nPrefix}TEMPLATE_UPDATE.TOOLTIP_UP_TO_DATE`,
-        );
-    });
     variableInputValid: WritableSignal<boolean> = signal(true);
     invalidParametersTooltip: Signal<string> = computed(() =>
         this.variableInputValid()
@@ -170,28 +134,10 @@ export class ConfigurePageVariantOrTemplateComponent implements AfterViewInit, O
     }
 
     /**
-     * Emits the delete event of the configured node: the global template or the page variant.
+     * Emits the delete event of the configured global template.
      */
-    deletePageVariant(): void {
-        if (this.globalTemplateMode()) {
-            this.deleteGlobalTemplateClicked.emit();
-            return;
-        }
-        this.deletePageVariantClicked.emit();
-    }
-
-    /**
-     * Emits the event to open the global template the page is linked to in the editor.
-     */
-    editGlobalTemplate(): void {
-        this.editGlobalTemplateClicked.emit();
-    }
-
-    /**
-     * Emits the regenerate event to replace this variant with a fresh copy of its template.
-     */
-    triggerRegenerate(): void {
-        this.regenerateClicked.emit();
+    deleteGlobalTemplate(): void {
+        this.deleteGlobalTemplateClicked.emit();
     }
 
     /**
@@ -242,7 +188,7 @@ export class ConfigurePageVariantOrTemplateComponent implements AfterViewInit, O
     checkValidity(): void {
         this.isDuplicate.set(false);
 
-        if (!this.currentValues || Object.keys(!this.currentValues)?.length) {
+        if (!this.currentValues) {
             this.variableInputValid.set(false);
             return;
         }
@@ -254,9 +200,7 @@ export class ConfigurePageVariantOrTemplateComponent implements AfterViewInit, O
             }
         });
 
-        if (!validInput) {
-            this.settingsValidityChanged.emit(validInput);
-        } else {
+        if (validInput) {
             // duplicate check (does another variant already exist with the same values?)
             this.furtherExistingPageVariants()?.forEach((pageVariantNode: Node): void => {
                 let isDuplicate: boolean = true;

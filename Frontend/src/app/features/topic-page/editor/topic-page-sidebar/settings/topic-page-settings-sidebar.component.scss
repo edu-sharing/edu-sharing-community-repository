@@ -1,0 +1,7 @@
+// the form fills the panel, so its footer stays at the bottom edge
+:host {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 100%;
+}

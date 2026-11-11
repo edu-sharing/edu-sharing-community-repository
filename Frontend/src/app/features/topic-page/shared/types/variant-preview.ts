@@ -34,7 +34,6 @@ export interface VariantPreviewRestoreState {
     pageVariantConfigs: NodeEntries;
     pageVariantNode: Node | null;
     pageVariantNodeIndex: number;
-    pageVariantSettingsValid: boolean;
     persistedSwimlanes: Swimlane[];
     propagatedBreadcrumbNodeId: string;
     propagatedHeaderNodeId: string;

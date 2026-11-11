@@ -1,5 +1,5 @@
 import { inject, Injectable, Signal } from '@angular/core';
-import { Node } from 'ngx-edu-sharing-api';
+import { MdsWidget, Node } from 'ngx-edu-sharing-api';
 import { OptionConfig } from '../../../editorial-sidebar/editorial-sidebar.component';
 import { EditorialSidebarService } from '../../../editorial-sidebar/editorial-sidebar.service';
 import { TopicPageEntry } from '../../shared/services/topic-page-manage.service';
@@ -11,7 +11,9 @@ import {
 
 /** id of the topic page's menu in the editorial sidebar, listing the options below */
 export const TOPIC_PAGE_SIDEBAR_OPTION = 'TOPIC_PAGE';
-/** lists the pages and templates of the collection to show, regenerate or delete them */
+/** edits the title and parameters of the page or template shown in the editor */
+export const TOPIC_PAGE_SETTINGS_OPTION = 'TOPIC_PAGE_SETTINGS';
+/** lists the pages and templates of the collection to show, regenerate, publish or delete them */
 export const TOPIC_PAGE_MANAGE_OPTION = 'TOPIC_PAGE_MANAGE';
 /** creates a page variant or template from an existing one */
 export const TOPIC_PAGE_CREATE_OPTION = 'TOPIC_PAGE_CREATE';
@@ -20,6 +22,7 @@ export const TOPIC_PAGE_INHERITANCE_OPTION = 'TOPIC_PAGE_INHERITANCE';
 /** the menu first, its entries in the order they are offered */
 export const TOPIC_PAGE_SIDEBAR_OPTIONS: readonly string[] = [
     TOPIC_PAGE_SIDEBAR_OPTION,
+    TOPIC_PAGE_SETTINGS_OPTION,
     TOPIC_PAGE_MANAGE_OPTION,
     TOPIC_PAGE_CREATE_OPTION,
     TOPIC_PAGE_INHERITANCE_OPTION,
@@ -37,6 +40,20 @@ export function createOptionLabel(kinds: CreationKind[]): string {
 export type TopicPageSidebarConfig = {
     /** the creation tab to show; falls back to the first one available */
     tab?: TopicPageSidebarTab;
+};
+
+/** the page, template or global template the settings entry edits, as shown in the editor */
+export type TopicPageSettings = {
+    node: Node;
+    // the title the form starts with; untitled pages are named by their position
+    title: string;
+    // the other pages of the same config, which must not have the same parameters
+    configNodes: Node[];
+    // the parameters that tell the pages of a config apart
+    dimensions: Map<string, MdsWidget>;
+    templateMode: boolean;
+    globalTemplateMode: boolean;
+    canDeleteGlobalTemplate: boolean;
 };
 
 /**
@@ -78,6 +95,19 @@ export interface TopicPageSidebarHost {
     editTemplate(entry: TopicPageEntry): Promise<void>;
     // opens the templates of the given collection in its template mode
     editInheritedTemplates(source: Node): Promise<void>;
+    // what the settings entry edits, null while nothing can be configured
+    settings(): TopicPageSettings | null;
+    applySettings(changes: Map<string, string | string[]>): Promise<void>;
+    // whether the user may publish pages as global templates
+    canAddToGlobalTemplates: Signal<boolean>;
+    // publishes the shown page as a global template, with the given unsaved settings
+    addToGlobalTemplates(changes: Map<string, string | string[]>): Promise<void>;
+    // shows the entry and publishes it as a global template
+    addEntryToGlobalTemplates(entry: TopicPageEntry): Promise<void>;
+    // whether every parameter that tells the pages apart is set on the node
+    parametersComplete(node: Node): boolean;
+    // deletes the global template shown in the editor
+    deleteGlobalTemplate(): Promise<void>;
 }
 
 /**
@@ -122,6 +152,17 @@ export class TopicPageSidebarService {
     }
 
     /**
+     * Opens the settings of the page or template shown in the editor.
+     */
+    openSettings(): void {
+        this.editorialSidebarService.showOption({
+            option: TOPIC_PAGE_SETTINGS_OPTION,
+            trap: false,
+            backTo: { option: TOPIC_PAGE_SIDEBAR_OPTION, trap: false },
+        });
+    }
+
+    /**
      * Opens the topic menu if the sidebar shows no option, the menu is registered and no content
      * is selected, which the menu does not act on.
      */
@@ -146,6 +187,18 @@ export class TopicPageSidebarService {
      */
     close(): void {
         if (this.isOpen()) {
+            this.editorialSidebarService.close();
+        }
+    }
+
+    /**
+     * Closes the sidebar if it shows the settings, which belong to the page shown before.
+     */
+    closeSettings(): void {
+        if (
+            this.editorialSidebarService.editorialSidebar?.enabledOption()?.option ===
+            TOPIC_PAGE_SETTINGS_OPTION
+        ) {
             this.editorialSidebarService.close();
         }
     }

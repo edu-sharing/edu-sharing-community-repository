@@ -14,6 +14,12 @@
         "TEMPLATE": "Template"
       },
       "MENU": {
+        "SETTINGS_VARIANT": "Variant settings",
+        "SETTINGS_VARIANT_DESCRIPTION": "Set the title and parameters of the shown variant",
+        "SETTINGS_TEMPLATE": "Template settings",
+        "SETTINGS_TEMPLATE_DESCRIPTION": "Set the title and parameters of the shown template",
+        "SETTINGS_GLOBAL_TEMPLATE": "Global template settings",
+        "SETTINGS_GLOBAL_TEMPLATE_DESCRIPTION": "Set the title and parameters of the global template",
         "MANAGE": "Manage topic pages",
         "MANAGE_DESCRIPTION": "Show, regenerate or delete pages and templates",
         "CREATE": "New topic page",
@@ -264,9 +270,7 @@
         "HEADING": "Topic tree of {{topic}}"
       },
       "CONFIG_PAGE_VARIANT": {
-        "LABEL": "Settings",
-        "HEADING": "Settings of the topic page variant",
-        "WARN_TEXT": "Some of the required parameter fields have not been filled in. You cannot cancel the process.",
+        "WARN_TEXT": "Some of the required parameter fields have not been filled in.",
         "DUPLICATE_WARN_TEXT": "Another variant of this topic page already has the same parameters. Choose different values so it is clear who is shown which variant.",
         "TITLE": "Variant title",
         "TITLE_PLACEHOLDER": "Topic page variant for xyz",
@@ -275,32 +279,24 @@
         "TEMPLATE_UPDATE": {
           "TOOLTIP": "A new version of the template used is available.",
           "TOOLTIP_AVAILABLE": "WARNING: new template from {{date}}",
-          "TOOLTIP_UP_TO_DATE": "Template up to date: resets the page content to the state of the template",
           "TEMPLATE_MISSING": "The linked template is no longer available.",
           "HEADING": "Update page variant",
           "MESSAGE": "Do you want to update the page variant based on the new template? Changes to the page content will be lost.",
           "RESET_HEADING": "Reset page variant",
           "RESET_MESSAGE": "Do you want to reset the page content to the state of the template? Your changes to the page content will be lost."
         },
-        "REGENERATE_VARIANT": "Regenerate",
-        "DELETE_VARIANT": "Delete variant",
         "ADD_TO_GLOBAL_TEMPLATES": "Add to global templates",
-        "EDIT_GLOBAL_TEMPLATE": "Edit global template",
         "DEFINE_PARAMETERS": "Define parameters",
         "DUPLICATE_PARAMETERS": "Same parameters as another variant"
       },
       "CONFIG_PAGE_TEMPLATE": {
-        "HEADING": "Settings of the topic page template",
         "DUPLICATE_WARN_TEXT": "Another template of this collection already has the same parameters. Choose different values so it is clear which template the sub-collections receive for whom.",
         "DUPLICATE_PARAMETERS": "Same parameters as another template",
         "TITLE": "Template title",
         "TITLE_PLACEHOLDER": "Topic page template for xyz",
-        "DELETE_VARIANT": "Delete template",
-        "ADD_TO_GLOBAL_TEMPLATES": "Add to global templates",
-        "EDIT_GLOBAL_TEMPLATE": "Edit global template"
+        "ADD_TO_GLOBAL_TEMPLATES": "Add to global templates"
       },
       "CONFIG_GLOBAL_TEMPLATE": {
-        "HEADING": "Settings of the global template",
         "TITLE": "Global template title",
         "TITLE_PLACEHOLDER": "Global topic page template for xyz",
         "DELETE_VARIANT": "Delete global template"

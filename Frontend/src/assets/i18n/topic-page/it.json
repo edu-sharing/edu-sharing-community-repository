@@ -14,6 +14,12 @@
         "TEMPLATE": "Modello"
       },
       "MENU": {
+        "SETTINGS_VARIANT": "Impostazioni della variante",
+        "SETTINGS_VARIANT_DESCRIPTION": "Imposta il titolo e i parametri della variante mostrata",
+        "SETTINGS_TEMPLATE": "Impostazioni del modello",
+        "SETTINGS_TEMPLATE_DESCRIPTION": "Imposta il titolo e i parametri del modello mostrato",
+        "SETTINGS_GLOBAL_TEMPLATE": "Impostazioni del modello globale",
+        "SETTINGS_GLOBAL_TEMPLATE_DESCRIPTION": "Imposta il titolo e i parametri del modello globale",
         "MANAGE": "Gestisci pagine tematiche",
         "MANAGE_DESCRIPTION": "Mostra, rigenera o elimina pagine e modelli",
         "CREATE": "Nuova pagina tematica",
@@ -261,25 +267,20 @@
         "HEADING": "Albero tematico di {{topic}}"
       },
       "CONFIG_PAGE_VARIANT": {
-        "LABEL": "Impostazioni",
-        "HEADING": "Impostazioni della variante di pagina tematica",
-        "WARN_TEXT": "Non tutti i campi dei parametri obbligatori sono stati compilati. Non potete annullare l'operazione.",
+        "WARN_TEXT": "Non tutti i campi dei parametri obbligatori sono stati compilati.",
         "DUPLICATE_WARN_TEXT": "Un'altra variante di questa pagina tematica ha già gli stessi parametri. Scegliete altri valori, affinché sia chiaro a chi viene mostrata quale variante.",
         "TITLE": "Titolo della variante",
         "TITLE_PLACEHOLDER": "Variante di pagina tematica per xyz",
         "EDUCATION_LEVEL_LABEL": "Livello di istruzione",
         "TARGET_GROUP_LABEL": "Gruppo target",
-        "DELETE_VARIANT": "Elimina variante",
         "DEFINE_PARAMETERS": "Definisci parametri",
         "DUPLICATE_PARAMETERS": "Stessi parametri di un'altra variante"
       },
       "CONFIG_PAGE_TEMPLATE": {
-        "HEADING": "Impostazioni del modello di pagina tematica",
         "DUPLICATE_WARN_TEXT": "Un altro modello di questa collezione ha già gli stessi parametri. Scegliete altri valori, affinché sia chiaro quale modello ricevono le sottocollezioni e per chi.",
         "DUPLICATE_PARAMETERS": "Stessi parametri di un altro modello",
         "TITLE": "Titolo del modello",
-        "TITLE_PLACEHOLDER": "Modello di pagina tematica per xyz",
-        "DELETE_VARIANT": "Elimina modello"
+        "TITLE_PLACEHOLDER": "Modello di pagina tematica per xyz"
       }
     },
     "ADD_PAGE_TEMPLATE": {

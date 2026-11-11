@@ -14,6 +14,12 @@
         "TEMPLATE": "Vorlage"
       },
       "MENU": {
+        "SETTINGS_VARIANT": "Einstellungen der Variante",
+        "SETTINGS_VARIANT_DESCRIPTION": "Titel und Parameter der angezeigten Variante festlegen",
+        "SETTINGS_TEMPLATE": "Einstellungen der Vorlage",
+        "SETTINGS_TEMPLATE_DESCRIPTION": "Titel und Parameter der angezeigten Vorlage festlegen",
+        "SETTINGS_GLOBAL_TEMPLATE": "Einstellungen der globalen Vorlage",
+        "SETTINGS_GLOBAL_TEMPLATE_DESCRIPTION": "Titel und Parameter der globalen Vorlage festlegen",
         "MANAGE": "Themenseiten verwalten",
         "MANAGE_DESCRIPTION": "Seiten und Vorlagen anzeigen, neu generieren oder löschen",
         "CREATE": "Neue Themenseite",
@@ -264,9 +270,7 @@
         "HEADING": "Themenbaum von {{topic}}"
       },
       "CONFIG_PAGE_VARIANT": {
-        "LABEL": "Einstellungen",
-        "HEADING": "Einstellungen der Themenseiten-Variante",
-        "WARN_TEXT": "Nicht alle erforderlichen Parameter-Felder sind ausgefüllt. Du kannst den Vorgang nicht abbrechen.",
+        "WARN_TEXT": "Nicht alle erforderlichen Parameter-Felder sind ausgefüllt.",
         "DUPLICATE_WARN_TEXT": "Eine andere Variante dieser Themenseite hat bereits dieselben Parameter. Wähle andere Werte, damit eindeutig ist, wem welche Variante angezeigt wird.",
         "TITLE": "Titel der Variante",
         "TITLE_PLACEHOLDER": "Themenseiten-Variante für xyz",
@@ -275,32 +279,24 @@
         "TEMPLATE_UPDATE": {
           "TOOLTIP": "Eine neue Version der verwendeten Vorlage ist verfügbar.",
           "TOOLTIP_AVAILABLE": "ACHTUNG: neue Vorlage vom {{date}}",
-          "TOOLTIP_UP_TO_DATE": "Vorlage aktuell: setzt den Seiteninhalt auf den Stand der Vorlage zurück",
           "TEMPLATE_MISSING": "Die verknüpfte Vorlage ist nicht mehr verfügbar.",
           "HEADING": "Seiten-Variante aktualisieren",
           "MESSAGE": "Möchtest du die Seiten-Variante auf Grundlage der neuen Vorlage aktualisieren? Änderungen am Seiteninhalt gehen dabei verloren.",
           "RESET_HEADING": "Seiten-Variante zurücksetzen",
           "RESET_MESSAGE": "Möchtest du den Seiteninhalt auf den Stand der Vorlage zurücksetzen? Deine Anpassungen am Seiteninhalt gehen dabei verloren."
         },
-        "REGENERATE_VARIANT": "Neu generieren",
-        "DELETE_VARIANT": "Variante löschen",
         "ADD_TO_GLOBAL_TEMPLATES": "Zu globalen Vorlagen hinzufügen",
-        "EDIT_GLOBAL_TEMPLATE": "Globale Vorlage bearbeiten",
         "DEFINE_PARAMETERS": "Definiere Parameter",
         "DUPLICATE_PARAMETERS": "Gleiche Parameter wie eine andere Variante"
       },
       "CONFIG_PAGE_TEMPLATE": {
-        "HEADING": "Einstellungen der Themenseiten-Vorlage",
         "DUPLICATE_WARN_TEXT": "Eine andere Vorlage dieser Sammlung hat bereits dieselben Parameter. Wähle andere Werte, damit eindeutig ist, welche Vorlage die Unterebenen für wen erhalten.",
         "DUPLICATE_PARAMETERS": "Gleiche Parameter wie eine andere Vorlage",
         "TITLE": "Titel der Vorlage",
         "TITLE_PLACEHOLDER": "Themenseiten-Vorlage für xyz",
-        "DELETE_VARIANT": "Vorlage löschen",
-        "ADD_TO_GLOBAL_TEMPLATES": "Zu globalen Vorlagen hinzufügen",
-        "EDIT_GLOBAL_TEMPLATE": "Globale Vorlage bearbeiten"
+        "ADD_TO_GLOBAL_TEMPLATES": "Zu globalen Vorlagen hinzufügen"
       },
       "CONFIG_GLOBAL_TEMPLATE": {
-        "HEADING": "Einstellungen der globalen Vorlage",
         "TITLE": "Titel der globalen Vorlage",
         "TITLE_PLACEHOLDER": "Globale Themenseiten-Vorlage für xyz",
         "DELETE_VARIANT": "Globale Vorlage löschen"

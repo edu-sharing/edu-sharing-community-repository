@@ -63,7 +63,7 @@
           </div>
           } }
         </div>
-        @if (entry.templateEditTarget || entry.kind !== 'inherited') {
+        @if (entryOptions(entry).length) {
         <button
           class="entry-menu"
           mat-icon-button
@@ -71,23 +71,11 @@
           [disabled]="busy()"
           [attr.aria-label]="i18nPrefix + 'MORE_ACTIONS' | translate"
           [matTooltip]="i18nPrefix + 'MORE_ACTIONS' | translate"
-          [matMenuTriggerFor]="actions"
+          [matMenuTriggerFor]="dropdown.menu"
+          (click)="menuOptions.set(entryOptions(entry))"
         >
           <i esIcon="more_vert"></i>
         </button>
-        <mat-menu #actions="matMenu" xPosition="before">
-          @if (entry.templateEditTarget) {
-          <button mat-menu-item type="button" (click)="editTemplate(entry)">
-            <i esIcon="edit"></i>
-            {{ i18nPrefix + 'EDIT_TEMPLATE' | translate }}
-          </button>
-          } @if (entry.kind !== 'inherited') {
-          <button mat-menu-item type="button" (click)="delete(entry)">
-            <i esIcon="delete"></i>
-            {{ i18nPrefix + 'DELETE' | translate }}
-          </button>
-          }
-        </mat-menu>
         }
       </div>
       <div class="entry-actions">
@@ -128,3 +116,5 @@
   </button>
 </div>
 } }
+<!-- one menu for all entries, filled with the actions of the entry it is opened for -->
+<es-dropdown #dropdown [options]="menuOptions()"></es-dropdown>
