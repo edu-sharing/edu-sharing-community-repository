@@ -2,36 +2,36 @@
 
 ### Global parameters
 
-| Name                                        | Description                                                                                                                                                                                      | Value                                  |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------- |
-| `global.annotations`                        | Define global annotations                                                                                                                                                                        | `{}`                                   |
-| `global.backup.velero.enabled`              | Enable velero backup                                                                                                                                                                             | `false`                                |
-| `global.cluster.cert.annotations`           | Set custom global cert annotations                                                                                                                                                               | `{}`                                   |
-| `global.cluster.domain`                     | Set global domain for the cluster                                                                                                                                                                | `cluster.local`                        |
-| `global.cluster.ingress.ingressClassName`   | Set global ingress class name                                                                                                                                                                    | `nginx`                                |
-| `global.cluster.istio.enabled`              | Enable Istio Service mesh                                                                                                                                                                        | `false`                                |
-| `global.cluster.istio.gateway.selector.app` | Set global app selector for istio gateway                                                                                                                                                        | `istio-ingressgateway`                 |
-| `global.cluster.pdb.enabled`                | Enable PDB                                                                                                                                                                                       | `false`                                |
-| `global.cluster.storage.data.permission`    | Enable global custom data storage permissions                                                                                                                                                    | `false`                                |
-| `global.cluster.storage.data.spec`          | Set data storage spec                                                                                                                                                                            | `{}`                                   |
-| `global.cluster.storage.share.permission`   | Enable global custom share storage permissions                                                                                                                                                   | `false`                                |
-| `global.cluster.storage.share.spec`         | Set share storage spec                                                                                                                                                                           | `{}`                                   |
-| `global.debug`                              | Enable global debugging                                                                                                                                                                          | `false`                                |
-| `global.image.pullPolicy`                   | Set global image pullPolicy                                                                                                                                                                      | `Always`                               |
-| `global.image.pullSecrets`                  | Set global image pullSecrets                                                                                                                                                                     | `[]`                                   |
-| `global.image.registry`                     | Set global image container registry                                                                                                                                                              | `${docker.registry}`                   |
-| `global.image.repository`                   | Set global image container repository                                                                                                                                                            | `${docker.repository}`                 |
-| `global.image.common`                       | Set global image container common                                                                                                                                                                | `${docker.common}`                     |
-| `global.metrics.rules.enabled`              | Enable metrics rules                                                                                                                                                                             | `false`                                |
-| `global.metrics.scrape.interval`            | Set prometheus scrape interval                                                                                                                                                                   | `60s`                                  |
-| `global.metrics.scrape.timeout`             | Set prometheus scrape timeout                                                                                                                                                                    | `60s`                                  |
-| `global.metrics.servicemonitor.enabled`     | Enable metrics service monitor                                                                                                                                                                   | `false`                                |
-| `global.patroni.enabled`                    | Enable PSQL patroni                                                                                                                                                                              | `false`                                |
-| `global.patroni.name`                       | Name of patroni                                                                                                                                                                                  | `edusharing-repository-postgresql`     |
-| `global.patroni.secrets`                    | Set patroni secrets                                                                                                                                                                              | `credentials.postgresql.acid.zalan.do` |
-| `global.patroni.team`                       | Set patroni team                                                                                                                                                                                 | `edusharing`                           |
-| `global.password`                           | Set global password                                                                                                                                                                              | `""`                                   |
-| `global.security`                           | Set global custom security parameters                                                                                                                                                            | `{}`                                   |
+| Name                                        | Description                                    | Value                                  |
+| ------------------------------------------- | ---------------------------------------------- | -------------------------------------- |
+| `global.annotations`                        | Define global annotations                      | `{}`                                   |
+| `global.backup.velero.enabled`              | Enable velero backup                           | `false`                                |
+| `global.cluster.cert.annotations`           | Set custom global cert annotations             | `{}`                                   |
+| `global.cluster.domain`                     | Set global domain for the cluster              | `cluster.local`                        |
+| `global.cluster.ingress.ingressClassName`   | Set global ingress class name                  | `nginx`                                |
+| `global.cluster.istio.enabled`              | Enable Istio Service mesh                      | `false`                                |
+| `global.cluster.istio.gateway.selector.app` | Set global app selector for istio gateway      | `istio-ingressgateway`                 |
+| `global.cluster.pdb.enabled`                | Enable PDB                                     | `false`                                |
+| `global.cluster.storage.data.permission`    | Enable global custom data storage permissions  | `false`                                |
+| `global.cluster.storage.data.spec`          | Set data storage spec                          | `{}`                                   |
+| `global.cluster.storage.share.permission`   | Enable global custom share storage permissions | `false`                                |
+| `global.cluster.storage.share.spec`         | Set share storage spec                         | `{}`                                   |
+| `global.debug`                              | Enable global debugging                        | `false`                                |
+| `global.image.pullPolicy`                   | Set global image pullPolicy                    | `Always`                               |
+| `global.image.pullSecrets`                  | Set global image pullSecrets                   | `[]`                                   |
+| `global.image.registry`                     | Set global image container registry            | `${docker.registry}`                   |
+| `global.image.repository`                   | Set global image container repository          | `${docker.repository}`                 |
+| `global.image.common`                       | Set global image container common              | `${docker.common}`                     |
+| `global.metrics.rules.enabled`              | Enable metrics rules                           | `false`                                |
+| `global.metrics.scrape.interval`            | Set prometheus scrape interval                 | `60s`                                  |
+| `global.metrics.scrape.timeout`             | Set prometheus scrape timeout                  | `60s`                                  |
+| `global.metrics.servicemonitor.enabled`     | Enable metrics service monitor                 | `false`                                |
+| `global.patroni.enabled`                    | Enable PSQL patroni                            | `false`                                |
+| `global.patroni.name`                       | Name of patroni                                | `edusharing-repository-postgresql`     |
+| `global.patroni.secrets`                    | Set patroni secrets                            | `credentials.postgresql.acid.zalan.do` |
+| `global.patroni.team`                       | Set patroni team                               | `edusharing`                           |
+| `global.password`                           | Set global password                            | `""`                                   |
+| `global.security`                           | Set global custom security parameters          | `{}`                                   |
 
 ### Local parameters
 
