@@ -14,8 +14,11 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.*;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.ServiceRegistry;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
@@ -483,6 +486,159 @@ public class CollectionApi {
     	} catch (Throwable t) {
     		return ErrorResponse.createResponse(t);
     	}
+	}
+
+	private static final int MAX_TREE_DEPTH = 20;
+
+	@GET
+	@Path("/collections/{repository}/{collection}/tree")
+	@Operation(summary = "Get a collection tree.", description = "Get the given collection together with its sub collections as a tree, down to the given depth, in a single request. Optionally also the materials (references) of every collection.")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = CollectionTreeEntry.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+	})
+	public Response getCollectionTree(
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
+			@Parameter(description = "ID of the collection which is the root of the tree", required = true) @PathParam("collection") String collectionId,
+			@Parameter(description = "maximum depth of sub collection levels below the given collection (0 = only the collection itself, max " + MAX_TREE_DEPTH + ")", schema = @Schema(defaultValue="1")) @QueryParam("maxDepth") Integer maxDepth,
+			@Parameter(description = "fetch counts of collections (materials and subcollections). This parameter will decrease performance so only enable if if you need this data", schema = @Schema(defaultValue="false")) @QueryParam("fetchCounts") Boolean fetchCounts,
+			@Parameter(description = "also return the materials (references) of every collection in the tree", schema = @Schema(defaultValue="false")) @QueryParam("includeReferences") Boolean includeReferences,
+			@Parameter(description = "maximum number of child collections and of references per collection", schema = @Schema(defaultValue="500")) @QueryParam("maxItems") Integer maxItems,
+			@Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES + " (applied to child collections and references)") @QueryParam("sortProperties") List<String> sortProperties,
+			@Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
+			@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)") @QueryParam("propertyFilter") List<String> propertyFilter,
+			@Context HttpServletRequest req) {
+
+		try {
+			if (CollectionDao.ROOT.equals(collectionId)) {
+				throw new IllegalArgumentException("-root- is not supported, please provide the id of a collection");
+			}
+			int depth = maxDepth == null ? 1 : maxDepth;
+			if (depth < 0 || depth > MAX_TREE_DEPTH) {
+				throw new IllegalArgumentException("maxDepth must be between 0 and " + MAX_TREE_DEPTH);
+			}
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			Filter filter = new Filter();
+			filter.setProperties(propertyFilter);
+			CollectionTreeEntry response = readTreeNode(repoDao,
+					CollectionDao.getCollection(repoDao, collectionId).asNode(),
+					depth,
+					Boolean.TRUE.equals(fetchCounts),
+					Boolean.TRUE.equals(includeReferences),
+					maxItems == null ? 500 : maxItems,
+					filter,
+					new SortDefinition(sortProperties, sortAscending));
+			return Response.status(Response.Status.OK).entity(response).build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+
+	private CollectionTreeEntry readTreeNode(RepositoryDao repoDao, Node node, int remainingDepth, boolean fetchCounts, boolean includeReferences, int maxItems, Filter filter, SortDefinition sortDefinition) throws Throwable {
+		CollectionTreeEntry entry = new CollectionTreeEntry();
+		entry.setCollection(node);
+		if (includeReferences) {
+			List<CollectionReference> references = new ArrayList<>();
+			CollectionBaseEntries refs = CollectionDao.getCollectionsReferences(repoDao, node.getRef().getId(), filter, sortDefinition, 0, maxItems);
+			for (Node item : refs.getEntries()) {
+				references.add(item instanceof CollectionReference ? (CollectionReference) item : new CollectionReference(item));
+			}
+			entry.setReferences(references);
+		}
+		if (remainingDepth > 0) {
+			CollectionBaseEntries children = CollectionDao.getCollectionsSubcollections(repoDao, node.getRef().getId(),
+					SearchScope.MY, fetchCounts, false, filter, sortDefinition, 0, maxItems);
+			for (Node child : children.getEntries()) {
+				entry.getChildren().add(readTreeNode(repoDao, child, remainingDepth - 1, fetchCounts, includeReferences, maxItems, filter, sortDefinition));
+			}
+		}
+		return entry;
+	}
+
+	@POST
+	@Path("/collections/{repository}/{collection}/tree")
+	@Operation(summary = "Create a collection tree.", description = "Create a whole tree of collections (including their metadata properties) below the given parent in a single request. Replaces the sequence of createCollection + changeMetadata calls per collection. The whole tree is created in one transaction: if any collection fails, nothing is created.")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = CollectionTreeEntry.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+	})
+	public Response createCollectionTree(
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
+			@Parameter(description = "ID of parent collection (or \"-root-\" for level0 collections)", required = true) @PathParam("collection") String parentId,
+			@Parameter(description = "obey the mds definition, only accepting properties defined in the mds", schema = @Schema(defaultValue="true")) @QueryParam("obeyMds") Boolean obeyMds,
+			@Parameter(description = "if true, the children of every collection get the order of the list they are provided in (custom order)", schema = @Schema(defaultValue="false")) @QueryParam("order") Boolean order,
+			@Parameter(description = "root of the tree to create", required = true) CollectionTreeNode tree,
+			@Context HttpServletRequest req) {
+
+		try {
+			if (tree == null || StringUtils.isBlank(tree.getTitle())) {
+				throw new IllegalArgumentException("tree with a title is required");
+			}
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			boolean obey = obeyMds == null || obeyMds;
+			boolean setOrder = Boolean.TRUE.equals(order);
+			ServiceRegistry serviceRegistry = (ServiceRegistry) AlfAppContextGate.getApplicationContext().getBean(ServiceRegistry.SERVICE_REGISTRY);
+			// one transaction for the whole tree: any failure rolls back all created collections
+			CollectionTreeEntry response = serviceRegistry.getTransactionService().getRetryingTransactionHelper()
+					.doInTransaction(() -> createTreeNode(repoDao, parentId, tree, obey, setOrder));
+			return Response.status(Response.Status.OK).entity(response).build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+
+	private CollectionTreeEntry createTreeNode(RepositoryDao repoDao, String parentId, CollectionTreeNode treeNode, boolean obeyMds, boolean setOrder) throws Throwable {
+		if (StringUtils.isBlank(treeNode.getTitle())) {
+			throw new IllegalArgumentException("every collection requires a title");
+		}
+		Collection collection = new Collection();
+		collection.setTitle(treeNode.getTitle());
+		collection.setDescription(treeNode.getDescription());
+		collection.setColor(treeNode.getColor());
+		collection.setScope(treeNode.getScope());
+		collection.setType(StringUtils.isBlank(treeNode.getType()) ? CCConstants.COLLECTIONTYPE_DEFAULT : treeNode.getType());
+		collection.setLevel0(CollectionDao.ROOT.equals(parentId));
+
+		Node node = new Node();
+		node.setTitle(treeNode.getTitle());
+		node.setCollection(collection);
+
+		NodeDao created = CollectionDao.ROOT.equals(parentId)
+				? CollectionDao.createRoot(repoDao, node)
+				: CollectionDao.getCollection(repoDao, parentId).createChild(node);
+
+		if (treeNode.getProperties() != null && !treeNode.getProperties().isEmpty()) {
+			created = created.changeProperties(treeNode.getProperties(), obeyMds);
+		}
+
+		CollectionTreeEntry entry = new CollectionTreeEntry();
+		entry.setCollection(created.asNode());
+		if (treeNode.getChildren() != null) {
+			for (CollectionTreeNode child : treeNode.getChildren()) {
+				entry.getChildren().add(createTreeNode(repoDao, entry.getCollection().getRef().getId(), child, obeyMds, setOrder));
+			}
+			if (setOrder && !entry.getChildren().isEmpty()) {
+				String[] childIds = entry.getChildren().stream()
+						.map(c -> c.getCollection().getRef().getId())
+						.toArray(String[]::new);
+				String id = entry.getCollection().getRef().getId();
+				CollectionDao.getCollection(repoDao, id).setOrder(childIds);
+				// activate the custom order mode for the sub collections (same value the editor writes when sorting manually),
+				// otherwise the positions are stored but ignored when listing
+				Map<String, String[]> orderMode = new HashMap<>();
+				orderMode.put("ccm:collectionsubcollectionordermode", new String[]{"ccm:collection_ordered_position", "true"});
+				entry.setCollection(NodeDao.getNode(repoDao, id).changeProperties(orderMode, false).asNode());
+			}
+		}
+		return entry;
 	}
 
 	@POST

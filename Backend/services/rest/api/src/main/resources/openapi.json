@@ -1213,6 +1213,78 @@
         ],
         "type": "object"
       },
+      "CollectionTreeEntry": {
+        "properties": {
+          "children": {
+            "items": {
+              "$ref": "#/components/schemas/CollectionTreeEntry"
+            },
+            "type": "array"
+          },
+          "collection": {
+            "$ref": "#/components/schemas/Node"
+          },
+          "references": {
+            "description": "Materials (references) of this collection. Only filled if requested (includeReferences=true)",
+            "items": {
+              "$ref": "#/components/schemas/CollectionReference"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "children",
+          "collection"
+        ],
+        "type": "object"
+      },
+      "CollectionTreeNode": {
+        "properties": {
+          "children": {
+            "description": "Child collections, created below this collection",
+            "items": {
+              "$ref": "#/components/schemas/CollectionTreeNode"
+            },
+            "type": "array"
+          },
+          "color": {
+            "description": "Color of the collection (e.g. #FF0000)",
+            "type": "string"
+          },
+          "description": {
+            "description": "Description of the collection",
+            "type": "string"
+          },
+          "properties": {
+            "additionalProperties": {
+              "description": "Additional metadata properties which are set on the new collection (same format as PUT /node/v1/nodes/{repository}/{node}/metadata)",
+              "items": {
+                "description": "Additional metadata properties which are set on the new collection (same format as PUT /node/v1/nodes/{repository}/{node}/metadata)",
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "description": "Additional metadata properties which are set on the new collection (same format as PUT /node/v1/nodes/{repository}/{node}/metadata)",
+            "type": "object"
+          },
+          "scope": {
+            "description": "Scope of the collection",
+            "type": "string"
+          },
+          "title": {
+            "description": "Title of the collection",
+            "type": "string"
+          },
+          "type": {
+            "description": "Type of the collection, defaults to \"default\"",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "type": "object"
+      },
       "Collections": {
         "description": "Collections configuration (allowed colors, special types like editorial)",
         "properties": {
@@ -22804,6 +22876,290 @@
         ]
       }
     },
+    "/collection/v1/collections/{repository}/{collection}/tree": {
+      "get": {
+        "description": "Get the given collection together with its sub collections as a tree, down to the given depth, in a single request. Optionally also the materials (references) of every collection.",
+        "operationId": "getCollectionTree",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "ID of the collection which is the root of the tree",
+            "in": "path",
+            "name": "collection",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "maximum depth of sub collection levels below the given collection (0 = only the collection itself, max 20)",
+            "in": "query",
+            "name": "maxDepth",
+            "schema": {
+              "default": 1,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "fetch counts of collections (materials and subcollections). This parameter will decrease performance so only enable if if you need this data",
+            "in": "query",
+            "name": "fetchCounts",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "also return the materials (references) of every collection in the tree",
+            "in": "query",
+            "name": "includeReferences",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "maximum number of child collections and of references per collection",
+            "in": "query",
+            "name": "maxItems",
+            "schema": {
+              "default": 500,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "sort properties (applied to child collections and references)",
+            "in": "query",
+            "name": "sortProperties",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index",
+            "in": "query",
+            "name": "sortAscending",
+            "schema": {
+              "items": {
+                "type": "boolean"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "property filter for result nodes (or \"-all-\" for all properties)",
+            "in": "query",
+            "name": "propertyFilter",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollectionTreeEntry"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Get a collection tree.",
+        "tags": [
+          "COLLECTION v1"
+        ]
+      },
+      "post": {
+        "description": "Create a whole tree of collections (including their metadata properties) below the given parent in a single request. Replaces the sequence of createCollection + changeMetadata calls per collection. The whole tree is created in one transaction: if any collection fails, nothing is created.",
+        "operationId": "createCollectionTree",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "ID of parent collection (or \"-root-\" for level0 collections)",
+            "in": "path",
+            "name": "collection",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "obey the mds definition, only accepting properties defined in the mds",
+            "in": "query",
+            "name": "obeyMds",
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "if true, the children of every collection get the order of the list they are provided in (custom order)",
+            "in": "query",
+            "name": "order",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CollectionTreeNode"
+              }
+            }
+          },
+          "description": "root of the tree to create",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollectionTreeEntry"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Create a collection tree.",
+        "tags": [
+          "COLLECTION v1"
+        ]
+      }
+    },
     "/collection/v1/collections/{repository}/{sourceCollection}/copy": {
       "post": {
         "description": "Copy a collection.",
@@ -25238,7 +25594,7 @@
     },
     "/iam/v1/groups/{repository}": {
       "get": {
-        "description": "Search groups. (admin rights are required.)",
+        "description": "Search groups. (Global search requires the GLOBAL_AUTHORITY_SEARCH toolpermission; otherwise the search is limited to the user's own organizations.)",
         "operationId": "searchGroups",
         "parameters": [
           {
@@ -26964,7 +27320,7 @@
     },
     "/iam/v1/people/{repository}": {
       "get": {
-        "description": "Search users. (admin rights are required.)",
+        "description": "Search users. (Global search requires the GLOBAL_AUTHORITY_SEARCH toolpermission; otherwise the search is limited to the user's own organizations.)",
         "operationId": "searchUser",
         "parameters": [
           {
@@ -26987,7 +27343,7 @@
             }
           },
           {
-            "description": "global search context, defaults to true, otherwise just searches for users within the organizations",
+            "description": "global search context, defaults to true, otherwise just searches for users within the organizations (requires GLOBAL_AUTHORITY_SEARCH)",
             "in": "query",
             "name": "global",
             "schema": {
