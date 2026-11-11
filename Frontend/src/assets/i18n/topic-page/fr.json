@@ -62,9 +62,10 @@
         "NOT_PASSED_ON": "ne transmet pas",
         "PASS_ON": "Transmettre",
         "PASS_ON_TOOLTIP": "Transmettre les modèles aux sous-collections",
-        "CHANGED_COUNT": "{{count}} collections changent lors de l'application.",
-        "CHANGED_COUNT_ONE": "1 collection change lors de l'application.",
-        "CHANGES_PARENTS": "Les modifications des collections parentes s'appliquent aussi à leurs autres sous-collections, non affichées ici.",
+        "CHANGED_COUNT": "{{count}} collections seront modifiées.",
+        "CHANGED_COUNT_ONE": "1 collection sera modifiée.",
+        "CHANGED_COUNT_WITH_PARENTS": "{{count}} collections seront modifiées, d'autres hors de cette vue.",
+        "CHANGED_COUNT_ONE_WITH_PARENTS": "1 collection sera modifiée, d'autres hors de cette vue.",
         "SAVED": "L'héritage a été enregistré.",
         "LOAD_ERROR": "L'héritage n'a pas pu être chargé."
       }

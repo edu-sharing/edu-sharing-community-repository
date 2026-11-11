@@ -1062,7 +1062,8 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                     for (const key of Object.keys(option)) {
                         (existing[0] as any)[key] = (option as any)[key];
                     }
-                } else {
+                } else if (option.callback) {
+                    // entries without callback only override an existing option, never add one
                     options.push(option);
                 }
             }

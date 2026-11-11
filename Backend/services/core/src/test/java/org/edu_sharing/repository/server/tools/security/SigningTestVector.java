@@ -13,9 +13,8 @@ import java.util.Base64;
 import static org.mockito.Mockito.when;
 
 /**
- * The test vector for the signature on the user of a request. It is the same in the B-API ({@code TestVector.kt} of the
- * bildungs-api): a key pair made for the tests, fixed inputs, the signed string (line breaks written as backslash n) and the signature
- * (RSASSA-PKCS1-v1_5 is deterministic, so both sides give the same bytes). If the format changes, change both.
+ * The test vector for the user assertion of a request. It is the same in the B-API ({@code TestVector.kt} of the
+ * bildungs-api): a key pair made for the tests, fixed inputs and one fixed JWS. If the format changes, change both.
  */
 public final class SigningTestVector {
     private SigningTestVector() {
@@ -52,23 +51,35 @@ public final class SigningTestVector {
             + "VWZLVzTgC7dIQ/1vq2DbhMwb0RhE+lDBPlMkgoLoEBALj43xUXkJskk1mN1znsqBGk+84xoN8ZX0"
             + "r9YeNwIDAQAB";
 
-    public static final String SCHEME = "bapi-user-v1";
     public static final String APP_ID = "repo-app-1";
+    public static final String AUDIENCE = "bildungs-api";
     public static final String API_KEY = "test-key-0123456789";
+    public static final String METHOD = "POST";
     public static final String PATH = "/api/v1/edu-sharing/chat/completion?a=b%20c";
-    public static final long TS = 1793883800238L;
-    public static final String NONCE = "AAAAAAAAAAAAAAAAAAAAAA";
+    /** Seconds; the assertion is valid from IAT for 30 seconds. */
+    public static final long IAT = 1793883800L;
+    public static final String JTI = "AAAAAAAAAAAAAAAAAAAAAA";
     public static final String USER = "Jürgen+Müller@ex";
-    public static final String USER_ENCODED = "J%C3%BCrgen%2BM%C3%BCller%40ex";
+    /** RFC 7638 thumbprint (SHA-256) of the public key above. */
+    public static final String KID = "_AsUI_lBKBlwpjc6XhIArFZ18ngbVqeyCnS9KQoPWPs";
+    /** Base64url of the SHA-256 of API_KEY. */
+    public static final String ATH = "CwJtyvUt0tfos3ftdRgr_MZUl6_4hbOjfdG-GnXKOU0";
 
-    /** The signed string with the line breaks written as backslash n, and the signature. */
-    public static final String EXPECTED_SIGNED_STRING = "bapi-user-v1\\nrepo-app-1\\n0b026dcaf52dd2d7e8b377ed75182bfcc65497aff885b3a37dd1be1a75ca394d\\nPOST\\n/api/v1/edu-sharing/chat/completion?a=b%20c\\n1793883800238\\nAAAAAAAAAAAAAAAAAAAAAA\\nJ%C3%BCrgen%2BM%C3%BCller%40ex";
-
-    public static final String EXPECTED_SIGNATURE = "NflvSwSeJGGVbvxVPOgAAZL06l+0muVYT3KXc2esOYJUB+E9pC3I3+L5FOvWZ9CVpRwe5R3yn7w+"
-            + "7pK6JQT86pQ5zX1KnLRX+t4OopF+te5DLlo+5kicLgDYjEafbkHNxJQtl+MoP186PNg4jD/56c7K"
-            + "PTwRB1mSoUjBXlQdqsvUEKG2n8KWiWlMAFj03OCe7fy571NGjL2/0kneKU1I9YVn9CVIPD4+QgKv"
-            + "sOXlar60Fucf8TCB2b4nf4RMd4vjn0Ax1aLgjxKFUihmTi2hGRXngf8Dg3/RpdAnPib4QisIbLR8"
-            + "jFugU10mJYoAjUr8EgY4iFMSAT1Ah0AJMTJH2g==";
+    /**
+     * The fixed assertion (RS512). RSASSA-PKCS1-v1_5 is deterministic and the header and claims are written in a fixed order, so the signer gives exactly
+     * these bytes; the B-API verifies the same string in its TestVector.kt.
+     */
+    public static final String TOKEN = "eyJhbGciOiJSUzUxMiIsInR5cCI6ImJhcGktdXNlcitqd3QiLCJraWQiOiJfQXNVSV9sQktCbHdw"
+            + "amM2WGhJQXJGWjE4bmdiVnFleUNuUzlLUW9QV1BzIn0.eyJpc3MiOiJyZXBvLWFwcC0xIiwiYXVk"
+            + "IjoiYmlsZHVuZ3MtYXBpIiwic3ViIjoiSsO8cmdlbitNw7xsbGVyQGV4IiwiaWF0IjoxNzkzODgz"
+            + "ODAwLCJleHAiOjE3OTM4ODM4MzAsImp0aSI6IkFBQUFBQUFBQUFBQUFBQUFBQUFBQUEiLCJodG0i"
+            + "OiJQT1NUIiwiaHBxIjoiL2FwaS92MS9lZHUtc2hhcmluZy9jaGF0L2NvbXBsZXRpb24_YT1iJTIw"
+            + "YyIsImF0aCI6IkN3SnR5dlV0MHRmb3MzZnRkUmdyX01aVWw2XzRoYk9qZmRHLUduWEtPVTAifQ.O"
+            + "2l4fH9_mgyHzc8kfHmMemi6Llof1fcyDvcgKSDFOuNkeBFP2NSGC_DYr7HQi4pPmZR41-"
+            + "ve5yVgOnGroqJJ2lo9WaY4j7JEOoQAiNNaAEEtJfRm-mnP75NshjpSE_4Y0S_DfK95_NPIkqKbda"
+            + "LREWrkAh5ja31EFXdoNDwORLYeoMhSLgcC5DM492HOaO4uJi1UV4C1cDbpn5N3E79KChJ1CcmBD2"
+            + "jrg3z-fd6nNmLKs0XVGKCuOGo_TBZHgDsOZ0zvAs8MWSInbMccSjjsx9pkkjDZVpSOs-"
+            + "Rk_CDKwACiiJAedQhPwn7nSaN8tda4EVPMOqFiNNLHnsyf-rZHrA";
 
     /** The PEM the repository keeps its private key in. */
     public static String privateKeyPem() {

@@ -380,9 +380,10 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
                 node: nodes[0],
             }),
         );
-        shareElement.elementType = [ElementType.Node];
+        shareElement.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         shareElement.constrains = [Constrain.NoBulk];
-        shareElement.scopes = ['activity'];
+        shareElement.scopes = ['activity', 'render'];
+        shareElement.group = DefaultGroups.View;
         options.push(shareElement);
 
         const versionManagement = new OptionItem(

@@ -193,6 +193,7 @@ export function createEditOptions({
     pinCollection.permissions = [RestConstants.ACCESS_WRITE];
     pinCollection.permissionsMode = HideMode.Hide;
     pinCollection.toolpermissions = [RestConstants.TOOLPERMISSION_COLLECTION_PINNING];
+    pinCollection.toolpermissionsMode = HideMode.Hide;
     pinCollection.group = DefaultGroups.Edit;
     pinCollection.priority = 20;
 

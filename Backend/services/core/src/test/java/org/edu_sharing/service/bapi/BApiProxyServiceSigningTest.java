@@ -15,7 +15,11 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.http.HttpMethod;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.net.InetSocketAddress;
+import java.util.Base64;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
@@ -94,17 +98,28 @@ class BApiProxyServiceSigningTest {
         assertEquals(List.of("kept"), seen.get("x-other"));
         assertNull(seen.get("authorization"));
         assertNull(seen.get("x-edu-anything"));
-        assertEquals(List.of(RequestUserSigner.encodeUser("Jürgen")), seen.get("x-edu-user-id"), "the authenticated user, once");
-        assertEquals(List.of(APP_ID), seen.get("x-edu-app-id"));
-        String ts = seen.get("x-edu-app-ts").get(0);
-        String nonce = seen.get("x-edu-app-nonce").get(0);
-        String algorithm = seen.get("x-edu-app-signedalg").get(0);
-        assertTrue(Math.abs(System.currentTimeMillis() - Long.parseLong(ts)) < 10_000);
-        String data = RequestUserSigner.signedString(BApiProxyService.USER_SIGNATURE_SCHEME, APP_ID, API_KEY, "POST", seenTarget[0], Long.parseLong(ts), nonce,
-                seen.get("x-edu-user-id").get(0));
-        assertTrue(verify(data, seen.get("x-edu-app-sig").get(0), algorithm), "signed as it went over the wire: " + seenTarget[0]);
+        // one header carries the user: the assertion, signed by the repository for exactly this request
+        for (String legacy : List.of("x-edu-user-id", "x-edu-app-id", "x-edu-app-ts", "x-edu-app-nonce", "x-edu-app-sig", "x-edu-app-signedalg")) {
+            assertNull(seen.get(legacy), legacy + " is not part of the protocol any more");
+        }
+        List<String> assertions = seen.get("x-edu-user-assertion");
+        assertEquals(1, assertions.size());
+        String[] parts = assertions.get(0).split("\\.");
+        java.security.Signature signature = java.security.Signature.getInstance("SHA512withRSA");
+        signature.initVerify(publicKey());
+        signature.update((parts[0] + "." + parts[1]).getBytes(StandardCharsets.US_ASCII));
+        assertTrue(signature.verify(Base64.getUrlDecoder().decode(parts[2])), "signed as it went over the wire: " + seenTarget[0]);
+        ObjectMapper json = new ObjectMapper();
+        JsonNode claims = json.readTree(Base64.getUrlDecoder().decode(parts[1]));
+        assertEquals("Jürgen", claims.get("sub").asText(), "the authenticated user, not what the client sent");
+        assertEquals(APP_ID, claims.get("iss").asText());
+        assertEquals("bildungs-api", claims.get("aud").asText());
+        assertEquals("POST", claims.get("htm").asText());
         assertEquals("/api/v1/chat?a=b%20c", seenTarget[0]);
-        assertEquals("bapi-user-v1", BApiProxyService.USER_SIGNATURE_SCHEME, "the B-API checks for this format");
+        assertEquals(seenTarget[0], claims.get("hpq").asText());
+        assertEquals(ATH, claims.get("ath").asText());
+        assertTrue(Math.abs(System.currentTimeMillis() / 1000 - claims.get("iat").asLong()) < 10);
+        assertEquals("bapi-user+jwt", json.readTree(Base64.getUrlDecoder().decode(parts[0])).get("typ").asText(), "the B-API checks for this type");
     }
 
     @Test

@@ -237,36 +237,24 @@
     padding: 12px 16px;
     border-top: 1px solid var(--borderLight);
     background: var(--roundedContainerBackground);
-    // the narrow sidebar leaves no room beside the buttons, so the message sits above them
+    // the message sits beside the buttons and wraps above them only when the row is too narrow
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
+    align-items: center;
     gap: 8px;
 }
 
-// the message and the hidden sizer share one cell, which is as high as the longest message
-.footer-summary {
-    display: grid;
-    line-height: 1.4;
-    > * {
-        grid-area: 1 / 1;
-        align-self: start;
-    }
-}
-
-.footer-message-sizer {
-    visibility: hidden;
-}
-
-// as wide as its text, the sizer as wide as the footer to wrap like the longest message
+// shown only while there are unsaved changes, as wide as its text
 .footer-message {
     display: block;
     width: fit-content;
     max-width: 100%;
-    &.footer-message-sizer {
-        width: auto;
-    }
+    line-height: 1.4;
+    // as high as the buttons beside it while the text fits on one line
     ::ng-deep .block {
-        padding: 8px 12px;
+        box-sizing: border-box;
+        min-height: 36px;
+        padding: 4px 12px;
     }
     ::ng-deep .message-container {
         gap: 2px;
@@ -277,12 +265,8 @@
     }
 }
 
-.footer-parents-hint {
-    font-size: var(--fontSizeXSmall);
-}
-
 .footer-actions {
     display: flex;
-    justify-content: flex-end;
     gap: 8px;
+    margin-left: auto;
 }

@@ -61,7 +61,7 @@ public class IamApi {
 
     @Path("/people/{repository}")
 
-    @Operation(summary = "Search users.", description = "Search users. (admin rights are required.)")
+    @Operation(summary = "Search users.", description = "Search users. (Global search requires the GLOBAL_AUTHORITY_SEARCH toolpermission; otherwise the search is limited to the user's own organizations.)")
 
     @ApiResponses(
             value = {
@@ -76,7 +76,7 @@ public class IamApi {
     public Response searchUser(
             @Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
             @Parameter(description = "pattern", required = true) @QueryParam("pattern") String pattern,
-            @Parameter(description = "global search context, defaults to true, otherwise just searches for users within the organizations", required = false, schema = @Schema(defaultValue = "true")) @QueryParam("global") Boolean global,
+            @Parameter(description = "global search context, defaults to true, otherwise just searches for users within the organizations (requires GLOBAL_AUTHORITY_SEARCH)", required = false, schema = @Schema(defaultValue = "true")) @QueryParam("global") Boolean global,
             @Parameter(description = "the user status (e.g. active), if not set, all users are returned", required = false) @QueryParam("status") PersonLifecycleService.PersonStatus status,
             @Parameter(description = RestConstants.MESSAGE_MAX_ITEMS, schema = @Schema(defaultValue = "" + RestConstants.DEFAULT_MAX_ITEMS)) @QueryParam("maxItems") Integer maxItems,
             @Parameter(description = RestConstants.MESSAGE_SKIP_COUNT, schema = @Schema(defaultValue = "0")) @QueryParam("skipCount") Integer skipCount,
@@ -1028,7 +1028,7 @@ public class IamApi {
 
     @GET
     @Path("/groups/{repository}")
-    @Operation(summary = "Search groups.", description = "Search groups. (admin rights are required.)")
+    @Operation(summary = "Search groups.", description = "Search groups. (Global search requires the GLOBAL_AUTHORITY_SEARCH toolpermission; otherwise the search is limited to the user's own organizations.)")
     @ApiResponses(
             value = {
                     @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = GroupEntries.class))),

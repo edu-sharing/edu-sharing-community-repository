@@ -20,6 +20,7 @@ import {
     ActionbarComponent,
     CustomOptions,
     NodeHelperService,
+    OptionItem,
     OptionItemToggle,
     OptionsHelperDataService,
     RenderHelperService,
@@ -225,7 +226,23 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
         this.optionsHelper.setData({
             scope: this.editorialSidebarService.scope(),
             activeObjects: [this.node()],
-            customOptions: this.customOptions,
+            customOptions: {
+                ...this.customOptions,
+                // no "show": the preview already is that, the full view is
+                // reachable via the details link; version management is an option of the
+                // sidebar itself
+                removeOptions: [
+                    ...(this.customOptions?.removeOptions ?? []),
+                    'OPTIONS.SHOW',
+                    'OPTIONS.VERSION_MANAGEMENT',
+                ],
+                // the QR code option (options helper) is scoped to render/collections; lift that
+                // for the preview — only the given fields are merged into the existing option
+                addOptions: [
+                    ...(this.customOptions?.addOptions ?? []),
+                    { name: 'OPTIONS.QR_CODE', scopes: null } as Partial<OptionItem> as OptionItem,
+                ],
+            },
             postPrepareOptions: (options) => {
                 // no toggles in sidebar
                 options.splice(

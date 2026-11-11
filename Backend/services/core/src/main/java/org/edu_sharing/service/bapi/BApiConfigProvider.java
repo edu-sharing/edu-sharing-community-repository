@@ -65,10 +65,11 @@ public class BApiConfigProvider {
         // the fallback switch is global only
         boolean fallback = defaultConfig.isFallback();
 
-        // uri and timeout are instance wide, only api keys and features can be set per context
+        // uri, timeout and audience are instance wide, only api keys and features can be set per context
         BApiProxyConfig result = new BApiProxyConfig();
         result.setUri(defaultConfig.getUri());
         result.setCallTimeout(defaultConfig.getCallTimeout());
+        result.setAudience(defaultConfig.getAudience());
         result.setFallback(fallback);
         result.setFeatures(resolveFeatures(contextConfig, defaultConfig.getFeatures(), fallback));
         result.setAuthUserApiKey(resolveKey(contextConfig, AUTH_USER_API_KEY, defaultConfig.getAuthUserApiKey(), fallback));

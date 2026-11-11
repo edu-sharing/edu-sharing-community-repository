@@ -143,26 +143,16 @@
   </mat-tree>
 </div>
 <div class="footer">
-  <div class="footer-summary">
-    <!-- reserves the height of the longest message, so the footer never grows -->
-    <es-info-message class="footer-message footer-message-sizer" mode="warning" aria-hidden="true">
-      <span class="footer-count">{{
-        i18nPrefix + 'CHANGED_COUNT' | translate : { count: 99 }
-      }}</span>
-      <span class="footer-parents-hint">{{ i18nPrefix + 'CHANGES_PARENTS' | translate }}</span>
-    </es-info-message>
-    @if (hasUnsavedChanges()) {
-    <es-info-message class="footer-message" [mode]="changesParents() ? 'warning' : 'info'">
-      <span class="footer-count">{{
-        i18nPrefix + (changedCount() === 1 ? 'CHANGED_COUNT_ONE' : 'CHANGED_COUNT')
-          | translate : { count: changedCount() }
-      }}</span>
-      @if (changesParents()) {
-      <span class="footer-parents-hint">{{ i18nPrefix + 'CHANGES_PARENTS' | translate }}</span>
-      }
-    </es-info-message>
-    }
-  </div>
+  @if (hasUnsavedChanges()) {
+  <!-- changes to parent collections also reach sub-collections outside this view -->
+  <es-info-message class="footer-message" [mode]="changesParents() ? 'warning' : 'info'">
+    {{
+      i18nPrefix +
+        (changedCount() === 1 ? 'CHANGED_COUNT_ONE' : 'CHANGED_COUNT') +
+        (changesParents() ? '_WITH_PARENTS' : '') | translate : { count: changedCount() }
+    }}
+  </es-info-message>
+  }
   <div class="footer-actions">
     <button
       mat-button
