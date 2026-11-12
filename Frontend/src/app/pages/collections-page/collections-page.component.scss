@@ -372,32 +372,21 @@ section {
     .card-image-icon-container {
         margin-top: 20px;
     }
-    // Mobile is a single column with the breadcrumb as an absolute overlay, so the desktop
-    // "scroll only the right column" split is undone: the whole card body scrolls again.
+    // Mobile is a single column, so the desktop "scroll only the right column" split is undone:
+    // the whole card body scrolls again.
     .collections-body {
         overflow-y: auto;
     }
     .breadcrumb-space {
-        // the breadcrumb becomes an absolute overlay here, so drop the fixed bar height/frame
-        min-height: 0;
-        background: transparent;
-        padding: 0;
-        margin-top: 0;
+        // Sticks to the top of the scrolling card body above the content passing underneath,
+        // which includes the node-entries top matter (z-index 1).
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        padding: 0 10px;
     }
     .collections-breadcrumb {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        z-index: 1;
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(5px);
-        height: vars.$secondaryBarHeight;
-        @include mixins.materialShadowBottom();
-        padding-top: 22px;
-        padding-bottom: 20px;
-        padding-right: 50px;
-        margin: 0;
+        min-width: 0;
     }
     .collection-new-preview-infoline,
     .collection-description,
