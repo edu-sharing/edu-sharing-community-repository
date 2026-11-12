@@ -8,9 +8,9 @@
 
   <parent>
     <groupId>org.edu_sharing</groupId>
-    <artifactId>edu_sharing-community-repository-backend-services-rest-client</artifactId>
+    <artifactId>edu_sharing-community-repository-backend-services</artifactId>
     <version>git</version>
-    <relativePath>../pom.xml</relativePath>
+    <relativePath>../../../pom.xml</relativePath>
   </parent>
 
   <artifactId>edu_sharing-community-repository-backend-services-rest-client-java</artifactId>
@@ -20,7 +20,7 @@
 
   <properties>
 
-    <java.package>${java.package.root}</java.package>
+    <java.package>${java.root.generated}.repository.backend.services.rest.client</java.package>
 
   </properties>
 
@@ -31,6 +31,13 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
+        <configuration>
+          <includeArtifactIds>
+            edu_sharing-community-repository-backend-services-rest-api
+          </includeArtifactIds>
+          <excludes>META-INF/**</excludes>
+          <outputDirectory>${project.build.directory}/api</outputDirectory>
+        </configuration>
         <executions>
           <execution>
             <goals>

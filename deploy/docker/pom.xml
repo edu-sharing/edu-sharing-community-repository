@@ -6,9 +6,9 @@
 
   <parent>
     <groupId>org.edu_sharing</groupId>
-    <artifactId>edu_sharing-community-repository-deploy</artifactId>
+    <artifactId>edu_sharing-community-repository</artifactId>
     <version>git</version>
-    <relativePath>../pom.xml</relativePath>
+    <relativePath>../../pom.xml</relativePath>
   </parent>
 
   <artifactId>edu_sharing-community-repository-deploy-docker</artifactId>
@@ -17,6 +17,10 @@
   <name>edu_sharing-community-repository-deploy-docker</name>
 
   <properties>
+
+    <docker.repository>community</docker.repository>
+    <docker.prefix>edu_sharing-community-repository</docker.prefix>
+    <helm.prefix>edu_sharing-community-repository</helm.prefix>
 
     <docker.edu_sharing.community.common.alfresco.transform.name>
       edu_sharing-community-common-docker-alfresco-transform

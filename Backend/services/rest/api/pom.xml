@@ -8,9 +8,9 @@
 
   <parent>
     <groupId>org.edu_sharing</groupId>
-    <artifactId>edu_sharing-community-repository-backend-services-rest</artifactId>
+    <artifactId>edu_sharing-community-repository-backend-services</artifactId>
     <version>git</version>
-    <relativePath>../pom.xml</relativePath>
+    <relativePath>../../pom.xml</relativePath>
   </parent>
 
   <artifactId>edu_sharing-community-repository-backend-services-rest-api</artifactId>
