@@ -92,6 +92,8 @@ button.mat-mdc-button {
         overflow-x: auto;
         overflow-y: hidden;
         scroll-snap-type: x mandatory;
+        // lets a start-aligned snap target rest at the strip's padded edge (scrollLeft 0)
+        scroll-padding-inline: $horizontalScrollPadding;
         grid-auto-flow: column;
         grid-template-columns: repeat(auto-fit, var(--cardWidth));
         grid-auto-columns: minmax(var(--cardWidth), 1fr);
@@ -107,6 +109,10 @@ button.mat-mdc-button {
         > .load-more-card {
             scroll-snap-align: center;
             scroll-snap-stop: always;
+        }
+        // the narrow global options tile needs its own snap position to stay fully reachable
+        > es-node-entries-global-options {
+            scroll-snap-align: start;
         }
         // the "load more" fallback rendered as the trailing tile of the strip
         > .load-more-card {
