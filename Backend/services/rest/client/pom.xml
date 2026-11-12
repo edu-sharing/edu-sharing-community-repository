@@ -20,7 +20,6 @@
 
   <properties>
 
-    <composer.project.root>community-repository-rest-client</composer.project.root>
     <java.package.root>${java.root.generated}.repository.backend.services.rest.client</java.package.root>
 
   </properties>
@@ -51,8 +50,6 @@
 
   <modules>
     <module>java</module>
-<!--    <module>php</module>-->
-<!--    <module>typescript</module>-->
   </modules>
 
 </project>

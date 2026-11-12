@@ -35,6 +35,16 @@
     <alfresco.platform.version>26.1.0</alfresco.platform.version>
     <alfresco.sdk.version>4.15.0</alfresco.sdk.version>
 
+    <bouncycastle.version>1.85</bouncycastle.version>
+    <jmh.version>1.36</jmh.version>
+    <log4j.version>2.25.5</log4j.version>
+    <micrometer.version>1.14.14</micrometer.version>
+    <pdfbox.version>3.0.5</pdfbox.version>
+    <swagger.version>2.2.30</swagger.version>
+    <tika.version>3.2.3</tika.version>
+
+    <license.thirdparty.outputDirectory>src/main/webapp/WEB-INF/licenses</license.thirdparty.outputDirectory>
+
     <!-- release-1 -->
     <bom.repository-repackaged.version>${project.version}</bom.repository-repackaged.version>
 
@@ -101,7 +111,6 @@
 
       <plugins>
         <plugin>
-          <!-- override super pom version for compatibility with java 8 -->
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
           <configuration>
@@ -140,7 +149,41 @@
         <plugin>
           <groupId>org.openapitools</groupId>
           <artifactId>openapi-generator-maven-plugin</artifactId>
-          <version>7.7.0</version>
+          <version>7.12.0</version>
+        </plugin>
+
+        <!-- modules that attach a sources jar only declare the plugin -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>
+          <executions>
+            <execution>
+              <id>attach-sources</id>
+              <goals>
+                <goal>jar</goal>
+              </goals>
+              <phase>package</phase>
+            </execution>
+          </executions>
+        </plugin>
+
+        <!-- modules that ship a third party license list only declare the plugin -->
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>license-maven-plugin</artifactId>
+          <executions>
+            <execution>
+              <id>add-third-party-licenses</id>
+              <goals>
+                <goal>add-third-party</goal>
+              </goals>
+              <phase>prepare-package</phase>
+              <configuration>
+                <outputDirectory>${license.thirdparty.outputDirectory}</outputDirectory>
+                <thirdPartyFilename>THIRD-PARTY-${project.artifactId}.txt</thirdPartyFilename>
+              </configuration>
+            </execution>
+          </executions>
         </plugin>
 
       </plugins>
@@ -306,19 +349,19 @@
       <dependency>
         <groupId>org.apache.pdfbox</groupId>
         <artifactId>pdfbox-io</artifactId>
-        <version>3.0.5</version>
+        <version>${pdfbox.version}</version>
       </dependency>
 
       <dependency>
           <groupId>org.apache.pdfbox</groupId>
           <artifactId>fontbox</artifactId>
-          <version>3.0.5</version>
+          <version>${pdfbox.version}</version>
       </dependency>
 
       <dependency>
           <groupId>org.apache.pdfbox</groupId>
           <artifactId>xmpbox</artifactId>
-          <version>3.0.5</version>
+          <version>${pdfbox.version}</version>
       </dependency>
 
       <dependency>
@@ -342,23 +385,23 @@
       <dependency>
         <groupId>org.bouncycastle</groupId>
         <artifactId>bcpkix-jdk18on</artifactId>
-        <version>1.85</version>
+        <version>${bouncycastle.version}</version>
       </dependency>
 
       <dependency>
           <groupId>org.bouncycastle</groupId>
           <artifactId>bcjmail-jdk18on</artifactId>
-          <version>1.85</version>
+          <version>${bouncycastle.version}</version>
       </dependency>
       <dependency>
         <groupId>org.bouncycastle</groupId>
         <artifactId>bcutil-jdk18on</artifactId>
-        <version>1.85</version>
+        <version>${bouncycastle.version}</version>
       </dependency>
       <dependency>
         <groupId>org.bouncycastle</groupId>
         <artifactId>bcprov-jdk18on</artifactId>
-        <version>1.85</version>
+        <version>${bouncycastle.version}</version>
       </dependency>
       <dependency>
         <groupId>net.sourceforge.cardme</groupId>
@@ -400,7 +443,7 @@
       <dependency>
         <groupId>org.apache.tika</groupId>
         <artifactId>tika-bom</artifactId>
-        <version>3.2.3</version>
+        <version>${tika.version}</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
@@ -410,7 +453,7 @@
         <!-- missing in bom... -->
         <groupId>org.apache.tika</groupId>
         <artifactId>tika-parser-webarchive-module</artifactId>
-        <version>3.2.3</version>
+        <version>${tika.version}</version>
       </dependency>
 
       <dependency>
@@ -474,32 +517,11 @@
         <version>${project.version}</version>
       </dependency>
 
-      <!--<dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-backend-services-rest-client-typescript-angular</artifactId>
-        <version>${project.version}</version>
-        <classifier>sources</classifier>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-backend-services-rest-client-typescript-ng</artifactId>
-        <version>${project.version}</version>
-        <classifier>sources</classifier>
-      </dependency>-->
-
       <dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-repository-backend-services-rest-client-java</artifactId>
         <version>${project.version}</version>
       </dependency>
-
-      <!--<dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-backend-services-rest-client-php</artifactId>
-        <version>${project.version}</version>
-        <type>zip</type>
-      </dependency>-->
 
       <dependency>
         <groupId>${project.groupId}</groupId>
@@ -863,7 +885,7 @@
       <dependency>
         <groupId>org.apache.logging.log4j</groupId>
         <artifactId>log4j-bom</artifactId>
-        <version>2.25.5</version>
+        <version>${log4j.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -871,7 +893,7 @@
       <dependency>
         <groupId>org.apache.logging.log4j</groupId>
         <artifactId>log4j-slf4j2-impl</artifactId>
-        <version>2.25.5</version>
+        <version>${log4j.version}</version>
       </dependency>
 
 
@@ -977,7 +999,8 @@
         <version>5.0.6</version>
       </dependency>
 
-      <!-- ... other dependency elements ... -->
+      <!-- manages all spring-security-* artifacts, including spring-security-oauth2-authorization-server
+           (part of Spring Security since 7.0; the old 1.x line fails on Spring Security 7 with NoClassDefFoundError) -->
       <dependency>
         <groupId>org.springframework.security</groupId>
         <artifactId>spring-security-bom</artifactId>
@@ -986,68 +1009,6 @@
         <scope>import</scope>
       </dependency>
       <dependency>
-        <groupId>org.springframework.security</groupId>
-        <artifactId>spring-security-config</artifactId>
-        <version>${spring-security.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework.security</groupId>
-        <artifactId>spring-security-core</artifactId>
-        <version>${spring-security.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.springframework.security</groupId>
-        <artifactId>spring-security-crypto</artifactId>
-        <version>${spring-security.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.springframework.security</groupId>
-        <artifactId>spring-security-oauth2-client</artifactId>
-        <version>${spring-security.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.springframework.security</groupId>
-        <artifactId>spring-security-oauth2-core</artifactId>
-        <version>${spring-security.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.springframework.security</groupId>
-        <artifactId>spring-security-oauth2-jose</artifactId>
-        <version>${spring-security.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.springframework.security</groupId>
-        <artifactId>spring-security-oauth2-resource-server</artifactId>
-        <version>${spring-security.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.springframework.security</groupId>
-        <artifactId>spring-security-web</artifactId>
-        <version>${spring-security.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.springframework.security</groupId>
-        <artifactId>spring-security-saml2-service-provider</artifactId>
-        <version>${spring-security.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.springframework.security</groupId>
-        <artifactId>spring-security-oauth2-authorization-server</artifactId>
-        <!-- Must track the Spring Security major: the 7.0.x line targets Spring Security 7.
-             The 1.x line references the removed org.springframework.security.config.annotation.ObjectPostProcessor
-             and fails on Spring Security 7 with NoClassDefFoundError. -->
-        <version>7.0.0</version>
-      </dependency>
-
-      <dependency>
         <groupId>org.codehaus.woodstox</groupId>
         <artifactId>stax2-api</artifactId>
         <version>4.2.2</version>
@@ -1055,19 +1016,19 @@
       <dependency>
         <groupId>io.swagger.core.v3</groupId>
         <artifactId>swagger-annotations-jakarta</artifactId>
-        <version>2.2.30</version>
+        <version>${swagger.version}</version>
       </dependency>
 
       <dependency>
         <groupId>io.swagger.core.v3</groupId>
         <artifactId>swagger-jaxrs2-jakarta</artifactId>
-        <version>2.2.30</version>
+        <version>${swagger.version}</version>
       </dependency>
 
       <dependency>
         <groupId>io.swagger.core.v3</groupId>
         <artifactId>swagger-core-jakarta</artifactId>
-        <version>2.2.30</version>
+        <version>${swagger.version}</version>
       </dependency>
 
       <dependency>
@@ -1298,19 +1259,19 @@
       <dependency>
         <groupId>io.micrometer</groupId>
         <artifactId>micrometer-core</artifactId>
-        <version>1.14.14</version>
+        <version>${micrometer.version}</version>
       </dependency>
 
       <dependency>
         <groupId>io.micrometer</groupId>
         <artifactId>micrometer-observation</artifactId>
-        <version>1.14.14</version>
+        <version>${micrometer.version}</version>
       </dependency>
 
       <dependency>
         <groupId>io.micrometer</groupId>
         <artifactId>micrometer-commons</artifactId>
-        <version>1.14.14</version>
+        <version>${micrometer.version}</version>
       </dependency>
 
       <dependency>

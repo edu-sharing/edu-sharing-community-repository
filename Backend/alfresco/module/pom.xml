@@ -18,101 +18,40 @@
 
   <name>edu_sharing-community-repository-backend-alfresco-module</name>
 
+  <properties>
+    <license.thirdparty.outputDirectory>src/main/amp/licenses</license.thirdparty.outputDirectory>
+  </properties>
+
   <build>
 
     <plugins>
 
-      <!-- see src/main/assembly/amp.xml -->
+      <!-- moves the classes/resources that patch alfresco out of the module jar, they are deployed into
+           WEB-INF/classes for earlier classloading, see src/main/assembly/amp.xml -->
       <plugin>
-        <groupId>com.coderplus.maven.plugins</groupId>
-        <artifactId>copy-rename-maven-plugin</artifactId>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
         <executions>
           <execution>
-            <id>fix1</id>
+            <id>move-fixes</id>
             <goals>
-              <goal>rename</goal>
+              <goal>run</goal>
             </goals>
             <phase>package</phase>
             <configuration>
-              <sourceFile>${project.build.directory}/classes/org/alfresco/repo/search/impl/solr/SolrJSONResultSet.class</sourceFile>
-              <destinationFile>${project.build.directory}/fixes/org/alfresco/repo/search/impl/solr/SolrJSONResultSet.class</destinationFile>
-            </configuration>
-          </execution>
-          <execution>
-            <id>fix2</id>
-            <goals>
-              <goal>rename</goal>
-            </goals>
-            <phase>package</phase>
-            <configuration>
-              <sourceFile>${project.build.directory}/classes/org/alfresco/repo/search/impl/solr/ESSearchParameters.class</sourceFile>
-              <destinationFile>${project.build.directory}/fixes/org/alfresco/repo/search/impl/solr/ESSearchParameters.class</destinationFile>
-            </configuration>
-          </execution>
-          <execution>
-            <id>fix3</id>
-            <goals>
-              <goal>rename</goal>
-            </goals>
-            <phase>package</phase>
-            <configuration>
-              <sourceFile>${project.build.directory}/classes/org/alfresco/repo/search/impl/solr/SolrQueryHTTPClient.class</sourceFile>
-              <destinationFile>${project.build.directory}/fixes/org/alfresco/repo/search/impl/solr/SolrQueryHTTPClient.class</destinationFile>
-            </configuration>
-          </execution>
-          <execution>
-            <id>fix4</id>
-            <goals>
-              <goal>rename</goal>
-            </goals>
-            <phase>package</phase>
-            <configuration>
-              <sourceFile>${project.build.directory}/classes/org/apache/tika/parser/pdf/PDF2XHTML.class</sourceFile>
-              <destinationFile>${project.build.directory}/fixes/org/apache/tika/parser/pdf/PDF2XHTML.class</destinationFile>
-            </configuration>
-          </execution>
-          <execution>
-            <id>fix5</id>
-            <goals>
-              <goal>rename</goal>
-            </goals>
-            <phase>package</phase>
-            <configuration>
-              <sourceFile>${project.build.directory}/classes/alfresco/mimetype/openoffice-document-formats.xml</sourceFile>
-              <destinationFile>${project.build.directory}/fixes/alfresco/mimetype/openoffice-document-formats.xml</destinationFile>
-            </configuration>
-          </execution>
-          <execution>
-            <id>fix6</id>
-            <goals>
-              <goal>rename</goal>
-            </goals>
-            <phase>package</phase>
-            <configuration>
-              <sourceFile>${project.build.directory}/classes/net/sf/jooreports/converter/DocumentFamily.class</sourceFile>
-              <destinationFile>${project.build.directory}/fixes/net/sf/jooreports/converter/DocumentFamily.class</destinationFile>
-            </configuration>
-          </execution>
-          <execution>
-            <id>fix7</id>
-            <goals>
-              <goal>rename</goal>
-            </goals>
-            <phase>package</phase>
-            <configuration>
-              <sourceFile>${project.build.directory}/classes/org/alfresco/repo/web/scripts/solr/NodesMetaDataGet.class</sourceFile>
-              <destinationFile>${project.build.directory}/fixes/org/alfresco/repo/web/scripts/solr/NodesMetaDataGet.class</destinationFile>
-            </configuration>
-          </execution>
-          <execution>
-            <id>fix8</id>
-            <goals>
-              <goal>rename</goal>
-            </goals>
-            <phase>package</phase>
-            <configuration>
-              <sourceFile>${project.build.directory}/classes/org/alfresco/transform/registry/TransformRegistryHelper.class</sourceFile>
-              <destinationFile>${project.build.directory}/fixes/org/alfresco/transform/registry/TransformRegistryHelper.class</destinationFile>
+              <target>
+                <move todir="${project.build.directory}/fixes">
+                  <fileset dir="${project.build.outputDirectory}">
+                    <include name="alfresco/mimetype/openoffice-document-formats.xml"/>
+                    <include name="net/sf/jooreports/converter/DocumentFamily.class"/>
+                    <include name="org/alfresco/repo/search/impl/solr/ESSearchParameters.class"/>
+                    <include name="org/alfresco/repo/search/impl/solr/SolrJSONResultSet.class"/>
+                    <include name="org/alfresco/repo/search/impl/solr/SolrQueryHTTPClient.class"/>
+                    <include name="org/alfresco/repo/web/scripts/solr/NodesMetaDataGet.class"/>
+                    <include name="org/alfresco/transform/registry/TransformRegistryHelper.class"/>
+                  </fileset>
+                </move>
+              </target>
             </configuration>
           </execution>
         </executions>
@@ -141,33 +80,11 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>license-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>add-third-party</id>
-            <goals>
-              <goal>add-third-party</goal>
-            </goals>
-            <phase>prepare-package</phase>
-            <configuration>
-              <outputDirectory>src/main/amp/licenses</outputDirectory>
-              <thirdPartyFilename>THIRD-PARTY-${project.artifactId}.txt</thirdPartyFilename>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>attach-sources</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-            <phase>package</phase>
-          </execution>
-        </executions>
       </plugin>
 
       <plugin>

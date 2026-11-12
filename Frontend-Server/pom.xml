@@ -129,9 +129,7 @@
                 <artifactId>maven-source-plugin</artifactId>
                 <executions>
                     <execution>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
+                        <id>attach-sources</id>
                         <phase>verify</phase>
                     </execution>
                 </executions>

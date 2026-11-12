@@ -59,19 +59,6 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>license-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>add-third-party-licenses</id>
-            <goals>
-              <goal>add-third-party</goal>
-            </goals>
-            <phase>prepare-package</phase>
-            <configuration>
-              <outputDirectory>src/main/webapp/WEB-INF/licenses</outputDirectory>
-              <thirdPartyFilename>THIRD-PARTY-${project.artifactId}.txt</thirdPartyFilename>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
 
       <plugin>
@@ -79,9 +66,7 @@
         <artifactId>maven-source-plugin</artifactId>
         <executions>
           <execution>
-            <goals>
-              <goal>jar</goal>
-            </goals>
+            <id>attach-sources</id>
             <phase>verify</phase>
           </execution>
         </executions>

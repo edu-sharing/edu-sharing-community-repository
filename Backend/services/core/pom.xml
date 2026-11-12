@@ -46,15 +46,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>attach-sources</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-            <phase>package</phase>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
 
@@ -376,13 +367,13 @@
     <dependency>
       <groupId>org.openjdk.jmh</groupId>
       <artifactId>jmh-core</artifactId>
-      <version>1.36</version>
+      <version>${jmh.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.openjdk.jmh</groupId>
       <artifactId>jmh-generator-annprocess</artifactId>
-      <version>1.36</version>
+      <version>${jmh.version}</version>
       <scope>test</scope>
     </dependency>
 
