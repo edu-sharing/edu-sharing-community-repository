@@ -92,6 +92,15 @@ mat-sidenav-container {
             // both live in the same stacking context, so the header must outrank the tab bar.
             position: relative;
             z-index: 3;
+            // Collapse the bar when no child is visible; an actionbar only counts if it has buttons.
+            &:not(
+                    :has(
+                            > :not(.display-none, es-actionbar),
+                            > es-actionbar:not(.display-none) button
+                        )
+                ) {
+                display: none;
+            }
             > es-editorial-breadcrumb {
                 // same left inset es-breadcrumbs gets from the workspace topbar
                 padding-left: 30px;
