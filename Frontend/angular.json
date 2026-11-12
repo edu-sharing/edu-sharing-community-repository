@@ -43,6 +43,16 @@
                 "output": "/assets/tinymce/langs/"
 
               },
+              {
+                "glob": "pbkdf2.js",
+                "input": "node_modules/altcha/dist/workers",
+                "output": "/assets/altcha/"
+              },
+              {
+                "glob": "altcha.css",
+                "input": "node_modules/altcha/dist/external",
+                "output": "/assets/altcha/"
+              },
               { "glob": "**/*", "input": "node_modules/ngx-extended-pdf-viewer/assets", "output": "/assets" },
               { "glob": "**/*", "input": "projects/rendering-service-lib/assets", "output": "/" }
             ],
