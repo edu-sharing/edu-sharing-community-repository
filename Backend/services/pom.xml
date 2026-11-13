@@ -23,10 +23,8 @@
     <module>core</module>
     <module>rest/api</module>
     <module>rest/client/java</module>
-    <module>rest/webapp</module>
     <module>webapp</module>
     <module>graphql/server</module>
-    <module>graphql/webapp</module>
   </modules>
 
 </project>

@@ -40,23 +40,17 @@
 
   <dependencies>
 
-    <!-- compile -->
-
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>edu_sharing-community-repository-backend-services-rest-webapp</artifactId>
-      <type>war</type>
-    </dependency>
-
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>edu_sharing-community-repository-backend-services-graphql-webapp</artifactId>
-      <type>war</type>
-    </dependency>
+    <!-- runtime -->
 
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>edu_sharing-community-repository-backend-services-core</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-repository-backend-services-graphql-server</artifactId>
       <scope>runtime</scope>
     </dependency>
 
