@@ -1,0 +1,11 @@
+{
+  "name": "edu-sharing-rest-webapp-swagger-ui",
+  "private": true,
+  "description": "Provides the static Swagger UI under src/main/webapp/swagger (vendored from swagger-ui-dist).",
+  "scripts": {
+    "update-swagger-ui": "node scripts/update-swagger-ui.mjs"
+  },
+  "devDependencies": {
+    "swagger-ui-dist": "5.35.0"
+  }
+}
