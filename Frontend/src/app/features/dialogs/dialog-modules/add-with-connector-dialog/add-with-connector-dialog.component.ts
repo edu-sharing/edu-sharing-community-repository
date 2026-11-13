@@ -86,12 +86,10 @@ export class AddWithConnectorDialogComponent {
     }
 
     private processConnector(connector: Connector): Connector {
-        for (let i = 0; i < connector.filetypes.length; i++) {
-            if (!connector.filetypes[i].creatable) {
-                connector.filetypes.splice(i, 1);
-            }
-        }
-        return connector;
+        return {
+            ...connector,
+            filetypes: connector.filetypes.filter((f) => f.creatable),
+        };
     }
 
     private async initDialogConfig(): Promise<void> {
