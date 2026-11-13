@@ -617,7 +617,34 @@
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>33.4.0-jre</version>
+        <version>33.7.2-jre</version>
+      </dependency>
+
+      <!-- security update: replace the guava, plexus-utils and httpclient5/httpcore5 jars of alfresco.war
+           (see Dockerfile and alfresco module), httpclient5 is raised together with httpcore5 to keep a released pair.
+           can be removed again once we switch to a newer alfresco version that ships fixed versions -->
+      <dependency>
+        <groupId>org.codehaus.plexus</groupId>
+        <artifactId>plexus-utils</artifactId>
+        <version>3.6.2</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.httpcomponents.client5</groupId>
+        <artifactId>httpclient5</artifactId>
+        <version>5.6.5</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.httpcomponents.core5</groupId>
+        <artifactId>httpcore5</artifactId>
+        <version>5.4.4</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.httpcomponents.core5</groupId>
+        <artifactId>httpcore5-h2</artifactId>
+        <version>5.4.4</version>
       </dependency>
 
       <dependency>
