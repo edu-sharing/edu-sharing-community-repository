@@ -11,11 +11,15 @@ import { mdsStorybookProviders, WidgetDummy } from '../../storybook-utils';
 import { MdsEditorWidgetContainerComponent } from '../mds-editor-widget-container/mds-editor-widget-container.component';
 import { RegisterFormFieldDirective } from '../mds-editor-widget-container/register-form-field.directive';
 import { MdsEditorWidgetTinyMCEComponent } from './mds-editor-widget-tinymce.component';
+import {
+    AdminMessagesEditorConfig,
+    AssignmentEditorConfig,
+} from '../../../../../shared/tinymce/tinymce-config';
 
 /**
  * Test bed for TinyMCE upgrades. The MDS widget merges `configuration` (JSON) over its defaults,
- * so the stories below also replay the editor configs of the other TinyMCE usages
- * (admin messages, editorial assignments) to cover all variants in one place.
+ * so the stories below also replay the shared editor configs of the other TinyMCE usages
+ * (admin messages, editorial assignments; see `shared/tinymce/tinymce-config.ts`).
  */
 
 /**
@@ -54,25 +58,6 @@ const SAMPLE_HTML =
     '<span style="text-decoration: underline;">unterstrichener</span> Text mit ' +
     '<a href="https://edu-sharing.com" target="_blank" rel="noopener">Link</a>.</p>' +
     '<ul><li>Punkt 1</li><li>Punkt 2</li></ul><p style="text-align: center;">zentriert</p>';
-
-/** mirrors `messages.component.ts` (admin messages) */
-const ADMIN_MESSAGES_CONFIG = {
-    convert_urls: false,
-    plugins: ['link', 'code'],
-    toolbar:
-        'bold italic underline | link | alignleft aligncenter alignright alignjustify | removeformat | code | undo redo',
-};
-
-/** mirrors `AssignmentEditorConfig` in `manage-assignment.component.ts` (editorial pages) */
-const ASSIGNMENT_CONFIG = {
-    suffix: '.min',
-    plugins: ['lists'],
-    default_link_target: '_blank',
-    link_title: false,
-    newline_behavior: 'invert',
-    link_assume_external_targets: true,
-    toolbar: 'bold | bullist numlist | undo redo',
-};
 
 const meta: Meta<TinyMceStoryArgs> = {
     title: 'Mds/Widget/TinyMCE',
@@ -139,7 +124,7 @@ export const MdsMandatory: Story = {
 /** config of the admin message editor (`link` + `code` plugin, `convert_urls: false`) */
 export const AdminMessagesConfig: Story = {
     args: {
-        configuration: JSON.stringify(ADMIN_MESSAGES_CONFIG),
+        configuration: JSON.stringify(AdminMessagesEditorConfig),
         initialHtml: '<p>Relativer <a href="components/workspace">Link</a> bleibt erhalten.</p>',
     },
 };
@@ -147,7 +132,7 @@ export const AdminMessagesConfig: Story = {
 /** config of the editorial assignment editors (`lists` plugin, inverted newline behavior) */
 export const AssignmentConfig: Story = {
     args: {
-        configuration: JSON.stringify(ASSIGNMENT_CONFIG),
+        configuration: JSON.stringify(AssignmentEditorConfig),
         initialHtml:
             '<p>Hinweise zur Abgabe:</p><ol><li>Datei hochladen</li><li>Absenden</li></ol>',
     },
