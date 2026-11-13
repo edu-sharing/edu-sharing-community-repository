@@ -424,7 +424,16 @@ export class MdsWidgetComponent implements OnInit, OnDestroy, OnChanges {
             const id = raw?.[i]?.id ?? '';
             // keep the raw id (not the key's id): an id enables the search link, which
             // requires an editor instance
-            return { ...this.findValuespaceKey(id, caption), id, caption };
+            const entry: MdsValue = { ...this.findValuespaceKey(id, caption), id, caption };
+            // TODO REMOVE: local fake for testing valuespace icons (glyph / relative / absolute)
+            if (this.widget?.definition.id === 'ccm:educationallearningresourcetype') {
+                entry.icon = [
+                    'biotech',
+                    'logo.svg',
+                    'https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg',
+                ][i % 3];
+            }
+            return entry;
         });
     }
 
@@ -441,7 +450,16 @@ export class MdsWidgetComponent implements OnInit, OnDestroy, OnChanges {
     }
 
     /**
-     * Resolves a valuespace `icon` attribute like the backend MetadataTemplateRenderer:
+     * A valuespace `icon` attribute is either an image (absolute url or a file path relative to
+     * `assets/images/`, i.e. containing a `/` or a file extension) or an icon glyph name
+     * (e.g. `biotech`), mirroring the backend MetadataTemplateRenderer.
+     */
+    isIconImage(icon: string | undefined): boolean {
+        return !!icon && (/^https?:\/\//.test(icon) || /[/.]/.test(icon));
+    }
+
+    /**
+     * Resolves a valuespace `icon` image like the backend MetadataTemplateRenderer:
      * absolute urls are used as is, everything else is relative to `assets/images/`.
      */
     getIconUrl(icon: string | undefined): string | undefined {

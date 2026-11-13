@@ -80,12 +80,22 @@
                 object-fit: contain;
                 object-position: left center;
             }
+            .array-entry-icon {
+                font-size: 25px;
+                width: 25px;
+                height: 25px;
+            }
             .array-entry-value-group {
                 display: flex;
                 flex-direction: column;
                 // flex-wrap breaks the line once the caption would get narrower than this
                 flex: 1 1 150px;
                 min-width: 0;
+            }
+            // glyph icons are small, so size the chip to the caption instead of reserving
+            // the space needed for (wide) images
+            .array-entry-icon + .array-entry-value-group {
+                flex: 0 1 auto;
             }
             .array-entry-description {
                 font-size: 80%;
