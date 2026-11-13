@@ -23,7 +23,11 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { debounceTime } from 'rxjs/operators';
 import { firstValueFrom } from 'rxjs';
 import { EditorComponent } from '@tinymce/tinymce-angular';
-import { AssignmentEditorConfig } from '../manage-assignment/manage-assignment.component';
+import {
+    AssignmentEditorConfig,
+    getTinyMceBaseConfig,
+    getTinyMceThemeConfig,
+} from '../../../shared/tinymce/tinymce-config';
 import { TranslateService } from '@ngx-translate/core';
 import { PlatformLocation } from '@angular/common';
 import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
@@ -77,11 +81,12 @@ export class SubmissionSidebarComponent {
 
     //@ViewChild(CommentsListComponent) commentsRef: CommentsListComponent;
     readonly editorConfig = computed(() => ({
+        ...getTinyMceBaseConfig(
+            this.platformLocation.getBaseHrefFromDOM(),
+            this.translateService.getDefaultLang(),
+        ),
         ...AssignmentEditorConfig,
-        base_url: this.platformLocation.getBaseHrefFromDOM() + 'assets/tinymce',
-        language: this.translateService.getDefaultLang(),
-        skin: this.theme.isDarkMode() ? 'oxide-dark' : 'oxide',
-        content_css: this.theme.isDarkMode() ? 'dark' : 'default',
+        ...getTinyMceThemeConfig(this.theme.isDarkMode()),
     }));
     submitFormGroup: FormGroup;
     data = model.required<SubmissionConfig>();

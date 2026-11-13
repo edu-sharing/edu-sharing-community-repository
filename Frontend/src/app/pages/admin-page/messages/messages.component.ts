@@ -23,6 +23,11 @@ import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ShareDialogModule } from '../../../features/dialogs/dialog-modules/share-dialog/share-dialog.module';
+import {
+    AdminMessagesEditorConfig,
+    getTinyMceBaseConfig,
+    getTinyMceThemeConfig,
+} from '../../../shared/tinymce/tinymce-config';
 import { MainNavService } from '../../../main/navigation/main-nav.service';
 import { Toast } from 'ngx-edu-sharing-ui';
 import { ThemeService } from '../../../services/theme.service';
@@ -133,23 +138,12 @@ export class AdminMessagesComponent implements OnInit {
         ]);*/
         if ((await this.configService.get<string>('admin.wysiwygType', 'TinyMCE')) === 'TinyMCE') {
             this.editorConfig = {
-                base_url: this.platformLocation.getBaseHrefFromDOM() + 'assets/tinymce/',
-                // TinyMCE rewrites href/src relative to its document_base_url by
-                // default; keep admin-entered message URLs exactly as typed. (breaks angular logic)
-                convert_urls: false,
-                branding: false,
-                height: 200,
-                apiKey: '',
-                menubar: false,
-                statusbar: false,
-                resize: true,
-                //newline_behavior: 'linebreak',
-                plugins: ['link', 'code'],
-                toolbar:
-                    'bold italic underline | link | alignleft aligncenter alignright alignjustify | removeformat | code | undo redo',
-                language: this.translate.getDefaultLang(),
-                skin: this.theme.isDarkMode() ? 'oxide-dark' : 'oxide',
-                content_css: this.theme.isDarkMode() ? 'dark' : 'default',
+                ...getTinyMceBaseConfig(
+                    this.platformLocation.getBaseHrefFromDOM(),
+                    this.translate.getDefaultLang(),
+                ),
+                ...AdminMessagesEditorConfig,
+                ...getTinyMceThemeConfig(this.theme.isDarkMode()),
             };
         }
     }

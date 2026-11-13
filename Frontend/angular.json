@@ -39,7 +39,7 @@
               },
               {
                 "glob": "**/*",
-                "input": "node_modules/tinymce-i18n/langs5",
+                "input": "node_modules/tinymce-i18n/langs8",
                 "output": "/assets/tinymce/langs/"
 
               },
@@ -223,7 +223,9 @@
           "builder": "@storybook/angular:start-storybook",
           "options": {
             "assets": [
-              "src/assets"
+              "src/assets",
+              { "glob": "**/*", "input": "node_modules/tinymce", "output": "/assets/tinymce/" },
+              { "glob": "**/*", "input": "node_modules/tinymce-i18n/langs8", "output": "/assets/tinymce/langs/" }
             ],
             "configDir": ".storybook",
             "browserTarget": "angular-edusharing:build",
@@ -235,7 +237,9 @@
           "builder": "@storybook/angular:build-storybook",
           "options": {
             "assets": [
-              "src/assets"
+              "src/assets",
+              { "glob": "**/*", "input": "node_modules/tinymce", "output": "/assets/tinymce/" },
+              { "glob": "**/*", "input": "node_modules/tinymce-i18n/langs8", "output": "/assets/tinymce/langs/" }
             ],
             "configDir": ".storybook",
             "browserTarget": "angular-edusharing:build",

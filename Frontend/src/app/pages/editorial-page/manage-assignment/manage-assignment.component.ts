@@ -34,23 +34,14 @@ import { NodesSelectorConfig } from '../nodes-selector/nodes-selector.component'
 import { EditorialPageService } from '../editorial-page.service';
 import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
 import { ThemeService } from '../../../services/theme.service';
+import {
+    AssignmentEditorConfig,
+    getTinyMceBaseConfig,
+    getTinyMceThemeConfig,
+} from '../../../shared/tinymce/tinymce-config';
 
 export type AssignmentBase = Pick<Assignment, 'title' | 'type' | 'summary'>;
 
-export const AssignmentEditorConfig = {
-    branding: false,
-    height: 200,
-    suffix: '.min',
-    menubar: false,
-    statusbar: false,
-    resize: true,
-    plugins: ['lists'],
-    default_link_target: '_blank',
-    link_title: false,
-    newline_behavior: 'invert',
-    link_assume_external_targets: true,
-    toolbar: 'bold | bullist numlist | undo redo',
-} as any;
 @Component({
     selector: 'es-manage-assignment',
     templateUrl: 'manage-assignment.component.html',
@@ -82,11 +73,12 @@ export class ManageAssignmentComponent {
     private theme = inject(ThemeService);
 
     readonly editorConfig = computed(() => ({
+        ...getTinyMceBaseConfig(
+            this.platformLocation.getBaseHrefFromDOM(),
+            this.translateService.getDefaultLang(),
+        ),
         ...AssignmentEditorConfig,
-        base_url: this.platformLocation.getBaseHrefFromDOM() + 'assets/tinymce',
-        language: this.translateService.getDefaultLang(),
-        skin: this.theme.isDarkMode() ? 'oxide-dark' : 'oxide',
-        content_css: this.theme.isDarkMode() ? 'dark' : 'default',
+        ...getTinyMceThemeConfig(this.theme.isDarkMode()),
     }));
     now = new Date().getTime();
     dateTime = new Date().getTime() + 1000 * 3600 * 24 * 5;
