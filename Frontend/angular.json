@@ -62,7 +62,6 @@
             "scripts": [
               "node_modules/jquery/dist/jquery.js",
               "src/assets/js/nouislider.min.js",
-              "node_modules/moment/min/moment-with-locales.min.js",
               "node_modules/chart.js/dist/chart.umd.js",
               "node_modules/tinymce/tinymce.min.js"
             ],
@@ -74,7 +73,6 @@
               "qrcode",
               "uuid",
               "lodash",
-              "moment",
               "jquery",
               "pdfmake/build/pdfmake",
               "pdfmake/build/vfs_fonts"
@@ -186,7 +184,6 @@
             "scripts": [
               "node_modules/jquery/dist/jquery.js",
               "src/assets/js/nouislider.min.js",
-              "node_modules/moment/min/moment-with-locales.min.js",
               "node_modules/chart.js/dist/chart.umd.js",
               "node_modules/tinymce/tinymce.min.js"
             ],
