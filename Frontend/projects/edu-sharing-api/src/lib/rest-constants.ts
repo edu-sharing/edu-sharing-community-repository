@@ -85,6 +85,16 @@ export class RestConstants {
     public static PERMISSION_FEEDBACK = 'Feedback'; // Giving feedback for collections
     public static PERMISSION_RATE = 'Rate';
 
+    public static CONTENT_QUOTA_EXCEPTION = 'DAOQuotaException';
+    public static CONTENT_VIRUS_SCAN_FAILED_EXCEPTION = 'DAOVirusScanFailedException';
+    public static CONTENT_VIRUS_EXCEPTION = 'DAOVirusDetectedException';
+    public static CONTENT_MIMETYPE_VERIFICATION_EXCEPTION = 'DAOMimetypeVerificationException';
+    public static CONTENT_NODE_FILE_SIZE_EXCEEDED_EXCEPTION = 'DAONodeFileSizeExceededException';
+    public static CONTENT_FILE_EXTENSION_VERIFICATION_EXCEPTION =
+        'DAOFileExtensionVerificationException';
+    public static CONTENT_ACTIVE_CONTENT_VERIFICATION_EXCEPTION =
+        'DAOActiveContentVerificationException';
+
     public static TOOLPERMISSION_INVITE = 'TOOLPERMISSION_INVITE';
     public static TOOLPERMISSION_INVITE_TIMEBASED = 'TOOLPERMISSION_INVITE_TIMEBASED';
     public static TOOLPERMISSION_INVITE_STREAM = 'TOOLPERMISSION_INVITE_STREAM';

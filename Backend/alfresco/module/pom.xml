@@ -580,6 +580,11 @@
       <artifactId>tika-parser-pdf-module</artifactId>
     </dependency>
     <dependency>
+      <!-- used directly by PdfActiveContentScanner -->
+      <groupId>org.apache.pdfbox</groupId>
+      <artifactId>pdfbox</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.apache.tika</groupId>
       <artifactId>tika-parser-pkg-module</artifactId>
     </dependency>

@@ -59,6 +59,7 @@
       "VIRUS": "Virus détecté. Le fichier a été supprimé.",
       "VIRUS_SCAN_FAILED": "Erreur de vérification du fichier. Veuillez réessayer.",
       "MIMETYPE_VERIFICATION": "Le contenu du fichier n'était pas autorisé ou n'a pas pu être vérifié. Le fichier a été supprimé.",
+      "ACTIVE_CONTENT_VERIFICATION": "Le fichier contient du contenu actif (p. ex. JavaScript) qui n'est pas autorisé. Le fichier a été supprimé.",
       "FILETYPE_VERIFICATION": "L'extension du fichier n'a pas pu être vérifiée. Le fichier a été supprimé.",
       "FILE_SIZE_EXCEEDED": "Dépassement de la taille maximale autorisée (taille du fichier : {{actualSize}}, maximum autorisé : {{maxSize}})"
     },

@@ -61,6 +61,7 @@
       "VIRUS": "Virus detected. File was deleted.",
       "VIRUS_SCAN_FAILED": "Error verifying the file. Please try again.",
       "MIMETYPE_VERIFICATION": "File content was not allowed or could not be verified. File was deleted.",
+      "ACTIVE_CONTENT_VERIFICATION": "The file contains active content (e.g. JavaScript) which is not allowed. File was deleted.",
       "FILETYPE_VERIFICATION": "File extension could not be verified. File was deleted.",
       "FILE_SIZE_EXCEEDED": "Maximum allowed file size exceeded (file size: {{actualSize}}, maximum allowed: {{maxSize}})"
     },

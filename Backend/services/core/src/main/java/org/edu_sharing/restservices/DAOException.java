@@ -16,6 +16,7 @@ import org.alfresco.service.cmr.usage.ContentQuotaException;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.RestrictedAccessException;
 import org.edu_sharing.alfresco.policy.GuestCagePolicy;
+import org.edu_sharing.alfresco.policy.NodeActiveContentValidationException;
 import org.edu_sharing.alfresco.policy.NodeFileExtensionValidationException;
 import org.edu_sharing.alfresco.policy.NodeFileSizeExceededException;
 import org.edu_sharing.alfresco.policy.NodeMimetypeValidationException;
@@ -162,6 +163,12 @@ public class DAOException extends RuntimeException {
         if (t instanceof NodeMimetypeValidationException ||
                 t instanceof ContentIOException && t.getCause() instanceof NodeMimetypeValidationException) {
             return new DAOMimetypeVerificationException(t, nodeId);
+        }
+        if (t instanceof NodeActiveContentValidationException) {
+            return new DAOActiveContentVerificationException((NodeActiveContentValidationException) t, nodeId);
+        }
+        if (t instanceof ContentIOException && t.getCause() instanceof NodeActiveContentValidationException) {
+            return new DAOActiveContentVerificationException((NodeActiveContentValidationException) t.getCause(), nodeId);
         }
         if (t instanceof NodeFileSizeExceededException) {
             return new DAONodeFileSizeExceededException((NodeFileSizeExceededException) t, nodeId);

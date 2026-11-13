@@ -306,48 +306,63 @@ export class FileUploadProgressDialogComponent implements OnInit {
             .subscribe((subtitle) => this.dialogRef.patchConfig({ subtitle }));
     }
 
+    /**
+     * Returns the parsed json body of a rest error.
+     * Supports the `HttpErrorResponse` of the angular http client (body in `error`) as well as the
+     * legacy xhr based upload errors (body as string in `response`).
+     */
+    private _getErrorBody(error: any): { error?: string; message?: string; details?: any } | null {
+        for (const body of [error?.error, error?.response]) {
+            if (body && typeof body === 'object') {
+                return body;
+            }
+            if (typeof body === 'string') {
+                try {
+                    return JSON.parse(body);
+                } catch (e) {}
+            }
+        }
+        return null;
+    }
+
     private _mapError(error: any, node: Node = null) {
         // delete the now orphan node since it's empty
         if (node) {
             this.nodeService.deleteNode(node.ref.id, false).subscribe(() => {});
         }
+        const body = this._getErrorBody(error);
+        const matches = (needle: string) =>
+            [body?.error, body?.message].some(
+                (value) => typeof value === 'string' && value.includes(needle),
+            );
         let i18nName: string;
         let variables: any;
-        if (RestHelper.errorMatchesAny(error, RestConstants.CONTENT_VIRUS_SCAN_FAILED_EXCEPTION)) {
+        if (matches(RestConstants.CONTENT_VIRUS_SCAN_FAILED_EXCEPTION)) {
             i18nName = 'VIRUS_SCAN_FAILED';
-        } else if (RestHelper.errorMatchesAny(error, RestConstants.CONTENT_VIRUS_EXCEPTION)) {
+        } else if (matches(RestConstants.CONTENT_VIRUS_EXCEPTION)) {
             i18nName = 'VIRUS';
-        } else if (
-            RestHelper.errorMatchesAny(error, RestConstants.CONTENT_MIMETYPE_VERIFICATION_EXCEPTION)
-        ) {
+        } else if (matches(RestConstants.CONTENT_MIMETYPE_VERIFICATION_EXCEPTION)) {
             i18nName = 'MIMETYPE_VERIFICATION';
-        } else if (
-            RestHelper.errorMatchesAny(
-                error,
-                RestConstants.CONTENT_NODE_FILE_SIZE_EXCEEDED_EXCEPTION,
-            )
-        ) {
+        } else if (matches(RestConstants.CONTENT_ACTIVE_CONTENT_VERIFICATION_EXCEPTION)) {
+            i18nName = 'ACTIVE_CONTENT_VERIFICATION';
+        } else if (matches(RestConstants.CONTENT_NODE_FILE_SIZE_EXCEEDED_EXCEPTION)) {
             i18nName = 'FILE_SIZE_EXCEEDED';
-            try {
-                const errorData = JSON.parse(error.response);
+            if (body?.details) {
                 variables = {
-                    actualSize: this.formatSizePipe.transform(errorData.details.actualSize),
-                    maxSize: this.formatSizePipe.transform(errorData.details.maxSize),
+                    actualSize: this.formatSizePipe.transform(body.details.actualSize),
+                    maxSize: this.formatSizePipe.transform(body.details.maxSize),
                 };
-            } catch (e) {
-                console.warn(e);
             }
-        } else if (
-            RestHelper.errorMatchesAny(
-                error,
-                RestConstants.CONTENT_FILE_EXTENSION_VERIFICATION_EXCEPTION,
-            )
-        ) {
+        } else if (matches(RestConstants.CONTENT_FILE_EXTENSION_VERIFICATION_EXCEPTION)) {
             i18nName = 'FILETYPE_VERIFICATION';
-        } else if (RestHelper.errorMatchesAny(error, RestConstants.CONTENT_QUOTA_EXCEPTION)) {
+        } else if (matches(RestConstants.CONTENT_QUOTA_EXCEPTION)) {
             i18nName = 'QUOTA';
         } else {
             i18nName = 'UNKNOWN';
+        }
+        if (i18nName !== 'UNKNOWN') {
+            // the error is shown in the dialog, the global error handler must not show a toast as well
+            (error as ApiErrorResponse)?.preventDefault?.();
         }
         return { key: i18nName, variables };
     }

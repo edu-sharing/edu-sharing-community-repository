@@ -58,6 +58,12 @@ export class PdfComponent implements RenderModule, OnChanges {
         // document-level `dragover`/`drop` listeners (to paste dropped images
         // into the stamp editor)
         pdfDefaultOptions.annotationEditorMode = AnnotationEditorType.DISABLE;
+        // Never execute JavaScript embedded in a pdf (OpenAction, document / page / field actions).
+        // Set explicitly instead of relying on the library defaults, since the peer dependency range
+        // allows older ngx-extended-pdf-viewer versions.
+        pdfDefaultOptions.enableScripting = false;
+        pdfDefaultOptions.enableOpenActionJavaScript = false;
+        pdfDefaultOptions.enableCatalogAAJavaScript = false;
 
         // Keep the viewer theme in sync with live dark-mode toggles.
         const observer = new MutationObserver(() =>
