@@ -16,6 +16,11 @@ import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { ContextNamePipe } from './context.directive';
 import { MatChipEvent } from '@angular/material/chips';
 import { EditorModule } from '@tinymce/tinymce-angular';
+import {
+    getTinyMceBaseUrl,
+    getTinyMceLanguage,
+    TINYMCE_LOCAL_SCRIPT_PROVIDER,
+} from '../../../util/tinymce';
 import { TranslateService } from '@ngx-translate/core';
 import { PlatformLocation } from '@angular/common';
 import { DELETE_OR_CANCEL } from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
@@ -32,6 +37,8 @@ import { Toast } from 'ngx-edu-sharing-ui';
     styleUrls: ['messages.component.scss'],
     standalone: true,
     imports: [SharedModule, ContextNamePipe, EditorModule, ShareDialogModule],
+    // load the bundled TinyMCE instead of the Tiny Cloud CDN
+    providers: [TINYMCE_LOCAL_SCRIPT_PROVIDER],
 })
 export class AdminMessagesComponent implements OnInit {
     @ViewChild('heading') headingRef: ElementRef;
@@ -128,7 +135,7 @@ export class AdminMessagesComponent implements OnInit {
         ]);*/
         if ((await this.configService.get<string>('admin.wysiwygType', 'TinyMCE')) === 'TinyMCE') {
             this.editorConfig = {
-                base_url: this.platformLocation.getBaseHrefFromDOM() + 'assets/tinymce/',
+                base_url: getTinyMceBaseUrl(this.platformLocation),
                 branding: false,
                 height: 200,
                 apiKey: '',
@@ -139,7 +146,7 @@ export class AdminMessagesComponent implements OnInit {
                 plugins: ['link', 'code'],
                 toolbar:
                     'bold italic underline | link | alignleft aligncenter alignright alignjustify | removeformat | code | undo redo',
-                language: this.translate.getDefaultLang(),
+                language: getTinyMceLanguage(this.translate.getDefaultLang()),
             };
         }
     }

@@ -39,7 +39,7 @@
               },
               {
                 "glob": "**/*",
-                "input": "node_modules/tinymce-i18n/langs5",
+                "input": "node_modules/tinymce-i18n/langs8",
                 "output": "/assets/tinymce/langs/"
 
               },

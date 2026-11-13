@@ -3,26 +3,23 @@ import { UntypedFormControl } from '@angular/forms';
 import { MdsEditorWidgetBase } from '../mds-editor-widget-base';
 import { TranslateService } from '@ngx-translate/core';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
-import { EditorComponent, TINYMCE_SCRIPT_SRC } from '@tinymce/tinymce-angular';
+import { EditorComponent } from '@tinymce/tinymce-angular';
 import { PlatformLocation } from '@angular/common';
 import { MdsEditorWidgetContainerComponent } from '../mds-editor-widget-container/mds-editor-widget-container.component';
 import { CardDialogService } from '../../../../dialogs/card-dialog/card-dialog.service';
 import { Toast } from '../../../../../services/toast';
 import { ValueType } from 'ngx-edu-sharing-ui';
+import {
+    getTinyMceBaseUrl,
+    getTinyMceLanguage,
+    TINYMCE_LOCAL_SCRIPT_PROVIDER,
+} from '../../../../../util/tinymce';
 
 @Component({
     selector: 'es-mds-editor-widget-checkbox',
     templateUrl: './mds-editor-widget-tinymce.component.html',
     styleUrls: ['./mds-editor-widget-tinymce.component.scss'],
-    providers: [
-        {
-            provide: TINYMCE_SCRIPT_SRC,
-            useFactory: (platformLocation: PlatformLocation) => {
-                return platformLocation.getBaseHrefFromDOM() + 'assets/tinymce/tinymce.min.js';
-            },
-            deps: [PlatformLocation],
-        },
-    ],
+    providers: [TINYMCE_LOCAL_SCRIPT_PROVIDER],
     standalone: false,
 })
 export class MdsEditorWidgetTinyMCEComponent extends MdsEditorWidgetBase implements AfterViewInit {
@@ -40,7 +37,7 @@ export class MdsEditorWidgetTinyMCEComponent extends MdsEditorWidgetBase impleme
         plugins: ['link'],
         toolbar:
             'h1 h2 h3 h4 | bold italic underline | link | alignleft aligncenter alignright alignjustify | removeformat | undo redo',
-        language: this.translate.getDefaultLang(),
+        language: getTinyMceLanguage(this.translate.getDefaultLang()),
     };
     editorConfig: Record<string, any>;
     _html = '';
@@ -87,8 +84,7 @@ export class MdsEditorWidgetTinyMCEComponent extends MdsEditorWidgetBase impleme
 
     async ngAfterViewInit() {
         this._html = (await this.widget.getInitalValuesAsync()).jointValues[0];
-        (this.editorConfigDefault as any).base_url =
-            this.platformLocation.getBaseHrefFromDOM() + 'assets/tinymce/';
+        (this.editorConfigDefault as any).base_url = getTinyMceBaseUrl(this.platformLocation);
         // dirty workaround for tinyMCE
         setTimeout(() => {
             if (this.widget.definition.configuration) {
