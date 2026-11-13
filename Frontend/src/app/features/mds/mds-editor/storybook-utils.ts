@@ -147,6 +147,18 @@ export class translateProvider {
         return this.translation$.pipe(map((_) => this.instant(v, args)));
     }
 
+    /** storybook always loads the german translations (see `loadStorybookTranslations`) */
+    readonly currentLang = 'de';
+    readonly defaultLang = 'de';
+
+    getDefaultLang(): string {
+        return this.defaultLang;
+    }
+
+    getCurrentLang(): string {
+        return this.currentLang;
+    }
+
     onTranslationChange = of({ lang: 'none' });
     onDefaultLangChange = of({ lang: 'none' });
     onLangChange = of({});
