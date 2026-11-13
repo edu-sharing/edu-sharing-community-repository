@@ -48,7 +48,7 @@ export class PreviewSidebarComponent implements OnDestroy, AfterViewInit {
 
     private readonly destroyed = new Subject<void>();
     private modalDialogRef: CardDialogRef<GenericDialogData<string>, string>;
-    private modalOpen$ = new BehaviorSubject<boolean>(false);
+    readonly modalOpen$ = new BehaviorSubject<boolean>(false);
 
     constructor(
         private dialogs: DialogsService,

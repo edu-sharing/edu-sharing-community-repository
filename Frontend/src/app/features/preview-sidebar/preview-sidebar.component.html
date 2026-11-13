@@ -14,7 +14,13 @@
         <i esIcon="close" [aria]="true"></i>
       </button>
     </div>
+    <!--
+      The pdf viewer (ngx-extended-pdf-viewer) only supports one instance per page,
+      so the sidebar content is removed while the fullscreen modal is open.
+    -->
+    @if ((modalOpen$ | async) === false) {
     <ng-container *ngTemplateOutlet="content"></ng-container>
+    }
   </div>
   <ng-template #content>
     <es-preview-content #preview [node]="node" [customOptions]="customOptions"></es-preview-content>
