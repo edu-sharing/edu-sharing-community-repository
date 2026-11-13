@@ -13,6 +13,10 @@ whitelist=(
   "jakarta.xml.soap-api-2.0.1.jar:edu-lib"
   "stax-api-1.0.1.jar:alf-lib"
   "stax-api-1.0-2.jar:alf-lib"
+  # jackson 3 (tools.jackson.*) is a runtime dependency of elasticsearch-java >= 8.19.20 and lives in its own packages,
+  # so it does not clash with jackson 2 (com.fasterxml.jackson.*)
+  "jackson-core-3.0.0.jar:alf-lib"
+  "jackson-databind-3.0.0.jar:alf-lib"
 )
 
 files=()
