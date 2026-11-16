@@ -191,14 +191,25 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         return !!clip?.nodes?.length && clip.nodes.every((node) => this.isCollection(node));
     }
 
-    /** Whether the clipboard holds files, the only nodes a collection can reference. */
-    clipboardContainsCollectableNodes(): boolean {
+    /** Whether at least one node of the clipboard is a collection. */
+    private clipboardIncludesCollections(): boolean {
+        return !!this.getClipboard()?.nodes?.some((node) => this.isCollection(node));
+    }
+
+    /** Whether a collection can take the node as a reference, which only files can be. */
+    private isCollectable(node: Node): boolean {
+        return !this.isCollection(node) && node.type === RestConstants.CCM_TYPE_IO;
+    }
+
+    /**
+     * Whether every node of the clipboard can be pasted into a collection: collections become
+     * sub-collections, files become references.
+     */
+    private clipboardFitsIntoCollection(): boolean {
         const clip = this.getClipboard();
         return (
             !!clip?.nodes?.length &&
-            clip.nodes.every(
-                (node) => !this.isCollection(node) && node.type === RestConstants.CCM_TYPE_IO,
-            )
+            clip.nodes.every((node) => this.isCollection(node) || this.isCollectable(node))
         );
     }
 
@@ -222,7 +233,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
      * Cut nodes can neither be pasted into their source folder again nor a folder into itself.
      */
     canPasteIntoFolder(target?: Node): boolean {
-        if (this.clipboardContainsCollections() || this.clipboardIsCutFromCollection()) {
+        if (this.clipboardIncludesCollections() || this.clipboardIsCutFromCollection()) {
             return false;
         }
         const clip = this.getClipboard();
@@ -262,7 +273,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         ) {
             return false;
         }
-        if (!this.clipboardContainsCollections() && !this.clipboardContainsCollectableNodes()) {
+        if (!this.clipboardFitsIntoCollection()) {
             return false;
         }
         if (clip.copy) {
@@ -295,10 +306,15 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         if (!this.getClipboard().copy) {
             return this.moveClipboardIntoCollection(target);
         }
-        if (this.clipboardContainsCollections()) {
-            return this.pasteCollections(target);
+        const nodes = this.getClipboard().nodes;
+        const collections = nodes.filter((node) => this.isCollection(node));
+        const files = nodes.filter((node) => !this.isCollection(node));
+        if (collections.length > 0) {
+            await this.pasteCollections(target, collections);
         }
-        this.addClipboardNodesToCollection(target);
+        if (files.length > 0) {
+            this.addClipboardNodesToCollection(target, files);
+        }
     }
 
     /** Moves the cut collections/references of the clipboard into the target collection. */
@@ -311,8 +327,9 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         // moving to the start page is always allowed (same as dropping on the breadcrumb home)
         if (
             !toRoot &&
-            this.clipboardContainsCollections() &&
-            clip.nodes.some((node) => isEditorial(node) !== isEditorial(target))
+            clip.nodes.some(
+                (node) => this.isCollection(node) && isEditorial(node) !== isEditorial(target),
+            )
         ) {
             this.toast.error(null, 'INVALID_OPERATION');
             return;
@@ -361,16 +378,10 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         }
     }
 
-    /** Adds the clipboard nodes to the given collection, they become collection references. */
-    private addClipboardNodesToCollection(target: Node): void {
-        const clip = this.storage.get(
-            TemporaryStorageService.WORKSPACE_CLIPBOARD,
-        ) as ClipboardObject;
-        if (!clip?.nodes?.length || !target) {
-            return;
-        }
+    /** Adds the copied files to the given collection, they become collection references. */
+    private addClipboardNodesToCollection(target: Node, files: Node[]): void {
         // a collection references the original, not a reference node copied inside a collection
-        const nodes = clip.nodes.map((node) => ({
+        const nodes = files.map((node) => ({
             ...node,
             ref: { ...node.ref, id: this.nodeHelper.getOriginalId(node) },
         }));
@@ -383,21 +394,15 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
     }
 
     /**
-     * Copies the clipboard collection(s) into the target collection, including child collections,
+     * Copies the given collections into the target collection, including child collections,
      * references and permissions.
      */
-    private async pasteCollections(target: Node): Promise<void> {
-        const clip = this.storage.get(
-            TemporaryStorageService.WORKSPACE_CLIPBOARD,
-        ) as ClipboardObject;
-        if (!clip?.nodes?.length || !target) {
-            return;
-        }
+    private async pasteCollections(target: Node, collections: Node[]): Promise<void> {
         this.toast.showProgressSpinner();
         try {
             let skippedRefs = 0;
             const created: Node[] = [];
-            for (const source of clip.nodes) {
+            for (const source of collections) {
                 const copyResponse = await firstValueFrom(
                     this.collectionApiService.copyCollection({
                         repository: HOME_REPOSITORY,

@@ -1021,7 +1021,6 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         const mixed = collections > 0 && collections < nodes.length;
         const unsupported = (option: OptionItem) =>
             (nodes.length > 1 && option.name === 'OPTIONS.ADD_SHORTCUT') ||
-            (mixed && option.name === 'OPTIONS.COPY') ||
             ((collections > 1 || mixed) && option.name === 'OPTIONS.INVITE');
         for (let i = options.length - 1; i >= 0; i--) {
             if (unsupported(options[i])) {
@@ -1494,15 +1493,22 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             this.createdCollections = [];
             return;
         }
+        // a selection the tiles cannot show (no checkboxes) could neither be seen nor undone there,
+        // so the created collections are only selected while the checkboxes are visible
+        const select = this.showCollectionCheckboxes();
         this.listCollections?.addVirtualNodes(
             created.map((node) => Object.assign(node, { override: false })) as VirtualNode[],
-            { select: true },
+            { select },
         );
-        // the selection replaced any earlier one, so the only selected entry is a created collection
+        // a selection replaces any earlier one, so the only selected entry is a created
+        // collection; without a selection the created collections are the virtual tiles
+        const target = select
+            ? 'es-node-entries-wrapper .selected, .mat-row-selected'
+            : 'es-node-entries-wrapper .grid-card-virtual';
         afterNextRender(
             () =>
                 this.elementRef.nativeElement
-                    .querySelector('es-node-entries-wrapper .selected, .mat-row-selected')
+                    .querySelector(target)
                     ?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }),
             { injector: this.injector },
         );
