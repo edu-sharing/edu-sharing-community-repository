@@ -24,7 +24,7 @@
     "zone.js": ">=0.14.3",
     "ngx-edu-sharing-api": "~11.0.0",
     "ngx-edu-sharing-ui": "~11.0.0",
-    "ngx-extended-pdf-viewer": ">=23.2.0"
+    "ngx-extended-pdf-viewer": ">=28.1.2"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": ">=21.0.0",

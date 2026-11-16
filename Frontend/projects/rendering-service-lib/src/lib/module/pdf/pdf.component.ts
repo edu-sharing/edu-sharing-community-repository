@@ -61,10 +61,9 @@ export class PdfComponent implements RenderModule, OnChanges {
         // into the stamp editor)
         pdfDefaultOptions.annotationEditorMode = AnnotationEditorType.DISABLE;
         // Never execute JavaScript embedded in a pdf (OpenAction, document / page / field actions).
-        // Set explicitly instead of relying on the library defaults, since the peer dependency range
-        // allows older ngx-extended-pdf-viewer versions.
+        // Set explicitly instead of relying on the library defaults. (`isEvalSupported` is obsolete:
+        // pdf.js 6 / ngx-extended-pdf-viewer 28 no longer uses eval.)
         pdfDefaultOptions.enableScripting = false;
-        pdfDefaultOptions.isEvalSupported = false;
         pdfDefaultOptions.enableOpenActionJavaScript = false;
         pdfDefaultOptions.enableCatalogAAJavaScript = false;
 
