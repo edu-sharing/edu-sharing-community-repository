@@ -1,5 +1,6 @@
 package org.edu_sharing.repository.server.sitemap;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -9,6 +10,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import com.typesafe.config.Config;
@@ -19,6 +21,7 @@ import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.Marshaller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
@@ -36,6 +39,7 @@ import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.search.SearchServiceFactory;
@@ -58,37 +62,29 @@ public class SitemapServlet extends SpringHttpServlet {
     private static final String CONFIG_STATIC_PAGES = "angular.sitemap.staticPages";
     private static final String TYPE_STATIC = "static";
     private static final Set<String> CHANGE_FREQUENCIES = Set.of("always", "hourly", "daily", "weekly", "monthly", "yearly", "never");
+    private static final String CONFIG_CACHE_SECONDS = "angular.sitemap.cacheSeconds";
+    private static final long DEFAULT_CACHE_SECONDS = 600;
+    /** a sitemap file is up to ~1 MB, the index and the static pages are small */
+    private static final int MAX_CACHED_FILES = 64;
+
+    private final SitemapCache cache = new SitemapCache(MAX_CACHED_FILES, System::currentTimeMillis);
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         try {
-            String from = req.getParameter("from");
-            String after = req.getParameter("after");
-            String type = req.getParameter("type");
-            if (TYPE_STATIC.equals(type)) {
-                toXml(getStaticPages(), resp);
+            SitemapCache.Entry entry = cache.get(cacheKey(req), getCacheMillis(), () -> toXml(render(req)));
+            resp.setContentType("application/xml");
+            resp.setHeader("ETag", entry.etag());
+            resp.setDateHeader("Last-Modified", entry.created());
+            // a crawler asks again with the etag and gets a 304 as long as the file is unchanged
+            resp.setHeader("Cache-Control", "no-cache");
+            if (SitemapCache.notModified(req.getHeader("If-None-Match"), ifModifiedSince(req), entry)) {
+                resp.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
                 return;
             }
-            SearchService search = SearchServiceFactory.getInstance().getLocalService();
-
-            if (search instanceof SearchServiceElastic) {
-                SearchServiceElastic elastic = (SearchServiceElastic) search;
-                if (type == null) {
-                    toXml(getAllElastic(req, elastic), resp);
-                } else if (from != null) {
-                    // legacy offset urls (before the cursor paging): the pages are not addressable anymore
-                    toXml(new Urlset(), resp);
-                } else {
-                    toXml(getNodesElastic(elastic, type, after == null ? null : Long.valueOf(after)), resp);
-                }
-            } else if (from == null) {
-                Sitemapindex index = getAll(req);
-                toXml(index, resp);
-            } else {
-                Urlset set = getNodes(req, type, Integer.parseInt(from));
-                toXml(set, resp);
-            }
+            resp.setContentLength(entry.body().length);
+            resp.getOutputStream().write(entry.body());
         }
         catch(NumberFormatException t){
             resp.sendError(400, "invalid parameter: " + t.getMessage());
@@ -96,6 +92,72 @@ public class SitemapServlet extends SpringHttpServlet {
         catch(Throwable t){
             log.error(t.getMessage(),t);
             resp.sendError(500,t.toString());
+        }
+    }
+
+    /**
+     * the sitemap index or one of its files, as the parameters ask for
+     */
+    private Object render(HttpServletRequest req) throws Exception {
+        String from = req.getParameter("from");
+        String after = req.getParameter("after");
+        String type = req.getParameter("type");
+        if (TYPE_STATIC.equals(type)) {
+            return getStaticPages();
+        }
+        try {
+            SearchService search = SearchServiceFactory.getInstance().getLocalService();
+            if (search instanceof SearchServiceElastic elastic) {
+                if (type == null) {
+                    return getAllElastic(req, elastic);
+                }
+                if (from != null) {
+                    // legacy offset urls (before the cursor paging): the pages are not addressable anymore
+                    return new Urlset();
+                }
+                return getNodesElastic(elastic, type, after == null ? null : Long.valueOf(after));
+            }
+            if (from == null) {
+                return getAll(req);
+            }
+            return getNodes(req, type, Integer.parseInt(from));
+        } catch (Exception | Error e) {
+            throw e;
+        } catch (Throwable t) {
+            throw new Exception(t);
+        }
+    }
+
+    /**
+     * The content depends on the url (host and file) and on who asks: the permissions of the user decide which
+     * nodes are listed, the scope which index part. A crawler is always the guest.
+     */
+    private static String cacheKey(HttpServletRequest req) {
+        String user;
+        try {
+            user = AuthenticationUtil.getRunAsUser();
+        } catch (Throwable t) {
+            user = null;
+        }
+        return req.getRequestURL() + "?" + Objects.toString(req.getQueryString(), "")
+                + "|" + Objects.toString(user, "")
+                + "|" + Objects.toString(NodeServiceInterceptor.getEduSharingScope(), "");
+    }
+
+    private long getCacheMillis() {
+        try {
+            return lightbendConfigLoader.getConfig().getLong(CONFIG_CACHE_SECONDS) * 1000;
+        } catch (Throwable t) {
+            return DEFAULT_CACHE_SECONDS * 1000L;
+        }
+    }
+
+    private static long ifModifiedSince(HttpServletRequest req) {
+        try {
+            return req.getDateHeader("If-Modified-Since");
+        } catch (IllegalArgumentException e) {
+            // not a date: as if not sent
+            return -1;
         }
     }
 
@@ -256,16 +318,17 @@ public class SitemapServlet extends SpringHttpServlet {
         return index;
     }
 
-    private void toXml(Object obj, HttpServletResponse resp) throws Exception {
+    private static byte[] toXml(Object obj) throws Exception {
         JAXBContext jaxbContext = JAXBContext.newInstance(obj.getClass());
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
 
-        resp.setContentType("application/xml");
         // output pretty printed
         jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         jaxbMarshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION, NS_SITEMAP);
         jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT,false);
-        jaxbMarshaller.marshal(obj, resp.getOutputStream());
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        jaxbMarshaller.marshal(obj, out);
+        return out.toByteArray();
     }
 
     private Urlset getNodes(HttpServletRequest request, String type, int from) throws Throwable {
