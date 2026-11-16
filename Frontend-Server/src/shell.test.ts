@@ -383,6 +383,21 @@ test('a versioned render url is not enriched and spares the query', async () => 
     assert.deepEqual(elasticQueries, []);
     // the oEmbed links do not depend on the node and stay
     assert.match(response.body, /json\+oembed/);
+    // the canonical neither: the url of the node without the version, so an old version does not compete
+    assert.match(response.body, /<link rel="canonical" href="http:\/\/repo.example.org\/edu-sharing\/components\/render\/public">/);
+    assert.doesNotMatch(response.body, /og:|twitter:/);
+});
+
+test('a versioned render url with guest access off carries no canonical', async () => {
+    guestEnabled = false;
+    try {
+        const response = await shell('/edu-sharing/components/render/public/1.0', { host: 'noguest-version.example.org' });
+        assert.equal(response.statusCode, 200);
+        assert.match(response.body, /json\+oembed/);
+        assert.doesNotMatch(response.body, /rel="canonical"/);
+    } finally {
+        guestEnabled = true;
+    }
 });
 
 test('the query goes to the ELASTIC_INDEX override, ahead of the backend index', async () => {

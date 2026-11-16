@@ -131,6 +131,32 @@ test('render view of a version: the canonical is the url without the version', (
     assert.doesNotMatch(head, /rel="canonical"[^>]*n1\/1\.2/);
 });
 
+test('versioned render url without node data: the canonical without the version, nothing else', () => {
+    const context = renderContext({
+        target: { kind: 'render', nodeId: 'n1', version: '1.2' },
+        loaded: undefined,
+        pageUrl: 'https://repo.example.org/edu-sharing/components/render/n1/1.2',
+    });
+    const head = headOf(enrichShell(SHELL, context));
+    assert.match(head, /<link rel="canonical" href="https:\/\/repo.example.org\/edu-sharing\/components\/render\/n1">/);
+    assert.equal(head.match(/rel="canonical"/g)?.length, 1);
+    assert.match(head, /json\+oembed/);
+    assert.doesNotMatch(head, /og:|twitter:|name="description"|ld\+json/);
+});
+
+test('versioned render url: no canonical without guest access or without a config', () => {
+    const context = { target: { kind: 'render', nodeId: 'n1', version: '1.2' }, loaded: undefined } as const;
+    const withoutGuest = headOf(enrichShell(SHELL, renderContext({ ...context, config: { ...CONFIG, guest: { enabled: false } } })));
+    assert.doesNotMatch(withoutGuest, /rel="canonical"/);
+    const withoutConfig = headOf(enrichShell(SHELL, renderContext({ ...context, config: null })));
+    assert.doesNotMatch(withoutConfig, /rel="canonical"/);
+});
+
+test('render url without a version and without node data: no canonical, as before', () => {
+    const head = headOf(enrichShell(SHELL, renderContext({ loaded: undefined })));
+    assert.doesNotMatch(head, /rel="canonical"/);
+});
+
 test('collection view: canonical on the collection, Open Graph type website', () => {
     const head = headOf(enrichShell(SHELL, renderContext({ target: { kind: 'collection', nodeId: 'c1' } })));
     assert.match(head, /<link rel="canonical" href="https:\/\/repo.example.org\/edu-sharing\/components\/collections\?id=c1">/);

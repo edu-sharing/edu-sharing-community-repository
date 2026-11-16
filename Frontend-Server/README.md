@@ -84,6 +84,9 @@ guest access off the anonymous caller gets none of it).
 **Node views** (`components/render/<id>`, `components/collections?id=<id>`): title, description,
 `canonical` (the url without the version), Open Graph and Twitter card, and for the render view the
 license, the LRMI data and oEmbed. All of it from the search index (`src/lib/shell-head.ts`).
+The index has no documents of a version, so a versioned render url (`components/render/<id>/<version>`)
+carries no node data - only the oEmbed links and the `canonical` to the url without the version, which
+needs none, so an old version does not compete with the current one.
 
 **Pages** (`components/<name>`: the start page, the search, the collections overview, and what a client
 adds): the texts are translations, so they are overridden like any other text, per language and

@@ -45,6 +45,12 @@ export function enrichShell(html: string, context: ShellContext): string {
         const url = encodeURIComponent(context.pageUrl);
         head.push(`<link rel="alternate" type="application/json+oembed" href="${escapeHtml(`${oembed}?format=json&url=${url}`)}"/>`);
         head.push(`<link rel="alternate" type="text/xml+oembed" href="${escapeHtml(`${oembed}?format=xml&url=${url}`)}"/>`);
+        // The index holds no documents of a version, so a versioned url carries no node data - but its
+        // canonical needs none: the url of the node without the version, so an old version does not
+        // compete with the current one. Only with guest access (the guest gate), as the rest.
+        if (loaded === undefined && target.version !== undefined && config?.guest.enabled === true) {
+            head.push(`<link rel="canonical" href="${escapeHtml(renderUrl(context.appUrl, target.nodeId, undefined))}">`);
+        }
     }
     let result = insertIntoHead(html, head.join(''));
     if (loaded !== undefined) {
