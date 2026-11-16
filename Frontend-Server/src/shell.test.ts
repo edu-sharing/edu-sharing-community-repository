@@ -93,7 +93,24 @@ before(async () => {
     distDir = fs.mkdtempSync(path.join(os.tmpdir(), 'es-frontend-server-shell-'));
     fs.writeFileSync(
         path.join(distDir, 'index.html'),
-        '<html><head><base href="/edu-sharing/" /><title>edu-sharing</title></head><body><es-app></es-app></body></html>',
+        '<html><head><base href="/edu-sharing/" /><title>edu-sharing</title></head><body><es-app><div class="ng-loading"></div></es-app></body></html>',
+    );
+    // the default translations of the build: the SEO texts of the pages are read from them
+    fs.mkdirSync(path.join(distDir, 'assets', 'i18n', 'common'), { recursive: true });
+    fs.writeFileSync(
+        path.join(distDir, 'assets', 'i18n', 'common', 'de.json'),
+        JSON.stringify({
+            SAVE: 'Speichern',
+            SEO: {
+                START: { TITLE: 'Mediathek', DESCRIPTION: 'Unterrichtsmaterialien für Schulen', HEADING: 'Willkommen', INTRO: 'Erster Absatz.\n\nZweiter Absatz.' },
+                SEARCH: { TITLE: 'Suche', DESCRIPTION: 'Medien finden' },
+                MY_PAGE: { TITLE: 'Meine Seite' },
+            },
+        }),
+    );
+    fs.writeFileSync(
+        path.join(distDir, 'assets', 'i18n', 'common', 'en.json'),
+        JSON.stringify({ SAVE: 'Save', SEO: { SEARCH: { TITLE: 'Search', DESCRIPTION: 'Find media' } } }),
     );
 
     internal = http.createServer((request, response) => {
@@ -109,6 +126,8 @@ before(async () => {
                     defaultLocation: request.headers.host === 'portal.example.org' ? 'https://portal.example.org/start' : 'workspace',
                 },
                 currentBackend: {
+                    // client.config.xml: the SEO title of the search is overridden
+                    language: [{ language: 'de', string: [{ key: 'SEO.SEARCH.TITLE', value: 'Suche in der Mediathek' }] }],
                     repository: { guest: { enabled: guestEnabled } },
                     angular: {
                         headers: {
@@ -126,6 +145,9 @@ before(async () => {
                     },
                 },
             });
+        }
+        if (url === '/edu-sharing/rest/config/v1/context/?includeStatic=true') {
+            return json(response, 200, []);
         }
         response.writeHead(404);
         response.end();
@@ -278,6 +300,63 @@ test('with guest access off in the cached config the index is not even asked', a
         assert.equal(response.statusCode, 200);
         assert.doesNotMatch(response.body, /Photosynthesis/);
         assert.deepEqual(elasticQueries, []);
+    } finally {
+        guestEnabled = true;
+    }
+});
+
+test('start page: the SEO texts of the build, canonical, WebSite data and the text below the loading animation', async () => {
+    const response = await shell('/edu-sharing/components/start');
+    assert.equal(response.statusCode, 200);
+    const html = response.body;
+    assert.match(html, /<title>Mediathek<\/title>/);
+    assert.match(html, /<meta name="description" content="Unterrichtsmaterialien für Schulen">/);
+    assert.match(html, /<link rel="canonical" href="http:\/\/repo.example.org\/edu-sharing\/components\/start">/);
+    assert.match(html, /<meta property="og:title" content="Mediathek">/);
+    assert.match(html, /"@type": "WebSite"/);
+    assert.match(html, /components\/search\?q=\{search_term_string\}/);
+    assert.match(html, /<div class="ng-loading"><\/div><div id="seo-content"><h1>Willkommen<\/h1><p>Erster Absatz.<\/p><p>Zweiter Absatz.<\/p><\/div><\/es-app>/);
+    // the texts come from the translations, the index is not asked
+    assert.deepEqual(elasticQueries, []);
+});
+
+test('search page: the override of the client config wins over the text of the build', async () => {
+    const response = await shell('/edu-sharing/components/search?q=physics');
+    assert.match(response.body, /<title>Suche in der Mediathek<\/title>/);
+    assert.match(response.body, /<meta name="description" content="Medien finden">/);
+    // the url of the search with a query is the one of the search
+    assert.match(response.body, /rel="canonical" href="http:\/\/repo.example.org\/edu-sharing\/components\/search"/);
+    assert.doesNotMatch(response.body, /ld\+json/);
+});
+
+test('page texts in the language of the request, German when there are none', async () => {
+    const english = await shell('/edu-sharing/components/search', { 'accept-language': 'en-US,en;q=0.9' });
+    assert.match(english.body, /<title>Search<\/title>/);
+    assert.match(english.body, /content="Find media"/);
+    // no French file: the texts of the app language
+    const french = await shell('/edu-sharing/components/search', { 'accept-language': 'fr-FR' });
+    assert.match(french.body, /<title>Suche in der Mediathek<\/title>/);
+    // English has no text for the start page: German
+    const startInEnglish = await shell('/edu-sharing/components/start', { 'accept-language': 'en' });
+    assert.match(startInEnglish.body, /<title>Mediathek<\/title>/);
+});
+
+test('a page of a client that has an entry is enriched, one without stays as it is', async () => {
+    const mine = await shell('/edu-sharing/components/my-page');
+    assert.match(mine.body, /<title>Meine Seite<\/title>/);
+    assert.match(mine.body, /rel="canonical" href="http:\/\/repo.example.org\/edu-sharing\/components\/my-page"/);
+    const workspace = await shell('/edu-sharing/components/workspace');
+    assert.match(workspace.body, /<title>edu-sharing<\/title>/);
+    assert.doesNotMatch(workspace.body, /rel="canonical"|og:|seo-content/);
+});
+
+test('with guest access off the pages carry no SEO texts and no canonical', async () => {
+    guestEnabled = false;
+    try {
+        const response = await shell('/edu-sharing/components/start', { host: 'noguest-pages.example.org' });
+        assert.equal(response.statusCode, 200);
+        assert.match(response.body, /<title>edu-sharing<\/title>/);
+        assert.doesNotMatch(response.body, /Mediathek|rel="canonical"|seo-content/);
     } finally {
         guestEnabled = true;
     }

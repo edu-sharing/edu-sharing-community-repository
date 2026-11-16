@@ -25,10 +25,10 @@ import { registerOpenApi } from './lib/openapi.ts';
 import { registerMetrics, type ProxyReason } from './lib/metrics.ts';
 import { ElasticClient, type ElasticSearcher, isMissingIndex } from './lib/elastic-client.ts';
 import { loadNode, primaryLanguage } from './lib/elastic-node.ts';
-import { parseShellTarget, type ShellTarget } from './lib/node-metadata.ts';
+import { parseShellPage, parseShellTarget, type ShellTarget } from './lib/node-metadata.ts';
 import { securityHeaders } from './lib/security-headers.ts';
 import { type CachedFile, negotiateEncoding, StaticCache } from './lib/static-cache.ts';
-import { enrichShell } from './lib/shell-head.ts';
+import { enrichPage, enrichShell, type PageTexts, pageTexts } from './lib/shell-head.ts';
 import { createLogStream } from './lib/log-format.ts';
 import { ensureRequestId, REQUEST_ID_HEADER, traceLogBindings } from './lib/tracing.ts';
 import { ANGULAR_ROUTE_PREFIXES, BACKEND_PATHS, WEBDAV_METHODS } from './routes/backend-paths.ts';
@@ -40,6 +40,9 @@ import { FRONTEND_API_PATH, frontendApi } from './routes/frontend-api.ts';
  * Exactly 8 characters, so an unhashed `ngx-extended-pdf-viewer.js` does not match.
  */
 export const HASHED_ASSET = /-[A-Za-z0-9_-]{8}\.(js|css)$/;
+
+/** the language of the app when a request asks for none or for one without texts */
+const DEFAULT_LANGUAGE = 'de';
 
 /** package.json sits one level above both src/ and build/. */
 function serverVersion(): string {
@@ -198,6 +201,21 @@ export async function buildServer(config: Config, overrides: ServerOverrides = {
     app.addHook('onClose', async () => configCache.stop());
     app.decorate('backendReady', () => configCache.isReady());
 
+    // translations: level 1 the files of the build, level 2 the overrides of the client
+    // config (internal port, follows the config reloads of the backend), level 3 both merged.
+    // Served as the frontend api, and read for the SEO texts of the shell pages
+    const translationOverrides = new TranslationOverrides(internalBackend, {
+        contextPath: ctx,
+        configVersion: () => configCache.configVersion(),
+        maxAgeMs: config.configMaxAgeMs,
+        log: app.log.child({ name: 'translation-overrides' }),
+    });
+    const translations = new Translations({
+        defaults: new LanguageDefaults(path.join(config.distDir, 'assets', 'i18n'), { revalidate: config.dev }),
+        overrides: translationOverrides,
+        log: app.log.child({ name: 'translations' }),
+    });
+
     // before any route, so fastify-metrics sees every route pattern
     const staticCache = new StaticCache({
         root: config.distDir,
@@ -275,6 +293,31 @@ export async function buildServer(config: Config, overrides: ServerOverrides = {
     }
 
     /**
+     * The SEO texts of a page: the `SEO` entry of the translations in the language of the request,
+     * and in German - the language of the app - when there are none (a crawler asks for no
+     * language at all, a client may have written the texts in one language only).
+     * The same translations the app loads, so a client overrides them in its `client.config.xml`.
+     */
+    async function loadPageTexts(request: FastifyRequest, page: string): Promise<PageTexts | undefined> {
+        const requested = primaryLanguage(request.headers['accept-language']);
+        try {
+            for (const language of new Set([requested, DEFAULT_LANGUAGE])) {
+                if (language === undefined) {
+                    continue;
+                }
+                const texts = pageTexts(await translations.section(language, request.hostname, 'SEO'), page);
+                if (texts !== undefined) {
+                    return texts;
+                }
+            }
+        } catch (err) {
+            // the page goes out without its texts, the shell does not depend on them
+            request.log.warn({ err, page }, 'loading the SEO texts of the page failed');
+        }
+        return undefined;
+    }
+
+    /**
      * `NgServlet.doGet` plus `SecurityHeadersFilter`: the shell with custom html headers
      * and security headers sharing one nonce, the render and collection views enriched
      * for crawlers and oEmbed consumers, and `components/error/<code>` answered with
@@ -303,6 +346,8 @@ export async function buildServer(config: Config, overrides: ServerOverrides = {
             reply.code(errorStatus);
         }
         const target = reachable ? parseShellTarget(url) : undefined;
+        // a page that is no node view (start, search, collections ...): SEO texts instead of node metadata
+        const page = reachable && target === undefined ? parseShellPage(url) : undefined;
         // the config is needed on every shell page (headers, custom html) and is cached;
         // node metadata only for the render and collection views. Without a backend the
         // cached config is used as is - asking would only wait for the timeout.
@@ -374,8 +419,8 @@ export async function buildServer(config: Config, overrides: ServerOverrides = {
 
         const nonce = IndexHtml.newNonce();
         let html = index.render(nonce, repositoryConfig?.angular.customHtmlHeaders ?? '');
+        const origin = `${request.protocol}://${request.host}`;
         if (target !== undefined) {
-            const origin = `${request.protocol}://${request.host}`;
             html = enrichShell(html, {
                 target,
                 loaded: node,
@@ -383,6 +428,9 @@ export async function buildServer(config: Config, overrides: ServerOverrides = {
                 pageUrl: `${origin}${request.url}`,
                 appUrl: `${origin}${ctx}/`,
             });
+        } else if (page !== undefined && guestEnabled) {
+            // the guest gate as for the nodes: with guest access off, the anonymous caller gets nothing
+            html = enrichPage(html, { page, texts: await loadPageTexts(request, page), appUrl: `${origin}${ctx}/` });
         }
         if (repositoryConfig === null) {
             metrics.shellWithoutCsp('no-config');
@@ -416,21 +464,9 @@ export async function buildServer(config: Config, overrides: ServerOverrides = {
         await app.register(swaggerUi, { routePrefix: `${ctx}${FRONTEND_API_PATH}/docs` });
         app.get(`${ctx}${FRONTEND_API_PATH}/openapi.json`, { schema: { hide: true } }, () => app.swagger());
     }
-    // translations: level 1 the files of the build, level 2 the overrides of the client
-    // config (internal port, follows the config reloads of the backend), level 3 both merged
-    const translationOverrides = new TranslationOverrides(internalBackend, {
-        contextPath: ctx,
-        configVersion: () => configCache.configVersion(),
-        maxAgeMs: config.configMaxAgeMs,
-        log: app.log.child({ name: 'translation-overrides' }),
-    });
     await app.register(frontendApi, {
         prefix: `${ctx}${FRONTEND_API_PATH}`,
-        translations: new Translations({
-            defaults: new LanguageDefaults(path.join(config.distDir, 'assets', 'i18n'), { revalidate: config.dev }),
-            overrides: translationOverrides,
-            log: app.log.child({ name: 'translations' }),
-        }),
+        translations,
         overrides: translationOverrides,
     });
 

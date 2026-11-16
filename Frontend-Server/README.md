@@ -76,6 +76,37 @@ The authoritative list lives in
 [`src/routes/backend-paths.ts`](src/routes/backend-paths.ts) and is derived from
 `Backend/services/webapp/src/main/webapp/WEB-INF/web.xml`.
 
+## SEO in the shell
+
+The shell goes out with what a crawler needs without running the app (the guest gate applies: with
+guest access off the anonymous caller gets none of it).
+
+**Node views** (`components/render/<id>`, `components/collections?id=<id>`): title, description,
+`canonical` (the url without the version), Open Graph and Twitter card, and for the render view the
+license, the LRMI data and oEmbed. All of it from the search index (`src/lib/shell-head.ts`).
+
+**Pages** (`components/<name>`: the start page, the search, the collections overview, and what a client
+adds): the texts are translations, so they are overridden like any other text, per language and
+context, in the `<language>` entries of the `client.config.xml` - there is no other place to configure them.
+
+| Key                      | Result                                                             |
+|--------------------------|--------------------------------------------------------------------|
+| `SEO.<PAGE>.TITLE`       | `<title>` and `og:title`                                           |
+| `SEO.<PAGE>.DESCRIPTION` | `<meta name="description">` and `og:description`                   |
+| `SEO.<PAGE>.HEADING`     | visible `<h1>` inside the app element, below the loading animation |
+| `SEO.<PAGE>.INTRO`       | text below the heading, paragraphs separated by an empty line      |
+
+`<PAGE>` is the name in the url, upper case, `-` as `_`: `SEO.START.TITLE` for `components/start`,
+`SEO.MY_PAGE.TITLE` for `components/my-page`. The start page also gets `WebSite` data with the search
+(`SearchAction`). The text is replaced by the app when it starts, it is only there for a crawler.
+
+- The language is the first of `Accept-Language`, German (the app language) when there is none or there are no
+  texts for it. A crawler sends no language, so it gets the German texts.
+- `start`, `search` and `collections` get a `canonical` url even without texts (`?q=` variants do not compete).
+  Any other page is only enriched when it has an `SEO.<PAGE>` entry, so a page like the login stays as it is.
+- Defaults can be added to `Frontend/src/assets/i18n/common/<lang>.json`; the core ships none, so an instance
+  without client texts is unchanged apart from the canonical url.
+
 ## Logging
 
 Log lines use the repository's Log4j layout (`src/lib/log-format.ts`), so Node and

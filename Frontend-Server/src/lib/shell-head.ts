@@ -102,6 +102,123 @@ export function collectionUrl(appUrl: string, nodeId: string): string {
 }
 
 /**
+ * The SEO texts of a page, the entries `SEO.<PAGE>.TITLE`, `.DESCRIPTION`, `.HEADING` and `.INTRO` of
+ * the translations. The defaults are part of the build, a client overrides them in its
+ * `client.config.xml` like any other text (per language, per context) - nothing is configured twice.
+ */
+export interface PageTexts {
+    readonly title?: string | undefined;
+    readonly description?: string | undefined;
+    /** the visible `<h1>` of the page for a crawler that does not run the app */
+    readonly heading?: string | undefined;
+    /** the text below the heading, paragraphs separated by an empty line */
+    readonly intro?: string | undefined;
+}
+
+/** the pages every instance has a public entry for - they get a canonical url even without own texts */
+const CANONICAL_PAGES: ReadonlySet<string> = new Set(['start', 'search', 'collections']);
+
+/**
+ * @param seo the `SEO` entry of the translations (`Translations.section`)
+ * @param page the page name of the url (`search`), its entry is `SEO.SEARCH`, `my-page` is `SEO.MY_PAGE`
+ * @returns undefined if nobody wrote an entry for the page
+ */
+export function pageTexts(seo: Readonly<Record<string, unknown>> | undefined, page: string): PageTexts | undefined {
+    const entry = seo?.[page.toUpperCase().replace(/-/g, '_')];
+    if (entry === null || typeof entry !== 'object' || Array.isArray(entry)) {
+        return undefined;
+    }
+    const text = (key: string): string | undefined => {
+        const value = (entry as Record<string, unknown>)[key];
+        return typeof value === 'string' && value.trim() !== '' ? value.trim() : undefined;
+    };
+    return { title: text('TITLE'), description: text('DESCRIPTION'), heading: text('HEADING'), intro: text('INTRO') };
+}
+
+export interface PageContext {
+    /** the page name of the url, `search` for `components/search` */
+    readonly page: string;
+    /** undefined: no entry for the page, or no translations at all (backend down, unknown language) */
+    readonly texts: PageTexts | undefined;
+    /** public base of the app, `https://host/edu-sharing/` */
+    readonly appUrl: string;
+}
+
+/**
+ * The `<head>` and the content of a page that is no node view (start page, search, collections
+ * overview ...) for a crawler that does not run the app: canonical, title, description, Open
+ * Graph, for the start page the `WebSite` data with the search, and the heading and text.
+ *
+ * The start page, the search and the collections get a canonical url without any texts - it
+ * costs nothing and keeps the variants of the url (`?q=`) from competing. Every other page only
+ * gets enriched when somebody wrote texts for it, so a page like the login stays as it is.
+ * Every part is skipped on its own when its text is missing.
+ */
+export function enrichPage(html: string, context: PageContext): string {
+    const { page, texts, appUrl } = context;
+    if (texts === undefined && !CANONICAL_PAGES.has(page)) {
+        return html;
+    }
+    const url = `${appUrl}components/${page}`;
+    const head = [`<link rel="canonical" href="${escapeHtml(url)}">`];
+    let result = html;
+    if (texts?.title !== undefined) {
+        result = setTitle(result, texts.title);
+        head.push(metaProperty('og:title', texts.title));
+    }
+    if (texts?.description !== undefined) {
+        head.push(`<meta name="description" content="${escapeHtml(texts.description)}">`);
+        head.push(metaProperty('og:description', texts.description));
+    }
+    if (texts?.title !== undefined || texts?.description !== undefined) {
+        head.push(metaProperty('og:type', 'website'));
+        head.push(metaProperty('og:url', url));
+        head.push('<meta name="twitter:card" content="summary">');
+    }
+    const name = texts?.heading ?? texts?.title;
+    if (page === 'start' && name !== undefined) {
+        const search = `${appUrl}components/search?q={search_term_string}`;
+        const website = {
+            '@context': 'https://schema.org',
+            '@type': 'WebSite',
+            name,
+            url,
+            potentialAction: { '@type': 'SearchAction', target: search, 'query-input': 'required name=search_term_string' },
+        };
+        head.push(`<script type="application/ld+json">${jsonForScript(website)}</script>`);
+    }
+    result = insertIntoHead(result, head.join(''));
+    return insertIntoApp(result, pageContent(texts));
+}
+
+/** the heading and the paragraphs of a page, empty without both */
+function pageContent(texts: PageTexts | undefined): string {
+    const parts: string[] = [];
+    if (texts?.heading !== undefined) {
+        parts.push(`<h1>${escapeHtml(texts.heading)}</h1>`);
+    }
+    for (const paragraph of (texts?.intro ?? '').split(/\n{2,}/)) {
+        if (paragraph.trim() !== '') {
+            parts.push(`<p>${escapeHtml(paragraph.trim())}</p>`);
+        }
+    }
+    return parts.length === 0 ? '' : `<div id="seo-content">${parts.join('')}</div>`;
+}
+
+/**
+ * Appends to the content of the app element, below the loading animation (it fills the window,
+ * the text is a scroll away). The app replaces everything in its element when it starts, so
+ * nothing of this stays next to the real page.
+ */
+function insertIntoApp(html: string, fragment: string): string {
+    if (fragment === '') {
+        return html;
+    }
+    const position = html.indexOf('</es-app>');
+    return position === -1 ? html : html.slice(0, position) + fragment + html.slice(position);
+}
+
+/**
  * `NgServlet.addSEO`: first non blank of lom title / cm:title / cm:name, truncated.
  * NgServlet fails with a NullPointerException without any title and then adds
  * neither title nor description - hence undefined.

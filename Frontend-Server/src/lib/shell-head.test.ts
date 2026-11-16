@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { RepositoryConfig } from './config-cache.ts';
 import type { LoadedNode } from './node-metadata.ts';
-import { enrichShell, jsonForScript, pageDescription, pageTitle, setTitle, type ShellContext } from './shell-head.ts';
+import { enrichPage, enrichShell, jsonForScript, pageDescription, pageTexts, pageTitle, setTitle, type PageContext, type ShellContext } from './shell-head.ts';
 
 const SHELL = '<html><head><base href="/edu-sharing/"><title>edu-sharing</title></head><body></body></html>';
 
@@ -193,4 +193,127 @@ test('setTitle adds a title when the shell has none', () => {
 
 test('setTitle is safe against $ patterns in the title', () => {
     assert.equal(setTitle('<head><title>x</title></head>', "$& $' $1"), "<head><title>$&amp; $&#39; $1</title></head>");
+});
+
+// --- pages that are no node view ------------------------------------------------------
+
+const APP_SHELL =
+    '<html><head><base href="/edu-sharing/"><title>edu-sharing</title></head><body><es-app><div class="ng-loading"></div></es-app></body></html>';
+
+function pageContext(overrides: Partial<PageContext> = {}): PageContext {
+    return { page: 'start', texts: undefined, appUrl: 'https://repo.example.org/edu-sharing/', ...overrides };
+}
+
+const START_TEXTS = {
+    title: 'ByCS-Mediathek | Unterrichtsmaterialien für Schulen in Bayern',
+    description: 'Die ByCS-Mediathek bietet Lehrkräften Unterrichtsmaterialien.',
+    heading: 'ByCS-Mediathek',
+    intro: 'Das zentrale Medienportal.\n\nMit Videos, Audios und Arbeitsblättern.',
+};
+
+function bodyOf(html: string): string {
+    return html.slice(html.indexOf('<body>'));
+}
+
+test('pageTexts: the entry of the page, blank texts are none, - becomes _', () => {
+    const seo = {
+        START: { TITLE: ' T ', DESCRIPTION: '  ', HEADING: 'H', INTRO: 5 },
+        MY_PAGE: { TITLE: 'M' },
+        SEARCH: 'not an object',
+    };
+    assert.deepEqual(pageTexts(seo, 'start'), { title: 'T', description: undefined, heading: 'H', intro: undefined });
+    assert.deepEqual(pageTexts(seo, 'my-page'), { title: 'M', description: undefined, heading: undefined, intro: undefined });
+    assert.equal(pageTexts(seo, 'search'), undefined);
+    assert.equal(pageTexts(seo, 'collections'), undefined);
+    assert.equal(pageTexts(undefined, 'start'), undefined);
+});
+
+test('page with all texts: title, description, canonical, Open Graph, WebSite with search, heading and text', () => {
+    const html = enrichPage(APP_SHELL, pageContext({ texts: START_TEXTS }));
+    const head = headOf(html);
+    assert.match(head, /<title>ByCS-Mediathek \| Unterrichtsmaterialien für Schulen in Bayern<\/title>/);
+    assert.equal(html.match(/<title>/g)?.length, 1);
+    assert.match(head, /<meta name="description" content="Die ByCS-Mediathek bietet Lehrkräften Unterrichtsmaterialien.">/);
+    assert.match(head, /<link rel="canonical" href="https:\/\/repo.example.org\/edu-sharing\/components\/start">/);
+    assert.match(head, /<meta property="og:title" content="ByCS-Mediathek \| /);
+    assert.match(head, /<meta property="og:description" content="Die ByCS-Mediathek/);
+    assert.match(head, /<meta property="og:type" content="website">/);
+    assert.match(head, /<meta property="og:url" content="https:\/\/repo.example.org\/edu-sharing\/components\/start">/);
+    assert.match(head, /<meta name="twitter:card" content="summary">/);
+    const ld = /<script type="application\/ld\+json">([\s\S]*?)<\/script>/.exec(head);
+    assert.ok(ld, 'JSON-LD');
+    assert.deepEqual(JSON.parse(ld[1] as string), {
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: 'ByCS-Mediathek',
+        url: 'https://repo.example.org/edu-sharing/components/start',
+        potentialAction: {
+            '@type': 'SearchAction',
+            target: 'https://repo.example.org/edu-sharing/components/search?q={search_term_string}',
+            'query-input': 'required name=search_term_string',
+        },
+    });
+    const body = bodyOf(html);
+    assert.match(body, /<div id="seo-content"><h1>ByCS-Mediathek<\/h1><p>Das zentrale Medienportal.<\/p><p>Mit Videos, Audios und Arbeitsblättern.<\/p><\/div><\/es-app>/);
+});
+
+test('page text goes below the loading animation, inside the app element', () => {
+    const body = bodyOf(enrichPage(APP_SHELL, pageContext({ texts: START_TEXTS })));
+    assert.ok(body.indexOf('ng-loading') < body.indexOf('seo-content'));
+    assert.ok(body.indexOf('seo-content') < body.indexOf('</es-app>'));
+});
+
+test('start, search and collections get a canonical url without any texts', () => {
+    for (const page of ['start', 'search', 'collections']) {
+        const html = enrichPage(APP_SHELL, pageContext({ page }));
+        assert.match(headOf(html), new RegExp(`<link rel="canonical" href="https://repo.example.org/edu-sharing/components/${page}">`));
+        assert.match(html, /<title>edu-sharing<\/title>/);
+        assert.doesNotMatch(html, /og:|name="description"|ld\+json|seo-content/);
+    }
+});
+
+test('a page nobody wrote texts for stays as it is', () => {
+    assert.equal(enrichPage(APP_SHELL, pageContext({ page: 'login' })), APP_SHELL);
+    assert.equal(enrichPage(APP_SHELL, pageContext({ page: 'workspace', texts: undefined })), APP_SHELL);
+});
+
+test('a page with texts is enriched even when it is no entry page of the core', () => {
+    const html = enrichPage(APP_SHELL, pageContext({ page: 'my-page', texts: { title: 'Mine' } }));
+    assert.match(headOf(html), /rel="canonical" href="https:\/\/repo.example.org\/edu-sharing\/components\/my-page"/);
+    assert.match(html, /<title>Mine<\/title>/);
+    // no WebSite data: that is for the start page
+    assert.doesNotMatch(html, /ld\+json/);
+});
+
+test('every part is left out when its text is missing', () => {
+    const titleOnly = enrichPage(APP_SHELL, pageContext({ page: 'search', texts: { title: 'Suche' } }));
+    assert.match(titleOnly, /<title>Suche<\/title>/);
+    assert.match(titleOnly, /og:title/);
+    assert.doesNotMatch(titleOnly, /name="description"|og:description|seo-content/);
+    const headingOnly = enrichPage(APP_SHELL, pageContext({ texts: { heading: 'Mediathek' } }));
+    assert.match(headingOnly, /<h1>Mediathek<\/h1>/);
+    // the WebSite data take the heading as name when there is no title
+    assert.match(headingOnly, /"name": "Mediathek"/);
+    assert.match(headingOnly, /<title>edu-sharing<\/title>/);
+    assert.doesNotMatch(headingOnly, /og:/);
+});
+
+test('the WebSite data are for the start page only', () => {
+    const html = enrichPage(APP_SHELL, pageContext({ page: 'search', texts: START_TEXTS }));
+    assert.doesNotMatch(html, /ld\+json/);
+});
+
+test('page texts are escaped, a text cannot inject markup', () => {
+    const evil = { title: '</title><script>alert(1)</script>', description: '"><img src=x>', heading: '<b>x</b>', intro: '<script>alert(2)</script>' };
+    const html = enrichPage(APP_SHELL, pageContext({ texts: evil }));
+    assert.doesNotMatch(html, /<script>alert|<img src=x>|<b>x<\/b>/);
+    assert.match(html, /&lt;script&gt;alert\(2\)&lt;\/script&gt;/);
+    // JSON-LD cannot close its script element
+    assert.equal(html.match(/<script/g)?.length, 1);
+});
+
+test('a shell without the app element only gets the head', () => {
+    const html = enrichPage('<html><head></head><body></body></html>', pageContext({ texts: START_TEXTS }));
+    assert.match(html, /rel="canonical"/);
+    assert.doesNotMatch(html, /seo-content/);
 });

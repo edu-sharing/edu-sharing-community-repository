@@ -40,6 +40,27 @@ export function parseShellTarget(url: string): ShellTarget | undefined {
     return undefined;
 }
 
+const PAGE_NAME = /^[a-z][a-z0-9-]*$/;
+/** under `components/` but no page of its own: the node view and the error page */
+const NOT_A_PAGE = new Set(['render', 'error']);
+
+/**
+ * The page of a shell url that is no node view: exactly `components/<name>` - the start page,
+ * the search, the collections overview and what a customer adds (`components/start` is no route
+ * of the core, it is the default location of some customers). Node views are `parseShellTarget`.
+ *
+ * @param url request url below the context path, e.g. `/components/search?q=physics`
+ * @returns the name of the page (`search`), undefined for every other url
+ */
+export function parseShellPage(url: string): string | undefined {
+    const segments = new URL(url, 'http://localhost').pathname.split('/').filter((segment) => segment !== '');
+    const name = segments[1];
+    if (segments.length !== 2 || segments[0] !== 'components' || name === undefined) {
+        return undefined;
+    }
+    return PAGE_NAME.test(name) && !NOT_A_PAGE.has(name) ? name : undefined;
+}
+
 /**
  * What the shell enrichment needs about a node. Deliberately not the REST `Node`
  * model any more: the data comes from the search index, and only these four things
