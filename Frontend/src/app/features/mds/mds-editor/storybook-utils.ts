@@ -117,8 +117,6 @@ export function loadStorybookTranslations(): Promise<any> {
 export class translateProvider {
     private translation$: Observable<any> | null = null;
     cache$ = new BehaviorSubject(null);
-    // the storybook translations are german, see `loadStorybookTranslations`
-    currentLang = 'de';
 
     constructor() {
         // `instant()` can only answer from the cache, so fill it as early as possible
@@ -184,9 +182,6 @@ export class TranslationsServiceMock {
         return LANGUAGES[this.getLanguage()];
     }
     getLocale(): string {
-        return this.translateProvider.currentLang ?? 'de';
-    }
-    getLanguage(): string {
         return this.translateProvider.currentLang ?? 'de';
     }
 }
