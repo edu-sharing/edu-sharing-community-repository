@@ -3,10 +3,12 @@
   <img #image [src]="activeObject()?.link | rsAssetLink" [alt]="node?.title || node?.name || ''" />
   <button
     mat-icon-button
-    [attr.aria-label]="'RENDERING.FULLSCREEN' | translate"
+    [attr.aria-label]="
+      (isFullscreen() ? 'RENDERING.EXIT_FULLSCREEN' : 'RENDERING.FULLSCREEN') | translate
+    "
     (click)="toggleFullscreen()"
   >
-    <mat-icon>fullscreen</mat-icon>
+    <mat-icon>{{ isFullscreen() ? 'fullscreen_exit' : 'fullscreen' }}</mat-icon>
   </button>
 </div>
 }

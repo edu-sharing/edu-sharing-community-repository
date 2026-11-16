@@ -1140,6 +1140,7 @@
     "OPEN_IN_NEW_TAB": "In neuem Tab öffnen",
     "RELOAD_LINK": "Link neu laden",
     "FULLSCREEN": "Vollbild",
+    "EXIT_FULLSCREEN": "Vollbild beenden",
     "VIDEO_RESOLUTION": "Videoauflösung",
     "LINK_TO_OBJECT": "Zum Objekt",
     "REVOKED": {

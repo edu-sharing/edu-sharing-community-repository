@@ -27,11 +27,22 @@ export class ImageComponent implements RenderModule, AfterViewInit {
     @Input() data: RenderData | undefined;
     @Input() node: Node | undefined;
     activeObject = signal<AssetStateItem | undefined>(undefined);
+    /** Whether this module's host element is currently shown in fullscreen. */
+    isFullscreen = signal(false);
     ngAfterViewInit(): void {
         this.loadOptimalSize();
     }
 
+    /**
+     * Tracks the fullscreen state on every change, including exits via Esc or browser controls,
+     * so the toggle button can expose the matching name and icon.
+     */
     @HostListener('document:fullscreenchange')
+    protected onFullscreenChange() {
+        this.isFullscreen.set(document.fullscreenElement === this.element.nativeElement);
+        this.loadOptimalSize();
+    }
+
     protected loadOptimalSize() {
         const size = this.element.nativeElement.getBoundingClientRect();
         const allFinishedItems = this.data?.items?.filter((item) => item.link !== '');

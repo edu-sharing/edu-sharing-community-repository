@@ -1572,6 +1572,7 @@
     "OPEN_IN_NEW_TAB": "Ouvrir dans un nouvel onglet",
     "RELOAD_LINK": "Recharger le lien",
     "FULLSCREEN": "Plein écran",
+    "EXIT_FULLSCREEN": "Quitter le plein écran",
     "VIDEO_RESOLUTION": "Résolution vidéo",
     "LINK_TO_OBJECT": "Lien vers l'objet",
     "ERROR": {

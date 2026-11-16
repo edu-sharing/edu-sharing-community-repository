@@ -16,6 +16,8 @@
     @for (item of filteredItems; track item) {
     <button
       mat-menu-item
+      role="menuitemradio"
+      [attr.aria-checked]="item.height === activeObject()?.height"
       [disabled]="item.link === ''"
       (click)="item.height !== activeObject()?.height && switchResolution(item)"
     >
