@@ -4,7 +4,13 @@ positioning easier for outer components.
 -->
 @if (node) { @if ((isMobileScreen | async) === false) {
 <div class="preview-sidebar mat-elevation-z3">
+  <!--
+    The pdf viewer (ngx-extended-pdf-viewer) only supports one instance per page,
+    so the sidebar content is removed while the fullscreen modal is open.
+  -->
+  @if ((modalOpen$ | async) === false) {
   <ng-container *ngTemplateOutlet="content"></ng-container>
+  }
 </div>
 }
 <ng-template #content>

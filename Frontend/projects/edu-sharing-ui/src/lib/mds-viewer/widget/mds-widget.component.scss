@@ -48,6 +48,48 @@
                 color: var(--palette-primary-800);
                 text-decoration: none;
             }
+            // valuespace keys with an icon (e.g. university logos) render as a chip with
+            // icon, caption and description, like the backend MetadataTemplateRenderer
+            &.array-entry-with-icon {
+                display: inline-block;
+                margin: 0 10px 10px 0;
+                padding: 5px 10px;
+                border-radius: 16px;
+                background-color: $cardLightBackground;
+                &:after {
+                    content: none;
+                }
+                max-width: 100%;
+                box-sizing: border-box;
+                // wrap the caption below the icon when the space is too narrow (mobile, sidebar)
+                > a,
+                > span {
+                    display: flex;
+                    flex-wrap: wrap;
+                    align-items: center;
+                    gap: 5px;
+                }
+                > span {
+                    color: inherit;
+                }
+            }
+            .array-entry-image {
+                height: 40px;
+                width: auto;
+                max-width: 100%;
+                object-fit: contain;
+                object-position: left center;
+            }
+            .array-entry-value-group {
+                display: flex;
+                flex-direction: column;
+                // flex-wrap breaks the line once the caption would get narrower than this
+                flex: 1 1 150px;
+                min-width: 0;
+            }
+            .array-entry-description {
+                font-size: 80%;
+            }
         }
     }
     &.widget-type-vcard {
