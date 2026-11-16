@@ -3,9 +3,22 @@
   @if (showIframe) {
   <iframe [title]="node?.title ?? 'Moodle'" class="frame" [src]="sanitizedUrl"></iframe>
   } @if (!showIframe && previewUrl) {
-  <img [src]="previewUrl" alt="preview" />
+  <img [src]="previewUrl" alt="" />
   } @if (sanitizedLinkUrl) {
-  <a mat-flat-button color="primary" [href]="sanitizedLinkUrl" target="_blank">
+  <a
+    mat-flat-button
+    color="primary"
+    [href]="sanitizedLinkUrl"
+    target="_blank"
+    [attr.aria-label]="
+      (node?.title || node?.name
+        ? 'RENDERING.LINK_NAME_TITLE_NEW_WINDOW'
+        : 'RENDERING.LINK_NAME_NEW_WINDOW'
+      )
+        | translate
+          : { label: ('RENDERING.GO_TO_COURSE' | translate), title: node?.title || node?.name }
+    "
+  >
     <div class="link-label">
       {{ 'RENDERING.GO_TO_COURSE' | translate }}<i esIcon="open_in_new"></i>
     </div>

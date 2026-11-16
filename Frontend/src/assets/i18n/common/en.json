@@ -1005,6 +1005,9 @@
     "EXIT_FULLSCREEN": "Exit fullscreen",
     "VIDEO_RESOLUTION": "Video resolution",
     "LINK_TO_OBJECT": "Link to object",
+    "LINK_NAME_TITLE": "{{label}} – {{title}}",
+    "LINK_NAME_TITLE_NEW_WINDOW": "{{label}} – {{title}}, opens in a new window",
+    "LINK_NAME_NEW_WINDOW": "{{label}}, opens in a new window",
     "REVOKED": {
       "DETAILS_EMPTY": "The publisher or editorial team has revoked this object. Only the metadata are available.\n\nCheck the reason below for more details",
       "DETAILS": "The publisher or editorial team has revoked this object.\n\nCheck the reason below for more details",

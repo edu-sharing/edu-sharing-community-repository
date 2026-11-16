@@ -1575,6 +1575,9 @@
     "EXIT_FULLSCREEN": "Quitter le plein écran",
     "VIDEO_RESOLUTION": "Résolution vidéo",
     "LINK_TO_OBJECT": "Lien vers l'objet",
+    "LINK_NAME_TITLE": "{{label}} – {{title}}",
+    "LINK_NAME_TITLE_NEW_WINDOW": "{{label}} – {{title}}, s'ouvre dans une nouvelle fenêtre",
+    "LINK_NAME_NEW_WINDOW": "{{label}}, s'ouvre dans une nouvelle fenêtre",
     "ERROR": {
       "GENERIC_ERROR_MESSAGE": "Une erreur est survenue.",
       "RS2_NOT_CONFIGURED": "Le service de rendu 2 n'est actuellement pas connecté à ce référentiel.",
