@@ -7,6 +7,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.tools.URLHelper;
 import org.edu_sharing.restservices.DAOException;
+import org.edu_sharing.restservices.DAOMissingException;
 import org.edu_sharing.restservices.DAOSecurityException;
 import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.RepositoryDao;
@@ -91,6 +92,10 @@ public class oEmbedServlet extends SpringHttpServlet {
                 base.setType("rich");
                 int[] size=getSize(oEmbedBase.DEFAULT_SIZE,oEmbedBase.DEFAULT_SIZE,maxWidth,maxHeight);
                 base.setHtml(getIFrameHTML(URLHelper.getBaseUrl(true)+"/rendering-error?i18n=usage_missing&exception="+e.getClass().getName(),size[0],size[1]));
+            }catch(DAOMissingException e) {
+                // the node (or the requested version) does not exist (oembed spec: 404)
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "the node was not found");
+                return;
             }catch(Throwable t){
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,t.getMessage());
                 return;
