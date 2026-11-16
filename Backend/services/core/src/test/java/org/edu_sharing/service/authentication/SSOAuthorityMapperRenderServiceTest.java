@@ -113,9 +113,12 @@ class SSOAuthorityMapperRenderServiceTest {
 
     @AfterEach
     void tearDown() {
-        applicationInfoList.close();
-        alfAppContextGate.close();
-        lightbend.close();
+        // close whatever setUp managed to open: a static mock left registered breaks every later test of the thread
+        for (MockedStatic<?> mock : new MockedStatic<?>[]{applicationInfoList, alfAppContextGate, lightbend}) {
+            if (mock != null) {
+                mock.close();
+            }
+        }
     }
 
     private void inject(String field, Object value) throws Exception {
@@ -149,10 +152,14 @@ class SSOAuthorityMapperRenderServiceTest {
     @ParameterizedTest
     @ValueSource(strings = {ApplicationInfo.TYPE_RENDERSERVICE, ApplicationInfo.TYPE_RENDERSERVICE_2})
     void renderServiceDoesNotChangeUsersOrMemberships(String renderServiceType) throws Exception {
+        // Arrange
         registerApp(renderServiceType);
 
-        assertEquals(USER, authenticateByApp());
+        // Act
+        String result = authenticateByApp();
 
+        // Assert
+        assertEquals(USER, result);
         verify(authorityService, never()).removeAuthority(anyString(), anyString());
         verify(authorityService, never()).addAuthority(anyString(), anyString());
         verify(authorityService, never()).createAuthority(any(), anyString(), anyString(), any());
@@ -162,10 +169,14 @@ class SSOAuthorityMapperRenderServiceTest {
     @ParameterizedTest
     @ValueSource(strings = {ApplicationInfo.TYPE_LMS})
     void otherApplicationsStillUpdateMemberships(String type) throws Exception {
+        // Arrange
         registerApp(type);
 
-        assertEquals(USER, authenticateByApp());
+        // Act
+        String result = authenticateByApp();
 
+        // Assert
+        assertEquals(USER, result);
         verify(authorityService).removeAuthority(GROUP_AUTHORITY, USER);
     }
 }
