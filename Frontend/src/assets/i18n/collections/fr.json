@@ -10,6 +10,7 @@
     "ORDER_ALL_INFO": "Les visiteurs de la collection voient les sous-collections et les documents contenus dans un certain ordre.",
     "ORDER_UNSAVED_TITLE": "Save changes to the order?",
     "ORDER_UNSAVED_MESSAGE": "The order has been changed. Do you want to keep or discard the changes?",
+    "EDIT_MODE": "Mode édition",
     "SORT_SLIDER": "Trier",
     "CUSTOM_ORDER": "modifier l'ordre des éléments",
     "PERMISSIONS": "Sur invitation",

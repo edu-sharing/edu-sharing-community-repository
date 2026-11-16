@@ -529,9 +529,11 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             // selected in the one before
             const previousId = changes.collection.previousValue?.ref?.id;
             if (previousId !== changes.collection.currentValue.ref?.id) {
-                this.clearSelection();
                 if (this.editMode()) {
+                    // leaving the mode drops the selection as well
                     this.endOrderMode();
+                } else {
+                    this.clearSelection();
                 }
                 // what the sidebar shows belongs to the collection that was left
                 if (previousId) {
