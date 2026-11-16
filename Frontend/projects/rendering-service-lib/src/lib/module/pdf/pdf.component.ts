@@ -62,6 +62,7 @@ export class PdfComponent implements RenderModule, OnChanges {
         // Set explicitly instead of relying on the library defaults, since the peer dependency range
         // allows older ngx-extended-pdf-viewer versions.
         pdfDefaultOptions.enableScripting = false;
+        pdfDefaultOptions.isEvalSupported = false;
         pdfDefaultOptions.enableOpenActionJavaScript = false;
         pdfDefaultOptions.enableCatalogAAJavaScript = false;
 
