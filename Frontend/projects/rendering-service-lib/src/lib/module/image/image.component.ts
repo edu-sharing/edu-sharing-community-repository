@@ -13,10 +13,11 @@ import { Node } from 'ngx-edu-sharing-api';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { RenderData, AssetStateItem } from '../../dto/RenderData';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
     selector: 'rs-module-image',
-    imports: [RenderingModule, MatButtonModule, MatIconModule],
+    imports: [RenderingModule, MatButtonModule, MatIconModule, TranslateModule],
     templateUrl: './image.component.html',
     styleUrl: './image.component.scss',
 })

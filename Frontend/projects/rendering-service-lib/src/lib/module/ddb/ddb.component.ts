@@ -14,10 +14,11 @@ import { MatIcon } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { FormsModule } from '@angular/forms';
 import { RenderData } from '../../dto/RenderData';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
     selector: 'rs-module-ddb',
-    imports: [RenderingModule, MatButtonModule, FormsModule, MatIcon],
+    imports: [RenderingModule, MatButtonModule, FormsModule, MatIcon, TranslateModule],
     templateUrl: './ddb.component.html',
     styleUrl: './ddb.component.scss',
 })

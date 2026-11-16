@@ -12,9 +12,9 @@
     @if (binderItem()?.link === '') {
     <mat-spinner [diameter]="50"></mat-spinner>
     } @if (binderItem()?.link !== '') {
-    <a mat-flat-button color="primary" [href]="binderItem()?.link" target="_blank"
-      >Link to object</a
-    >
+    <a mat-flat-button color="primary" [href]="binderItem()?.link" target="_blank">{{
+      'RENDERING.LINK_TO_OBJECT' | translate
+    }}</a>
     }
   </div>
 </div>

@@ -1571,6 +1571,9 @@
     "QUEUE_POSITION": "Posizione in coda",
     "OPEN_IN_NEW_TAB": "Apri in una nuova scheda",
     "RELOAD_LINK": "Ricarica il link",
+    "FULLSCREEN": "Schermo intero",
+    "VIDEO_RESOLUTION": "Risoluzione video",
+    "LINK_TO_OBJECT": "Link all'oggetto",
     "ERROR": {
       "GENERIC_ERROR_MESSAGE": "Si è verificato un errore.",
       "RS2_NOT_CONFIGURED": "Il rendering service 2 attualmente non è collegato a questo repository.",

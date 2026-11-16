@@ -1,6 +1,12 @@
 @if (activeObject()) {
 <div class="ddb-wrapper">
   <img [src]="activeObject()" [alt]="node?.title || node?.name || ''" />
-  <button mat-icon-button (click)="toggleFullscreen()"><mat-icon>fullscreen</mat-icon></button>
+  <button
+    mat-icon-button
+    [attr.aria-label]="'RENDERING.FULLSCREEN' | translate"
+    (click)="toggleFullscreen()"
+  >
+    <mat-icon>fullscreen</mat-icon>
+  </button>
 </div>
 }
