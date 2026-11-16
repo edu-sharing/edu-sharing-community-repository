@@ -111,6 +111,62 @@ test('collection view: title and description only', () => {
     assert.doesNotMatch(html, /oembed|ld\+json|rel="license"/);
 });
 
+test('render view: canonical, Open Graph and Twitter card', () => {
+    const head = headOf(enrichShell(SHELL, renderContext({ loaded: { ...loaded({ 'cclom:title': ['Photosynthesis'], 'cclom:general_description': ['How plants eat light'] }), previewUrl: 'https://repo.example.org/edu-sharing/preview?nodeId=n1&storeProtocol=workspace&storeId=SpacesStore' } })));
+    assert.match(head, /<link rel="canonical" href="https:\/\/repo.example.org\/edu-sharing\/components\/render\/n1">/);
+    assert.match(head, /<meta property="og:type" content="article">/);
+    // the browser tab has the branding suffix, the share preview does not
+    assert.match(head, /<meta property="og:title" content="Photosynthesis">/);
+    assert.match(head, /<meta property="og:description" content="How plants eat light">/);
+    assert.match(head, /<meta property="og:url" content="https:\/\/repo.example.org\/edu-sharing\/components\/render\/n1">/);
+    assert.match(head, /<meta property="og:image" content="https:\/\/repo.example.org\/edu-sharing\/preview\?nodeId=n1&amp;storeProtocol=workspace&amp;storeId=SpacesStore">/);
+    assert.match(head, /<meta name="twitter:card" content="summary_large_image">/);
+});
+
+test('render view of a version: the canonical is the url without the version', () => {
+    const head = headOf(
+        enrichShell(SHELL, renderContext({ target: { kind: 'render', nodeId: 'n1', version: '1.2' }, pageUrl: 'https://repo.example.org/edu-sharing/components/render/n1/1.2' })),
+    );
+    assert.match(head, /<link rel="canonical" href="https:\/\/repo.example.org\/edu-sharing\/components\/render\/n1">/);
+    assert.doesNotMatch(head, /rel="canonical"[^>]*n1\/1\.2/);
+});
+
+test('collection view: canonical on the collection, Open Graph type website', () => {
+    const head = headOf(enrichShell(SHELL, renderContext({ target: { kind: 'collection', nodeId: 'c1' } })));
+    assert.match(head, /<link rel="canonical" href="https:\/\/repo.example.org\/edu-sharing\/components\/collections\?id=c1">/);
+    assert.match(head, /<meta property="og:type" content="website">/);
+    assert.match(head, /<meta property="og:url" content="https:\/\/repo.example.org\/edu-sharing\/components\/collections\?id=c1">/);
+});
+
+test('without a preview: no og:image and a small Twitter card', () => {
+    const head = headOf(enrichShell(SHELL, renderContext()));
+    assert.doesNotMatch(head, /og:image/);
+    assert.match(head, /<meta name="twitter:card" content="summary">/);
+});
+
+test('without a description: no og:description', () => {
+    const head = headOf(enrichShell(SHELL, renderContext({ loaded: loaded({ 'cclom:title': ['Photosynthesis'] }) })));
+    assert.match(head, /og:title/);
+    assert.doesNotMatch(head, /og:description/);
+});
+
+test('without readable node: neither canonical nor Open Graph', () => {
+    const html = enrichShell(SHELL, renderContext({ loaded: undefined }));
+    assert.doesNotMatch(html, /rel="canonical"|og:|twitter:/);
+});
+
+test('no title: the canonical stays, the Open Graph tags are left out', () => {
+    const head = headOf(enrichShell(SHELL, renderContext({ loaded: loaded({ 'cclom:general_description': ['D'] }) })));
+    assert.match(head, /rel="canonical"/);
+    assert.doesNotMatch(head, /og:|twitter:/);
+});
+
+test('Open Graph values are escaped', () => {
+    const evil = { ...loaded({ 'cclom:title': ['"><script>alert(1)</script>'], 'cclom:general_description': ['"><img src=x>'] }), previewUrl: 'https://x/p?a=1&b="><i>' };
+    const html = enrichShell(SHELL, renderContext({ loaded: evil }));
+    assert.doesNotMatch(html, /<script>alert|<img src=x>|<i>/);
+});
+
 test('no title at all: neither title nor description, like the NPE path in NgServlet', () => {
     const html = enrichShell(SHELL, renderContext({ loaded: loaded({ 'cclom:general_description': ['D'] }) }));
     assert.match(html, /<title>edu-sharing<\/title>/);

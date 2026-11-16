@@ -56,8 +56,49 @@ export function enrichShell(html: string, context: ShellContext): string {
                 result = insertIntoHead(result, `<meta name="description" content="${escapeHtml(description)}">`);
             }
         }
+        result = insertIntoHead(result, socialHead(context, loaded));
     }
     return result;
+}
+
+/**
+ * `canonical`, Open Graph and the Twitter card of a render or collection view.
+ *
+ * The canonical is the url of the node without a version: an old version is the same content
+ * for a search engine, the current one should collect the ranking. The Open Graph title is the
+ * title without the branding suffix, the suffix is for the browser tab.
+ *
+ * No title (same as for the `<title>`): the canonical stays, the Open Graph tags are left out -
+ * `og:title` is required, the others mean nothing without it.
+ */
+export function socialHead(context: ShellContext, loaded: LoadedNode): string {
+    const { target } = context;
+    const url = target.kind === 'render' ? renderUrl(context.appUrl, target.nodeId, undefined) : collectionUrl(context.appUrl, target.nodeId);
+    const tags = [`<link rel="canonical" href="${escapeHtml(url)}">`];
+    const title = pageTitle(loaded.properties, false);
+    if (title !== undefined) {
+        tags.push(metaProperty('og:type', target.kind === 'render' ? 'article' : 'website'));
+        tags.push(metaProperty('og:title', title));
+        tags.push(metaProperty('og:url', url));
+        const description = pageDescription(loaded.properties);
+        if (description !== undefined) {
+            tags.push(metaProperty('og:description', description));
+        }
+        if (loaded.previewUrl !== undefined) {
+            tags.push(metaProperty('og:image', loaded.previewUrl));
+        }
+        tags.push(`<meta name="twitter:card" content="${loaded.previewUrl !== undefined ? 'summary_large_image' : 'summary'}">`);
+    }
+    return tags.join('');
+}
+
+function metaProperty(property: string, content: string): string {
+    return `<meta property="${property}" content="${escapeHtml(content)}">`;
+}
+
+/** `URLTool.getNgCollectionUrl` */
+export function collectionUrl(appUrl: string, nodeId: string): string {
+    return `${appUrl}components/collections?id=${nodeId}`;
 }
 
 /**
