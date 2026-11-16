@@ -75,6 +75,7 @@ import {
 } from 'ngx-edu-sharing-ui';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { firstValueFrom, forkJoin, from, Observable, of, Subject } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { catchError, concatMap, filter, map, takeUntil, toArray } from 'rxjs/operators';
 import * as EduData from '../../../core-module/core.module';
 import { ConfigurationHelper, LoginResult } from '../../../core-module/core.module';
@@ -374,11 +375,22 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             const viewType = this.viewState.viewType();
             untracked(() => this.onViewTypeChange(viewType));
         });
+        // the switch of the edit mode disappears when the mode is no longer available (another
+        // view, a search, a touch device), so the mode is left with it
+        effect(() => {
+            if (this.editMode() && !this.canEdit()) {
+                untracked(() => {
+                    void this.leaveOrderMode(false);
+                });
+            }
+        });
         effect(() => {
             const query = this.searchState.query();
             const includeSubLevels = this.searchState.includeSubLevels();
             const filters = this.searchState.filters();
-            untracked(() => this.onQueryChange(query, includeSubLevels, filters));
+            untracked(() => {
+                void this.onQueryChange(query, includeSubLevels, filters);
+            });
         });
         // the header bar is rendered independently of the content, so its actionbar can appear
         // after the options were set up
@@ -518,6 +530,9 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             const previousId = changes.collection.previousValue?.ref?.id;
             if (previousId !== changes.collection.currentValue.ref?.id) {
                 this.clearSelection();
+                if (this.editMode()) {
+                    this.endOrderMode();
+                }
                 // what the sidebar shows belongs to the collection that was left
                 if (previousId) {
                     this.editorialSidebarService.close();
@@ -1090,8 +1105,9 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
 
     /**
      * Lets the sidebar follow a selection that contains collections: a single collection shows its
-     * information, anything else closes the sidebar, as the actions of several nodes are offered by
-     * the selection bar. A selection of materials only is handled by the list of the materials.
+     * actions & options, anything else closes the sidebar, as the actions of several nodes are
+     * offered by the selection bar. A selection of materials only is handled by the list of the
+     * materials.
      */
     private syncSidebarWithCollectionSelection() {
         if (this.interactionType !== InteractionType.DefaultActionLink) {
@@ -1105,8 +1121,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             return;
         }
         if (selected.length === 1) {
-            this.editorialSidebarService.nodes.set(selected);
-            this.editorialSidebarService.showOption({ option: 'COLLECTION_INFO', trap: false });
+            this.editorialSidebarService.showEntryList(selected);
         } else {
             this.editorialSidebarService.close();
             // closing forgets the nodes, but a sidebar opened later has to describe the selection
@@ -1213,7 +1228,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     }
 
     /** Reloads the content when the search term changed, e.g. when it was typed or cleared. */
-    private onQueryChange(query: string | null, includeSubLevels: boolean, filters: Values) {
+    private async onQueryChange(query: string | null, includeSubLevels: boolean, filters: Values) {
         if (
             query === this.shownQuery &&
             includeSubLevels === this.shownIncludeSubLevels &&
@@ -1224,6 +1239,11 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         this.shownQuery = query;
         this.shownIncludeSubLevels = includeSubLevels;
         this.shownFilters = filters;
+        // the results replace the content of the lists, so an arrangement made in the edit mode
+        // has to be decided on while the lists still hold it
+        if (this.editMode()) {
+            await this.leaveOrderMode(false);
+        }
         if (this.collection) {
             this.refreshContent();
         }
@@ -1420,17 +1440,20 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             this.dataSourceReferences.reset();
         }
         this.dataSourceReferences.isLoading = true;
-        this.collectionService
-            .getCollectionReferences(
-                this.collection.ref.id,
-                [RestConstants.ALL],
-                request,
-                this.collection.ref.repo,
-            )
-            .subscribe((refs) => {
-                this.dataSourceReferences.appendData(refs.references);
-                this.dataSourceReferences.isLoading = false;
-            });
+        // resolves once the page is in the list, so callers can work with the complete data
+        try {
+            const refs = await firstValueFrom(
+                this.collectionService.getCollectionReferences(
+                    this.collection.ref.id,
+                    [RestConstants.ALL],
+                    request,
+                    this.collection.ref.repo,
+                ),
+            );
+            this.dataSourceReferences.appendData(refs.references);
+        } finally {
+            this.dataSourceReferences.isLoading = false;
+        }
     }
 
     async loadMoreCollections() {
@@ -1696,20 +1719,34 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         void this.optionsService.refreshComponents();
     }
 
-    /** Whether the sub-collections or the materials are currently arranged by hand. */
-    isOrderModeActive(): boolean {
+    /**
+     * Whether the edit mode is on: the tiles show their checkboxes and the lists can be arranged
+     * by hand.
+     */
+    readonly editMode = signal(false);
+
+    /** Follows the touch detection, so the availability of the edit mode reacts to it. */
+    private readonly isTouch = toSignal(this.uiService.isTouchSubject, { requireSync: true });
+
+    /** Pending while the edit mode is being left, so a second request waits for the first. */
+    private leavingEditMode: Promise<void> | null = null;
+
+    /** Whether the user may switch the edit mode on for the lists shown as tiles. */
+    canEdit(): boolean {
         return (
-            !!this.sortCollections.customSortingInProgress ||
-            !!this.sortReferences.customSortingInProgress
+            !this.isRootLevel &&
+            !this.isTouch() &&
+            !this.searchState.active() &&
+            this.viewState.viewType() !== 'tree' &&
+            (this.viewState.collectionsDisplayType() !== NodeEntriesDisplayType.Table ||
+                this.viewState.referencesDisplayType() !== NodeEntriesDisplayType.Table) &&
+            this.isUserAllowedToEdit(this.collection)
         );
     }
 
-    /** Whether there is a list the user may arrange by hand, which the mode toggle depends on. */
-    canOrder(): boolean {
-        return (
-            this.viewState.viewType() !== 'tree' &&
-            (this.canOrderCollections() || this.canOrderReferences())
-        );
+    /** Tables always select with their checkboxes, the tiles only while the edit mode is on. */
+    showCheckboxes(displayType: NodeEntriesDisplayType): boolean {
+        return displayType === NodeEntriesDisplayType.Table || this.editMode();
     }
 
     canOrderCollections(): boolean {
@@ -1732,8 +1769,8 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     }
 
     /**
-     * Handles the toggle that switches the arrangement by hand on or off for the sub-collections
-     * and the materials together.
+     * Handles the toggle of the edit mode, which shows the checkboxes of the tiles and lets the
+     * sub-collections and the materials be arranged by hand.
      */
     async onOrderModeToggle(event: MatSlideToggleChange) {
         if (event.checked) {
@@ -1742,12 +1779,17 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             await this.leaveOrderMode();
         }
         // The toggle keeps its own state, which differs when leaving the mode was refused.
-        event.source.checked = this.isOrderModeActive();
+        event.source.checked = this.editMode();
     }
 
     private async enterOrderMode() {
         const collections = this.canOrderCollections();
         const references = this.canOrderReferences();
+        this.editMode.set(true);
+        if (!collections && !references) {
+            // nothing to arrange, the mode only offers the selection
+            return;
+        }
         if (references) {
             // all materials have to be present to arrange them
             await this.loadMoreReferences({
@@ -1777,7 +1819,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 { label: 'SAVE', config: { color: 'primary' } },
             ],
         });
-        if (!this.isOrderModeActive()) {
+        if (!this.editMode()) {
             // The mode was left via the toggle, which takes care of the pending changes.
             return;
         }
@@ -1792,14 +1834,39 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         }
     }
 
-    private async leaveOrderMode() {
+    /**
+     * Leaves the edit mode and asks what to do with an arrangement that was changed in it.
+     *
+     * @param cancelable whether the user may stay in the mode; when the mode is no longer
+     * available, cancelling the question discards the changes instead
+     */
+    private leaveOrderMode(cancelable = true): Promise<void> {
+        if (!this.leavingEditMode) {
+            this.leavingEditMode = this.decideOnLeavingOrderMode(cancelable).finally(() => {
+                this.leavingEditMode = null;
+            });
+        }
+        return this.leavingEditMode;
+    }
+
+    private async decideOnLeavingOrderMode(cancelable: boolean) {
+        if (
+            !this.sortCollections.customSortingInProgress &&
+            !this.sortReferences.customSortingInProgress
+        ) {
+            this.endOrderMode();
+            return;
+        }
         const changed = await this.getChangedOrderLists();
         let decision: 'SAVE' | 'DISCARD' | 'CANCEL' = 'DISCARD';
         if (changed.collections || changed.references) {
             decision = await this.confirmLeavingOrderMode();
         }
         if (decision === 'CANCEL') {
-            return;
+            if (cancelable) {
+                return;
+            }
+            decision = 'DISCARD';
         }
         this.endOrderMode();
         if (decision === 'SAVE') {
@@ -1809,8 +1876,13 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         }
     }
 
-    /** Switches both lists back to their regular view and closes the info bar of the mode. */
+    /**
+     * Leaves the edit mode: drops the selection, switches both lists back to their regular view and
+     * closes the info bar of the mode.
+     */
     private endOrderMode() {
+        this.editMode.set(false);
+        this.clearSelection();
         this.sortCollections = { ...this.sortCollections, customSortingInProgress: false };
         this.sortReferences = { ...this.sortReferences, customSortingInProgress: false };
         this.infobar.close();
@@ -1947,10 +2019,11 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             this.clickItem.emit(event);
             return;
         }
-        // the tiles enter the collection on a click, they are selected with their checkbox
+        // the tiles enter the collection on a click, in the edit mode they are selected instead
         if (
             this.viewState.viewType() !== 'tree' &&
             this.viewState.collectionsDisplayType() !== NodeEntriesDisplayType.Table &&
+            !this.editMode() &&
             !event.ctrlKey
         ) {
             this.openCollection(event);
@@ -1966,8 +2039,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             return;
         }
         selection?.select(event.element as Node);
-        this.editorialSidebarService.nodes.set([event.element]);
-        this.editorialSidebarService.showOption({ option: 'COLLECTION_INFO', trap: false });
+        this.editorialSidebarService.showEntryList([event.element]);
     }
 
     /** Empties the selection of every list that is currently rendered. */

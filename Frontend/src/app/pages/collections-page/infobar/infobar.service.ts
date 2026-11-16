@@ -1,6 +1,6 @@
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { DialogButton } from '../../../util/dialog-button';
 import { GenericDialogButton } from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { InfobarComponent } from './infobar.component';
@@ -10,6 +10,9 @@ export class InfobarService {
     private overlay = inject(Overlay);
 
     overlayRef: OverlayRef | null;
+
+    /** Whether an info bar is shown, so pages can keep their bottom free of it. */
+    readonly isOpen = signal(false);
 
     /**
      * Shows an info bar with the given configuration.
@@ -32,6 +35,7 @@ export class InfobarService {
             this.overlayRef = this.overlay.create();
             const portal = new ComponentPortal(InfobarComponent);
             const componentRef = this.overlayRef.attach(portal);
+            this.isOpen.set(true);
             componentRef.instance.title = title;
             componentRef.instance.message = message;
             componentRef.instance.buttons = buttons.map(
@@ -45,6 +49,7 @@ export class InfobarService {
             componentRef.instance.cancelInfobar.subscribe(() => this.overlayRef.dispose());
             componentRef.onDestroy(() => {
                 this.overlayRef = null;
+                this.isOpen.set(false);
                 resolve(null);
             });
         });

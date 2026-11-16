@@ -181,6 +181,12 @@ export interface ListEventInterface<T extends NodeEntriesDataType> {
 
     getDisplayType(): NodeEntriesDisplayType;
 
+    /** Whether the entries show a checkbox to select them. */
+    hasCheckboxes?(): boolean;
+
+    /** Emits whenever the checkboxes are shown or hidden. */
+    onCheckboxChange?(): Observable<boolean>;
+
     setDisplayType(displayType: NodeEntriesDisplayType): void;
 
     showReorderColumnsDialog(): void;

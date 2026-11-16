@@ -140,6 +140,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     @Input() columns: ColumnType;
     @Input() configureColumns: boolean;
     @Input() checkbox = true;
+    private readonly checkboxChanged = new Subject<boolean>();
     /**
      * emits when the user re-configures the columns
      * should be used in order to save the new configuration
@@ -330,6 +331,9 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         }
         this.entriesService.configureColumns = this.configureColumns;
         this.entriesService.checkbox = this.checkbox;
+        if (changes.checkbox && !changes.checkbox.firstChange) {
+            this.checkboxChanged.next(this.checkbox);
+        }
         this.entriesService.allowSelectAllResults.set(this.allowSelectAllResults);
         this.entriesService.displayType = this.displayType;
         if (changes.paginationStrategy) {
@@ -453,6 +457,14 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
 
     getDisplayType(): NodeEntriesDisplayType {
         return this.displayType;
+    }
+
+    hasCheckboxes() {
+        return this.checkbox;
+    }
+
+    onCheckboxChange() {
+        return this.checkboxChanged.asObservable();
     }
 
     onDisplayTypeChange() {

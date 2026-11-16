@@ -10,6 +10,45 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { map } from 'rxjs/operators';
 import { OptionsContext } from './options-context';
 
+/**
+ * The "select all" toggle that is currently offered for each list. The options are rebuilt on
+ * every refresh, so the list is subscribed to only once and its events always update the toggle
+ * of the latest build.
+ */
+const selectionToggles = new WeakMap<ListEventInterface<any>, { toggle: OptionItemToggle }>();
+
+function registerSelectionToggle(list: ListEventInterface<any>, toggle: OptionItemToggle) {
+    if (!list) {
+        return;
+    }
+    let entry = selectionToggles.get(list);
+    const isNew = !entry;
+    if (isNew) {
+        entry = { toggle };
+        selectionToggles.set(list, entry);
+    }
+    entry.toggle = toggle;
+    const updateVisibility = () => {
+        // the table selects with its own header checkbox, and without checkboxes there is
+        // nothing to select
+        entry.toggle.isToggleVisible =
+            list.getDisplayType() !== NodeEntriesDisplayType.Table &&
+            list.hasCheckboxes?.() !== false;
+    };
+    const updateSelectionState = (selection: SelectionModel<any>) => {
+        entry.toggle.toggleState = !selection?.isEmpty();
+    };
+    if (isNew) {
+        list.getSelection()
+            ?.changed.pipe(map((s) => s.source))
+            .subscribe(updateSelectionState);
+        list.onDisplayTypeChange().subscribe(updateVisibility);
+        list.onCheckboxChange?.().subscribe(updateVisibility);
+    }
+    updateSelectionState(list.getSelection());
+    updateVisibility();
+}
+
 export function createToggleOptions({
     service,
     management,
@@ -68,21 +107,6 @@ export function createToggleOptions({
     toggleViewType.priority = 15;
     toggleViewType.togglePosition = 'before';
 
-    const registerSelectionChange = (list: ListEventInterface<any>) => {
-        const updateVisibility = () => {
-            toggleSelection.isToggleVisible =
-                list?.getDisplayType() !== NodeEntriesDisplayType.Table;
-        };
-        const updateSelectionState = (selection: SelectionModel<any>) => {
-            toggleSelection.toggleState = !selection?.isEmpty();
-        };
-        list?.getSelection()
-            .changed.pipe(map((s) => s.source))
-            .subscribe(updateSelectionState);
-        list?.onDisplayTypeChange().subscribe(updateVisibility);
-        updateSelectionState(list?.getSelection());
-        updateVisibility();
-    };
     const toggleSelection = new OptionItemToggle(
         {
             enabled: 'OPTIONS.DESELECT',
@@ -101,7 +125,7 @@ export function createToggleOptions({
             }
         },
     );
-    registerSelectionChange(components?.list);
+    registerSelectionToggle(components?.list, toggleSelection);
     toggleSelection.scopes = [Scope.WorkspaceList, Scope.Search, Scope.CollectionsReferences];
     toggleSelection.group = DefaultGroups.Toggles;
     toggleSelection.customShowCallback = async () => data?.allObjects?.length > 0;

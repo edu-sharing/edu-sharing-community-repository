@@ -358,9 +358,19 @@ export class EditorialSidebarService {
         }
         const nodeList = Array.isArray(nodes) ? nodes : [nodes];
         instance.list?.addVirtualNodes(nodeList, { select: true });
-        this.nodes.set(nodeList);
+        this.showEntryList(nodeList);
+    }
+
+    /**
+     * Opens the sidebar on its list of actions & options for the given nodes. The list has no
+     * fullscreen view, so one left from a previously shown option is dropped.
+     */
+    showEntryList(nodes: NodeEntriesDataType[]) {
+        this.nodes.set(nodes);
         this._editorialSidebar?.enabledOption.set(null);
         this.sidebarOpened.set(true);
+        this.showFullscreenToggle.set(false);
+        this.fullscreenActive.set(false);
     }
 
     handleSelection(selection: SelectionChange<NodeEntriesDataType>) {

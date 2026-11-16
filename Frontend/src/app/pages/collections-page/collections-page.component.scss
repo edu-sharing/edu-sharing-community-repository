@@ -58,6 +58,17 @@ mat-sidenav.es-mat-sidenav {
     > mat-tab-group {
         flex-shrink: 0;
     }
+
+    // the info bar covers the bottom of the viewport, so the card ends above it and its
+    // selection bar stays visible
+    &.infobar-open {
+        $infobarFree: calc(
+            100vh - var(--roundedContainerMargin) - var(--roundedContainerMargin) -
+                var(--mainnavCurrentHeight) - #{vars.$infobarHeight}
+        );
+        height: $infobarFree;
+        min-height: $infobarFree;
+    }
 }
 
 // Full-width selection bar pinned at the bottom of the card (sibling of .collections-body), shown
@@ -466,4 +477,11 @@ section {
 
 .search-in-collection {
     margin: 12px 20px 0;
+}
+
+// the switch of the edit mode sits below the collection header bar, aligned with its inset
+.edit-mode-row {
+    display: flex;
+    justify-content: flex-end;
+    padding: 8px 20px 0;
 }

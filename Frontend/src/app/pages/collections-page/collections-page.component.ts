@@ -71,6 +71,7 @@ import {
     SearchFieldService,
 } from '../../main/navigation/search-field/search-field.service';
 import { CollectionSearchService } from './collection-search.service';
+import { InfobarService } from './infobar/infobar.service';
 import {
     COLLECTION_SEARCH_FILTERS_PARAM,
     CollectionSearchStateService,
@@ -127,6 +128,7 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
         },
     ];
     readonly topicView = inject(CollectionTopicViewService);
+    readonly infobar = inject(InfobarService);
     /** the view types of a collection below the root level, which also offer its topic page */
     readonly collectionDisplayTypeItems = computed(() => [
         ...this.displayTypeItems,
