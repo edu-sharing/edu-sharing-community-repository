@@ -92,4 +92,36 @@ class SitemapServletTest {
         assertEquals("https://host/p?a=1&b=2", SitemapServlet.removeVolatileUrlParts("https://host/p?a=1&b=2"));
         assertNull(SitemapServlet.removeVolatileUrlParts(null));
     }
+
+    @Test
+    void onlyConfiguredTypesAreListed() {
+        // Arrange
+        List<String> configured = List.of("collection");
+
+        // Act
+        List<String> types = SitemapServlet.parseTypes(configured);
+
+        // Assert
+        assertEquals(List.of("collection"), types);
+    }
+
+    @Test
+    void typesKeepAFixedOrderAndIgnoreUnknownEntries() {
+        // Arrange
+        List<String> configured = List.of("collection", "foo", "io");
+
+        // Act
+        List<String> types = SitemapServlet.parseTypes(configured);
+
+        // Assert
+        assertEquals(List.of("io", "collection"), types);
+    }
+
+    @Test
+    void allTypesAreListedWithoutAValidConfiguration() {
+        // Arrange / Act / Assert
+        assertEquals(List.of("io", "collection"), SitemapServlet.parseTypes(null));
+        assertEquals(List.of("io", "collection"), SitemapServlet.parseTypes(List.of()));
+        assertEquals(List.of("io", "collection"), SitemapServlet.parseTypes(List.of("foo")));
+    }
 }
