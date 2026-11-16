@@ -127,6 +127,12 @@
   "RENDERSERVICE_API_ERROR": "Fehler beim Verbinden mit dem Renderingservice. Bitte melden Sie diesen Fehler einen Administrator.",
   "SYSTEM_FOLDER_DELETE_ERROR": "Dieser Ordner wurde vom System erstellt und kann nicht gelöscht werden.",
   "GENERIC_QUOTA_ERROR_TITLE": "Der Vorgang konnte nicht ausgeführt werden, da das Speicherplatz-Quota überschritten wurde.",
+  "NODE_COUNT_QUOTA_ERROR": {
+    "MATERIAL": "Das Materiallimit ist erreicht: Es dürfen maximal {{limit}} Materialien angelegt werden.",
+    "COLLECTION": "Das Sammlungslimit ist erreicht: Es dürfen maximal {{limit}} Sammlungen angelegt werden.",
+    "FOLDER": "Das Ordnerlimit ist erreicht: Es dürfen maximal {{limit}} Ordner angelegt werden.",
+    "GENERIC": "Der Vorgang konnte nicht ausgeführt werden, da die maximale Anzahl an Elementen erreicht wurde."
+  },
   "CONNECTOR_FORMAT_LABEL": "Dateityp",
   "CONNECTOR_QUOTA_REACHED_TITLE": "Speicherplatz-Quota überschritten",
   "CONNECTOR_QUOTA_REACHED_MESSAGE": "Diese Funktion ist nicht mehr verfügbar, da Sie das Speicherplatz-Quota vollständig überschritten haben.\n\nLöschen Sie einige Dateien, um Speicherplatz zu schaffen und versuchen Sie es anschließend erneut.",
@@ -754,6 +760,10 @@
     "PRIMARY_AFFILIATION_SWITCH_TO_TEXT": "Zu Freitext wechseln",
     "password": "Passwort",
     "sizeQuota": "Speicherkontingent in MB",
+    "materialCountQuota": "Max. Anzahl Materialien",
+    "collectionCountQuota": "Max. Anzahl Sammlungen",
+    "folderCountQuota": "Max. Anzahl Ordner",
+    "COUNT_QUOTA_CURRENT": "Aktuell {{current}} von {{limit}} genutzt",
     "PRIMARY_AFFILIATION": {
       "teacher": "Lehrender / Lehrer",
       "student": "Lernender / Schüler",

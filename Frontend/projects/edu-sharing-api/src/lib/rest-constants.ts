@@ -86,6 +86,7 @@ export class RestConstants {
     public static PERMISSION_RATE = 'Rate';
 
     public static CONTENT_QUOTA_EXCEPTION = 'DAOQuotaException';
+    public static NODE_COUNT_QUOTA_EXCEPTION = 'DAONodeCountQuotaException';
     public static CONTENT_VIRUS_SCAN_FAILED_EXCEPTION = 'DAOVirusScanFailedException';
     public static CONTENT_VIRUS_EXCEPTION = 'DAOVirusDetectedException';
     public static CONTENT_MIMETYPE_VERIFICATION_EXCEPTION = 'DAOMimetypeVerificationException';

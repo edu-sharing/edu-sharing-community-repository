@@ -355,6 +355,13 @@ export class FileUploadProgressDialogComponent implements OnInit {
             }
         } else if (matches(RestConstants.CONTENT_FILE_EXTENSION_VERIFICATION_EXCEPTION)) {
             i18nName = 'FILETYPE_VERIFICATION';
+        } else if (matches(RestConstants.NODE_COUNT_QUOTA_EXCEPTION)) {
+            // count quota (max. number of materials / collections / folders) of the user reached
+            const quotaType: string = body?.details?.quotaType;
+            i18nName = ['MATERIAL', 'COLLECTION', 'FOLDER'].includes(quotaType)
+                ? 'COUNT_QUOTA_' + quotaType
+                : 'COUNT_QUOTA';
+            variables = { limit: body?.details?.limit };
         } else if (matches(RestConstants.CONTENT_QUOTA_EXCEPTION)) {
             i18nName = 'QUOTA';
         } else {

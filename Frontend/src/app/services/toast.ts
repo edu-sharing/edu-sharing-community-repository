@@ -494,7 +494,15 @@ export class Toast extends ToastAbstract implements OnDestroy {
                     message = 'GENERIC_QUOTA_ERROR_TITLE';
                     dialogTitle = '';
                 }
-                if (json.error.indexOf(RestConstants.CONTENT_VIRUS_EXCEPTION) != -1) {
+                if (json.error.indexOf(RestConstants.NODE_COUNT_QUOTA_EXCEPTION) !== -1) {
+                    // count quota (max. number of materials / collections / folders) of the user reached
+                    const quotaType: string = json.details?.quotaType;
+                    message = ['MATERIAL', 'COLLECTION', 'FOLDER'].includes(quotaType)
+                        ? 'NODE_COUNT_QUOTA_ERROR.' + quotaType
+                        : 'NODE_COUNT_QUOTA_ERROR.GENERIC';
+                    translationParameters = { limit: json.details?.limit };
+                    dialogTitle = '';
+                } else if (json.error.indexOf(RestConstants.CONTENT_VIRUS_EXCEPTION) != -1) {
                     message = 'GENERIC_VIRUS_ERROR_TITLE';
                     dialogTitle = '';
                 } else if (json.error.indexOf('DAOToolPermissionException') !== -1) {

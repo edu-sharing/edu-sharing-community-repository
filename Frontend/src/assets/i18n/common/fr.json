@@ -109,6 +109,12 @@
   "RENDERSERVICE_API_ERROR": "erreur lors de l'accès au service de rendu. Veuillez signaler cette erreur à un administrateur.",
   "SYSTEM_FOLDER_DELETE_ERROR": "Ce dossier système ne peut pas être supprimé",
   "GENERIC_QUOTA_ERROR_TITLE": "L'opération n'a pas pu être exécutée car le quota de téléchargement a été dépassé.",
+  "NODE_COUNT_QUOTA_ERROR": {
+    "MATERIAL": "Limite de matériels atteinte : vous pouvez créer au maximum {{limit}} matériels.",
+    "COLLECTION": "Limite de collections atteinte : vous pouvez créer au maximum {{limit}} collections.",
+    "FOLDER": "Limite de dossiers atteinte : vous pouvez créer au maximum {{limit}} dossiers.",
+    "GENERIC": "L'opération n'a pas pu être exécutée car le nombre maximal d'éléments a été atteint."
+  },
   "CONNECTOR_FORMAT_LABEL": "Type de fichier",
   "CONNECTOR_QUOTA_REACHED_TITLE": "Le quota de téléchargement a été dépassé",
   "CONNECTOR_QUOTA_REACHED_MESSAGE": "Cette fonction n'est pas disponible car le quota de téléchargements est entièrement dépassé.\n\nSupprimez des fichiers pour récupérer de l'espace de stockage et réessayez.",
@@ -514,6 +520,10 @@
     "primaryAffiliation": "Rôle principal",
     "password": "mot de passe",
     "sizeQuota": "Taille du quota en Mo",
+    "materialCountQuota": "Nombre max. de matériels",
+    "collectionCountQuota": "Nombre max. de collections",
+    "folderCountQuota": "Nombre max. de dossiers",
+    "COUNT_QUOTA_CURRENT": "Actuellement {{current}} sur {{limit}} utilisés",
     "PRIMARY_AFFILIATION": {
       "teacher": "enseignant-e",
       "student": "étudiant-e",

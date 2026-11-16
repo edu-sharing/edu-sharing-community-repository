@@ -141,6 +141,11 @@ public class Edu_SharingWebDAVServerException extends WebDAVServerException
                 return new Edu_SharingWebDAVServerException(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE,
                         MSERR_FILE_SIZE, "The file exceeds the maximum permitted file size.", e);
             }
+            if ("NodeCountQuotaExceededException".equals(name))
+            {
+                return new Edu_SharingWebDAVServerException(SC_INSUFFICIENT_STORAGE, MSERR_OVER_QUOTA,
+                        "The element was not saved because the maximum number of elements for this user is reached.", e);
+            }
             if ("ContentQuotaException".equals(name))
             {
                 return new Edu_SharingWebDAVServerException(SC_INSUFFICIENT_STORAGE, MSERR_OVER_QUOTA,

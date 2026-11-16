@@ -158,6 +158,19 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     public SCOPE_TYPES = RestConstants.VALID_SCOPE_TYPES;
     public ORG_TYPES = RestConstants.VALID_GROUP_TYPES_ORG;
     public PRIMARY_AFFILIATIONS = RestConstants.USER_PRIMARY_AFFILIATIONS;
+    /**
+     * count quotas (max. number of owned nodes) which can be set per user
+     * key: field in the profile / quota, current: field in the quota holding the current count
+     */
+    readonly COUNT_QUOTA_FIELDS = [
+        { key: 'materialCountQuota', current: 'materialCountCurrent' },
+        { key: 'collectionCountQuota', current: 'collectionCountCurrent' },
+        { key: 'folderCountQuota', current: 'folderCountCurrent' },
+    ] as const;
+    /**
+     * initial state of the quota section (expanded if any quota is set for the edited user)
+     */
+    quotaPanelExpanded = false;
     public edit: {
         authorityName?: string;
         constrains?: Constrain[];
@@ -261,6 +274,20 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     signupActions: CustomOptions = {
         useDefaultOptions: false,
     };
+
+    /**
+     * true if any quota (size or count) is set for the currently edited user
+     * used to expand the quota section initially
+     */
+    private hasQuotaSet(): boolean {
+        const profile = this.edit?.profile;
+        if (!profile) {
+            return false;
+        }
+        return [profile.sizeQuota, ...this.COUNT_QUOTA_FIELDS.map((f) => profile[f.key])].some(
+            (v) => v !== undefined && v !== null && v !== '' && v !== 0,
+        );
+    }
 
     private updateMemberSuggestions(event: any) {
         if (this.editMembers == this.org || this.org == null) {
@@ -883,6 +910,17 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             }
             const password = this.editDetails?.password?.trim() || null;
             editStore.profile.sizeQuota *= 1024 * 1024;
+            for (const field of this.COUNT_QUOTA_FIELDS) {
+                const value = editStore.profile[field.key];
+                if (value === undefined || value === null) {
+                    // not touched -> keep the current value in the backend
+                    delete editStore.profile[field.key];
+                } else {
+                    // empty -> 0 -> removes the limit
+                    const limit = parseInt(String(value), 10);
+                    editStore.profile[field.key] = limit > 0 ? limit : 0;
+                }
+            }
             // we allow fully empty password since this means the backend will not create an authentication
             // useful for system managed users like i.e. guests
             if (this.passwordRef?.passwordStrength === 'weak' && password) {
@@ -1098,6 +1136,10 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             this.iam.getUser(list[0].authorityName).subscribe((user) => {
                 this.edit = user.person;
                 this.edit.profile.sizeQuota = user.person.quota.sizeQuota / 1024 / 1024 || '';
+                for (const field of this.COUNT_QUOTA_FIELDS) {
+                    this.edit.profile[field.key] = (user.person.quota as any)?.[field.key] ?? '';
+                }
+                this.quotaPanelExpanded = this.hasQuotaSet();
                 this.editId = this.edit.authorityName;
                 this.primaryAffiliationList = this.edit.profile.primaryAffiliation
                     ? this.PRIMARY_AFFILIATIONS.indexOf(this.edit.profile.primaryAffiliation) != -1
@@ -1316,6 +1358,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     }
     private createAuthority() {
         this.edit = { profile: {} };
+        this.quotaPanelExpanded = false;
         this.editDetails = {};
         this.editId = null;
         this.updateButtons();

@@ -135,6 +135,16 @@
             display: flex;
             padding-top: 10px;
         }
+        .quota-panel {
+            margin-top: 10px;
+            .quota + .quota {
+                padding-top: 15px;
+            }
+        }
+        .quota-count-current {
+            padding-top: 5px;
+            font-size: 90%;
+        }
         .folder-path {
             display: flex;
             flex-direction: column;
