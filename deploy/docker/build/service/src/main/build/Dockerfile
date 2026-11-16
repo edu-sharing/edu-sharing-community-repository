@@ -18,7 +18,8 @@ ENV LANG=en_US.UTF-8
 ENV LC_ALL=en_US.UTF-8
 
 # security update: spring-*-6.2.11, bc*, cxf, camel, netty, jackson, jsoup jars (+ angus-activation, neethi, qpid-jms-client,
-# proton-j, xmlschema-core as their deps) are removed from alfresco.war and replaced
+# proton-j, xmlschema-core as their deps), guava (+ failureaccess, j2objc-annotations, error_prone_annotations), plexus-utils,
+# httpclient5 and httpcore5(-h2) jars (guava-mini is kept: guava-3* does not match it) are removed from alfresco.war and replaced
 # by newer versions from the edu-sharing amp, can be removed again once we switch to a newer alfresco version
 RUN set -eux \
     && mkdir -p alf_safe \
@@ -58,7 +59,14 @@ RUN set -eux \
         tomcat/webapps/alfresco/WEB-INF/lib/juniversalchardet-* \
         tomcat/webapps/alfresco/WEB-INF/lib/poi-* \
         tomcat/webapps/alfresco/WEB-INF/lib/xmpbox-* \
-        tomcat/webapps/alfresco/WEB-INF/lib/stax2-api-*
+        tomcat/webapps/alfresco/WEB-INF/lib/stax2-api-* \
+        tomcat/webapps/alfresco/WEB-INF/lib/guava-3* \
+        tomcat/webapps/alfresco/WEB-INF/lib/failureaccess-* \
+        tomcat/webapps/alfresco/WEB-INF/lib/j2objc-annotations-* \
+        tomcat/webapps/alfresco/WEB-INF/lib/error_prone_annotations-* \
+        tomcat/webapps/alfresco/WEB-INF/lib/plexus-utils-* \
+        tomcat/webapps/alfresco/WEB-INF/lib/httpclient5-* \
+        tomcat/webapps/alfresco/WEB-INF/lib/httpcore5-*
 
 COPY --chown=worker:worker artifacts/edu_sharing-community-repository-backend-tomcat-${org.edu_sharing:edu_sharing-community-repository-backend-tomcat:jar.version}.jar tomcat/lib/
 COPY --chown=worker:worker webapp/*.war tomcat/webapps/edu-sharing.war

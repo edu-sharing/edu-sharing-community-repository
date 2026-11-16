@@ -9,6 +9,7 @@ import { MdsEditorWidgetContainerComponent } from '../mds-editor-widget-containe
 import { CardDialogService } from '../../../../dialogs/card-dialog/card-dialog.service';
 import { Toast } from '../../../../../services/toast';
 import { ValueType } from 'ngx-edu-sharing-ui';
+import { getTinyMceBaseConfig } from '../../../../../shared/tinymce/tinymce-config';
 
 @Component({
     selector: 'es-mds-editor-widget-checkbox',
@@ -31,7 +32,6 @@ export class MdsEditorWidgetTinyMCEComponent extends MdsEditorWidgetBase impleme
     containerComponent: MdsEditorWidgetContainerComponent;
     readonly valueType: ValueType = ValueType.String;
     private editorConfigDefault = {
-        branding: false,
         height: 200,
         apiKey: '',
         menubar: false,
@@ -40,7 +40,6 @@ export class MdsEditorWidgetTinyMCEComponent extends MdsEditorWidgetBase impleme
         plugins: ['link'],
         toolbar:
             'h1 h2 h3 h4 | bold italic underline | link | alignleft aligncenter alignright alignjustify | removeformat | undo redo',
-        language: this.translate.getDefaultLang(),
     };
     editorConfig: Record<string, any>;
     _html = '';
@@ -87,18 +86,19 @@ export class MdsEditorWidgetTinyMCEComponent extends MdsEditorWidgetBase impleme
 
     async ngAfterViewInit() {
         this._html = (await this.widget.getInitalValuesAsync()).jointValues[0];
-        (this.editorConfigDefault as any).base_url =
-            this.platformLocation.getBaseHrefFromDOM() + 'assets/tinymce/';
         // dirty workaround for tinyMCE
         setTimeout(() => {
-            if (this.widget.definition.configuration) {
-                this.editorConfig = {
-                    ...this.editorConfigDefault,
-                    ...JSON.parse(this.widget.definition.configuration),
-                };
-            } else {
-                this.editorConfig = this.editorConfigDefault;
-            }
+            this.editorConfig = {
+                ...getTinyMceBaseConfig(
+                    this.platformLocation.getBaseHrefFromDOM(),
+                    this.translate.getDefaultLang(),
+                ),
+                ...this.editorConfigDefault,
+                // custom configuration of the mds widget definition
+                ...(this.widget.definition.configuration
+                    ? JSON.parse(this.widget.definition.configuration)
+                    : {}),
+            };
             setTimeout(() => {
                 this.editorComponent.editor.mode.set(
                     this.dummyControl.disabled ? 'readonly' : 'design',

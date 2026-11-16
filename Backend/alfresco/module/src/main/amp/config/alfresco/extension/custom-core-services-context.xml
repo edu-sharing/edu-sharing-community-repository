@@ -23,6 +23,7 @@
         <value>classpath*:alfresco/module/*/alfresco-global.properties</value>
         <value>classpath*:alfresco/module/*/caches.properties</value>
 
+        <value>classpath*:config/defaults/alfresco-global-core.properties</value>
         <value>classpath*:config/defaults/alfresco-global.properties</value>
         <value>classpath*:config/defaults/caches.properties</value>
 

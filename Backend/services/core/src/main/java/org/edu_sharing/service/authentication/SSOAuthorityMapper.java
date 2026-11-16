@@ -321,7 +321,7 @@ public class SSOAuthorityMapper {
                     throw new AuthenticationException(AuthenticationExceptionMessages.MISSING_PARAM);
                 }
 
-                if (ApplicationInfo.TYPE_RENDERSERVICE.equals(appInfo.getType())) {
+                if (appInfo != null && (ApplicationInfo.TYPE_RENDERSERVICE.equals(appInfo.getType()) || ApplicationInfo.TYPE_RENDERSERVICE_2.equals(appInfo.getType()))) {
                     createUser = false;
                     updateUser = false;
                     createGroups = false;

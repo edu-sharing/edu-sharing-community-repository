@@ -42,11 +42,13 @@ export function withTheme<TArgs = unknown>(themes: Themes): Decorator<TArgs> {
             importProvidersFrom(MaterialCssVarsModule.forRoot({ isAutoContrast: true })),
         );
 
+        // Storybook also assigns story props onto the instance of the story's `component`, so the
+        // prop names must not collide with component members (e.g. an injected `theme` service).
         story.props ??= {};
-        story.props.theme = themes[storyContext.globals['theme']];
+        story.props.storybookTheme = themes[storyContext.globals['theme']];
 
         story.template =
-            `<es-storybook-theme-wrapper [theme]="theme">` +
+            `<es-storybook-theme-wrapper [theme]="storybookTheme">` +
             `</es-storybook-theme-wrapper>` +
             story.template;
 

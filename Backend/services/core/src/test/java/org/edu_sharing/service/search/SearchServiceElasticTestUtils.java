@@ -28,10 +28,22 @@ public class SearchServiceElasticTestUtils
     }
 
     public static void assertQuery(String expected, BoolQuery.Builder actual) {
-        assertEquals(indentJson(expected), indentJson(actual));
+        assertJsonEquals(expected, JsonpUtils.toJsonString(actual.build()._toQuery(), mapper));
     }
     public static void assertFacet(String expected, Aggregation agg) {
-        assertEquals(indentJson(expected), indentJson(JsonpUtils.toJsonString(agg, mapper)));
+        assertJsonEquals(expected, JsonpUtils.toJsonString(agg, mapper));
+    }
 
+    /**
+     * compares two json documents semantically: the key order inside objects is ignored
+     * (it is not guaranteed by the elasticsearch client serializer), array order is still relevant
+     */
+    private static void assertJsonEquals(String expected, String actual) {
+        JsonElement expectedJson = JsonParser.parseString(expected);
+        JsonElement actualJson = JsonParser.parseString(actual);
+        if (!expectedJson.equals(actualJson)) {
+            // compare the pretty printed strings to get a readable diff
+            assertEquals(indentJson(expected), indentJson(actual));
+        }
     }
 }

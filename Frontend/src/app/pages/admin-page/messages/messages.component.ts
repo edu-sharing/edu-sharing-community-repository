@@ -23,6 +23,10 @@ import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ShareDialogModule } from '../../../features/dialogs/dialog-modules/share-dialog/share-dialog.module';
+import {
+    AdminMessagesEditorConfig,
+    getTinyMceBaseConfig,
+} from '../../../shared/tinymce/tinymce-config';
 import { MainNavService } from '../../../main/navigation/main-nav.service';
 import { Toast } from 'ngx-edu-sharing-ui';
 
@@ -128,18 +132,11 @@ export class AdminMessagesComponent implements OnInit {
         ]);*/
         if ((await this.configService.get<string>('admin.wysiwygType', 'TinyMCE')) === 'TinyMCE') {
             this.editorConfig = {
-                base_url: this.platformLocation.getBaseHrefFromDOM() + 'assets/tinymce/',
-                branding: false,
-                height: 200,
-                apiKey: '',
-                menubar: false,
-                statusbar: false,
-                resize: true,
-                //newline_behavior: 'linebreak',
-                plugins: ['link', 'code'],
-                toolbar:
-                    'bold italic underline | link | alignleft aligncenter alignright alignjustify | removeformat | code | undo redo',
-                language: this.translate.getDefaultLang(),
+                ...getTinyMceBaseConfig(
+                    this.platformLocation.getBaseHrefFromDOM(),
+                    this.translate.getDefaultLang(),
+                ),
+                ...AdminMessagesEditorConfig,
             };
         }
     }

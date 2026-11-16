@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.transaction.AlfrescoTransactionSupport;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -36,6 +37,8 @@ import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.springframework.context.ApplicationContext;
+
+import static org.edu_sharing.repository.server.policies.ReservedNodesPolicy.TX_RESTORE_SYS_FOLDER;
 
 public class ArchiveServiceImpl implements ArchiveService  {
 	
@@ -175,35 +178,51 @@ public class ArchiveServiceImpl implements ArchiveService  {
 		if(destinationParentId == null){
 			throw new RuntimeException("can not restore, no target available");
 		}
-		
-		
-		
-		try{
-			String newName = new DuplicateFinder().getUniqueValue(destinationParentId, CCConstants.CM_NAME, name);
-			if(!newName.equals(name)){
-				name = newName;
-				nodeService.setProperty(archivedNodeRef, QName.createQName(CCConstants.CM_NAME), name);
-				QName type = nodeService.getType(archivedNodeRef);
-		
-				if(QName.createQName(CCConstants.CCM_TYPE_IO).equals(type)){
-					nodeService.setProperty(archivedNodeRef, QName.createQName(CCConstants.LOM_PROP_GENERAL_TITLE), name);
+
+		String fdestinationParentId = destinationParentId;
+		String status = restoreResult.getRestoreStatus();
+		NodeRef restoredNode = serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
+			restoreResult.setRestoreStatus(status);
+			restoreResult.setName(name);
+			String iname = name;
+			try {
+				String newName = new DuplicateFinder().getUniqueValue(fdestinationParentId, CCConstants.CM_NAME, iname);
+				if (!newName.equals(iname)) {
+					iname = newName;
+					nodeService.setProperty(archivedNodeRef, QName.createQName(CCConstants.CM_NAME), iname);
+					QName type = nodeService.getType(archivedNodeRef);
+
+					if (QName.createQName(CCConstants.CCM_TYPE_IO).equals(type)) {
+						nodeService.setProperty(archivedNodeRef, QName.createQName(CCConstants.LOM_PROP_GENERAL_TITLE), iname);
+					}
+					restoreResult.setRestoreStatus(RESTORESTATUS_DUPLICATENAME);
 				}
-				restoreResult.setRestoreStatus(RESTORESTATUS_DUPLICATENAME);
+				restoreResult.setName(iname);
+
+			} catch (Throwable e) {
+				logger.error(e.getMessage(), e);
 			}
-			
-		}catch(Throwable e){
-			logger.error(e.getMessage(), e);
-		}
-		
-		String assocName = QName.createValidLocalName(name);
-		assocName = "{" + CCConstants.NAMESPACE_CCM + "}" + assocName;
-		
-		
-		
-		NodeRef restoredNode = nodeService.restoreNode(archivedNodeRef, 
-				new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, destinationParentId),
-				QName.createQName(CCConstants.CM_ASSOC_FOLDER_CONTAINS), 
-				QName.createQName(assocName));
+
+			try{
+				boolean isReservedFolder = restoresAsSystemFolder(archivedNodeRef, fdestinationParentId);
+
+				if (isReservedFolder){
+					AlfrescoTransactionSupport.bindResource(TX_RESTORE_SYS_FOLDER, Boolean.TRUE);
+				}
+
+				String assocName = QName.createValidLocalName(iname);
+				assocName = "{" + CCConstants.NAMESPACE_CCM + "}" + assocName;
+
+
+				return nodeService.restoreNode(archivedNodeRef,
+						new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, fdestinationParentId),
+						QName.createQName(CCConstants.CM_ASSOC_FOLDER_CONTAINS),
+						QName.createQName(assocName));
+			}finally{
+				AlfrescoTransactionSupport.unbindResource(TX_RESTORE_SYS_FOLDER);
+			}
+		});
+
 		// clear cache so that primary parent etc. gets newly resolved
 		new RepositoryCache().remove(restoredNode.getId());
 		
@@ -213,11 +232,33 @@ public class ArchiveServiceImpl implements ArchiveService  {
 		if(restoreResult.getRestoreStatus() == null){
 			restoreResult.setRestoreStatus(RESTORESTATUS_FINE);
 		}
-		restoreResult.setName(name);
 
 		new RepositoryCache().remove(restoredNode.getId());
 		
 		return restoreResult;
+	}
+
+	/**
+	 * a user system folder (inbox, saved search) is recreated automatically once it was deleted.
+	 * if the archived one is restored to a parent which already holds such a folder,
+	 * the map type is removed so the restored node becomes a regular folder and the user does not end up with two of them
+	 *
+	 * returns true if it is a systemFolder
+	 */
+	private boolean restoresAsSystemFolder(NodeRef archivedNodeRef, String destinationParentId) {
+		QName mapTypeProp = QName.createQName(CCConstants.CCM_PROP_MAP_TYPE);
+		String mapType = (String) nodeService.getProperty(archivedNodeRef, mapTypeProp);
+		if (!CCConstants.CCM_VALUE_MAP_TYPE_USERINBOX.equals(mapType) && !CCConstants.CCM_VALUE_MAP_TYPE_USERSAVEDSEARCH.equals(mapType)) {
+			return false;
+		}
+		List<ChildAssociationRef> existing = nodeService.getChildAssocsByPropertyValue(
+				new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, destinationParentId), mapTypeProp, mapType);
+		if (existing != null && !existing.isEmpty()) {
+			logger.info("restoring " + archivedNodeRef + " as regular folder, " + mapType + " already exists in " + destinationParentId);
+			nodeService.removeProperty(archivedNodeRef, mapTypeProp);
+			return false;
+		}
+		return true;
 	}
 
 }

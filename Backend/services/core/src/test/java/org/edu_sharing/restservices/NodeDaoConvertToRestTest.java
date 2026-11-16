@@ -5,17 +5,22 @@ import com.typesafe.config.ConfigFactory;
 import org.alfresco.repo.cache.SimpleCache;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.restservices.shared.NodeRef;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationContext;
 
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
@@ -56,6 +61,23 @@ class NodeDaoConvertToRestTest {
 
     private RepositoryDao repoDao;
     private Filter propFilter;
+
+    /**
+     * The worker threads of convertToRest touch {@code ApplicationInfoList}, whose static initializer reads a bean from
+     * the Alfresco context. Without a context it fails once and the class stays unusable for the whole JVM, so every
+     * later test that mocks it (e.g. {@code SSOAuthorityMapperRenderServiceTest}) fails as well.
+     */
+    @BeforeAll
+    static void keepApplicationInfoListInitializable() {
+        ApplicationContext context = Mockito.mock(ApplicationContext.class);
+        Mockito.when(context.getBean(ArgumentMatchers.anyString())).thenReturn(Mockito.mock(SimpleCache.class));
+        new AlfAppContextGate().setApplicationContext(context);
+    }
+
+    @AfterAll
+    static void resetAlfrescoContext() {
+        new AlfAppContextGate().setApplicationContext(null);
+    }
 
     @BeforeEach
     void setUp() throws Exception {

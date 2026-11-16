@@ -13,6 +13,7 @@ import org.alfresco.repo.copy.DefaultCopyBehaviourCallback;
 import org.alfresco.repo.node.NodeServicePolicies;
 import org.alfresco.repo.policy.JavaBehaviour;
 import org.alfresco.repo.policy.PolicyComponent;
+import org.alfresco.repo.transaction.AlfrescoTransactionSupport;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -41,6 +42,8 @@ public class ReservedNodesPolicy implements NodeServicePolicies.OnCreateNodePoli
     private final List<String> reservedNodeNames = List.of("inbox", "savedsearch");
 
     private final List<String> types = List.of(CCConstants.CCM_TYPE_IO, CCConstants.CM_TYPE_FOLDER);
+
+    public static final String TX_RESTORE_SYS_FOLDER = "edu.restoreSystemFolder";
 
     @PostConstruct
     public void init() {
@@ -73,6 +76,10 @@ public class ReservedNodesPolicy implements NodeServicePolicies.OnCreateNodePoli
 
     private void checkForReservedNames(NodeRef parentRef, NodeRef childRef) {
         try {
+
+            if (Boolean.TRUE.equals(AlfrescoTransactionSupport.getResource(TX_RESTORE_SYS_FOLDER))) {
+                return;
+            }
 
             HttpSession httpSession = Optional.ofNullable(Context.getCurrentInstance())
                     .map(Context::getRequest)
