@@ -1575,6 +1575,9 @@
     "EXIT_FULLSCREEN": "Esci da schermo intero",
     "VIDEO_RESOLUTION": "Risoluzione video",
     "LINK_TO_OBJECT": "Link all'oggetto",
+    "LINK_NAME_TITLE": "{{label}} – {{title}}",
+    "LINK_NAME_TITLE_NEW_WINDOW": "{{label}} – {{title}}, si apre in una nuova finestra",
+    "LINK_NAME_NEW_WINDOW": "{{label}}, si apre in una nuova finestra",
     "ERROR": {
       "GENERIC_ERROR_MESSAGE": "Si è verificato un errore.",
       "RS2_NOT_CONFIGURED": "Il rendering service 2 attualmente non è collegato a questo repository.",

@@ -14,8 +14,20 @@
     </button>
     } @if (data?.module === 'SODIX' && embedding === UrlEmbeddings.LINK) {
     <div class="link-wrapper">
-      <img [src]="previewUrl" alt="preview" />
-      <button mat-flat-button color="primary" [disabled]="loading" (click)="onFetchAndOpen()">
+      <img [src]="previewUrl" alt="" />
+      <button
+        mat-flat-button
+        color="primary"
+        [disabled]="loading"
+        (click)="onFetchAndOpen()"
+        [attr.aria-label]="
+          node?.title || node?.name
+            ? ('RENDERING.LINK_NAME_TITLE'
+              | translate
+                : { label: ('SHARING.LINK' | translate), title: node?.title || node?.name })
+            : null
+        "
+      >
         <div class="link-label">
           @if (loading) {
           <mat-progress-spinner mode="indeterminate" [diameter]="18"></mat-progress-spinner>
@@ -97,6 +109,12 @@
         [href]="url"
         target="_blank"
         (click)="onLinkClick()"
+        [attr.aria-label]="
+          (node?.title || node?.name
+            ? 'RENDERING.LINK_NAME_TITLE_NEW_WINDOW'
+            : 'RENDERING.LINK_NAME_NEW_WINDOW'
+          ) | translate : { label: ('SHARING.LINK' | translate), title: node?.title || node?.name }
+        "
       >
         <div class="link-label">{{ 'SHARING.LINK' | translate }}<i esIcon="open_in_new"></i></div>
       </a>
@@ -113,8 +131,24 @@
     UrlEmbeddings.PIXABAY || embedding === UrlEmbeddings.OERSI || embedding ===
     UrlEmbeddings.BROCKHAUS)) {
     <div class="link-wrapper">
-      <img [src]="previewUrl" alt="preview" />
-      <a mat-flat-button color="primary" [href]="url" target="_blank" (click)="onLinkClick()">
+      <!-- Pixabay previews show the image itself, the other link types only a decorative teaser. -->
+      <img
+        [src]="previewUrl"
+        [alt]="embedding === UrlEmbeddings.PIXABAY ? node?.title || node?.name || '' : ''"
+      />
+      <a
+        mat-flat-button
+        color="primary"
+        [href]="url"
+        target="_blank"
+        (click)="onLinkClick()"
+        [attr.aria-label]="
+          (node?.title || node?.name
+            ? 'RENDERING.LINK_NAME_TITLE_NEW_WINDOW'
+            : 'RENDERING.LINK_NAME_NEW_WINDOW'
+          ) | translate : { label: ('SHARING.LINK' | translate), title: node?.title || node?.name }
+        "
+      >
         <div class="link-label">{{ 'SHARING.LINK' | translate }}<i esIcon="open_in_new"></i></div>
       </a>
     </div>
@@ -129,9 +163,16 @@
         <div class="external-embed-content">
           <h3>{{ 'RENDERING.GDPR.EXTERNAL_SITE' | translate }}</h3>
           <span>{{ gdprInfoText }}</span>
-          <a mat-button="outlined" [href]="gdpr.ref" target="_blank">{{
-            'RENDERING.GDPR.GDPR_REGULATIONS' | translate
-          }}</a>
+          <a
+            mat-button="outlined"
+            [href]="gdpr.ref"
+            target="_blank"
+            [attr.aria-label]="
+              'RENDERING.LINK_NAME_NEW_WINDOW'
+                | translate : { label: ('RENDERING.GDPR.GDPR_REGULATIONS' | translate) }
+            "
+            >{{ 'RENDERING.GDPR.GDPR_REGULATIONS' | translate }}</a
+          >
           <button mat-button (click)="consentToGdprWarning()">
             {{ 'SHARING.LINK' | translate }}
           </button>
@@ -141,9 +182,16 @@
           <h3>{{ 'RENDERING.GDPR.EXTERNAL_CONTENT' | translate }}</h3>
           <span>{{ gdprInfoText }}</span>
           <span>{{ 'RENDERING.GDPR.FURTHER_INFORMATION' | translate }}</span>
-          <a mat-button="outlined" [href]="gdpr.ref" target="_blank">{{
-            'RENDERING.GDPR.GDPR_REGULATIONS' | translate
-          }}</a>
+          <a
+            mat-button="outlined"
+            [href]="gdpr.ref"
+            target="_blank"
+            [attr.aria-label]="
+              'RENDERING.LINK_NAME_NEW_WINDOW'
+                | translate : { label: ('RENDERING.GDPR.GDPR_REGULATIONS' | translate) }
+            "
+            >{{ 'RENDERING.GDPR.GDPR_REGULATIONS' | translate }}</a
+          >
           <button mat-button (click)="consentToGdprWarning()">
             {{ 'RENDERING.GDPR.AGREE_AND_CONTINUE' | translate }}
           </button>

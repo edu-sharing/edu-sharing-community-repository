@@ -1143,6 +1143,9 @@
     "EXIT_FULLSCREEN": "Vollbild beenden",
     "VIDEO_RESOLUTION": "Videoauflösung",
     "LINK_TO_OBJECT": "Zum Objekt",
+    "LINK_NAME_TITLE": "{{label}} – {{title}}",
+    "LINK_NAME_TITLE_NEW_WINDOW": "{{label}} – {{title}}, öffnet in neuem Fenster",
+    "LINK_NAME_NEW_WINDOW": "{{label}}, öffnet in neuem Fenster",
     "REVOKED": {
       "DETAILS_EMPTY": "Der Herausgebende bzw. die Redaktion hat dieses Objekt zurückgezogen. Es sind nur noch die Metadaten des ursprünglichen Elements verfügbar.\n\nWeitere Details finden Sie in der Begründung unten.",
       "DETAILS": "Der Herausgebende bzw. die Redaktion hat dieses Objekt zurückgezogen. \n\nWeitere Details finden Sie in der Begründung unten.",

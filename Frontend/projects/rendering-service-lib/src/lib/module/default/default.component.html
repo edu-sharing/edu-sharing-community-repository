@@ -1,5 +1,6 @@
 <div class="rs-default-wrapper" [class.has-download]="downloadUrl">
-  <img [src]="previewUrl" />
+  <!-- Decorative: the material's title is the page heading and the text below explains the state. -->
+  <img [src]="previewUrl" alt="" />
   <p class="info-text">{{ 'RENDERING.DEFAULT_MODULE_INFO_TEXT' | translate }}</p>
   @if (downloadUrl) {
   <p class="download-text">{{ 'RENDERING.DEFAULT_MODULE_DOWNLOAD' | translate }}</p>
