@@ -29,29 +29,54 @@ import java.util.Map;
 
 public class oEmbedServlet extends SpringHttpServlet {
     private static Logger logger = Logger.getLogger(oEmbedServlet.class);
+
+    /**
+     * The node id and the version (null if there is none) of the url of a render page,
+     * &lt;base&gt;/components/render/&lt;id&gt;[/&lt;version&gt;].
+     *
+     * @throws IllegalArgumentException if the url is missing, malformed or has no node id
+     *                                  (a NumberFormatException of a size parameter is one as well)
+     */
+    static String[] parseRenderUrl(String url) {
+        if (url == null || url.isBlank()) {
+            throw new IllegalArgumentException("missing parameter url");
+        }
+        String[] path;
+        try {
+            path = new URL(url).getPath().split("/");
+        } catch (java.net.MalformedURLException e) {
+            throw new IllegalArgumentException("invalid parameter url", e);
+        }
+        if (path.length < 5 || path[4].isEmpty()) {
+            throw new IllegalArgumentException("invalid parameter url: the node id is missing");
+        }
+        return new String[]{path[4], path.length >= 6 ? path[5] : null};
+    }
+
         protected void doGet(HttpServletRequest req, HttpServletResponse resp)
                 throws ServletException, IOException {
             oEmbedBase base;
             String node_id;
             String version=null;
-            String url = req.getParameter("url");
-            URL decoded = new URL(url);
-            String[] path = decoded.getPath().split("/");
-            node_id=path[4];
-            if(path.length>=6){
-                version=path[5];
-            }
-
             String format = req.getParameter("format");
             int maxWidth=oEmbedBase.DEFAULT_SIZE,maxHeight=oEmbedBase.DEFAULT_SIZE;
             if(format==null)
                 format="json";
-            String maxwidth = req.getParameter("maxwidth");
-            String maxheight = req.getParameter("maxheight");
-            if(maxwidth!=null)
-                maxWidth=Integer.parseInt(maxwidth);
-            if(maxheight!=null)
-                maxHeight=Integer.parseInt(maxheight);
+            try {
+                String[] target = parseRenderUrl(req.getParameter("url"));
+                node_id = target[0];
+                version = target[1];
+                String maxwidth = req.getParameter("maxwidth");
+                String maxheight = req.getParameter("maxheight");
+                if(maxwidth!=null)
+                    maxWidth=Integer.parseInt(maxwidth);
+                if(maxheight!=null)
+                    maxHeight=Integer.parseInt(maxheight);
+            } catch (IllegalArgumentException e) {
+                // a missing or invalid parameter is an error of the caller (oembed spec: 400), not of the server
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+                return;
+            }
             try {
                 RenderingService renderingService = RenderingServiceFactory.getInstance().getLocalService();
                 Map<String, String> params = new HashMap<>();
