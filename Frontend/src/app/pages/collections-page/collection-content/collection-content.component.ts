@@ -1746,9 +1746,15 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         );
     }
 
-    /** Tables always select with their checkboxes, the tiles only while the edit mode is on. */
-    showCheckboxes(displayType: NodeEntriesDisplayType): boolean {
-        return displayType === NodeEntriesDisplayType.Table || this.editMode();
+    /**
+     * A click on a collection tile enters the collection, so the tiles only show their checkboxes
+     * while the edit mode is on. A table always selects with its checkboxes.
+     */
+    showCollectionCheckboxes(): boolean {
+        return (
+            this.viewState.collectionsDisplayType() === NodeEntriesDisplayType.Table ||
+            this.editMode()
+        );
     }
 
     canOrderCollections(): boolean {
