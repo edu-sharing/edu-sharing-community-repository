@@ -429,8 +429,8 @@ section {
             min-height: auto;
         }
     }
-    // Mobile is a single column with the breadcrumb as an absolute overlay, so the desktop
-    // "scroll only the right column" split is undone: the whole card body scrolls again.
+    // Mobile is a single column, so the desktop "scroll only the right column" split is undone:
+    // the whole card body scrolls again.
     .collections-body {
         overflow-y: auto;
     }

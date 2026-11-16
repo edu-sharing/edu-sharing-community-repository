@@ -15,10 +15,11 @@ import { RenderData, AssetStateItem } from '../../dto/RenderData';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { MatAnchor } from '@angular/material/button';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
     selector: 'rs-module-binder',
-    imports: [RenderingModule, FormsModule, MatProgressSpinner, MatAnchor],
+    imports: [RenderingModule, FormsModule, MatProgressSpinner, MatAnchor, TranslateModule],
     templateUrl: './binder.component.html',
     changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './binder.component.scss',

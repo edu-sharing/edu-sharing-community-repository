@@ -16,6 +16,7 @@ import org.alfresco.service.cmr.usage.ContentQuotaException;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.RestrictedAccessException;
 import org.edu_sharing.alfresco.policy.GuestCagePolicy;
+import org.edu_sharing.alfresco.policy.NodeActiveContentValidationException;
 import org.edu_sharing.alfresco.policy.NodeFileExtensionValidationException;
 import org.edu_sharing.alfresco.policy.NodeFileSizeExceededException;
 import org.edu_sharing.alfresco.policy.NodeMimetypeValidationException;
@@ -28,6 +29,7 @@ import org.edu_sharing.service.handleservicedoi.DOIServiceException;
 import org.edu_sharing.service.permission.PermissionException;
 import org.edu_sharing.service.upload.UploadChunkOffsetMismatchException;
 import org.edu_sharing.service.upload.UploadSessionNotFoundException;
+import org.edu_sharing.service.quota.NodeCountQuotaExceededException;
 import org.springframework.dao.DuplicateKeyException;
 
 import java.io.FileNotFoundException;
@@ -36,7 +38,9 @@ import java.lang.reflect.UndeclaredThrowableException;
 import java.nio.file.NoSuchFileException;
 import java.security.InvalidKeyException;
 import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class DAOException extends RuntimeException {
 
@@ -110,6 +114,20 @@ public class DAOException extends RuntimeException {
         return ex;
     }
 
+    /**
+     * @return the first throwable of the given type in the cause chain of t (incl. t itself), or null
+     */
+    private static <T extends Throwable> T findCause(Throwable t, Class<T> clazz) {
+        Set<Throwable> visited = Collections.newSetFromMap(new IdentityHashMap<>());
+        while (t != null && visited.add(t)) {
+            if (clazz.isInstance(t)) {
+                return clazz.cast(t);
+            }
+            t = t.getCause();
+        }
+        return null;
+    }
+
     public static DAOException mapping(Throwable t, String nodeId) {
         // de-capsulate previously capsulated runtime throwables
         if (t instanceof RuntimeException) {
@@ -118,6 +136,10 @@ public class DAOException extends RuntimeException {
         // these exceptions come from annotated permissions checks
         if (t instanceof UndeclaredThrowableException) {
             t = t.getCause();
+        }
+        NodeCountQuotaExceededException countQuotaException = findCause(t, NodeCountQuotaExceededException.class);
+        if (countQuotaException != null) {
+            return new DAONodeCountQuotaException(countQuotaException, nodeId);
         }
         if (t instanceof DAOException) {
 
@@ -165,6 +187,12 @@ public class DAOException extends RuntimeException {
         if (t instanceof NodeMimetypeValidationException ||
                 t instanceof ContentIOException && t.getCause() instanceof NodeMimetypeValidationException) {
             return new DAOMimetypeVerificationException(t, nodeId);
+        }
+        if (t instanceof NodeActiveContentValidationException) {
+            return new DAOActiveContentVerificationException((NodeActiveContentValidationException) t, nodeId);
+        }
+        if (t instanceof ContentIOException && t.getCause() instanceof NodeActiveContentValidationException) {
+            return new DAOActiveContentVerificationException((NodeActiveContentValidationException) t.getCause(), nodeId);
         }
         if (t instanceof NodeFileSizeExceededException) {
             return new DAONodeFileSizeExceededException((NodeFileSizeExceededException) t, nodeId);

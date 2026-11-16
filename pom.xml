@@ -35,7 +35,7 @@
     <alfresco.platform.version>26.1.0</alfresco.platform.version>
     <alfresco.sdk.version>4.15.0</alfresco.sdk.version>
 
-    <bouncycastle.version>1.85</bouncycastle.version>
+    <bouncycastle.version>1.87</bouncycastle.version>
     <jmh.version>1.36</jmh.version>
     <log4j.version>2.25.5</log4j.version>
     <micrometer.version>1.14.14</micrometer.version>
@@ -348,6 +348,12 @@
 
       <dependency>
         <groupId>org.apache.pdfbox</groupId>
+        <artifactId>pdfbox</artifactId>
+        <version>3.0.5</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.pdfbox</groupId>
         <artifactId>pdfbox-io</artifactId>
         <version>${pdfbox.version}</version>
       </dependency>
@@ -412,7 +418,7 @@
       <dependency>
         <groupId>co.elastic.clients</groupId>
         <artifactId>elasticsearch-java</artifactId>
-        <version>8.18.7</version>
+        <version>8.19.24</version>
       </dependency>
 
       <!-- dependency of elastic client -->
@@ -683,14 +689,15 @@
         <version>33.7.2-jre</version>
       </dependency>
 
-      <!-- security update: replaces the plexus-utils 3.3.1 removed from alfresco.war (see Dockerfile) -->
+      <!-- security update: replace the guava, plexus-utils and httpclient5/httpcore5 jars of alfresco.war
+           (see Dockerfile and alfresco module), httpclient5 is raised together with httpcore5 to keep a released pair.
+           can be removed again once we switch to a newer alfresco version that ships fixed versions -->
       <dependency>
         <groupId>org.codehaus.plexus</groupId>
         <artifactId>plexus-utils</artifactId>
-        <version>3.6.1</version>
+        <version>3.6.2</version>
       </dependency>
 
-      <!-- security update: httpclient5 5.6.x requires httpcore5 5.4.x, replaces the 5.5 / 5.3.4 from alfresco.war -->
       <dependency>
         <groupId>org.apache.httpcomponents.client5</groupId>
         <artifactId>httpclient5</artifactId>
@@ -758,6 +765,19 @@
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-annotations</artifactId>
         <version>2.20</version>
+      </dependency>
+
+      <!-- Jackson 3 (tools.jackson) comes from the Spring 7 stack (oauth2-authorization-server, databind 3.0.1) and from
+           elasticsearch-java >= 8.19.20 (core 3.0.0), pin core and databind to the same version to keep a matching pair -->
+      <dependency>
+        <groupId>tools.jackson.core</groupId>
+        <artifactId>jackson-core</artifactId>
+        <version>3.0.1</version>
+      </dependency>
+      <dependency>
+        <groupId>tools.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>3.0.1</version>
       </dependency>
 
       <dependency>

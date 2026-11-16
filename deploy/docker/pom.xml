@@ -35,7 +35,7 @@
     </docker.edu_sharing.community.common.alfresco.transform.core.aio.name>
 
     <docker.edu_sharing.community.common.alfresco.transform.core.aio.tag>
-      5.4.5-4
+      5.4.5-5
     </docker.edu_sharing.community.common.alfresco.transform.core.aio.tag>
 
     <docker.edu_sharing.community.common.alfresco.search.service.name>
@@ -43,7 +43,7 @@
     </docker.edu_sharing.community.common.alfresco.search.service.name>
 
     <docker.edu_sharing.community.common.alfresco.search.service.tag>
-      2.0.10-4
+      2.0.10-5
     </docker.edu_sharing.community.common.alfresco.search.service.tag>
 
     <docker.edu_sharing.community.common.alfresco.share.name>
@@ -59,7 +59,7 @@
     </docker.edu_sharing.community.common.postgresql.name>
 
     <docker.edu_sharing.community.common.postgresql.tag>
-      16.6.0-3
+      16.6.0-4
     </docker.edu_sharing.community.common.postgresql.tag>
 
     <docker.edu_sharing.community.common.postgresql.exporter.name>
@@ -75,7 +75,7 @@
     </docker.edu_sharing.community.common.mailcatcher.name>
 
     <docker.edu_sharing.community.common.mailcatcher.tag>
-      1.0.0-2
+      1.0.0-3
     </docker.edu_sharing.community.common.mailcatcher.tag>
 
     <docker.edu_sharing.community.common.minideb.name>
@@ -99,7 +99,7 @@
     </docker.edu_sharing.community.common.redis.name>
 
     <docker.edu_sharing.community.common.redis.tag>
-      8.2.10-2
+      8.2.10-3
     </docker.edu_sharing.community.common.redis.tag>
 
     <docker.edu_sharing.community.common.redis>

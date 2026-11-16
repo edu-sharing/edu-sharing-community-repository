@@ -332,6 +332,25 @@ public class SearchServiceElastic implements SearchService {
         return sr;
     }
 
+    /**
+     * counts the nodes (in the workspace store) owned by the given user matching the given content type and the additional filters
+     * No permission filtering is applied
+     */
+    public long countOwnedNodes(String owner, ContentType contentType, List<Query> additionalFilters) throws IOException {
+        checkClient();
+        BoolQuery.Builder query = new BoolQuery.Builder()
+                .must(m -> m.match(t -> t.field("owner").query(owner)))
+                .must(m -> m.term(t -> t.field("nodeRef.storeRef.protocol").value(StoreRef.PROTOCOL_WORKSPACE)))
+                .must(getContentTypeQuery(contentType));
+        if (additionalFilters != null && !additionalFilters.isEmpty()) {
+            query.must(additionalFilters);
+        }
+        BoolQuery boolQuery = query.build();
+        return client.withTransportOptions(this::getRequestOptions)
+                .count(c -> c.index(WORKSPACE_INDEX).query(q -> q.bool(boolQuery)))
+                .count();
+    }
+
     private TransportOptions.Builder getRequestOptions(TransportOptions.Builder bld) {
         // add trace headers to elastic request
         Context context = Context.getCurrentInstance();

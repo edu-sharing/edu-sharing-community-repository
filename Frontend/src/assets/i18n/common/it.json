@@ -109,6 +109,12 @@
   "RENDERSERVICE_API_ERROR": "errore durante il raggiungimento del servizio di rendering. Si prega di segnalare questo errore all'amministratore.",
   "SYSTEM_FOLDER_DELETE_ERROR": "Questa cartella di sistema non può essere eliminata",
   "GENERIC_QUOTA_ERROR_TITLE": "Non è stato possibile eseguire l'operazione perché è stata superata la quota di caricamento.",
+  "NODE_COUNT_QUOTA_ERROR": {
+    "MATERIAL": "Limite di materiali raggiunto: è possibile creare al massimo {{limit}} materiali.",
+    "COLLECTION": "Limite di raccolte raggiunto: è possibile creare al massimo {{limit}} raccolte.",
+    "FOLDER": "Limite di cartelle raggiunto: è possibile creare al massimo {{limit}} cartelle.",
+    "GENERIC": "Non è stato possibile eseguire l'operazione perché è stato raggiunto il numero massimo di elementi."
+  },
   "CONNECTOR_FORMAT_LABEL": "Tipo di file",
   "CONNECTOR_QUOTA_REACHED_TITLE": "Quota di caricamento superata",
   "CONNECTOR_QUOTA_REACHED_MESSAGE": "Questa funzione non è disponibile perché la quota di caricamento è stata completamente superata.\n\nEliminare i file per recuperare spazio e riprovare.",
@@ -514,6 +520,10 @@
     "primaryAffiliation": "Ruolo primario",
     "password": "password",
     "sizeQuota": "Dimensione della quota in MB",
+    "materialCountQuota": "Numero max. di materiali",
+    "collectionCountQuota": "Numero max. di raccolte",
+    "folderCountQuota": "Numero max. di cartelle",
+    "COUNT_QUOTA_CURRENT": "Attualmente {{current}} di {{limit}} utilizzati",
     "PRIMARY_AFFILIATION": {
       "teacher": "insegnante",
       "student": "studente",
@@ -1565,6 +1575,13 @@
     "QUEUE_POSITION": "Posizione in coda",
     "OPEN_IN_NEW_TAB": "Apri in una nuova scheda",
     "RELOAD_LINK": "Ricarica il link",
+    "FULLSCREEN": "Schermo intero",
+    "EXIT_FULLSCREEN": "Esci da schermo intero",
+    "VIDEO_RESOLUTION": "Risoluzione video",
+    "LINK_TO_OBJECT": "Link all'oggetto",
+    "LINK_NAME_TITLE": "{{label}} – {{title}}",
+    "LINK_NAME_TITLE_NEW_WINDOW": "{{label}} – {{title}}, si apre in una nuova finestra",
+    "LINK_NAME_NEW_WINDOW": "{{label}}, si apre in una nuova finestra",
     "ERROR": {
       "GENERIC_ERROR_MESSAGE": "Si è verificato un errore.",
       "RS2_NOT_CONFIGURED": "Il rendering service 2 attualmente non è collegato a questo repository.",

@@ -7,6 +7,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.tools.URLHelper;
 import org.edu_sharing.restservices.DAOException;
+import org.edu_sharing.restservices.DAOMissingException;
 import org.edu_sharing.restservices.DAOSecurityException;
 import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.RepositoryDao;
@@ -29,29 +30,54 @@ import java.util.Map;
 
 public class oEmbedServlet extends SpringHttpServlet {
     private static Logger logger = Logger.getLogger(oEmbedServlet.class);
+
+    /**
+     * The node id and the version (null if there is none) of the url of a render page,
+     * &lt;base&gt;/components/render/&lt;id&gt;[/&lt;version&gt;].
+     *
+     * @throws IllegalArgumentException if the url is missing, malformed or has no node id
+     *                                  (a NumberFormatException of a size parameter is one as well)
+     */
+    static String[] parseRenderUrl(String url) {
+        if (url == null || url.isBlank()) {
+            throw new IllegalArgumentException("missing parameter url");
+        }
+        String[] path;
+        try {
+            path = new URL(url).getPath().split("/");
+        } catch (java.net.MalformedURLException e) {
+            throw new IllegalArgumentException("invalid parameter url", e);
+        }
+        if (path.length < 5 || path[4].isEmpty()) {
+            throw new IllegalArgumentException("invalid parameter url: the node id is missing");
+        }
+        return new String[]{path[4], path.length >= 6 ? path[5] : null};
+    }
+
         protected void doGet(HttpServletRequest req, HttpServletResponse resp)
                 throws ServletException, IOException {
             oEmbedBase base;
             String node_id;
             String version=null;
-            String url = req.getParameter("url");
-            URL decoded = new URL(url);
-            String[] path = decoded.getPath().split("/");
-            node_id=path[4];
-            if(path.length>=6){
-                version=path[5];
-            }
-
             String format = req.getParameter("format");
             int maxWidth=oEmbedBase.DEFAULT_SIZE,maxHeight=oEmbedBase.DEFAULT_SIZE;
             if(format==null)
                 format="json";
-            String maxwidth = req.getParameter("maxwidth");
-            String maxheight = req.getParameter("maxheight");
-            if(maxwidth!=null)
-                maxWidth=Integer.parseInt(maxwidth);
-            if(maxheight!=null)
-                maxHeight=Integer.parseInt(maxheight);
+            try {
+                String[] target = parseRenderUrl(req.getParameter("url"));
+                node_id = target[0];
+                version = target[1];
+                String maxwidth = req.getParameter("maxwidth");
+                String maxheight = req.getParameter("maxheight");
+                if(maxwidth!=null)
+                    maxWidth=Integer.parseInt(maxwidth);
+                if(maxheight!=null)
+                    maxHeight=Integer.parseInt(maxheight);
+            } catch (IllegalArgumentException e) {
+                // a missing or invalid parameter is an error of the caller (oembed spec: 400), not of the server
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+                return;
+            }
             try {
                 RenderingService renderingService = RenderingServiceFactory.getInstance().getLocalService();
                 Map<String, String> params = new HashMap<>();
@@ -66,6 +92,10 @@ public class oEmbedServlet extends SpringHttpServlet {
                 base.setType("rich");
                 int[] size=getSize(oEmbedBase.DEFAULT_SIZE,oEmbedBase.DEFAULT_SIZE,maxWidth,maxHeight);
                 base.setHtml(getIFrameHTML(URLHelper.getBaseUrl(true)+"/rendering-error?i18n=usage_missing&exception="+e.getClass().getName(),size[0],size[1]));
+            }catch(DAOMissingException e) {
+                // the node (or the requested version) does not exist (oembed spec: 404)
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "the node was not found");
+                return;
             }catch(Throwable t){
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,t.getMessage());
                 return;

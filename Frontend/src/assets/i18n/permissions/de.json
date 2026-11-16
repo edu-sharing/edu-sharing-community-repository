@@ -32,6 +32,7 @@
     "MENU_REMOVE_MEMBERSHIP": "Aus Gruppe(n) entfernen",
     "MENU_STATUS": "Status festlegen",
     "USER_QUOTA_HINT": "Wenn kein Wert gesetzt ist gilt keine Beschränkung",
+    "QUOTA_SECTION": "Kontingente",
     "ORG_HOME_FOLDER_LABEL": "Position des Organisations-Ordners",
     "ORG_HOME_FOLDER_MAIN": "System",
     "SEARCH_GROUP": "Gruppen suchen...",

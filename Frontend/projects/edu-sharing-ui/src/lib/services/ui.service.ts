@@ -15,6 +15,7 @@ import { OptionItem, OptionItemToggle } from '../types/option-item';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 import { ConfigService, Node } from 'ngx-edu-sharing-api';
 import { Router } from '@angular/router';
+import { LocationStrategy } from '@angular/common';
 
 @Injectable({ providedIn: 'root' })
 export class UIService {
@@ -383,7 +384,15 @@ export class UIService {
             });
         });
     }
-    goToLogin(scope: string = null, next = window.location.href) {
+    /**
+     * @param hardReload if true, a full page load is triggered instead of a router navigation
+     * (required if the app DOM has been removed and to clear all in-memory data)
+     */
+    goToLogin(
+        scope: string = null,
+        next = window.location.href,
+        { hardReload = false }: { hardReload?: boolean } = {},
+    ) {
         void this.injector
             .get(ConfigService)
             .get('loginUrl')
@@ -396,12 +405,20 @@ export class UIService {
                     window.location.href = url;
                     return;
                 }
-                void this.injector.get(Router).navigate([UIConstants.ROUTER_PREFIX + 'login'], {
+                const router = this.injector.get(Router);
+                const urlTree = router.createUrlTree([UIConstants.ROUTER_PREFIX + 'login'], {
                     queryParams: {
                         scope: scope,
                         next: next,
                     },
                 });
+                if (hardReload) {
+                    window.location.href = this.injector
+                        .get(LocationStrategy)
+                        .prepareExternalUrl(router.serializeUrl(urlTree));
+                } else {
+                    void router.navigateByUrl(urlTree);
+                }
             });
     }
 }

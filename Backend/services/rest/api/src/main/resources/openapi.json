@@ -10852,14 +10852,26 @@
           "avatar": {
             "type": "string"
           },
+          "collectionCountQuota": {
+            "format": "int64",
+            "type": "integer"
+          },
           "email": {
             "type": "string"
           },
           "firstName": {
             "type": "string"
           },
+          "folderCountQuota": {
+            "format": "int64",
+            "type": "integer"
+          },
           "lastName": {
             "type": "string"
+          },
+          "materialCountQuota": {
+            "format": "int64",
+            "type": "integer"
           },
           "primaryAffiliation": {
             "type": "string"
@@ -10890,8 +10902,32 @@
       },
       "UserQuota": {
         "properties": {
+          "collectionCountCurrent": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "collectionCountQuota": {
+            "format": "int64",
+            "type": "integer"
+          },
           "enabled": {
             "type": "boolean"
+          },
+          "folderCountCurrent": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "folderCountQuota": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "materialCountCurrent": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "materialCountQuota": {
+            "format": "int64",
+            "type": "integer"
           },
           "sizeCurrent": {
             "format": "int64",

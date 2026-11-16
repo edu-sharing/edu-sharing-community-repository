@@ -133,7 +133,8 @@ public class ErrorResponse {
                     .entity(new ErrorResponse(t))
                     .build();
         }
-        if (t instanceof DAOMimetypeVerificationException || t instanceof DAOFileExtensionVerificationException) {
+        if (t instanceof DAOMimetypeVerificationException || t instanceof DAOFileExtensionVerificationException
+                || t instanceof DAOActiveContentVerificationException) {
             return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
                     .type(MediaType.APPLICATION_JSON_TYPE)
                     .entity(new ErrorResponse(t))

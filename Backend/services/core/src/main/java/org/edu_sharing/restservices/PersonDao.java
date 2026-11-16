@@ -53,6 +53,8 @@ import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.notification.NotificationServiceFactory;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
+import org.edu_sharing.service.quota.NodeCountQuotaHelper;
+import org.edu_sharing.service.quota.NodeCountQuotaType;
 import org.edu_sharing.service.search.model.SearchResult;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
@@ -276,8 +278,21 @@ public class PersonDao {
             } else {
                 newUserInfo.put(CCConstants.CM_PROP_PERSON_SIZE_QUOTA, null);
             }
+            putCountQuota(newUserInfo, CCConstants.CM_PROP_PERSON_MATERIAL_COUNT_QUOTA, profile.getMaterialCountQuota());
+            putCountQuota(newUserInfo, CCConstants.CM_PROP_PERSON_COLLECTION_COUNT_QUOTA, profile.getCollectionCountQuota());
+            putCountQuota(newUserInfo, CCConstants.CM_PROP_PERSON_FOLDER_COUNT_QUOTA, profile.getFolderCountQuota());
         }
         return newUserInfo;
+    }
+
+    /**
+     * null keeps the current value (e.g. for clients not aware of the count quotas), <= 0 removes the limit
+     */
+    private static void putCountQuota(Map<String, Serializable> userInfo, String property, Long value) {
+        if (value == null) {
+            return;
+        }
+        userInfo.put(property, value > 0 ? "" + value : null);
     }
 
     public GroupEntries getMemberships(String pattern, int skipCount, int maxItems, SortDefinition sort) throws DAOException {
@@ -427,6 +442,7 @@ public class PersonDao {
 
     private UserQuota getQuota() {
         UserQuota quota = new UserQuota();
+        fillCountQuotas(quota);
         Long sizeQuota = (Long) userInfo.get(CCConstants.CM_PROP_PERSON_SIZE_QUOTA);
         if (sizeQuota == null || sizeQuota.equals(-1L)) {
             quota.setEnabled(false);
@@ -437,6 +453,35 @@ public class PersonDao {
         quota.setSizeQuota(sizeQuota);
         quota.setSizeCurrent(sizeCurrent);
         return quota;
+    }
+
+    private void fillCountQuotas(UserQuota quota) {
+        for (NodeCountQuotaType type : NodeCountQuotaType.values()) {
+            Long limit = NodeCountQuotaHelper.getLimit(userInfo, type);
+            if (limit == null) {
+                continue;
+            }
+            Long current = null;
+            try {
+                current = NodeCountQuotaHelper.countOwnedNodes(getUserName(), type);
+            } catch (Throwable t) {
+                logger.warn("Could not count the owned nodes of " + getUserName() + " for the count quota " + type + ": " + t.getMessage());
+            }
+            switch (type) {
+                case MATERIAL -> {
+                    quota.setMaterialCountQuota(limit);
+                    quota.setMaterialCountCurrent(current);
+                }
+                case COLLECTION -> {
+                    quota.setCollectionCountQuota(limit);
+                    quota.setCollectionCountCurrent(current);
+                }
+                case FOLDER -> {
+                    quota.setFolderCountQuota(limit);
+                    quota.setFolderCountCurrent(current);
+                }
+            }
+        }
     }
 
     private UserProfile getProfile() {

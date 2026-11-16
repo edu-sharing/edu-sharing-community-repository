@@ -284,7 +284,8 @@ public class SSOAuthorityMapper {
                     throw new AuthenticationException(AuthenticationExceptionMessages.MISSING_PARAM);
                 }
 
-                if (ApplicationInfo.TYPE_RENDERSERVICE.equals(appInfo.map(ApplicationInfo::getType).orElse(null))) {
+                String appType = appInfo.map(ApplicationInfo::getType).orElse(null);
+                if (ApplicationInfo.TYPE_RENDERSERVICE.equals(appType) || ApplicationInfo.TYPE_RENDERSERVICE_2.equals(appType)) {
                     createUser = false;
                     updateUser = false;
                     createGroups = false;
@@ -632,7 +633,13 @@ public class SSOAuthorityMapper {
     }
 
     private static boolean isMatchingGroup(Map<String, String> ssoAttributes, Mapping.Group mappingGroup) {
-        return Pattern.matches(mappingGroup.getMatcher(), Optional.of(mappingGroup).map(Mapping.Group::getAttribute).map(ssoAttributes::get).orElse(null));
+        // no attribute configured (e.g. lms global groups with ".*"): only the matcher decides
+        if (mappingGroup.getAttribute() == null) {
+            return Pattern.matches(mappingGroup.getMatcher(), "");
+        }
+        // a configured attribute that is not delivered (e.g. auth by a rendering service, which only sends the user name) never matches
+        String value = ssoAttributes.get(mappingGroup.getAttribute());
+        return value != null && Pattern.matches(mappingGroup.getMatcher(), value);
     }
 
     public String digest(String str) {
