@@ -76,6 +76,7 @@
   "LOGOUT": "Abmelden",
   "INVALID_OPERATION": "Diese Funktion wird leider nicht unterstützt.",
   "SORT_BY": "Sortieren nach",
+  "SORT_BY_COLUMN": "Nach dieser Spalte sortieren",
   "ASCENDING": "aufsteigend",
   "DESCENDING": "absteigend",
   "SELECTED": "ausgewählt",
@@ -1748,7 +1749,7 @@
     "aboutme": "Eigenes Profil",
     "documentation": "Zur Dokumentation",
     "OPTIONS_FOR": "Aktionen für {{element}}",
-    "ADD_ENTRY": "Shorcut Kachel hinzufügen"
+    "ADD_ENTRY": "Schnellzugriff Kachel hinzufügen"
   },
   "DASHBOARD_SWIMLANE": {
     "EXPAND": "{{ element }} ausklappen",

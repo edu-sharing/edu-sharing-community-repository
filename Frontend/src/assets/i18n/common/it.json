@@ -71,6 +71,7 @@
   "LOGOUT": "Disconnettersi",
   "INVALID_OPERATION": "Questa funzione non è attualmente supportata",
   "SORT_BY": "Ordina per",
+  "SORT_BY_COLUMN": "Ordina per questa colonna",
   "ASCENDING": "ascendente",
   "DESCENDING": "discendente",
   "SELECTED": "selezionato",

@@ -71,6 +71,7 @@
   "LOGOUT": "Déconnexion",
   "INVALID_OPERATION": "Cette fonction n'est pas prise en charge actuellement",
   "SORT_BY": "Trier par",
+  "SORT_BY_COLUMN": "Trier selon cette colonne",
   "ASCENDING": "ascendante",
   "DESCENDING": "descendant",
   "SELECTED": "sélectionné",

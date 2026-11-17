@@ -76,6 +76,7 @@
   "LOGOUT": "Log out",
   "INVALID_OPERATION": "This feature is currently not supported",
   "SORT_BY": "Sort by",
+  "SORT_BY_COLUMN": "Sort by this column",
   "ASCENDING": "ascending",
   "DESCENDING": "descending",
   "SELECTED": "selected",
