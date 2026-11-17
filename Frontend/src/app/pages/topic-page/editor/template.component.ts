@@ -203,6 +203,7 @@ import { BreadcrumbComponent } from '../widgets/breadcrumb/breadcrumb.component'
 import { GenericWidgetComponent } from '../widgets/generic-widget/generic-widget.component';
 import { GenericWidgetGlobalService } from '../widgets/generic-widget/generic-widget-global.service';
 import { ProfilingComponent } from '../widgets/profiling/profiling.component';
+import { AiTextPlaceholderComponent } from '../widgets/shared/ai-text-placeholder/ai-text-placeholder.component';
 import { ColorPickerComponent } from '../widgets/shared/color-picker/color-picker.component';
 import { EditableTextComponent } from '../widgets/shared/editable-text/editable-text.component';
 import { SideMenuItemComponent } from '../widgets/side-menu-wrapper/side-menu-item/side-menu-item.component';
@@ -228,6 +229,7 @@ import { TopicPageInheritanceSidebarComponent } from './topic-page-sidebar/inher
     imports: [
         AddPageVariantOrTemplateDialogComponent,
         AddSwimlaneBorderButtonComponent,
+        AiTextPlaceholderComponent,
         AiTextPromptPipe,
         BreadcrumbComponent,
         CdkAccordionModule,
@@ -666,6 +668,8 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         string,
         PromptToTextMapping
     >();
+    // ids of the swimlanes whose heading is still being generated from its prompt
+    swimlaneIdsWithPendingHeading: WritableSignal<ReadonlySet<string>> = signal(new Set<string>());
     topicWidgets: NodeEntries;
 
     latestParams: Params;
@@ -1324,7 +1328,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         }
         // update the swimlane ID to prompt text mapping
         if (initialLoad || pageVariantChanged || forceReload) {
-            await this.updateSwimlaneIdToPromptTextMapping();
+            void this.updateSwimlaneIdToPromptTextMapping();
         }
         // wait for the page variant to be loaded before checking whether all accordions are opened in edit mode
         setTimeout((): void => {
@@ -1376,7 +1380,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         if (this.pageVariantNode() !== node) {
             return;
         }
-        await this.updateSwimlaneIdToPromptTextMapping();
+        void this.updateSwimlaneIdToPromptTextMapping();
         setTimeout((): void => {
             this.checkAccordionExpansionState();
         });
@@ -1999,7 +2003,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 this.pageVariantReloadNecessary = false;
                 this.retrievePageVariant();
                 // use this pageVariantNode to update the mapping
-                await this.updateSwimlaneIdToPromptTextMapping();
+                void this.updateSwimlaneIdToPromptTextMapping();
             }
             // update the page variant config in any case
             else {
@@ -2712,6 +2716,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         this.persistedSwimlanes = restoreState.persistedSwimlanes;
         this.swimlanes = restoreState.swimlanes;
         this.swimlaneIdToPromptTextMapping = restoreState.swimlaneIdToPromptTextMapping;
+        this.swimlaneIdsWithPendingHeading.set(new Set<string>());
         // last, as effects reload the template and the rendered swimlanes from these
         this.pageVariantNode.set(restoreState.pageVariantNode);
         this.editMode.set(restoreState.editMode);
@@ -2867,7 +2872,8 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     }
 
     /**
-     * Helper function to update the swimlane ID to prompt text mapping.
+     * Helper function to update the swimlane ID to prompt text mapping. The headings are
+     * generated in parallel and each one is shown as soon as its result arrives.
      */
     private async updateSwimlaneIdToPromptTextMapping(): Promise<void> {
         if (!this.pageVariantNode()) {
@@ -2882,36 +2888,64 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         // slower earlier run cannot fill the map of a later one
         const mapping: Map<string, PromptToTextMapping> = new Map();
         this.swimlaneIdToPromptTextMapping = mapping;
+        this.swimlaneIdsWithPendingHeading.set(new Set<string>());
         if (!aiConfig || !Object.keys(aiConfig)?.length) {
             return;
         }
-        try {
-            for (const swimlane of this.swimlanes) {
-                if (aiConfig.hasOwnProperty(swimlane.id)) {
-                    const prompt: string = retrievePromptFromAiConfig(aiConfig, swimlane.id);
-                    if (prompt) {
-                        const config: NodeConfig = {
-                            type: 'node',
-                            nodeId: convertNodeRefIntoNodeId(this.pageVariantNodeId()),
-                            configName: swimlane.id,
-                        };
-                        const result: CreateChatCompletionResponse =
-                            await this.aiHelperService.generateFromPrompt(
-                                config,
-                                this.topicPageHelperService.getSelectedVariables() || {},
-                                this.topicCollectionId(),
-                            );
-                        const promptToTextMapping = new PromptToTextMapping(
-                            prompt,
-                            retrieveResultString(result) ||
-                                this.translate.instant('TOPIC_PAGE.AI.INVALID_PROMPT'),
-                        );
-                        mapping.set(swimlane.id, promptToTextMapping);
-                    }
+        // the prompt of each swimlane heading, by swimlane ID
+        const prompts: Map<string, string> = new Map();
+        for (const swimlane of this.swimlanes) {
+            if (aiConfig.hasOwnProperty(swimlane.id)) {
+                const prompt: string = retrievePromptFromAiConfig(aiConfig, swimlane.id);
+                if (prompt) {
+                    prompts.set(swimlane.id, prompt);
                 }
             }
+        }
+        this.swimlaneIdsWithPendingHeading.set(new Set(prompts.keys()));
+        await Promise.all(
+            [...prompts].map(
+                ([swimlaneId, prompt]: [string, string]): Promise<void> =>
+                    this.generateSwimlaneHeading(swimlaneId, prompt, mapping),
+            ),
+        );
+    }
+
+    /**
+     * Generates the heading of a swimlane from its prompt and adds it to the given mapping, which
+     * is no longer shown once a newer mapping replaced it.
+     */
+    private async generateSwimlaneHeading(
+        swimlaneId: string,
+        prompt: string,
+        mapping: Map<string, PromptToTextMapping>,
+    ): Promise<void> {
+        try {
+            const config: NodeConfig = {
+                type: 'node',
+                nodeId: convertNodeRefIntoNodeId(this.pageVariantNodeId()),
+                configName: swimlaneId,
+            };
+            const result: CreateChatCompletionResponse =
+                await this.aiHelperService.generateFromPrompt(
+                    config,
+                    this.topicPageHelperService.getSelectedVariables() || {},
+                    this.topicCollectionId(),
+                );
+            const promptToTextMapping = new PromptToTextMapping(
+                prompt,
+                retrieveResultString(result) ||
+                    this.translate.instant('TOPIC_PAGE.AI.INVALID_PROMPT'),
+            );
+            mapping.set(swimlaneId, promptToTextMapping);
         } catch (e) {
             console.error(e);
+        } finally {
+            if (this.swimlaneIdToPromptTextMapping === mapping) {
+                const pending: Set<string> = new Set(this.swimlaneIdsWithPendingHeading());
+                pending.delete(swimlaneId);
+                this.swimlaneIdsWithPendingHeading.set(pending);
+            }
         }
     }
 
