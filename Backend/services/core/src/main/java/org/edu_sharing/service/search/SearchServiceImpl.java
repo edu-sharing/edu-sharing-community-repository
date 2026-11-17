@@ -581,33 +581,6 @@ public class SearchServiceImpl implements SearchService {
 	}
 
 	@Override
-	public SearchResultNodeRef searchFingerPrint(String nodeId) {
-
-		int skipCount = 0;
-		int maxItems = 100;
-		StoreRef storeRef = new StoreRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(), StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier());
-
-		SearchParameters searchParameters = new ESSearchParameters();
-		searchParameters.addStore(storeRef);
-
-		searchParameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_FTS_ALFRESCO);
-		searchParameters.setQuery("FINGERPRINT:" + nodeId + "_30_90 AND NOT ID:\"workspace://SpacesStore/"+ nodeId + "\"");
-		searchParameters.setSkipCount(skipCount);
-		searchParameters.setMaxItems(maxItems);
-
-		ResultSet resultSet = serviceRegistry.getSearchService().query(searchParameters);
-
-		SearchResultNodeRef sr = new SearchResultNodeRef();
-		sr.setData(AlfrescoDaoHelper.unmarshall(resultSet.getNodeRefs(), ApplicationInfoList.getHomeRepository().getAppId()));
-		sr.setStartIDX(skipCount);
-		sr.setNodeCount(maxItems);
-		sr.setNodeCount((int) resultSet.getNumberFound());
-
-		return sr;
-	}
-
-
-	@Override
 	public SearchResultNodeRef getWorkflowReceive(String user, SortDefinition sortDefinition, ContentType contentType, int skipCount, int maxItems) throws Exception {
 		throw new NotImplementedException("Method not supported for solr");
 	}
