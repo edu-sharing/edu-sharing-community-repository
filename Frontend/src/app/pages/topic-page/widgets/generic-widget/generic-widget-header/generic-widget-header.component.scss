@@ -4,3 +4,10 @@
     flex-direction: column;
     gap: 8px;
 }
+
+// matches the centered, larger headline it stands in for
+.headline-placeholder {
+    align-self: center;
+    width: 40%;
+    font-size: 1.5em;
+}

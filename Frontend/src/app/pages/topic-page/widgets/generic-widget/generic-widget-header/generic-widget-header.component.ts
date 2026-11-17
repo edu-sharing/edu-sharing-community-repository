@@ -2,6 +2,7 @@ import { Component, computed, input, output } from '@angular/core';
 import { SharedModule } from '../../../../../shared/shared.module';
 import { AiTextPromptPipe } from '../../../shared/pipes/ai-text-prompt.pipe';
 import { PromptToTextMapping } from '../../../shared/types/prompt-to-text-mapping';
+import { AiTextPlaceholderComponent } from '../../shared/ai-text-placeholder/ai-text-placeholder.component';
 import { EditableTextComponent } from '../../shared/editable-text/editable-text.component';
 
 export interface GenerateWithAiChangeEvent {
@@ -20,7 +21,7 @@ export interface TextChangeEvent {
 @Component({
     selector: 'es-generic-widget-header',
     standalone: true,
-    imports: [AiTextPromptPipe, EditableTextComponent, SharedModule],
+    imports: [AiTextPlaceholderComponent, AiTextPromptPipe, EditableTextComponent, SharedModule],
     templateUrl: './generic-widget-header.component.html',
     styleUrls: ['./generic-widget-header.component.scss'],
 })
@@ -28,11 +29,15 @@ export class WidgetHeaderComponent {
     aiSupported = input<boolean>(false);
     description = input<string>('');
     descriptionAiGenerated = input<boolean>(false);
+    // the description is still being generated from its prompt
+    descriptionLoading = input<boolean>(false);
     descriptionMapping = input<PromptToTextMapping>();
     descriptionOptional = input<boolean>(true);
     hideDescription = input<boolean>(false);
     headline = input<string>('');
     headlineAiGenerated = input<boolean>(false);
+    // the headline is still being generated from its prompt
+    headlineLoading = input<boolean>(false);
     headlineMapping = input<PromptToTextMapping>();
     editMode = input<boolean>(false);
     updateInProgress = input<boolean>(false);
@@ -43,6 +48,11 @@ export class WidgetHeaderComponent {
     searchResultsUpdated = output<SearchResultsEvent>();
 
     // computed properties for template
+    // in the editor the prompt itself is shown, so a pending result is only marked outside of it
+    readonly showHeadlinePlaceholder = computed(() => this.headlineLoading() && !this.editMode());
+    readonly showDescriptionPlaceholder = computed(
+        () => this.descriptionLoading() && !this.hideDescription() && !this.editMode(),
+    );
     readonly shouldShowHeadline = computed(() => this.headline() || this.editMode());
     readonly shouldShowDescription = computed(
         () => (this.description() && !this.hideDescription()) || this.editMode(),
