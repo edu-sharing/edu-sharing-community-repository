@@ -1,5 +1,10 @@
 import { Injectable, inject } from '@angular/core';
-import { AboutService, FeaturesHelperService, UserService } from 'ngx-edu-sharing-api';
+import {
+    AboutService,
+    ApiErrorResponse,
+    FeaturesHelperService,
+    UserService,
+} from 'ngx-edu-sharing-api';
 import {
     CreateChatCompletionResponse,
     EduSharingLlmService,
@@ -7,7 +12,7 @@ import {
     MdsConfig,
     NodeConfig,
 } from 'ngx-edu-sharing-b-api';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import { GenericWidgetGlobalService } from '../../widgets/generic-widget/generic-widget-global.service';
 import { retrieveMdsConfig } from '../utils/ai-util';
 import { GlobalWidgetConfigService } from './global-widget-config.service';
@@ -56,7 +61,7 @@ export class AiHelperService {
         // a failing prompt must not break the rendering of the surrounding page,
         // so errors (e.g. a missing or expired B-API authorization) resolve to no result
         try {
-            return await firstValueFrom(
+            return await this.requestWithoutErrorToast(
                 this.eduSharingLlmService.chatCompletions({
                     body: {
                         configIds: [
@@ -88,7 +93,7 @@ export class AiHelperService {
         variables: { [key: string]: string[] } = {},
     ): Promise<ImagesResponse> {
         const user: string = await this.getCurrentUser();
-        return firstValueFrom(
+        return this.requestWithoutErrorToast(
             this.eduSharingLlmService.imageGeneration({
                 body: {
                     configIds: [
@@ -116,7 +121,7 @@ export class AiHelperService {
         variables: { [key: string]: string[] } = {},
     ): Promise<ImagesResponse> {
         const user: string = await this.getCurrentUser();
-        return firstValueFrom(
+        return this.requestWithoutErrorToast(
             this.eduSharingLlmService.imageGeneration({
                 body: {
                     configIds: [
@@ -136,6 +141,19 @@ export class AiHelperService {
                 },
             }),
         );
+    }
+
+    /**
+     * Resolves the first value of an AI request. A failure is passed on to the caller, which falls
+     * back to the content without AI, instead of being reported by the global error handler.
+     */
+    private async requestWithoutErrorToast<T>(request: Observable<T>): Promise<T> {
+        try {
+            return await firstValueFrom(request);
+        } catch (error) {
+            (error as ApiErrorResponse).preventDefault?.();
+            throw error;
+        }
     }
 
     /**
