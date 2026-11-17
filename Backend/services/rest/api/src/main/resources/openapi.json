@@ -24487,7 +24487,7 @@
     },
     "/iam/v1/groups/{repository}": {
       "get": {
-        "description": "Search groups. (admin rights are required.)",
+        "description": "Search groups. (Global search requires the GLOBAL_AUTHORITY_SEARCH toolpermission; otherwise the search is limited to the user's own organizations.)",
         "operationId": "searchGroups",
         "parameters": [
           {
@@ -26213,7 +26213,7 @@
     },
     "/iam/v1/people/{repository}": {
       "get": {
-        "description": "Search users. (admin rights are required.)",
+        "description": "Search users. (Global search requires the GLOBAL_AUTHORITY_SEARCH toolpermission; otherwise the search is limited to the user's own organizations.)",
         "operationId": "searchUser",
         "parameters": [
           {
@@ -26236,7 +26236,7 @@
             }
           },
           {
-            "description": "global search context, defaults to true, otherwise just searches for users within the organizations",
+            "description": "global search context, defaults to true, otherwise just searches for users within the organizations (requires GLOBAL_AUTHORITY_SEARCH)",
             "in": "query",
             "name": "global",
             "schema": {
