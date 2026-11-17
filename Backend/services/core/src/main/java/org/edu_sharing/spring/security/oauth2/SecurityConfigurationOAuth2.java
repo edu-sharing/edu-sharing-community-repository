@@ -3,7 +3,9 @@ package org.edu_sharing.spring.security.oauth2;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import com.typesafe.config.Config;
 import lombok.extern.slf4j.Slf4j;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -12,6 +14,7 @@ import org.edu_sharing.spring.scope.refresh.annotations.RefreshScope;
 import org.edu_sharing.spring.security.SSORegistrationService;
 import org.edu_sharing.spring.security.basic.*;
 import org.edu_sharing.spring.security.context.SecurityContextStrategySwitchFilter;
+import org.edu_sharing.spring.security.oauth2.config.OAuth2ConfigProvider;
 import org.edu_sharing.spring.security.openid.persistence.MyBatisOidcSessionRegistry;
 import org.edu_sharing.spring.security.openid.persistence.OidcUserSessionMapper;
 import org.springframework.context.annotation.Bean;
@@ -27,12 +30,14 @@ import org.springframework.security.config.annotation.web.configurers.HeadersCon
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.oidc.session.OidcSessionRegistry;
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository;
 import org.springframework.security.oauth2.client.web.HttpSessionOAuth2AuthorizationRequestRepository;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
+import org.springframework.security.oauth2.jwt.JwtDecoderFactory;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
@@ -40,6 +45,8 @@ import org.springframework.security.web.util.UrlUtils;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.time.Duration;
 
 
 @Slf4j
@@ -155,6 +162,19 @@ public class SecurityConfigurationOAuth2 {
                 return UrlTool.replaceParam(targetUrl, "post_logout_redirect_uri", idpRedirectUrl);
             }
         };
+    }
+
+    /**
+     * picked up automatically by oauth2Login for OidcAuthorizationCodeAuthenticationProvider.
+     * @see CachingOidcIdTokenDecoderFactory
+     */
+    @Bean
+    public JwtDecoderFactory<ClientRegistration> idTokenDecoderFactory(LightbendConfigLoader configLoader) {
+        Config jwkSetConfig = configLoader.getConfig().getConfig(OAuth2ConfigProvider.REPOSITORY_OAUTH2_CONFIG_PATH + ".jwkSet");
+        return new CachingOidcIdTokenDecoderFactory(
+                CachingOidcIdTokenDecoderFactory.parseJwsAlgorithm(jwkSetConfig.getString("jwsAlgorithm")),
+                Duration.ofMillis(jwkSetConfig.getInt("connectTimeout")),
+                Duration.ofMillis(jwkSetConfig.getInt("readTimeout")));
     }
 
     @Bean
