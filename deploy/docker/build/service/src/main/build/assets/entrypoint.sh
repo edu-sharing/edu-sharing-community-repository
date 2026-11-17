@@ -102,9 +102,6 @@ repository_database_prot="${REPOSITORY_DATABASE_PROT:-"postgresql"}"
 repository_database_user="${REPOSITORY_DATABASE_USER:-repository}"
 repository_database_jdbc="jdbc:${repository_database_prot}://${repository_database_host}:${repository_database_port}/${repository_database_name}${repository_database_opts}"
 
-repository_search_solr_host="${REPOSITORY_SEARCH_SOLR_HOST:-repository-search-solr}"
-repository_search_solr_port="${REPOSITORY_SEARCH_SOLR_PORT:-8080}"
-
 repository_transform_host="${REPOSITORY_TRANSFORM_HOST:-}"
 repository_transform_port="${REPOSITORY_TRANSFORM_PORT:-}"
 repository_transform_aio_host="${REPOSITORY_TRANSFORM_AIO_HOST:-}"
@@ -416,15 +413,6 @@ grep -q '^[#]*\s*share\.host=' "${alfProps}" || echo "share.host=${my_host_exter
 
 sed -i -r 's|^[#]*\s*share\.port=.*|share.port='"${my_port_external}"'|' "${alfProps}"
 grep -q '^[#]*\s*share\.port=' "${alfProps}" || echo "share.port=${my_port_external}" >>"${alfProps}"
-
-sed -i -r 's|^[#]*\s*solr\.host=.*|solr.host='"${repository_search_solr_host}"'|' "${alfProps}"
-grep -q '^[#]*\s*solr\.host=' "${alfProps}" || echo "solr.host=${repository_search_solr_host}" >>"${alfProps}"
-
-sed -i -r 's|^[#]*\s*solr\.port=.*|solr.port='"${repository_search_solr_port}"'|' "${alfProps}"
-grep -q '^[#]*\s*solr\.port=' "${alfProps}" || echo "solr.port=${repository_search_solr_port}" >>"${alfProps}"
-
-sed -i -r 's|^[#]*\s*solr\.secureComms=.*|solr.secureComms=none|' "${alfProps}"
-grep -q '^[#]*\s*solr\.secureComms=' "${alfProps}" || echo "solr.secureComms=none" >>"${alfProps}"
 
 #sed -i -r 's|^[#]*\s*messaging\.broker\.url=.*|messaging.broker.url=failover:(nio://repository-activemq:61616)?timeout=3000\&jms.useCompression=true|' "${alfProps}"
 #grep -q '^[#]*\s*messaging\.broker\.url=' "${alfProps}" || echo "messaging.broker.url=failover:(nio://repository-activemq:61616)?timeout=3000\&jms.useCompression=true" >>"${alfProps}"
