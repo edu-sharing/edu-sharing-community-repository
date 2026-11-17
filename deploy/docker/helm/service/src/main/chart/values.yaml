@@ -529,12 +529,6 @@ config:
       ## @param config.search.elastic.port Set elasticsearch port
       port: 9200
 
-    solr:
-      ## @param config.search.solr.host Set solr host
-      host: edusharing-repository-search-solr
-      ## @param config.search.solr.port Set solr port
-      port: 8080
-
   transform:
 
     aio:

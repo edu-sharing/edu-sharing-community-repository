@@ -5,10 +5,6 @@ repos:
     - id: helm-readme-generator
       pass_filenames: false
       always_run: true
-      args: [--readme=deploy/docker/helm/search-solr/src/main/chart/README.md, --values=deploy/docker/helm/search-solr/src/main/chart/values.yaml]
-    - id: helm-readme-generator
-      pass_filenames: false
-      always_run: true
       args: [--readme=deploy/docker/helm/service/src/main/chart/README.md, --values=deploy/docker/helm/service/src/main/chart/values.yaml]
     - id: helm-readme-generator
       pass_filenames: false
