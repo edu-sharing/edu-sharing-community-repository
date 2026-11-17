@@ -22,6 +22,7 @@
     "EXPANDED_SEARCH_SHORT": "Ricerca estesa",
     "ACTIVE_FILTER": "Criteri del filtro attivo",
     "ACTIVE_FILTER_TOOLTIP": "{{count}} criteri filtrati",
+    "REMOVE_FILTER_HINT": "Premi Invio o Canc per rimuovere",
     "METADATASET": "Scegliere il metadataset",
     "METADATASET_INFO": "Filtrare altri criteri di ricerca",
     "APPLY": "Applicare",

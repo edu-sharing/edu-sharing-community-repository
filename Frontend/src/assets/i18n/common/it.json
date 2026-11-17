@@ -1294,7 +1294,7 @@
   "MONTHS_AGO": "{{ months }}} mese/i fa",
   "YEARS_AGO": "{{ years }} anno/i fa",
   "STORAGE_LOCATION_SAVE": "Utilizzare questa posizione come predefinita in futuro",
-  "SEARCH_CLEAR": "Libero",
+  "SEARCH_CLEAR": "Cancella la ricerca",
   "TOGGLE_SEARCH_FILTERS": "Mostrare o nascondere i filtri di ricerca",
   "PAGINATOR": {
     "getRangeLabel": "Pagina {{page}} di {{pageCount}}",

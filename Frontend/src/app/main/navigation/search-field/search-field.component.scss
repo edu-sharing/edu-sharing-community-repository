@@ -102,9 +102,9 @@ form {
             white-space: normal;
         }
 
-        .mat-mdc-chip-remove {
+        .mat-mdc-chip-trailing-icon.remove-chip {
             color: inherit;
-            opacity: 0.4;
+            cursor: pointer;
         }
     }
 }

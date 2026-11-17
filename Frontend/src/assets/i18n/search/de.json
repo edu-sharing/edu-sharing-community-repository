@@ -23,6 +23,7 @@
     "EXPANDED_SEARCH_SHORT": "Erweiterte Suche",
     "ACTIVE_FILTER": "Aktive Filterkriterien",
     "ACTIVE_FILTER_TOOLTIP": "{{count}} Filter gesetzt",
+    "REMOVE_FILTER_HINT": "Zum Entfernen Enter oder Entf drücken",
     "METADATASET": "Metadaten-Set wählen",
     "METADATASET_INFO": "Nach anderen Suchkriterien filtern",
     "APPLY": "Übernehmen",
