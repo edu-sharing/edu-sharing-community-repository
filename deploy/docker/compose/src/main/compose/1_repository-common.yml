@@ -23,37 +23,6 @@ services:
       - "1025"
       - "1080"
 
-  repository-search-solr:
-    image: "${docker.registry}/${docker.common}/${docker.edu_sharing.community.common.alfresco.search.service.name}:${docker.edu_sharing.community.common.alfresco.search.service.tag}"
-    container_name: "repository-search-solr_${COMPOSE_PROJECT_NAME}"
-    command:
-      - solr/solr/bin/solr
-      - start
-      - -f
-      - -p
-      - "8080"
-      - -a
-      - -javaagent:/opt/alfresco/solr/agent/jmx_prometheus_javaagent.jar=9090:/opt/alfresco/solr/agent/jmx-exporter-config.yaml
-      - -Dcreate.alfresco.defaults=alfresco,archive
-    environment:
-      REPOSITORY_SEARCH_SOLR_ENVS: >-
-        ENABLE_REMOTE_JMX_OPTS="true"
-        RMI_PORT="7199"
-        GC_TUNE="-XX:+UseG1GC -XX:+PerfDisableSharedMem -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=250 -XX:+AlwaysPreTouch -XX:+ExplicitGCInvokesConcurrent"
-        SOLR_JAVA_MEM="-Xms${REPOSITORY_SEARCH_SOLR_JAVA_XMS:-1g} -Xmx${REPOSITORY_SEARCH_SOLR_JAVA_XMX:-1g}"
-      REPOSITORY_SEARCH_SOLR_HOST: repository-search-solr
-      REPOSITORY_SEARCH_SOLR_PORT: "8080"
-      REPOSITORY_SERVICE_HOST: repository-service
-      REPOSITORY_SERVICE_PORT: "8080"
-    expose:
-      - "7199"
-      - "8080"
-      - "9090"
-    volumes:
-      - "repository-search-solr-volume-data:/opt/alfresco/alf_data"
-    depends_on:
-      - repository-service
-
   repository-alfresco-share:
     image: "${docker.registry}/${docker.common}/${docker.edu_sharing.community.common.alfresco.share.name}:${docker.edu_sharing.community.common.alfresco.share.tag}"
     container_name: "repository-alfresco-share_${COMPOSE_PROJECT_NAME}"
@@ -92,8 +61,6 @@ services:
       REPOSITORY_DATABASE_PASS: "${REPOSITORY_DATABASE_PASS:-repository}"
       REPOSITORY_DATABASE_PORT: "5432"
       REPOSITORY_DATABASE_USER: "${REPOSITORY_DATABASE_USER:-repository}"
-      REPOSITORY_SEARCH_SOLR_HOST: repository-search-solr
-      REPOSITORY_SEARCH_SOLR_PORT: "8080"
       REPOSITORY_SERVICE_ADMIN_PASS: "${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
       REPOSITORY_SERVICE_HOME_APPID: "${REPOSITORY_SERVICE_HOME_APPID:-${COMPOSE_PROJECT_NAME:-local}}"
       REPOSITORY_SERVICE_HOME_CUSTOM_HTML_HEADERS: "${REPOSITORY_SERVICE_HOME_CUSTOM_HTML_HEADERS:-}"
@@ -190,8 +157,6 @@ services:
 
 volumes:
   repository-database-volume-data:
-  repository-search-solr-volume-data:
-  repository-search-solr-volume-solrhome:
   repository-service-volume-config-cluster:
   repository-service-volume-config-node:
   repository-service-volume-data:
