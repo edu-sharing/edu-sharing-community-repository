@@ -414,8 +414,13 @@ grep -q '^[#]*\s*share\.host=' "${alfProps}" || echo "share.host=${my_host_exter
 sed -i -r 's|^[#]*\s*share\.port=.*|share.port='"${my_port_external}"'|' "${alfProps}"
 grep -q '^[#]*\s*share\.port=' "${alfProps}" || echo "share.port=${my_port_external}" >>"${alfProps}"
 
-# apache solr is no longer part of the deployment: remove stale solr settings that persist in existing config volumes
-sed -i -r '/^\s*solr\./d' "${alfProps}"
+# apache solr is no longer part of the deployment: remove stale connection settings that persist in existing config volumes
+sed -i -r '/^\s*solr\.(host|port)=/d' "${alfProps}"
+
+# the elastic tracker uses the alfresco solr tracking webscripts without credentials, this requires secureComms=none
+# (alfresco default is https, which makes the webscripts answer with 403 Forbidden)
+sed -i -r 's|^[#]*\s*solr\.secureComms=.*|solr.secureComms=none|' "${alfProps}"
+grep -q '^[#]*\s*solr\.secureComms=' "${alfProps}" || echo "solr.secureComms=none" >>"${alfProps}"
 
 #sed -i -r 's|^[#]*\s*messaging\.broker\.url=.*|messaging.broker.url=failover:(nio://repository-activemq:61616)?timeout=3000\&jms.useCompression=true|' "${alfProps}"
 #grep -q '^[#]*\s*messaging\.broker\.url=' "${alfProps}" || echo "messaging.broker.url=failover:(nio://repository-activemq:61616)?timeout=3000\&jms.useCompression=true" >>"${alfProps}"
