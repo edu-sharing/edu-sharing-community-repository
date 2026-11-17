@@ -56,6 +56,18 @@
         </ng-template>
       </es-node-entries-wrapper>
     </div>
+    @if (!isRootLevel && customTemplates.value.belowSubcollections) {
+    <ng-container
+      *ngTemplateOutlet="
+        customTemplates.value.belowSubcollections;
+        context: {
+          $implicit: collection,
+          createAllowed: createAllowed(),
+          empty: dataSourceCollections.isEmpty() && !dataSourceCollections.isLoading
+        }
+      "
+    ></ng-container>
+    }
   </section>
   @if (!isRootLevel) {
   <es-collection-proposals
