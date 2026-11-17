@@ -728,21 +728,32 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
             this.authentication
                 .observeAutoLogout()
                 .pipe(takeUntil(this.destroyed$))
-                .subscribe(async () => {
-                    this.topBar?.mainMenuSidebar?.hide();
-                    const dialogRef = await this.dialogs.openGenericDialog({
-                        title: 'WORKSPACE.AUTOLOGOUT',
-                        message: 'WORKSPACE.AUTOLOGOUT_INFO',
-                        messageParameters: {
-                            minutes: Math.round(this.connector.logoutTimeout / 60).toString(),
-                        },
-                        buttons: [{ label: 'WORKSPACE.RELOGIN', config: { color: 'primary' } }],
-                        closable: Closable.Disabled,
-                    });
-                    await dialogRef.afterClosed().toPromise();
-                    this.uiService.goToLogin(this.isSafe() ? RestConstants.SAFE_SCOPE : null);
-                });
+                .subscribe(() => void this.showAutoLogoutDialog());
         }
+    }
+
+    private async showAutoLogoutDialog(): Promise<void> {
+        const next = window.location.href;
+        this.topBar?.mainMenuSidebar?.hide();
+        // close all other dialogs which might display data
+        this.dialogs.openDialogs.forEach((dialog) => dialog.close());
+        // remove the whole app from the DOM so no data remains visible behind the dialog
+        // (the dialog itself lives in the .cdk-overlay-container which is a sibling of es-app)
+        document.querySelector('es-app')?.remove();
+        const dialogRef = await this.dialogs.openGenericDialog({
+            title: 'WORKSPACE.AUTOLOGOUT',
+            message: 'WORKSPACE.AUTOLOGOUT_INFO',
+            messageParameters: {
+                minutes: Math.round(this.connector.logoutTimeout / 60).toString(),
+            },
+            buttons: [{ label: 'WORKSPACE.RELOGIN', config: { color: 'primary' } }],
+            closable: Closable.Disabled,
+        });
+        await dialogRef.afterClosed().toPromise();
+        // hard reload: the app DOM is gone and all in-memory data must be cleared as well
+        this.uiService.goToLogin(this.isSafe() ? RestConstants.SAFE_SCOPE : null, next, {
+            hardReload: true,
+        });
     }
 
     private formatTimeout(num: number, size: number) {

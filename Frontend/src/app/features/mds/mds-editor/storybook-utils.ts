@@ -19,8 +19,10 @@ import {
     ConfigService,
     DashboardShortcutEntry,
     DEFAULT,
+    EduSharingApiConfiguration,
     HOME_REPOSITORY,
     IamV1Service,
+    LANGUAGES,
     LoginInfo,
     MdsDefinition,
     MdsIdentifier,
@@ -145,6 +147,18 @@ export class translateProvider {
         return this.translation$.pipe(map((_) => this.instant(v, args)));
     }
 
+    /** storybook always loads the german translations (see `loadStorybookTranslations`) */
+    readonly currentLang = 'de';
+    readonly defaultLang = 'de';
+
+    getDefaultLang(): string {
+        return this.defaultLang;
+    }
+
+    getCurrentLang(): string {
+        return this.currentLang;
+    }
+
     onTranslationChange = of({ lang: 'none' });
     onDefaultLangChange = of({ lang: 'none' });
     onLangChange = of({});
@@ -159,6 +173,12 @@ export class TranslationsServiceMock {
             first((languageLoaded: any) => !!languageLoaded),
             map(() => undefined as void),
         );
+    }
+    getLanguage(): string {
+        return this.translateProvider.currentLang ?? 'de';
+    }
+    getISOLanguage(): string {
+        return LANGUAGES[this.getLanguage()];
     }
     getLocale(): string {
         return this.translateProvider.currentLang ?? 'de';
@@ -538,6 +558,12 @@ export class SuggestionsV1ServiceMock {
 
 @Injectable()
 export class IamServiceMock extends IamV1Service {
+    // Storybook compiles JIT without decorator metadata, so the inherited constructor
+    // parameters cannot be resolved and have to be injected explicitly.
+    constructor() {
+        super(inject(EduSharingApiConfiguration), inject(HttpClient));
+    }
+
     // read e.g. by the node lists via `UserService.observePreferences()`
     getPreferences(params?: unknown, context?: HttpContext): Observable<any> {
         return of({ preferences: '{}' });

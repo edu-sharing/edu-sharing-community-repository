@@ -1,7 +1,6 @@
 import { trigger } from '@angular/animations';
 import { AfterViewInit, Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Params, Router, RoutesRecognized } from '@angular/router';
-import moment from 'moment';
 import { ConnectorService, Node, StreamEntry, StreamV1Service } from 'ngx-edu-sharing-api';
 import {
     CustomOptions,
@@ -137,13 +136,27 @@ export class StreamPageComponent implements OnInit, AfterViewInit, OnDestroy {
         this.searchQuery = event.searchString;
         // TODO: Search for the given query doch nicht erledigt
     }
+    /** today as `dddd, DD. MMMM YYYY`, e.g. "Freitag, 13. November 2026" */
+    private formatToday(language: string): string {
+        const today = new Date();
+        let locale: string | undefined = language?.split('-')[0];
+        try {
+            // app languages like `de-no-binnen-i` or `none` are no valid BCP 47 tags
+            Intl.DateTimeFormat.supportedLocalesOf(locale);
+        } catch {
+            locale = undefined;
+        }
+        const weekday = today.toLocaleDateString(locale, { weekday: 'long' });
+        const month = today.toLocaleDateString(locale, { month: 'long' });
+        const day = String(today.getDate()).padStart(2, '0');
+        return `${weekday}, ${day}. ${month} ${today.getFullYear()}`;
+    }
+
     constructor() {
         const loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed });
         this.translations.waitForInit().subscribe(() => {
             this.connector.isLoggedIn().subscribe((data) => {
-                this.dateToDisplay = moment()
-                    .locale(this.translations.getLanguage())
-                    .format('dddd, DD. MMMM YYYY');
+                this.dateToDisplay = this.formatToday(this.translations.getLanguage());
                 this.createAllowed = data.statusCode == RestConstants.STATUS_CODE_OK;
                 loadingTask.done();
             });

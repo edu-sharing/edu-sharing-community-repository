@@ -301,21 +301,22 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
             Action resourceInfoAction = actionService.createAction(CCConstants.ACTION_NAME_RESOURCEINFO);
             actionService.executeAction(resourceInfoAction, nodeRef, true, false);
 
-            if (verifyMimetypeEnabled()) {
-                if (newContent &&
-                        !nodeService.getProperty(nodeRef, ContentModel.PROP_NODE_UUID)
-                                .equals(nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL)))) {
-                    logger.info("will not verifyMimetypeEnabled for copy");
-                } else {
+            // content of a copy was already verified on the original node
+            boolean isCopy = newContent &&
+                    !nodeService.getProperty(nodeRef, ContentModel.PROP_NODE_UUID)
+                            .equals(nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL)));
+            if (isCopy) {
+                logger.debug("will not verify mimetype / active content / file size for copy");
+            } else {
+                if (verifyMimetypeEnabled()) {
                     String filename = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
                     verifyMimetypeAllReaders(nodeRef, filename, getMimetypeAllowList(), lightbendConfigLoader.getConfig().getBoolean("security.fileManagement.mimetypeVerification.allowUnknownMimetypes"));
                 }
-            }
-            Long sizeLimit = lightbendConfigLoader.getConfig().hasPath("security.fileManagement.limits.fileSize") ? lightbendConfigLoader.getConfig().getLong("security.fileManagement.limits.fileSize") : null;
-            if (sizeLimit != null) {
-                if (!(newContent &&
-                        !nodeService.getProperty(nodeRef, ContentModel.PROP_NODE_UUID)
-                                .equals(nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL))))) {
+                if (verifyActiveContentEnabled()) {
+                    verifyActiveContent(reader, getPdfBlockSettings());
+                }
+                Long sizeLimit = lightbendConfigLoader.getConfig().hasPath("security.fileManagement.limits.fileSize") ? lightbendConfigLoader.getConfig().getLong("security.fileManagement.limits.fileSize") : null;
+                if (sizeLimit != null) {
                     verifyFileLimit(reader, sizeLimit);
                 }
             }
@@ -389,6 +390,58 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 
     private static boolean verifyMimetypeEnabled() {
         return LightbendConfigLoader.get().getBoolean("security.fileManagement.mimetypeVerification.enabled");
+    }
+
+    private static boolean verifyActiveContentEnabled() {
+        return LightbendConfigLoader.get().getBoolean("security.fileManagement.contentVerification.enabled");
+    }
+
+    private static PdfActiveContentScanner.BlockSettings getPdfBlockSettings() {
+        return PdfActiveContentScanner.BlockSettings.fromConfig(
+                LightbendConfigLoader.get().getConfig("security.fileManagement.contentVerification.pdf.block"));
+    }
+
+    /**
+     * Rejects pdfs containing blocked active content (JavaScript, launch actions, ...).
+     * The pdf is detected by its header, not by the filename / mimetype, so a renamed pdf is checked as well.
+     */
+    static void verifyActiveContent(ContentReader reader, PdfActiveContentScanner.BlockSettings settings) throws NodeActiveContentValidationException {
+        Set<PdfActiveContentScanner.Finding> blocked = settings.blocked();
+        if (reader == null || !reader.exists() || blocked.isEmpty()) {
+            return;
+        }
+        File tempFile = null;
+        try {
+            byte[] head = new byte[PdfActiveContentScanner.HEADER_SEARCH_LENGTH];
+            int length;
+            try (InputStream in = reader.getReader().getContentInputStream()) {
+                length = in.readNBytes(head, 0, head.length);
+            }
+            if (!PdfActiveContentScanner.looksLikePdf(head, length)) {
+                return;
+            }
+            File file;
+            if (reader instanceof FileContentReader && ((FileContentReader) reader).exists()) {
+                file = ((FileContentReader) reader).getFile();
+            } else {
+                tempFile = TempFileProvider.createTempFile("edu_pdfscan_", ".pdf");
+                try (InputStream in = reader.getReader().getContentInputStream()) {
+                    Files.copy(in, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                }
+                file = tempFile;
+            }
+            Set<PdfActiveContentScanner.Finding> findings = PdfActiveContentScanner.scan(file);
+            findings.retainAll(blocked);
+            if (!findings.isEmpty()) {
+                logger.warn("Pdf contains blocked active content: " + findings + ", content url: " + reader.getContentUrl());
+                throw new NodeActiveContentValidationException(findings);
+            }
+        } catch (IOException e) {
+            // broken or password protected pdfs can't be inspected, same behaviour as for the tika mimetype detection
+            logger.warn("Pdf active content scan failed for content url " + reader.getContentUrl() + ": " + e.getMessage());
+        } finally {
+            FileUtils.deleteQuietly(tempFile);
+        }
     }
 
     private void verifyMimetypeAllReaders(NodeRef nodeRef, String filename, Map<String, List<String>> allowList, boolean allowUnknownMimetypes) throws NodeMimetypeUnknownValidationException {

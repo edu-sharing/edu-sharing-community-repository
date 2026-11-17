@@ -246,6 +246,7 @@
     },
     "MENU_RESET_PASSWORD": "Réinitialiser le mot de passe",
     "USER_QUOTA_HINT": "Si aucune valeur n'est définie, il n'y a aucune restriction.",
+    "QUOTA_SECTION": "Quotas",
     "NEW_PASSWORD": "Nouveau mot de passe",
     "ERROR_PASSWORD_TO_WEAK": "Le mot de passe choisi n'est pas suffisamment sécurisé.",
     "ERROR_PASSWORD_POLICY_NOT_MATCHED": "Le mot de passe choisi ne respecte pas la politique de mot de passe définie (Détails : {{cause}})",

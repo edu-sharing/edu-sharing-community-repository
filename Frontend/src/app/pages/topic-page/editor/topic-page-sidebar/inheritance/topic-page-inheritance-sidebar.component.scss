@@ -252,13 +252,10 @@
     gap: 8px;
 }
 
-// room for the message with the count and the hint on parent collections, so the footer keeps
-// its height whether or not a message is shown
+// takes the room beside the buttons, empty while there are no unsaved changes
 .footer-summary {
     flex: 1 1 0;
     min-width: 0;
-    // the message's padding and border, the count's line, the gap and the hint's smaller line
-    min-height: calc(2 * 8px + 2px + 1.4em + 2px + 1.4 * 0.85em);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -271,8 +268,11 @@
     align-self: flex-start;
     width: fit-content;
     max-width: 100%;
+    // as high as the buttons beside it while the text fits on one line
     ::ng-deep .block {
-        padding: 8px 12px;
+        box-sizing: border-box;
+        min-height: 36px;
+        padding: 4px 12px;
     }
     ::ng-deep .message-container {
         gap: 2px;
@@ -281,10 +281,6 @@
     ::ng-deep .message:empty {
         display: none;
     }
-}
-
-.footer-parents-hint {
-    font-size: var(--fontSizeXSmall);
 }
 
 .footer-actions {

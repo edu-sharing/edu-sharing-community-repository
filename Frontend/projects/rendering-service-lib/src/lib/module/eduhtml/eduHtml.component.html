@@ -1,7 +1,23 @@
 @if (data?.items !== undefined) {
 <div class="eduHtml-wrapper">
   <iframe [title]="node?.title ?? 'eduhtml'" class="frame" [src]="sanitizedUrl"></iframe>
-  <a mat-flat-button color="primary" [href]="url" target="_blank">
+  <!-- The visible label already announces the new tab, so the name only adds the title. -->
+  <a
+    mat-flat-button
+    color="primary"
+    [href]="url"
+    target="_blank"
+    [attr.aria-label]="
+      node?.title || node?.name
+        ? ('RENDERING.LINK_NAME_TITLE'
+          | translate
+            : {
+                label: ('RENDERING.OPEN_IN_NEW_TAB' | translate),
+                title: node?.title || node?.name
+              })
+        : null
+    "
+  >
     <div class="link-label">
       {{ 'RENDERING.OPEN_IN_NEW_TAB' | translate }}<i esIcon="open_in_new"></i>
     </div>

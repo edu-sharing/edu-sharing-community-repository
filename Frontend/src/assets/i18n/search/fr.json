@@ -22,6 +22,7 @@
     "EXPANDED_SEARCH_SHORT": "Recherche étendue",
     "ACTIVE_FILTER": "Critères du filtre actif",
     "ACTIVE_FILTER_TOOLTIP": "{{count}} critères filtrés",
+    "REMOVE_FILTER_HINT": "Appuyez sur Entrée ou Suppr pour retirer",
     "METADATASET": "Choisir un set de métadonnées",
     "METADATASET_INFO": "Filtrer les autres critères de recherche",
     "APPLY": "Appliquer",

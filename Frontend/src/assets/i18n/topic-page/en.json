@@ -26,9 +26,10 @@
         "NOT_PASSED_ON": "does not pass on",
         "PASS_ON": "Pass on",
         "PASS_ON_TOOLTIP": "Pass templates on to the sub-collections",
-        "CHANGED_COUNT": "{{count}} collections change when applied.",
-        "CHANGED_COUNT_ONE": "1 collection changes when applied.",
-        "CHANGES_PARENTS": "Changes to parent collections also apply to their other sub-collections, which are not shown here.",
+        "CHANGED_COUNT": "{{count}} collections will be changed.",
+        "CHANGED_COUNT_ONE": "1 collection will be changed.",
+        "CHANGED_COUNT_WITH_PARENTS": "{{count}} collections will be changed, more outside this view.",
+        "CHANGED_COUNT_ONE_WITH_PARENTS": "1 collection will be changed, more outside this view.",
         "SAVED": "The inheritance has been saved.",
         "LOAD_ERROR": "The inheritance could not be loaded."
       }

@@ -29,6 +29,19 @@ spec:
   gateways:
   - {{ include "edusharing_common_lib.names.name" . }}
   http:
+  {{- if .Values.ingress.robots.enabled }}
+  - match:
+    - uri:
+        exact: /robots.txt
+    rewrite:
+      uri: /edu-sharing/robots.txt
+    route:
+    - destination:
+        host: {{ include "edusharing_common_lib.names.name" . }}
+        port:
+          number: {{ .Values.service.port.api.external }}
+      weight: 100
+  {{- end }}
   {{- range .Values.ingress.paths }}
   - match:
     - uri:

@@ -12,6 +12,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.session.SessionAuthenticationException;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.web.csrf.*;
 import org.springframework.util.Assert;
 
@@ -28,6 +29,7 @@ public class CSRFConfig {
         }else {
 
             CookieCsrfTokenRepository tokenRepository = CookieCsrfTokenRepository.withHttpOnlyFalse();
+            tokenRepository.setCookieCustomizer(CSRFConfig::applyCookieAttributes);
             CsrfTokenRequestHandler requestHandler = new CsrfTokenRequestAttributeHandler();
 
             eduSessionAuthenticationStrategy = new EduSessionAuthenticationStrategy(tokenRepository,requestHandler);
@@ -45,6 +47,28 @@ public class CSRFConfig {
                                     && request.getRequestedSessionId() == null));
         }
         return http;
+    }
+
+    /**
+     * Applies the home repository's {@code cookie_attributes} (also used for JSESSIONID, see
+     * {@link org.edu_sharing.repository.server.authentication.SameSiteCookieFilter}) to the XSRF-TOKEN cookie,
+     * so both cookies behave the same (e.g. when embedded cross-site).
+     * Only {@code Secure} and {@code SameSite=...} are taken over. {@code HttpOnly} is ignored on purpose, the
+     * client must be able to read the token to send it back as X-XSRF-TOKEN header.
+     */
+    static void applyCookieAttributes(ResponseCookie.ResponseCookieBuilder cookie) {
+        String cookieAttributes = ApplicationInfoList.getHomeRepository().getCookieAttributes();
+        if (cookieAttributes == null) {
+            return;
+        }
+        for (String attribute : cookieAttributes.split(";")) {
+            String attr = attribute.trim();
+            if ("Secure".equalsIgnoreCase(attr)) {
+                cookie.secure(true);
+            } else if (attr.regionMatches(true, 0, "SameSite=", 0, "SameSite=".length())) {
+                cookie.sameSite(attr.substring("SameSite=".length()).trim());
+            }
+        }
     }
 
     public static void csrfInitCookie(HttpServletRequest request, HttpServletResponse response){

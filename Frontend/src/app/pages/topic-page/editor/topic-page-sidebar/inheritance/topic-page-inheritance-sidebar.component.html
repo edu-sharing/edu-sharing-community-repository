@@ -151,14 +151,13 @@
 <div class="footer">
   <div class="footer-summary">
     @if (hasUnsavedChanges()) {
+    <!-- changes to parent collections also reach sub-collections outside this view -->
     <es-info-message class="footer-message" [mode]="changesParents() ? 'warning' : 'info'">
-      <span class="footer-count">{{
-        i18nPrefix + (changedCount() === 1 ? 'CHANGED_COUNT_ONE' : 'CHANGED_COUNT')
-          | translate : { count: changedCount() }
-      }}</span>
-      @if (changesParents()) {
-      <span class="footer-parents-hint">{{ i18nPrefix + 'CHANGES_PARENTS' | translate }}</span>
-      }
+      {{
+        i18nPrefix +
+          (changedCount() === 1 ? 'CHANGED_COUNT_ONE' : 'CHANGED_COUNT') +
+          (changesParents() ? '_WITH_PARENTS' : '') | translate : { count: changedCount() }
+      }}
     </es-info-message>
     }
   </div>

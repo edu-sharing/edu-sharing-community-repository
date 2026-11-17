@@ -15,6 +15,10 @@ import { MdsEditorWidgetContainerComponent } from '../mds-editor-widget-containe
 import { CardDialogService } from '../../../../dialogs/card-dialog/card-dialog.service';
 import { ThemeService } from '../../../../../services/theme.service';
 import { ValueType } from 'ngx-edu-sharing-ui';
+import {
+    getTinyMceBaseConfig,
+    getTinyMceThemeConfig,
+} from '../../../../../shared/tinymce/tinymce-config';
 
 @Component({
     selector: 'es-mds-editor-widget-checkbox',
@@ -41,7 +45,6 @@ export class MdsEditorWidgetTinyMCEComponent extends MdsEditorWidgetBase impleme
     containerComponent: MdsEditorWidgetContainerComponent;
     readonly valueType: ValueType = ValueType.String;
     private editorConfigDefault = {
-        branding: false,
         height: 200,
         apiKey: '',
         menubar: false,
@@ -50,7 +53,6 @@ export class MdsEditorWidgetTinyMCEComponent extends MdsEditorWidgetBase impleme
         plugins: ['link'],
         toolbar:
             'h1 h2 h3 h4 | bold italic underline | link | alignleft aligncenter alignright alignjustify | removeformat | undo redo',
-        language: this.translate.getDefaultLang(),
     };
     editorConfig = signal<Record<string, any>>(null);
     _html = '';
@@ -78,15 +80,18 @@ export class MdsEditorWidgetTinyMCEComponent extends MdsEditorWidgetBase impleme
     }
 
     private buildConfig(): void {
-        const base = this.widget.definition.configuration
-            ? {
-                  ...this.editorConfigDefault,
-                  ...JSON.parse(this.widget.definition.configuration),
-              }
-            : { ...this.editorConfigDefault };
-        base.skin = this.theme.isDarkMode() ? 'oxide-dark' : 'oxide';
-        base.content_css = this.theme.isDarkMode() ? 'dark' : 'default';
-        this.editorConfig.set(base);
+        this.editorConfig.set({
+            ...getTinyMceBaseConfig(
+                this.platformLocation.getBaseHrefFromDOM(),
+                this.translate.getDefaultLang(),
+            ),
+            ...this.editorConfigDefault,
+            // custom configuration of the mds widget definition
+            ...(this.widget.definition.configuration
+                ? JSON.parse(this.widget.definition.configuration)
+                : {}),
+            ...getTinyMceThemeConfig(this.theme.isDarkMode()),
+        });
     }
 
     onEditorInit(): void {
@@ -126,8 +131,6 @@ export class MdsEditorWidgetTinyMCEComponent extends MdsEditorWidgetBase impleme
 
     async ngAfterViewInit() {
         this._html = (await this.widget.getInitalValuesAsync()).jointValues[0];
-        (this.editorConfigDefault as any).base_url =
-            this.platformLocation.getBaseHrefFromDOM() + 'assets/tinymce/';
         // dirty workaround for tinyMCE
         setTimeout(() => this.buildConfig());
     }

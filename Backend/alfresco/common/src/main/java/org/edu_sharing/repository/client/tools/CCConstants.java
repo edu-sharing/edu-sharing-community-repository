@@ -372,6 +372,15 @@ public class CCConstants {
 
     public final static String CM_PROP_PERSON_SIZE_QUOTA = "{http://www.alfresco.org/model/content/1.0}sizeQuota";
 
+    /** max. number of materials (ccm:io) a person may own, unset = unlimited */
+    public final static String CM_PROP_PERSON_MATERIAL_COUNT_QUOTA = "{http://www.alfresco.org/model/content/1.0}materialCountQuota";
+
+    /** max. number of collections a person may own, unset = unlimited */
+    public final static String CM_PROP_PERSON_COLLECTION_COUNT_QUOTA = "{http://www.alfresco.org/model/content/1.0}collectionCountQuota";
+
+    /** max. number of (regular) folders a person may own, unset = unlimited */
+    public final static String CM_PROP_PERSON_FOLDER_COUNT_QUOTA = "{http://www.alfresco.org/model/content/1.0}folderCountQuota";
+
     public final static String CM_PROP_PERSON_ESORIGINALUID = "{http://www.alfresco.org/model/content/1.0}esoriginaluid";
 
     public final static String CM_PROP_PERSON_ESAFFILIATIONS = "{http://www.alfresco.org/model/content/1.0}esaffiliations";

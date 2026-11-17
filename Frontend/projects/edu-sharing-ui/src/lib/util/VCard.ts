@@ -248,7 +248,9 @@ export class VCard {
     }
     private deEscape(value: string) {
         if (value == null) return '';
-        return value.replace(/\\\\/g, '\\').replace(/\\,/g, ',');
+        // single pass, so an escaped backslash is never re-interpreted as an escape prefix.
+        // Some vcard generators also escape ':' (e.g. "X-ORCID:https\://orcid.org/...")
+        return value.replace(/\\([\\,;:])/g, '$1');
     }
     private escape(value: string) {
         if (value == null) return '';

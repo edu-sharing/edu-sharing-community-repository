@@ -70,7 +70,11 @@ import { UIService } from '../../../core-module/rest/services/ui.service';
 import { RestConnectorsService } from '../../../core-module/rest/services/rest-connectors.service';
 import { OptionsHelperService } from '../../../services/options-helper.service';
 import { EditorComponent } from '@tinymce/tinymce-angular';
-import { AssignmentEditorConfig } from '../manage-assignment/manage-assignment.component';
+import {
+    AssignmentEditorConfig,
+    getTinyMceBaseConfig,
+    getTinyMceThemeConfig,
+} from '../../../shared/tinymce/tinymce-config';
 import { PlatformLocation } from '@angular/common';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
@@ -139,11 +143,12 @@ export class SubmitAssignmentComponent implements OnDestroy {
         NodeEntriesWrapperComponent<Node>
     >;
     readonly editorConfig = computed(() => ({
+        ...getTinyMceBaseConfig(
+            this.platformLocation.getBaseHrefFromDOM(),
+            this.translateService.getDefaultLang(),
+        ),
         ...AssignmentEditorConfig,
-        base_url: this.platformLocation.getBaseHrefFromDOM() + 'assets/tinymce',
-        language: this.translateService.getDefaultLang(),
-        skin: this.theme.isDarkMode() ? 'oxide-dark' : 'oxide',
-        content_css: this.theme.isDarkMode() ? 'dark' : 'default',
+        ...getTinyMceThemeConfig(this.theme.isDarkMode()),
     }));
     readonly destroyed$ = new Subject<void>();
     columns: ColumnType = {

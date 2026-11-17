@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -56,6 +57,8 @@ public class SitemapServlet extends SpringHttpServlet {
     private static final int DEFAULT_PAGE_SIZE = 5000;
     private static final String CONFIG_PAGE_SIZE = "angular.sitemap.pageSize";
     private static final String CONFIG_STATIC_PAGES = "angular.sitemap.staticPages";
+    private static final String CONFIG_TYPES = "angular.sitemap.types";
+    private static final List<String> ALL_TYPES = List.of("io", "collection");
     private static final String TYPE_STATIC = "static";
     private static final Set<String> CHANGE_FREQUENCIES = Set.of("always", "hourly", "daily", "weekly", "monthly", "yearly", "never");
 
@@ -68,6 +71,11 @@ public class SitemapServlet extends SpringHttpServlet {
             String type = req.getParameter("type");
             if (TYPE_STATIC.equals(type)) {
                 toXml(getStaticPages(), resp);
+                return;
+            }
+            if (type != null && !getEnabledTypes().contains(type)) {
+                // the content type is switched off (angular.sitemap.types): nothing to list
+                toXml(new Urlset(), resp);
                 return;
             }
             SearchService search = SearchServiceFactory.getInstance().getLocalService();
@@ -107,6 +115,36 @@ public class SitemapServlet extends SpringHttpServlet {
             return Math.max(1, lightbendConfigLoader.getConfig().getInt(CONFIG_PAGE_SIZE));
         } catch (Throwable t) {
             return DEFAULT_PAGE_SIZE;
+        }
+    }
+
+    /**
+     * The content types listed in the sitemap: "io" (contents) and/or "collection".
+     * Unknown entries are ignored; without any valid entry all types are listed.
+     */
+    static List<String> parseTypes(List<String> configured) {
+        List<String> result = new ArrayList<>();
+        if (configured != null) {
+            for (String type : ALL_TYPES) {
+                if (configured.contains(type)) {
+                    result.add(type);
+                }
+            }
+            for (String type : configured) {
+                if (!ALL_TYPES.contains(type)) {
+                    log.warn("Ignoring unknown sitemap type '{}' in {}", type, CONFIG_TYPES);
+                }
+            }
+        }
+        return result.isEmpty() ? ALL_TYPES : result;
+    }
+
+    private List<String> getEnabledTypes() {
+        try {
+            Config config = lightbendConfigLoader.getConfig();
+            return parseTypes(config.hasPath(CONFIG_TYPES) ? config.getStringList(CONFIG_TYPES) : null);
+        } catch (Throwable t) {
+            return ALL_TYPES;
         }
     }
 
@@ -186,7 +224,7 @@ public class SitemapServlet extends SpringHttpServlet {
     private Sitemapindex getAllElastic(HttpServletRequest request, SearchServiceElastic elastic) throws Throwable {
         Sitemapindex index = new Sitemapindex();
         addStaticSitemap(index, request);
-        for (String type : new String[]{"io", "collection"}) {
+        for (String type : getEnabledTypes()) {
             for (SitemapPage page : elastic.getSitemapPages(getContentType(type), getPageSize())) {
                 Sitemapindex.Sitemap map = new Sitemapindex.Sitemap();
                 map.loc = request.getRequestURL() + "?type=" + type + (page.getAfter() != null ? "&after=" + page.getAfter() : "");
@@ -243,12 +281,13 @@ public class SitemapServlet extends SpringHttpServlet {
         SearchResultNodeRef resultFiles = search.search(getMds(request), MetadataSet.DEFAULT_CLIENT_QUERY, getSearchAllCriterias(), token);
         token.setContentType(SearchService.ContentType.COLLECTIONS);
         SearchResultNodeRef resultCollections = search.search(getMds(request), MetadataSet.DEFAULT_CLIENT_QUERY, getSearchAllCriterias(), token);
-        for(int i=0;i<resultFiles.getNodeCount();i+=NODES_PER_MAP){
+        List<String> enabledTypes = getEnabledTypes();
+        for(int i=0;enabledTypes.contains("io") && i<resultFiles.getNodeCount();i+=NODES_PER_MAP){
             Sitemapindex.Sitemap map = new Sitemapindex.Sitemap();
             map.loc=request.getRequestURL()+"?type=io&from="+i;
             index.sitemap.add(map);
         }
-        for(int i=0;i<resultCollections.getNodeCount();i+=NODES_PER_MAP){
+        for(int i=0;enabledTypes.contains("collection") && i<resultCollections.getNodeCount();i+=NODES_PER_MAP){
             Sitemapindex.Sitemap map = new Sitemapindex.Sitemap();
             map.loc=request.getRequestURL()+"?type=collection&from="+i;
             index.sitemap.add(map);

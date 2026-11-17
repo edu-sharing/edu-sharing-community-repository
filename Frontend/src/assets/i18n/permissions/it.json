@@ -246,6 +246,7 @@
     },
     "MENU_RESET_PASSWORD": "Reimposta password",
     "USER_QUOTA_HINT": "Se non viene impostato alcun valore, non vi è alcuna restrizione.",
+    "QUOTA_SECTION": "Quote",
     "NEW_PASSWORD": "Nuova password",
     "ERROR_PASSWORD_TO_WEAK": "La password scelta non è sufficientemente sicura.",
     "ERROR_PASSWORD_POLICY_NOT_MATCHED": "La password scelta non soddisfa i criteri di password impostati (Dettagli: {{cause}})",

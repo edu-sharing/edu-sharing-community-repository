@@ -26,9 +26,10 @@
         "NOT_PASSED_ON": "gibt nicht weiter",
         "PASS_ON": "Weitergeben",
         "PASS_ON_TOOLTIP": "Vorlagen an die Untersammlungen weitergeben",
-        "CHANGED_COUNT": "{{count}} Sammlungen ändern sich beim Übernehmen.",
-        "CHANGED_COUNT_ONE": "1 Sammlung ändert sich beim Übernehmen.",
-        "CHANGES_PARENTS": "Änderungen an übergeordneten Sammlungen gelten auch für deren andere Untersammlungen, die hier nicht angezeigt werden.",
+        "CHANGED_COUNT": "{{count}} Sammlungen werden geändert.",
+        "CHANGED_COUNT_ONE": "1 Sammlung wird geändert.",
+        "CHANGED_COUNT_WITH_PARENTS": "{{count}} Sammlungen werden geändert, weitere außerhalb dieser Ansicht.",
+        "CHANGED_COUNT_ONE_WITH_PARENTS": "1 Sammlung wird geändert, weitere außerhalb dieser Ansicht.",
         "SAVED": "Die Vererbung wurde gespeichert.",
         "LOAD_ERROR": "Die Vererbung konnte nicht geladen werden."
       }

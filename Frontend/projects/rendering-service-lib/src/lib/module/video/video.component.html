@@ -4,7 +4,11 @@
     <source [src]="activeObject()?.link | rsAssetLink" />
   </video>
   @if (hasMultipleResolutions) {
-  <button aria-label="resolution" mat-icon-button [matMenuTriggerFor]="resolutionMenu">
+  <button
+    [attr.aria-label]="'RENDERING.VIDEO_RESOLUTION' | translate"
+    mat-icon-button
+    [matMenuTriggerFor]="resolutionMenu"
+  >
     <mat-icon>settings</mat-icon>
   </button>
   }
@@ -12,6 +16,8 @@
     @for (item of filteredItems; track item) {
     <button
       mat-menu-item
+      role="menuitemradio"
+      [attr.aria-checked]="item.height === activeObject()?.height"
       [disabled]="item.link === ''"
       (click)="item.height !== activeObject()?.height && switchResolution(item)"
     >

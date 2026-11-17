@@ -137,6 +137,9 @@
         *matHeaderCellDef
         mat-sort-header
         [disabled]="!(entriesService.sort?.allowed && isSortable(column))"
+        [sortActionDescription]="
+          entriesService.sort?.allowed && isSortable(column) ? ('SORT_BY_COLUMN' | translate) : ''
+        "
         [class.mat-column-primary]="first"
         [style.min-width]="first ? (containerWidth$ | async) / 3 + 'px' : null"
         >{{ column | esListItemLabel | async }}</mat-header-cell

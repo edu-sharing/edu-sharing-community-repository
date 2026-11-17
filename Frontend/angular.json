@@ -39,7 +39,7 @@
               },
               {
                 "glob": "**/*",
-                "input": "node_modules/tinymce-i18n/langs5",
+                "input": "node_modules/tinymce-i18n/langs8",
                 "output": "/assets/tinymce/langs/"
 
               },
@@ -62,7 +62,6 @@
             "scripts": [
               "node_modules/jquery/dist/jquery.js",
               "src/assets/js/nouislider.min.js",
-              "node_modules/moment/min/moment-with-locales.min.js",
               "node_modules/chart.js/dist/chart.umd.js",
               "node_modules/tinymce/tinymce.min.js"
             ],
@@ -74,7 +73,6 @@
               "qrcode",
               "uuid",
               "lodash",
-              "moment",
               "jquery",
               "pdfmake/build/pdfmake",
               "pdfmake/build/vfs_fonts"
@@ -186,7 +184,6 @@
             "scripts": [
               "node_modules/jquery/dist/jquery.js",
               "src/assets/js/nouislider.min.js",
-              "node_modules/moment/min/moment-with-locales.min.js",
               "node_modules/chart.js/dist/chart.umd.js",
               "node_modules/tinymce/tinymce.min.js"
             ],
@@ -223,7 +220,9 @@
           "builder": "@storybook/angular:start-storybook",
           "options": {
             "assets": [
-              "src/assets"
+              "src/assets",
+              { "glob": "**/*", "input": "node_modules/tinymce", "output": "/assets/tinymce/" },
+              { "glob": "**/*", "input": "node_modules/tinymce-i18n/langs8", "output": "/assets/tinymce/langs/" }
             ],
             "configDir": ".storybook",
             "browserTarget": "angular-edusharing:build",
@@ -235,7 +234,9 @@
           "builder": "@storybook/angular:build-storybook",
           "options": {
             "assets": [
-              "src/assets"
+              "src/assets",
+              { "glob": "**/*", "input": "node_modules/tinymce", "output": "/assets/tinymce/" },
+              { "glob": "**/*", "input": "node_modules/tinymce-i18n/langs8", "output": "/assets/tinymce/langs/" }
             ],
             "configDir": ".storybook",
             "browserTarget": "angular-edusharing:build",

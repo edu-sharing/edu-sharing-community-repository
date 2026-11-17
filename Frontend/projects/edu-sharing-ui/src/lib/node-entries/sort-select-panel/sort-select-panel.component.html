@@ -14,7 +14,10 @@
   } @if (!active) {
   <span>{{ 'SORT_BY' | translate }}</span>
   } @if (active && active !== 'ccm:collection_ordered_position') {
-  <i [esIcon]="'arrow_' + (direction === 'asc' ? 'upward' : 'downward')"></i>
+  <i
+    [esIcon]="'arrow_' + (direction === 'asc' ? 'upward' : 'downward')"
+    [altText]="(direction === 'asc' ? 'ASCENDING' : 'DESCENDING') | translate"
+  ></i>
   }
 </button>
 }

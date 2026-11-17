@@ -9,7 +9,7 @@ import org.alfresco.service.namespace.QName;
  * Binds content that was already written to the content store (via an unbound ContentWriter) to a node.
  * Alfresco's ContentPropertyRestrictionInterceptor blocks setting a content property with a new contentUrl
  * through the public NodeService; this class is whitelisted in contentPropertyRestrictions.whitelist
- * (alfresco-global.properties).
+ * (config/defaults/alfresco-global-core.properties).
  * Only ever pass ContentData produced by our own writer - never data originating from a client request,
  * otherwise a caller could point a node to foreign content.
  */

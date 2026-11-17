@@ -57,6 +57,7 @@ public class VideoMetadataExtractor extends AbstractMetadataExtractorEmbedder {
     static String KEY_WIDTH = "WIDTH";
     static String KEY_HEIGHT = "HEIGHT";
     static String KEY_LENGTH = "LENGTH";
+    static String KEY_OVERWRITE_POLICY = "sys:overwritePolicy";
 
     private static final Logger logger = LoggerFactory.getLogger(VideoMetadataExtractor.class);
 
@@ -69,6 +70,9 @@ public class VideoMetadataExtractor extends AbstractMetadataExtractorEmbedder {
     protected Map<String, Serializable> extractRaw(File sourceFile) throws IOException,InterruptedException {
 
         Map<String,Serializable> result = new HashMap<>();
+        // the repository's default overwrite policy is PRAGMATIC which only fills empty properties,
+        // so a replaced video would keep the resolution/duration of the previous binary
+        result.put(KEY_OVERWRITE_POLICY, "EAGER");
         String resolution = getResolutionString(sourceFile.getCanonicalPath());
 
         Integer resolutionX = null;

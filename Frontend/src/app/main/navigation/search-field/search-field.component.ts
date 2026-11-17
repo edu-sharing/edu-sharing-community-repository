@@ -33,6 +33,9 @@ import { LoadingScreenService } from '../../loading-screen/loading-screen.servic
 import { SearchFieldInternalService } from './search-field-internal.service';
 import { SearchFieldConfig } from './search-field.service';
 
+/** Counter for DOM ids that must be unique per component instance. */
+let nextUniqueId = 0;
+
 @Component({
     selector: 'es-search-field',
     templateUrl: './search-field.component.html',
@@ -48,6 +51,8 @@ export class SearchFieldComponent implements OnInit, OnDestroy, AfterViewInit {
 
     /** The number of filters visible on the facets overlay. */
     filtersCount: number;
+    /** DOM id of the "active filters" heading, referenced by the chip list's aria-labelledby. */
+    readonly activeFiltersLabelId = `es-search-field-active-filters-${nextUniqueId++}`;
     /** The total number of filters independently of categories of the facets overlay. */
     totalFiltersCount: number;
     config: SearchFieldConfig;

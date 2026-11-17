@@ -353,16 +353,44 @@
           ></es-input-password>
         </div>
         }
-        <div class="quota">
-          <mat-form-field>
-            <mat-label>{{ 'USER.sizeQuota' | translate }}</mat-label>
-            <input matInput name="sizeQuota" [(ngModel)]="edit.profile.sizeQuota" />
-            <mat-hint>{{ 'PERMISSIONS.USER_QUOTA_HINT' | translate }}</mat-hint>
-          </mat-form-field>
-          @if (editId && edit.quota.enabled) {
-          <es-user-quota [quota]="edit.quota"></es-user-quota>
+        <mat-expansion-panel class="quota-panel" [expanded]="quotaPanelExpanded">
+          <mat-expansion-panel-header>
+            <mat-panel-title>{{ 'PERMISSIONS.QUOTA_SECTION' | translate }}</mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="quota">
+            <mat-form-field>
+              <mat-label>{{ 'USER.sizeQuota' | translate }}</mat-label>
+              <input matInput name="sizeQuota" [(ngModel)]="edit.profile.sizeQuota" />
+              <mat-hint>{{ 'PERMISSIONS.USER_QUOTA_HINT' | translate }}</mat-hint>
+            </mat-form-field>
+            @if (editId && edit.quota.enabled) {
+            <es-user-quota [quota]="edit.quota"></es-user-quota>
+            }
+          </div>
+          @for (field of COUNT_QUOTA_FIELDS; track field.key) {
+          <div class="quota quota-count">
+            <mat-form-field>
+              <mat-label>{{ 'USER.' + field.key | translate }}</mat-label>
+              <input
+                matInput
+                type="number"
+                min="0"
+                [name]="field.key"
+                [(ngModel)]="edit.profile[field.key]"
+              />
+              <mat-hint>{{ 'PERMISSIONS.USER_QUOTA_HINT' | translate }}</mat-hint>
+            </mat-form-field>
+            @if (editId && edit.quota?.[field.key] != null && edit.quota?.[field.current] != null) {
+            <div class="quota-count-current">
+              {{
+                'USER.COUNT_QUOTA_CURRENT'
+                  | translate : { current: edit.quota[field.current], limit: edit.quota[field.key] }
+              }}
+            </div>
+            }
+          </div>
           }
-        </div>
+        </mat-expansion-panel>
       </div>
       }
     </form>

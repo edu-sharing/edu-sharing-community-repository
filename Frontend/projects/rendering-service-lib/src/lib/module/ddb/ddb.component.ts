@@ -14,10 +14,11 @@ import { MatIcon } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { FormsModule } from '@angular/forms';
 import { RenderData } from '../../dto/RenderData';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
     selector: 'rs-module-ddb',
-    imports: [RenderingModule, MatButtonModule, FormsModule, MatIcon],
+    imports: [RenderingModule, MatButtonModule, FormsModule, MatIcon, TranslateModule],
     templateUrl: './ddb.component.html',
     styleUrl: './ddb.component.scss',
 })
@@ -27,12 +28,23 @@ export class DdbComponent implements RenderModule, AfterViewInit {
     @Input() data: RenderData | undefined;
     @Input() node: Node | undefined;
     activeObject = signal<string | undefined>(undefined);
+    /** Whether this module's host element is currently shown in fullscreen. */
+    isFullscreen = signal(false);
 
     ngAfterViewInit(): void {
         this.loadOptimalSize();
     }
 
+    /**
+     * Tracks the fullscreen state on every change, including exits via Esc or browser controls,
+     * so the toggle button can expose the matching name and icon.
+     */
     @HostListener('document:fullscreenchange')
+    protected onFullscreenChange() {
+        this.isFullscreen.set(document.fullscreenElement === this.element.nativeElement);
+        this.loadOptimalSize();
+    }
+
     protected loadOptimalSize() {
         const size = this.element.nativeElement.getBoundingClientRect();
         if (this.data?.items !== undefined && this.data?.items[0].additionalData !== undefined) {

@@ -76,6 +76,7 @@
   "LOGOUT": "Abmelden",
   "INVALID_OPERATION": "Diese Funktion wird leider nicht unterstützt.",
   "SORT_BY": "Sortieren nach",
+  "SORT_BY_COLUMN": "Nach dieser Spalte sortieren",
   "ASCENDING": "aufsteigend",
   "DESCENDING": "absteigend",
   "SELECTED": "ausgewählt",
@@ -127,6 +128,12 @@
   "RENDERSERVICE_API_ERROR": "Fehler beim Verbinden mit dem Renderingservice. Bitte melden Sie diesen Fehler einen Administrator.",
   "SYSTEM_FOLDER_DELETE_ERROR": "Dieser Ordner wurde vom System erstellt und kann nicht gelöscht werden.",
   "GENERIC_QUOTA_ERROR_TITLE": "Der Vorgang konnte nicht ausgeführt werden, da das Speicherplatz-Quota überschritten wurde.",
+  "NODE_COUNT_QUOTA_ERROR": {
+    "MATERIAL": "Das Materiallimit ist erreicht: Es dürfen maximal {{limit}} Materialien angelegt werden.",
+    "COLLECTION": "Das Sammlungslimit ist erreicht: Es dürfen maximal {{limit}} Sammlungen angelegt werden.",
+    "FOLDER": "Das Ordnerlimit ist erreicht: Es dürfen maximal {{limit}} Ordner angelegt werden.",
+    "GENERIC": "Der Vorgang konnte nicht ausgeführt werden, da die maximale Anzahl an Elementen erreicht wurde."
+  },
   "CONNECTOR_FORMAT_LABEL": "Dateityp",
   "CONNECTOR_QUOTA_REACHED_TITLE": "Speicherplatz-Quota überschritten",
   "CONNECTOR_QUOTA_REACHED_MESSAGE": "Diese Funktion ist nicht mehr verfügbar, da Sie das Speicherplatz-Quota vollständig überschritten haben.\n\nLöschen Sie einige Dateien, um Speicherplatz zu schaffen und versuchen Sie es anschließend erneut.",
@@ -220,7 +227,7 @@
   "CLICKTOREMOVE": "Klicken zum Entfernen",
   "NO_PERMISSIONS_FOR_SCOPE": "Keine Berechtigungen, um diesen Bereich anzuzeigen.",
   "DATE_SELECT_YEAR": "Jahr wählen",
-  "SEARCH_CLEAR": "Löschen",
+  "SEARCH_CLEAR": "Sucheingabe löschen",
   "TOGGLE_SEARCH_FILTERS": "Suchfilter ein- und ausblenden",
   "DATE_CLEAR": "Löschen",
   "USER_TUTORIAL_HEADING": "Ihr Profil",
@@ -754,6 +761,10 @@
     "PRIMARY_AFFILIATION_SWITCH_TO_TEXT": "Zu Freitext wechseln",
     "password": "Passwort",
     "sizeQuota": "Speicherkontingent in MB",
+    "materialCountQuota": "Max. Anzahl Materialien",
+    "collectionCountQuota": "Max. Anzahl Sammlungen",
+    "folderCountQuota": "Max. Anzahl Ordner",
+    "COUNT_QUOTA_CURRENT": "Aktuell {{current}} von {{limit}} genutzt",
     "PRIMARY_AFFILIATION": {
       "teacher": "Lehrender / Lehrer",
       "student": "Lernender / Schüler",
@@ -1129,6 +1140,13 @@
     "QUEUE_POSITION": "Position in der Warteschlange",
     "OPEN_IN_NEW_TAB": "In neuem Tab öffnen",
     "RELOAD_LINK": "Link neu laden",
+    "FULLSCREEN": "Vollbild",
+    "EXIT_FULLSCREEN": "Vollbild beenden",
+    "VIDEO_RESOLUTION": "Videoauflösung",
+    "LINK_TO_OBJECT": "Zum Objekt",
+    "LINK_NAME_TITLE": "{{label}} – {{title}}",
+    "LINK_NAME_TITLE_NEW_WINDOW": "{{label}} – {{title}}, öffnet in neuem Fenster",
+    "LINK_NAME_NEW_WINDOW": "{{label}}, öffnet in neuem Fenster",
     "REVOKED": {
       "DETAILS_EMPTY": "Der Herausgebende bzw. die Redaktion hat dieses Objekt zurückgezogen. Es sind nur noch die Metadaten des ursprünglichen Elements verfügbar.\n\nWeitere Details finden Sie in der Begründung unten.",
       "DETAILS": "Der Herausgebende bzw. die Redaktion hat dieses Objekt zurückgezogen. \n\nWeitere Details finden Sie in der Begründung unten.",
@@ -1731,7 +1749,7 @@
     "aboutme": "Eigenes Profil",
     "documentation": "Zur Dokumentation",
     "OPTIONS_FOR": "Aktionen für {{element}}",
-    "ADD_ENTRY": "Shorcut Kachel hinzufügen"
+    "ADD_ENTRY": "Schnellzugriff Kachel hinzufügen"
   },
   "DASHBOARD_SWIMLANE": {
     "EXPAND": "{{ element }} ausklappen",
