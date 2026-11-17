@@ -1,0 +1,10 @@
+<div class="ai-text-placeholder" role="status" aria-busy="true">
+  <span class="cdk-visually-hidden">{{ 'TOPIC_PAGE.AI.TEXT_LOADING' | translate }}</span>
+  @for (index of lineIndexes(); track index) {
+  <div
+    class="placeholder-line"
+    [class.last-line]="index > 0 && index === lineIndexes().length - 1"
+    aria-hidden="true"
+  ></div>
+  }
+</div>

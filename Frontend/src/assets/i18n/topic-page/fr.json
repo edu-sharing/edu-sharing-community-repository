@@ -42,7 +42,8 @@
     },
     "AI": {
       "GENERATED": "Généré par IA",
-      "INVALID_PROMPT": "Invite non valide"
+      "INVALID_PROMPT": "Invite non valide",
+      "TEXT_LOADING": "Le texte est en cours de génération ..."
     },
     "WIDGET": {
       "SUB_HEADING_LABEL_OPTIONAL": "Sous-titre (facultatif)",

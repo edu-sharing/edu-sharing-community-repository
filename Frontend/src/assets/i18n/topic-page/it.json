@@ -42,7 +42,8 @@
     },
     "AI": {
       "GENERATED": "Generato dall'IA",
-      "INVALID_PROMPT": "Prompt non valido"
+      "INVALID_PROMPT": "Prompt non valido",
+      "TEXT_LOADING": "Il testo è in fase di generazione ..."
     },
     "WIDGET": {
       "SUB_HEADING_LABEL_OPTIONAL": "Sottotitolo (facoltativo)",
