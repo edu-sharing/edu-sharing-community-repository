@@ -27,7 +27,12 @@
 
   <mat-sidenav-content>
     <div class="main-content">
-      @if (showTabs()) {
+      <!-- The page heading precedes the scope tabs so that it introduces them in reading order. -->
+      @if (isRootLevelCollection()) {
+      <h1 esTitle class="cdk-visually-hidden">
+        {{ 'COLLECTIONS.TITLE' | translate }}
+      </h1>
+      } @if (showTabs()) {
       <mat-tab-group
         class="mat-tab-group-shadow"
         role="navigation"
@@ -121,10 +126,6 @@
               <section class="collections-loading-div">
                 <es-spinner></es-spinner>
               </section>
-              } @if (isRootLevelCollection()) {
-              <h1 esTitle class="cdk-visually-hidden">
-                {{ 'COLLECTIONS.TITLE' | translate }}
-              </h1>
               } @if (!isLoading && isGuest) {
               <a
                 mat-button
