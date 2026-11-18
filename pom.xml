@@ -75,6 +75,8 @@
     <postgresql.jdbc.version>42.7.13</postgresql.jdbc.version>
     <tomcat.version>11.0.27</tomcat.version>
     <jackson.version>2.18.12</jackson.version>
+    <!-- elasticsearch java client, must match the server version (repository-elastic: elastic.stack.version) -->
+    <elasticsearch-client.version>9.5.6</elasticsearch-client.version>
     <mongodb.version>5.5.1</mongodb.version>
     <spring.version>7.0.10</spring.version>
     <spring-security.version>7.0.0</spring-security.version>
@@ -418,7 +420,14 @@
       <dependency>
         <groupId>co.elastic.clients</groupId>
         <artifactId>elasticsearch-java</artifactId>
-        <version>8.19.24</version>
+        <version>${elasticsearch-client.version}</version>
+      </dependency>
+
+      <!-- only an optional (compileOnly) dependency of elasticsearch-java 9, needed for the RestClientTransport -->
+      <dependency>
+        <groupId>org.elasticsearch.client</groupId>
+        <artifactId>elasticsearch-rest-client</artifactId>
+        <version>${elasticsearch-client.version}</version>
       </dependency>
 
       <!-- dependency of elastic client -->
@@ -757,27 +766,28 @@
       </dependency>
 
       <!-- jackson-annotations is shared by Jackson 2 (com.fasterxml.jackson, used by Alfresco) and
-           Jackson 3 (tools.jackson, used by the Spring 7 stack). Jackson 3.0.1 requires annotations 2.20
-           (adds JsonFormat.Shape.POJO); the transitive 2.17.2 lacks it and makes tools.jackson.databind
-           fail with NoSuchFieldError. 2.20 is backward-compatible with Alfresco's Jackson 2.17.2 databind,
-           so pin the shared annotations to 2.20 while leaving core/databind on ${jackson.version}. -->
+           Jackson 3 (tools.jackson, used by the Spring 7 stack). Jackson 3.1 requires annotations 2.21
+           (adds JsonSerializeAs, 3.0 already needed JsonFormat.Shape.POJO from 2.20); the transitive 2.17.2
+           lacks them and makes tools.jackson.databind fail with NoSuchFieldError / NoClassDefFoundError.
+           The annotations are backward-compatible with Alfresco's Jackson 2 databind, so pin the shared
+           annotations to 2.21 while leaving core/databind on ${jackson.version}. -->
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-annotations</artifactId>
-        <version>2.20</version>
+        <version>2.21</version>
       </dependency>
 
       <!-- Jackson 3 (tools.jackson) comes from the Spring 7 stack (oauth2-authorization-server, databind 3.0.1) and from
-           elasticsearch-java >= 8.19.20 (core 3.0.0), pin core and databind to the same version to keep a matching pair -->
+           elasticsearch-java 9.5.x (core/databind 3.1.0), pin core and databind to the same version to keep a matching pair -->
       <dependency>
         <groupId>tools.jackson.core</groupId>
         <artifactId>jackson-core</artifactId>
-        <version>3.0.1</version>
+        <version>3.1.7</version>
       </dependency>
       <dependency>
         <groupId>tools.jackson.core</groupId>
         <artifactId>jackson-databind</artifactId>
-        <version>3.0.1</version>
+        <version>3.1.7</version>
       </dependency>
 
       <dependency>

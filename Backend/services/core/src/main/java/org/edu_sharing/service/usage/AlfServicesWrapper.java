@@ -354,10 +354,10 @@ public class AlfServicesWrapper implements UsageDAO{
 			NumberRangeQuery.Builder rangeQueryBuilder = new NumberRangeQuery.Builder();
 			rangeQueryBuilder.field("properties.cm:created.number");
 			if(from != null) {
-				rangeQueryBuilder.from(from.doubleValue());
+				rangeQueryBuilder.gte(from.doubleValue());
 			}
 			if(to != null) {
-				rangeQueryBuilder.to(to.doubleValue());
+				rangeQueryBuilder.lte(to.doubleValue());
 			}
 			queryBuilder.must(rangeQueryBuilder.build()._toRangeQuery()._toQuery());
 		}

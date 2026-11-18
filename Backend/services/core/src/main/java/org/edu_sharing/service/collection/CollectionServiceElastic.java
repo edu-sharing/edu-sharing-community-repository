@@ -1167,12 +1167,12 @@ public class CollectionServiceElastic implements CollectionService {
                 .trackTotalHits(t -> t.enabled(true))
                 .scriptFields("proposals", sf -> sf.script(src -> src
                         .lang("painless")
-                        .source("Map m = new HashMap();for(def proposal: params._source.children) { if(proposal['type'] == 'ccm:collection_proposal') {def value = proposal['properties']['ccm:collection_proposal_status']; if(m.containsKey(value)) { m.put(value, m.get(value) + 1); } else { m.put(value, 1); } } } return m;")))
+                        .source(scriptSrc -> scriptSrc.scriptString("Map m = new HashMap();for(def proposal: params._source.children) { if(proposal['type'] == 'ccm:collection_proposal') {def value = proposal['properties']['ccm:collection_proposal_status']; if(m.containsKey(value)) { m.put(value, m.get(value) + 1); } else { m.put(value, 1); } } } return m;"))))
                 .query(q -> q.scriptScore(ssq -> ssq
                         .minScore(1f)
                         .script(scr -> scr
                                 .lang("painless")
-                                .source("if(!params._source.containsKey('children')) return 0; for(def proposal: params._source.children) { if(proposal['type'] == 'ccm:collection_proposal' && proposal.containsKey('properties') && proposal['properties'].containsKey('ccm:collection_proposal_status') && proposal['properties']['ccm:collection_proposal_status'] == params.status) return 1; } return 0;")
+                                .source(scriptSrc -> scriptSrc.scriptString("if(!params._source.containsKey('children')) return 0; for(def proposal: params._source.children) { if(proposal['type'] == 'ccm:collection_proposal' && proposal.containsKey('properties') && proposal['properties'].containsKey('ccm:collection_proposal_status') && proposal['properties']['ccm:collection_proposal_status'] == params.status) return 1; } return 0;"))
                                 .params("status", JsonData.of(status)))
                         .query(iq -> iq.bool(b -> b
                                 .must(m -> m.match(match -> match.field("nodeRef.storeRef.protocol").query("workspace")))

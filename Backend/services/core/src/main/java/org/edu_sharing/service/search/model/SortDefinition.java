@@ -190,9 +190,9 @@ public class SortDefinition implements Serializable {
 			if (sortDefintionEntry.getProperty().equalsIgnoreCase("score")) {
 				builder.sort(sort -> sort.score(score -> score.order(sortOrder)));
 			} else if (sortDefintionEntry.getProperty().equalsIgnoreCase("random")) {
-				builder.sort(sort -> sort.script(script -> script.script(s -> s.source("Math.random()")).type(ScriptSortType.Number)));
+				builder.sort(sort -> sort.script(script -> script.script(s -> s.source(scriptSrc -> scriptSrc.scriptString("Math.random()"))).type(ScriptSortType.Number)));
 			} else if (sortDefintionEntry.getProperty().equalsIgnoreCase("tree")) {
-				builder.sort(sort -> sort.script(script -> script.script(s -> s.source("doc['fullpath'].value + '/' + doc['nodeRef.id'].value")).type(ScriptSortType.String)));
+				builder.sort(sort -> sort.script(script -> script.script(s -> s.source(scriptSrc -> scriptSrc.scriptString("doc['fullpath'].value + '/' + doc['nodeRef.id'].value"))).type(ScriptSortType.String)));
 			} else if (ALLOWED_SORT_MAIN_PROPERTIES.contains(sortDefintionEntry.getProperty())) {
 				builder.sort(sort -> sort.field(field -> field.field(sortDefintionEntry.getProperty()).order(sortOrder)));
 			} else {
@@ -236,7 +236,7 @@ public class SortDefinition implements Serializable {
 							.script(scriptSort -> scriptSort
 									.script(Script.of(sc -> sc
 											.lang("painless")
-											.source("""
+											.source(scriptSrc -> scriptSrc.scriptString("""
 														if (doc[params.field].size() != 0) {
 														  ZonedDateTime zdt = Instant.ofEpochMilli(doc[params.field].value)
 															.atZone(ZoneId.of('UTC'))
@@ -245,7 +245,7 @@ public class SortDefinition implements Serializable {
 														} else {
 														  return 0;
 														}
-													""")
+													"""))
 											.params(Map.of("field", JsonData.of(name)))
 									))
 									.type(ScriptSortType.Number)

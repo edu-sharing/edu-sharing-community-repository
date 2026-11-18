@@ -174,7 +174,9 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 						.query(query->query.bool(bool->getAuthorityQuery(bool, Collections.singletonList(authority),status)))
 				,Map.class);
 		ScoreResult result=new ScoreResult();
-		result.score=(long)searchResult.aggregations().get("score").sum().value();
+		// since elasticsearch-java 9.3 the value is a nullable Double
+		Double score = searchResult.aggregations().get("score").sum().value();
+		result.score = score == null ? 0L : score.longValue();
 		return result;
 	}
 	@Override
@@ -204,7 +206,7 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 		client.update(req->req
 						.index(INDEX_NAME)
 						.id(id)
-						.script(scp->scp.source(script).params("audience", JsonData.of(audience)))
+						.script(scp->scp.source(scriptSrc -> scriptSrc.scriptString(script)).params("audience", JsonData.of(audience)))
 				, Map.class);
 	}
 	@Override

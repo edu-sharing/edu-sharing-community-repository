@@ -151,12 +151,12 @@ public class NodeFrontpage {
         if(RepositoryConfig.Frontpage.Mode.random.equals(config.getMode())){
             return SortOptions.of(so -> so.script(
                     s -> s.type(ScriptSortType.Number).script(
-                            script -> script.lang("painless").source("Math.random()"))
+                            script -> script.lang("painless").source(scriptSrc -> scriptSrc.scriptString("Math.random()")))
             ));
         }
         Script sortingScriptInline = new Script.Builder()
                 .lang("painless")
-                .source(STATISTIC_SORT_SCRIPT)
+                .source(scriptSrc -> scriptSrc.scriptString(STATISTIC_SORT_SCRIPT))
                 .params("fields", getFieldNames(config))
                 .build();
         return SortOptions.of(so -> so.script(

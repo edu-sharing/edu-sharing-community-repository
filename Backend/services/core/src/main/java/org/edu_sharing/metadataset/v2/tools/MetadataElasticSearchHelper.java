@@ -383,7 +383,7 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
         params.put("authority", authority == null ? JsonData.of("") : JsonData.of(authority));
         return AggregationBuilders.terms()
                 .script(s -> s
-                        .source(COMBINED_SUGGESTION_FACET_CURRENT_USER_SCRIPT)
+                        .source(scriptSrc -> scriptSrc.scriptString(COMBINED_SUGGESTION_FACET_CURRENT_USER_SCRIPT))
                         .lang("painless")
                         .params(params))
                 .size(size)
@@ -575,11 +575,11 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
                     }
                     searchRequestBuilder.runtimeMappings(GEOPOINT_RUNTIME_FIELD, RuntimeField.of(r -> r
                             .type(RuntimeFieldType.GeoPoint)
-                            .script(s -> s.source(
+                            .script(s -> s.source(scriptSrc -> scriptSrc.scriptString(
                                             "if (doc.containsKey('properties.cm:latitude.number') && doc['properties.cm:latitude.number'].size() > 0 && " +
                                                     "doc.containsKey('properties.cm:longitude.number') && doc['properties.cm:longitude.number'].size() > 0) { " +
                                                     "emit(doc['properties.cm:latitude.number'].value, doc['properties.cm:longitude.number'].value); }"
-                                    )
+                                    ))
                             )
                     ));
                     innerAggregation = AggregationBuilders.geotileGrid()

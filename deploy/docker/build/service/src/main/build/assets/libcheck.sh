@@ -14,9 +14,10 @@ whitelist=(
   "stax-api-1.0.1.jar:alf-lib"
   "stax-api-1.0-2.jar:alf-lib"
   # jackson 3 (tools.jackson.*) is a dependency of the spring 7 stack (oauth2-authorization-server) and of
-  # elasticsearch-java >= 8.19.20 and lives in its own packages, so it does not clash with jackson 2 (com.fasterxml.jackson.*)
-  "jackson-core-3.0.1.jar:alf-lib"
-  "jackson-databind-3.0.1.jar:alf-lib"
+  # elasticsearch-java 9.x and lives in its own packages, so it does not clash with jackson 2 (com.fasterxml.jackson.*)
+  # keep in sync with the tools.jackson.core version pinned in repository/pom.xml
+  "jackson-core-3.1.7.jar:alf-lib"
+  "jackson-databind-3.1.7.jar:alf-lib"
 )
 
 files=()

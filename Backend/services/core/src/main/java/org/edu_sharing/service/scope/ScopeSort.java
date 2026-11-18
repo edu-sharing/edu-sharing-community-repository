@@ -114,6 +114,6 @@ public class ScopeSort {
     private static RuntimeField runtimeField(RuntimeFieldType type, String source, Map<String, JsonData> params) {
         return RuntimeField.of(r -> r
                 .type(type)
-                .script(s -> s.lang("painless").source(source).params(params)));
+                .script(s -> s.lang("painless").source(scriptSrc -> scriptSrc.scriptString(source)).params(params)));
     }
 }

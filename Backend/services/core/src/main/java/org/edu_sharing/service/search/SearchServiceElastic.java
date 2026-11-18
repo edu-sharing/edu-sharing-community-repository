@@ -9,6 +9,7 @@ import co.elastic.clients.elasticsearch.core.search.*;
 import co.elastic.clients.json.JsonData;
 import co.elastic.clients.json.JsonpUtils;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
+import co.elastic.clients.util.NamedValue;
 import co.elastic.clients.transport.ElasticsearchTransport;
 import co.elastic.clients.transport.TransportOptions;
 import co.elastic.clients.transport.rest_client.RestClientOptions;
@@ -1808,9 +1809,9 @@ public class SearchServiceElastic implements SearchService {
                                     .aggregations("vcards", vcardAggr -> vcardAggr
                                             .composite(comp -> {
                                                 comp.size(1000)
-                                                        .sources(List.of(Map.of("vcard",
+                                                        .sources(NamedValue.of("vcard",
                                                                 CompositeAggregationSource.of(src -> src
-                                                                        .terms(t -> t.field("contributor.vcard"))))));
+                                                                        .terms(t -> t.field("contributor.vcard")))));
                                                 if (after != null) {
                                                     comp.after(after);
                                                 }
@@ -2256,7 +2257,7 @@ public class SearchServiceElastic implements SearchService {
                         // TODO: Filter by event if present!
                         .functions(f -> f.scriptScore(ss -> ss
                                 .script(script -> script
-                                        .source("decayDateLinear(params.originDate, '1m', '0', 1.5, doc['userEvent.timestamp'].value)")
+                                        .source(scriptSrc -> scriptSrc.scriptString("decayDateLinear(params.originDate, '1m', '0', 1.5, doc['userEvent.timestamp'].value)"))
                                         .params(Map.of("originDate", JsonData.of(Instant.now().toString())
                                                 )
                                         )
@@ -2419,7 +2420,7 @@ public class SearchServiceElastic implements SearchService {
                                 // TODO: Filter by event if present!
                                 .functions(f -> f.scriptScore(ss -> ss
                                         .script(script -> script
-                                                .source("decayDateLinear(params.originDate, '1m', '0', 1.5, doc['share.timestamp'].value)")
+                                                .source(scriptSrc -> scriptSrc.scriptString("decayDateLinear(params.originDate, '1m', '0', 1.5, doc['share.timestamp'].value)"))
                                                 .params(Map.of("originDate", JsonData.of(originDate.toString())
                                                         )
                                                 )
@@ -2561,7 +2562,7 @@ public class SearchServiceElastic implements SearchService {
             String property = sf.getProperty();
             aggregations.put(property, Aggregation.of(a -> a.terms(t -> t
                     .script(s -> s
-                            .source(MetadataElasticSearchHelper.COMBINED_SUGGESTION_FACET_SCRIPT)
+                            .source(scriptSrc -> scriptSrc.scriptString(MetadataElasticSearchHelper.COMBINED_SUGGESTION_FACET_SCRIPT))
                             .lang("painless")
                             .params(Map.of("property", JsonData.of(property)))
                     )
@@ -3663,11 +3664,11 @@ public class SearchServiceElastic implements SearchService {
             QueryVariant query;
             if (comp.equals("<=")) {
                 RangeQuery.Builder r = QueryBuilders.range();
-                r.number(n -> n.field("properties." + properties.get(finalI) + ".number").to(Double.valueOf(value.get(finalI))));
+                r.number(n -> n.field("properties." + properties.get(finalI) + ".number").lte(Double.valueOf(value.get(finalI))));
                 query = r.build();
             } else if (comp.equals(">=")) {
                 RangeQuery.Builder r = QueryBuilders.range();
-                r.number(n -> n.field("properties." + properties.get(finalI) + ".number").from(Double.valueOf(value.get(finalI))));
+                r.number(n -> n.field("properties." + properties.get(finalI) + ".number").gte(Double.valueOf(value.get(finalI))));
                 query = r.build();
             } else {
                 TermQuery.Builder t = QueryBuilders.term();
