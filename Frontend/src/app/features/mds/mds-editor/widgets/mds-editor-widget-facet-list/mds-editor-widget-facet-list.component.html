@@ -15,7 +15,9 @@
   </mat-form-field>
   } @if (formArray) {
   <ul [formGroup]="$any(formArray)" class="checkboxes-group">
-    @for (control of formArray.controls; track control; let i = $index) {
+    <!-- Rows are keyed by facet value, so a row and its keyboard focus survive the facet updates
+         that rebuild the form array after every search. -->
+    @for (control of formArray.controls; track getFacet($index)?.value; let i = $index) {
     <li>
       <mat-checkbox [formControlName]="i">
         <span class="label">

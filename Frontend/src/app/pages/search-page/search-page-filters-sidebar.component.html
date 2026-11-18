@@ -19,13 +19,13 @@
     <div class="filter-bar-heading">
       <h2 class="filter-bar-title" [id]="titleId">{{ 'SEARCH.FILTERS' | translate }}</h2>
       @if (searchFilters.getUserValue()) {
-      <button mat-button (click)="searchFilters.setUserValue(null)">
+      <button mat-button (click)="resetFilters('sidebar')">
         <i esIcon="undo"></i>
         {{ 'CLEAR_FILTERS' | translate }}
       </button>
       }
     </div>
-    <div class="filter-bar-body">
+    <div class="filter-bar-body" #filterBarBody>
       @if ((showingAllRepositories | async) === false) {
       <es-search-page-filter-bar></es-search-page-filter-bar>
       }
@@ -40,7 +40,7 @@
 
 <ng-template #filtersDialogResetButton>
   @if (searchFilters.getUserValue()) {
-  <button mat-button (click)="searchFilters.setUserValue(null)">
+  <button mat-button (click)="resetFilters('dialog')">
     <i esIcon="undo"></i>
     {{ 'CLEAR_FILTERS' | translate }}
   </button>
