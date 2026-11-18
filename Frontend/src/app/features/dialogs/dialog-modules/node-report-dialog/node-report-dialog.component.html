@@ -2,10 +2,21 @@
   <h2>{{ data.mode + '.REPORT_INFO' | translate : { name: (data.node | nodeTitle) } }}</h2>
   <div class="report">
     @if (data.showOptions) {
+    <!-- visible group label; the error sits right below it so it clearly belongs to this group -->
+    <div class="reason-label" id="node-report-reason-label">
+      {{ 'NODE_REPORT.REASON' | translate }}<span aria-hidden="true"> *</span>
+    </div>
+    @if (shouldShowError('reason')) {
+    <mat-error id="node-report-reason-error">
+      {{ data.mode + '.REASON_REQUIRED' | translate }}
+    </mat-error>
+    }
     <mat-radio-group
       formControlName="reason"
       name="reason"
-      [attr.aria-label]="'NODE_REPORT.REASON' | translate"
+      aria-labelledby="node-report-reason-label"
+      required
+      [attr.aria-invalid]="shouldShowError('reason') ? 'true' : null"
     >
       @for (reason of reasons; track reason) {
       <mat-radio-button
@@ -15,10 +26,6 @@
       >
       }
     </mat-radio-group>
-    } @if (shouldShowError('reason')) {
-    <mat-error id="node-report-reason-error">
-      {{ data.mode + '.REASON_REQUIRED' | translate }}
-    </mat-error>
     }
   </div>
   <mat-form-field floatLabel="always" class="comment">
