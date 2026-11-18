@@ -2674,7 +2674,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             // the variant node carries the AI config of the swimlane headings
             this.pageVariantNode.set(await this.topicPageHelperService.getNodeUncached(nodeId));
             await this.updatePageVariantConfigs();
-            await this.updateSwimlaneIdToPromptTextMapping();
+            void this.updateSwimlaneIdToPromptTextMapping();
             return;
         }
         await this.bumpTemplateVersionIfNeeded();
