@@ -19,7 +19,6 @@ import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.lock.LockService;
 import org.alfresco.service.cmr.lock.LockStatus;
 import org.alfresco.service.cmr.repository.*;
-import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.security.PersonService;
@@ -365,7 +364,6 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
             }
             // if may just the content gets updated, the refs still need to get a new modified date
             AuthenticationUtil.runAsSystem(() -> {
-                //ResultSet result = fetchCollectionReferences(nodeRef);
                 List<NodeRef> result = fetchCollectionReferencesByCmis(nodeRef);
                 for (NodeRef ref : result) {
                     transactionService.getRetryingTransactionHelper().doInTransaction(() -> {
@@ -972,11 +970,6 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
             return true;
         }
         return false;
-    }
-
-    public ResultSet fetchCollectionReferences(NodeRef nodeRef) {
-        String query = "ASPECT:\"" + CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE + "\" AND @ccm\\:original:\"" + nodeRef.getId() + "\"";
-        return searchService.query(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, SearchService.LANGUAGE_LUCENE, query);
     }
 
     public static List<NodeRef> fetchCollectionReferencesByCmis(NodeRef nodeRef) {

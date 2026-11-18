@@ -296,23 +296,6 @@ div.download {
     margin-top: -8px;
 }
 
-.similarNodes {
-    display: flex;
-    flex-direction: column;
-    padding: 20px;
-    width: 100%;
-    background-color: #fff;
-    es-listTable {
-        /*margin:auto;*/
-    }
-    .caption {
-        padding-bottom: 10px;
-        color: $textLight;
-        font-weight: bold;
-        display: block;
-    }
-}
-
 es-imprint-privacy {
     position: absolute;
     width: 100%;

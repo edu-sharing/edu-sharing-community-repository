@@ -87,8 +87,6 @@ public interface SearchService {
 		return null;	
 	}
 
-	SearchResultNodeRef searchFingerPrint(String nodeId);
-
 	Set<SearchVCard> searchContributors(String suggest, List<String> fields, List<String> contributorProperties, ContributorKind kind) throws IOException;
 
 	SearchResultNodeRef getMetadata(List<String> nodeIds) throws IOException;

@@ -98,12 +98,6 @@ public class SearchServiceAdapter implements SearchService {
 	}
 	
 	@Override
-	public SearchResultNodeRef searchFingerPrint(String nodeId) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public Set<SearchVCard> searchContributors(String suggest, List<String> fields, List<String> contributorProperties, ContributorKind contributorKind) {
 		return new HashSet<>();
 	}
