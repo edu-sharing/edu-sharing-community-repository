@@ -173,11 +173,18 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     description: string;
     descriptionMapping: PromptToTextMapping;
     descriptionAiGenerated: WritableSignal<boolean> = signal(false);
+    descriptionLoading: WritableSignal<boolean> = signal(false);
     private destroyRef: DestroyRef = inject(DestroyRef);
     embedConfigurationOption: ConfigurationOption = new ConfigurationOption();
     headline: string;
     headlineMapping: PromptToTextMapping;
     headlineAiGenerated: WritableSignal<boolean> = signal(false);
+    headlineLoading: WritableSignal<boolean> = signal(false);
+    // the AI config whose texts the widget shows; results of another config are dropped
+    private appliedAiConfig: BapiConfigObject = null;
+    // settles once the AI texts of the current config are applied; saves wait for it, as a
+    // headline or description only counts as a prompt after its result has arrived
+    private aiTextsApplied: Promise<void> = Promise.resolve();
     initialized: WritableSignal<boolean> = signal(false);
     private readonly persistConfigTrigger$: Subject<void> = new Subject<void>();
     rendering2Supported: WritableSignal<boolean> = signal(false);
@@ -324,6 +331,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     async persistConfig(): Promise<void> {
         this.updateInProgress.set(true);
         this.widgetInstance.updateInProgress.set(true);
+        await this.aiTextsApplied;
         // retrieve the individual widget config
         let baseConfig: BaseWidgetConfig = this.retrieveBaseWidgetConfig();
         let specificWidgetConfig: WidgetConfig = this.widgetInstance.retrieveWidgetConfig
@@ -377,90 +385,122 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
 
     /**
      * Updates the common properties of the widget (description, headline + mappings).
+     * Plain texts are applied right away, AI texts once generated; a failure is only logged.
      */
-    async updateCommonProperties(
+    updateCommonProperties(widgetConfig: WidgetConfig, aiConfig: BapiConfigObject): Promise<void> {
+        this.aiTextsApplied = this.applyCommonProperties(widgetConfig, aiConfig).catch(
+            (error: unknown): void => {
+                console.error(
+                    this.translate.instant('TOPIC_PAGE.WIDGET.GENERIC_WIDGET.ERROR_LOADING_WIDGET'),
+                    error,
+                );
+            },
+        );
+        return this.aiTextsApplied;
+    }
+
+    /**
+     * Applies the plain headline and description and generates those stored as prompts in parallel.
+     */
+    private async applyCommonProperties(
         widgetConfig: WidgetConfig,
         aiConfig: BapiConfigObject,
     ): Promise<void> {
+        this.appliedAiConfig = aiConfig;
         // reset the mappings
         this.headlineMapping = null;
         this.descriptionMapping = null;
-        // do not automatically set the global variables as those would be input to the header component
-        let headlineAiGeneratedUpdated: boolean = false;
-        let descriptionAiGeneratedUpdated: boolean = false;
-        // do not automatically set the global variables for the headline and description, as the prompts would be visible
-        let headlineSyncedWithPrompt: boolean = false;
-        let descriptionSyncedWithPrompt: boolean = false;
-        // in case an AI config is defined, execute the prompts and store the results
-        if (aiConfig && Object.keys(aiConfig).length && this.aiSupported()) {
-            if (aiConfig.headline) {
-                const config: NodeConfig = {
-                    type: 'node',
-                    nodeId: convertNodeRefIntoNodeId(this.nodeId || this.propagatedNodeId),
-                    configName: 'headline',
-                };
-                const promptResponse: CreateChatCompletionResponse =
-                    await this.aiHelperService.generateFromPrompt(
-                        config,
-                        this.topicPageHelperService.getSelectedVariables() || {},
-                        this.contextNodeId,
-                    );
-                const responseText: string = retrieveResultString(promptResponse);
-                const prompt: string = retrievePromptFromAiConfig(aiConfig, 'headline');
-                // make sure to sync both headline and prompt; outside of the editor a prompt
-                // without a result stays empty so that its raw text is never rendered
-                this.headline = !responseText && !this.editMode() ? '' : prompt;
-                headlineSyncedWithPrompt = true;
+        const generateWithAi: boolean =
+            !!aiConfig && Object.keys(aiConfig).length > 0 && this.aiSupported();
+        const headlineFromAi: boolean = generateWithAi && !!aiConfig.headline;
+        const descriptionFromAi: boolean = generateWithAi && !!aiConfig.description;
+        // outside of the editor the raw prompt is never rendered, so it stays empty until the result
+        // arrives; the config holds the whole state, so a text missing from it is empty
+        if (headlineFromAi) {
+            this.headline = this.editMode() ? retrievePromptFromAiConfig(aiConfig, 'headline') : '';
+        } else {
+            this.headline = widgetConfig.headline ?? '';
+        }
+        if (descriptionFromAi) {
+            this.description = this.editMode()
+                ? retrievePromptFromAiConfig(aiConfig, 'description')
+                : '';
+        } else {
+            this.description = widgetConfig.description ?? '';
+        }
+        this.headlineAiGenerated.set(false);
+        this.descriptionAiGenerated.set(false);
+        this.headlineLoading.set(headlineFromAi);
+        this.descriptionLoading.set(descriptionFromAi);
+        if (!generateWithAi) {
+            return;
+        }
+        if (this.widgetType === WIDGETS.MEDIA_RENDERING) {
+            this.widgetComponentRef.setInput('headline', this.headline);
+        }
+        await Promise.all([
+            headlineFromAi ? this.generateCommonText('headline', aiConfig) : null,
+            descriptionFromAi ? this.generateCommonText('description', aiConfig) : null,
+        ]);
+        if (aiConfig !== this.appliedAiConfig) {
+            return;
+        }
+        if (this.widgetType === WIDGETS.MEDIA_RENDERING) {
+            this.widgetComponentRef.setInput('headline', this.headline);
+        }
+        this.updateInProgress.set(false);
+        this.widgetInstance.updateInProgress.set(false);
+    }
+
+    /**
+     * Generates the headline or description from its stored prompt and applies the result,
+     * unless a newer config was applied in the meantime.
+     */
+    private async generateCommonText(
+        key: 'headline' | 'description',
+        aiConfig: BapiConfigObject,
+    ): Promise<void> {
+        const config: NodeConfig = {
+            type: 'node',
+            nodeId: convertNodeRefIntoNodeId(this.nodeId || this.propagatedNodeId),
+            configName: key,
+        };
+        try {
+            const promptResponse: CreateChatCompletionResponse =
+                await this.aiHelperService.generateFromPrompt(
+                    config,
+                    this.topicPageHelperService.getSelectedVariables() || {},
+                    this.contextNodeId,
+                );
+            if (aiConfig !== this.appliedAiConfig) {
+                return;
+            }
+            const responseText: string = retrieveResultString(promptResponse);
+            const prompt: string = retrievePromptFromAiConfig(aiConfig, key);
+            // outside of the editor a prompt without a result stays empty so that its raw text is
+            // never rendered
+            const text: string = !responseText && !this.editMode() ? '' : prompt;
+            if (key === 'headline') {
+                this.headline = text;
                 if (prompt && responseText) {
                     this.headlineMapping = new PromptToTextMapping(prompt, responseText);
                     this.headlineAiGenerated.set(true);
-                    headlineAiGeneratedUpdated = true;
                 }
-            }
-            if (aiConfig.description) {
-                const config: NodeConfig = {
-                    type: 'node',
-                    nodeId: convertNodeRefIntoNodeId(this.nodeId || this.propagatedNodeId),
-                    configName: 'description',
-                };
-                const promptResponse: CreateChatCompletionResponse =
-                    await this.aiHelperService.generateFromPrompt(
-                        config,
-                        this.topicPageHelperService.getSelectedVariables() || {},
-                        this.contextNodeId,
-                    );
-                const responseText: string = retrieveResultString(promptResponse);
-                const prompt: string = retrievePromptFromAiConfig(aiConfig, 'description');
-                // outside of the editor a prompt without a result stays empty so that its raw
-                // text is never rendered
-                this.description = !responseText && !this.editMode() ? '' : prompt;
-                descriptionSyncedWithPrompt = true;
+            } else {
+                this.description = text;
                 if (responseText) {
                     this.descriptionMapping = new PromptToTextMapping(prompt, responseText);
                     this.descriptionAiGenerated.set(true);
-                    descriptionAiGeneratedUpdated = true;
                 }
             }
-            if (this.widgetType === WIDGETS.MEDIA_RENDERING) {
-                this.widgetComponentRef.setInput('headline', this.headline);
+        } finally {
+            if (aiConfig === this.appliedAiConfig) {
+                if (key === 'headline') {
+                    this.headlineLoading.set(false);
+                } else {
+                    this.descriptionLoading.set(false);
+                }
             }
-            this.updateInProgress.set(false);
-            this.widgetInstance.updateInProgress.set(false);
-        }
-        // when the headline or description are not synced with the prompt, set them to the config
-        // value; the config holds the whole state, so a text missing from it is empty
-        if (!headlineSyncedWithPrompt) {
-            this.headline = widgetConfig.headline ?? '';
-        }
-        if (!descriptionSyncedWithPrompt) {
-            this.description = widgetConfig.description ?? '';
-        }
-        // when the headline or description were not AI-generated, reset the flag
-        if (!headlineAiGeneratedUpdated) {
-            this.headlineAiGenerated.set(false);
-        }
-        if (!descriptionAiGeneratedUpdated) {
-            this.descriptionAiGenerated.set(false);
         }
     }
 
@@ -842,7 +882,8 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
                         await result;
                     }
                 }
-                await this.updateCommonProperties(widgetConfig, aiConfig);
+                // AI texts are filled in later, they do not hold back the widget content
+                void this.updateCommonProperties(widgetConfig, aiConfig);
             }
         } finally {
             // the widget always has to leave its loading state, even if applying the config failed

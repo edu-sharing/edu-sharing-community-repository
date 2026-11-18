@@ -94,8 +94,8 @@
       class="suggestion-active-filter"
       [class.suggestion-active-filter-separator]="!facets.isEmpty()"
     >
-      <label #label>{{ 'SEARCH.ACTIVE_FILTER' | translate }}</label>
-      <mat-chip-listbox [attr.aria-labelledby]="label" #chipList>
+      <label [id]="activeFiltersLabelId">{{ 'SEARCH.ACTIVE_FILTER' | translate }}</label>
+      <mat-chip-listbox [attr.aria-labelledby]="activeFiltersLabelId" #chipList>
         @if (filters$ | async; as filtersDict) {
         <div class="chips-wrapper">
           @for (filters of filtersDict | keyvalue; track filters) {
@@ -104,16 +104,28 @@
                 keyboard interaction to work. -->
           @if ((categories$ | async)?.includes(filters.key)) { @for (filterValue of filters.value;
           track filterValue) {
+          <!-- Each filter is a single keyboard stop: the option itself removes the filter on Enter
+               or Delete (announced via aria-description), while the trailing "x" is a mouse-only
+               shortcut that is neither focusable nor exposed to assistive technology. -->
           <mat-chip-option
+            #filterChip
             [selectable]="false"
             class="filter-chip-{{ filters.key | propertySlug }}"
             [removable]="true"
+            [aria-description]="'SEARCH.REMOVE_FILTER_HINT' | translate"
+            (keydown.enter)="filterChip.remove()"
             (removed)="onRemoveFilter(filters.key, filterValue)"
             [matTooltip]="getTooltip(filters.key, filterValue)"
             matTooltipPosition="above"
           >
             {{ filterValue.label }}
-            <mat-icon matChipRemove class="remove-chip">cancel</mat-icon>
+            <i
+              matChipTrailingIcon
+              esIcon="cancel"
+              [aria]="false"
+              class="remove-chip"
+              (click)="filterChip.remove()"
+            ></i>
           </mat-chip-option>
           } } }
         </div>

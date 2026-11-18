@@ -97,6 +97,11 @@
               (tabType === TabType.SEARCH ? 'SEARCH.PLACEHOLDER' : 'COLLECTIONS.PLACEHOLDER')
               | translate
           "
+          [attr.aria-label]="
+            i18nPrefix +
+              (tabType === TabType.SEARCH ? 'SEARCH.PLACEHOLDER' : 'COLLECTIONS.PLACEHOLDER')
+              | translate
+          "
           [(ngModel)]="searchText"
           [disabled]="
             (tabType === TabType.SEARCH && dataSourceSearch.isLoading) ||

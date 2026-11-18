@@ -32,15 +32,11 @@ import {
 } from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
-    ColumnType,
     DefaultGroups,
     ElementType,
-    InteractionType,
     LocalEventsService,
-    MdsHelperService,
     MdsWidgetComponent,
     NodeDataSource,
-    NodeEntriesDisplayType,
     OptionItem,
     OptionsHelperDataService,
     Scope,
@@ -68,7 +64,6 @@ import {
     RestIamService,
     RestNetworkService,
     RestNodeService,
-    RestSearchService,
     RestToolService,
     UIService,
 } from '../../core-module/core.module';
@@ -120,10 +115,8 @@ export class RenderLegacyPageComponent implements EventListener, OnInit, OnDestr
     private connectors = inject(RestConnectorsService);
     private iam = inject(RestIamService);
     private mdsService = inject(MdsService);
-    private mdsHelperService = inject(MdsHelperService);
     private nodeApi = inject(RestNodeService);
     private nodeService = inject(NodeService);
-    private searchApi = inject(RestSearchService);
     private toolService = inject(RestToolService);
     private injector = inject(Injector);
     private cardServcie = inject(CardService);
@@ -148,8 +141,6 @@ export class RenderLegacyPageComponent implements EventListener, OnInit, OnDestr
     private temporaryStorageService = inject(TemporaryStorageService);
     private localEvents = inject(LocalEventsService);
 
-    readonly DisplayType = NodeEntriesDisplayType;
-    readonly InteractionType = InteractionType;
     specialTemplate: SpecialRenderTemplate;
     @Input() set node(node: Node | string) {
         const id = (node as Node).ref ? (node as Node).ref.id : (node as string);
@@ -271,7 +262,6 @@ export class RenderLegacyPageComponent implements EventListener, OnInit, OnDestr
     canScrollLeft = false;
     canScrollRight = false;
     private queryParams: Params;
-    public similarNodes = new NodeDataSource<Node>();
     mds = new BehaviorSubject<MdsDefinition>(null);
     isDestroyed = false;
     private readonly destroyed$ = new Subject<void>();
@@ -283,7 +273,6 @@ export class RenderLegacyPageComponent implements EventListener, OnInit, OnDestr
     _fromHomeRepository: boolean;
     _nodeId: string;
     @Output() closePage = new EventEmitter<void>();
-    similarNodeColumns: ColumnType;
 
     @HostListener('window:beforeunload', ['$event'])
     beforeunloadHandler(event: any) {
@@ -578,10 +567,6 @@ export class RenderLegacyPageComponent implements EventListener, OnInit, OnDestr
                             this.toast.error(e);
                         }
                         this.mds.pipe(filter((set) => !!set)).subscribe((set) => {
-                            this.similarNodeColumns = this.mdsHelperService.getColumns(
-                                set,
-                                'search',
-                            );
                             void this.linkSearchableWidgets();
                         });
                         this.mdsService
@@ -601,7 +586,6 @@ export class RenderLegacyPageComponent implements EventListener, OnInit, OnDestr
                             void this.handleProposal();
                             this.renderHelper.doAll(this._node);
                             this.loadNode();
-                            // this.loadSimilarNodes();
                             void this.linkSearchableWidgets();
                             this.specialTemplate = null;
                             if (this.nodeHelper.isNodeRevoked(this._node)) {
@@ -833,14 +817,6 @@ export class RenderLegacyPageComponent implements EventListener, OnInit, OnDestr
     public switchNode(event: any) {
         this.uiService.scrollSmooth();
         this.node = event.node;
-    }
-
-    private loadSimilarNodes() {
-        this.similarNodes.isLoading = true;
-        this.searchApi.searchFingerprint(this._nodeId).subscribe((data: NodeList) => {
-            this.similarNodes.isLoading = false;
-            this.similarNodes.setData(data.nodes, data.pagination);
-        });
     }
 
     private async linkSearchableWidgets() {

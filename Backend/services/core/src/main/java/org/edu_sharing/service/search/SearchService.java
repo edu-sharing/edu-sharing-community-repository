@@ -102,8 +102,6 @@ public interface SearchService {
 		return null;
 	}
 
-	SearchResultNodeRef searchFingerPrint(String nodeId);
-
 	/**
 	 * @deprecated Replaced by the managed contributor registry: use
 	 * {@link org.edu_sharing.service.contributor.ContributorService#search(String, ContributorKind, int)}

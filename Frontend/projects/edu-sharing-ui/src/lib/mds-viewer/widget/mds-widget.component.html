@@ -86,7 +86,11 @@
   <ng-template #arrayEntryContent let-entry="entry">
     @if (entry.icon) {
     <!-- mirrors the backend MetadataTemplateRenderer: icon + caption + description -->
+    @if (isIconImage(entry.icon)) {
     <img class="array-entry-image" [src]="getIconUrl(entry.icon)" alt="" />
+    } @else {
+    <i class="array-entry-icon" [esIcon]="entry.icon" [aria]="false"></i>
+    }
     <span class="array-entry-value-group">
       <span class="array-entry-caption">{{ entry.caption }}</span>
       @if (entry.description) {

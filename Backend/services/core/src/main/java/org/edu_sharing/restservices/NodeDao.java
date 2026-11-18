@@ -514,15 +514,6 @@ public class NodeDao {
         return removed;
     }
 
-    public static NodeSearch searchFingerprint(RepositoryDao repoDao, String nodeId, Filter filter) throws DAOException {
-        SearchService searchService = SearchServiceFactory.getInstance().getService(repoDao.getId());
-        try {
-            return transform(repoDao, searchService.searchFingerPrint(nodeId), filter, null);
-        } catch (Throwable e) {
-            throw DAOException.mapping(e);
-        }
-    }
-
     public static NodeSearch getMetadata(RepositoryDao repoDao, List<String> nodeIds, Filter filter) throws DAOException {
         SearchService searchService = SearchServiceFactory.getInstance().getService(repoDao.getId());
         try {

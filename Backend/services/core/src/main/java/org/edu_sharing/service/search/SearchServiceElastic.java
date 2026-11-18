@@ -28,7 +28,6 @@ import net.sourceforge.cardme.vcard.VCard;
 import net.sourceforge.cardme.vcard.types.ExtendedType;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
-import org.alfresco.repo.search.impl.solr.ESSearchParameters;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.PermissionReference;
 import org.alfresco.repo.security.permissions.impl.model.PermissionModel;
@@ -36,8 +35,6 @@ import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.cmr.search.ResultSet;
-import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.cmr.security.AuthorityService;
 import org.alfresco.service.cmr.security.AuthorityType;
@@ -101,7 +98,6 @@ import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.service.search.model.*;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
-import org.edu_sharing.service.util.AlfrescoDaoHelper;
 import org.edu_sharing.util.CheckedFunction;
 import org.elasticsearch.client.HttpAsyncResponseConsumerFactory;
 import org.elasticsearch.client.Request;
@@ -2204,31 +2200,6 @@ public class SearchServiceElastic implements SearchService {
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @Override
-    public SearchResultNodeRef searchFingerPrint(String nodeId) {
-        int skipCount = 0;
-        int maxItems = 100;
-        StoreRef storeRef = new StoreRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(), StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier());
-
-        SearchParameters searchParameters = new ESSearchParameters();
-        searchParameters.addStore(storeRef);
-
-        searchParameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_FTS_ALFRESCO);
-        searchParameters.setQuery("FINGERPRINT:" + nodeId + "_30_90 AND NOT ID:\"workspace://SpacesStore/" + nodeId + "\"");
-        searchParameters.setSkipCount(skipCount);
-        searchParameters.setMaxItems(maxItems);
-
-        ResultSet resultSet = searchService.query(searchParameters);
-
-        SearchResultNodeRef sr = new SearchResultNodeRef();
-        sr.setData(AlfrescoDaoHelper.unmarshall(resultSet.getNodeRefs(), ApplicationInfoList.getHomeRepository().getAppId()));
-        sr.setStartIDX(skipCount);
-        sr.setNodeCount(maxItems);
-        sr.setNodeCount((int) resultSet.getNumberFound());
-
-        return sr;
     }
 
     @Override

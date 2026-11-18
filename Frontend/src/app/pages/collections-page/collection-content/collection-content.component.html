@@ -68,6 +68,18 @@
         </ng-template>
       </es-node-entries-wrapper>
     </div>
+    @if (!isRootLevel && customTemplates.value.belowSubcollections) {
+    <ng-container
+      *ngTemplateOutlet="
+        customTemplates.value.belowSubcollections;
+        context: {
+          $implicit: collection,
+          createAllowed: createAllowed(),
+          empty: dataSourceCollections.isEmpty() && !dataSourceCollections.isLoading
+        }
+      "
+    ></ng-container>
+    }
   </section>
   } @if (searchTruncated()) {
   <p class="search-truncated" role="status">{{ 'COLLECTIONS.SEARCH_TRUNCATED' | translate }}</p>

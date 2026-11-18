@@ -78,7 +78,8 @@
     },
     "AI": {
       "GENERATED": "AI-generated",
-      "INVALID_PROMPT": "Invalid prompt"
+      "INVALID_PROMPT": "Invalid prompt",
+      "TEXT_LOADING": "Text is being generated ..."
     },
     "WIDGET": {
       "SUB_HEADING_LABEL_OPTIONAL": "Subheading (optional)",

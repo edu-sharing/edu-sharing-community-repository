@@ -53,8 +53,6 @@ data:
   REPOSITORY_SEARCH_ELASTIC_INDEX_HOST: {{ .Values.config.search.elastic.host | quote }}
   REPOSITORY_SEARCH_ELASTIC_INDEX_PORT: {{ .Values.config.search.elastic.port | quote }}
   {{- end }}
-  REPOSITORY_SEARCH_SOLR_HOST: {{ .Values.config.search.solr.host | quote }}
-  REPOSITORY_SEARCH_SOLR_PORT: {{ .Values.config.search.solr.port | quote }}
   REPOSITORY_SERVICE_HAZELCAST_HEARTBEAT_FAILUREDETECTOR_TYPE: {{ .Values.config.hazelcast.heartbeat.failuredetector.type | quote }}
   REPOSITORY_SERVICE_HAZELCAST_HEARTBEAT_INTERVAL_SECONDS: {{ .Values.config.hazelcast.heartbeat.interval.seconds | quote }}
   REPOSITORY_SERVICE_HAZELCAST_MAX_NO_HEARTBEAT_SECONDS: {{ .Values.config.hazelcast.max.heartbeat.seconds | quote }}

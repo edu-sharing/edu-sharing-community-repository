@@ -76,6 +76,7 @@
   "LOGOUT": "Abmelden",
   "INVALID_OPERATION": "Diese Funktion wird leider nicht unterstützt.",
   "SORT_BY": "Sortieren nach",
+  "SORT_BY_COLUMN": "Nach dieser Spalte sortieren",
   "ASCENDING": "aufsteigend",
   "DESCENDING": "absteigend",
   "SELECTED": "ausgewählt",
@@ -227,7 +228,7 @@
   "CLICKTOREMOVE": "Klicken zum Entfernen",
   "NO_PERMISSIONS_FOR_SCOPE": "Keine Berechtigungen, um diesen Bereich anzuzeigen.",
   "DATE_SELECT_YEAR": "Jahr wählen",
-  "SEARCH_CLEAR": "Löschen",
+  "SEARCH_CLEAR": "Sucheingabe löschen",
   "TOGGLE_SEARCH_FILTERS": "Suchfilter ein- und ausblenden",
   "DATE_CLEAR": "Löschen",
   "USER_TUTORIAL_HEADING": "Ihr Profil",
@@ -588,6 +589,7 @@
     "DONE": "Vielen Dank für Ihr Feedback.",
     "EMAIL": "Ihre E-Mail-Adresse",
     "EMAIL_PLACEHOLDER": "jemand@beispiel.de",
+    "EMAIL_FROM_PROFILE": "Aus dem Profil übernommen",
     "EMAIL_REQUIRED": "Bitte eine gültige E-Mail-Adresse angeben"
   },
   "NODE_REPORT": {
@@ -598,6 +600,7 @@
     "COMMENT_PLACEHOLDER": "Details angeben...",
     "EMAIL": "Ihre E-Mail-Adresse",
     "EMAIL_PLACEHOLDER": "jemand@beispiel.de",
+    "EMAIL_FROM_PROFILE": "Aus dem Profil übernommen",
     "EMAIL_REQUIRED": "Bitte eine gültige E-Mail-Adresse angeben",
     "REASON": "Art des Problems",
     "REASON_REQUIRED": "Bitte wählen Sie aus, welches Problem besteht",
@@ -1768,7 +1771,7 @@
     "aboutme": "Eigenes Profil",
     "documentation": "Zur Dokumentation",
     "OPTIONS_FOR": "Aktionen für {{element}}",
-    "ADD_ENTRY": "Shorcut Kachel hinzufügen"
+    "ADD_ENTRY": "Schnellzugriff Kachel hinzufügen"
   },
   "DASHBOARD_SWIMLANE": {
     "EXPAND": "{{ element }} ausklappen",

@@ -9,6 +9,22 @@ export interface CollectionsPageCustomTemplates {
     belowTabs?: TemplateRef<unknown>;
     /** Replaces the breadcrumbs inside the collection's header bar. */
     breadcrumbs?: TemplateRef<unknown>;
+    /**
+     * Shown directly below the subcollections of a (non root level) collection.
+     */
+    belowSubcollections?: TemplateRef<CollectionsPageSubcollectionsContext>;
+}
+
+/**
+ * Template context of the `belowSubcollections` custom template.
+ */
+export interface CollectionsPageSubcollectionsContext {
+    /** the current collection */
+    $implicit: Node;
+    /** whether the current user may create subcollections */
+    createAllowed: boolean;
+    /** whether the collection has no subcollections (false while loading) */
+    empty: boolean;
 }
 
 /**

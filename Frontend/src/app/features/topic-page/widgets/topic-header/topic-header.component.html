@@ -33,7 +33,9 @@
       <h1 class="mat-heading-1 topic-header-title" [esTitle]="topic || null">
         <span [innerHTML]="topic | highlightSearch : searchInput()"></span>
       </h1>
-      @if (collectionDescription || editMode) {
+      @if (collectionDescriptionLoading()) {
+      <es-ai-text-placeholder></es-ai-text-placeholder>
+      } @else if (collectionDescription || editMode) {
       <es-editable-text
         [aiGenerated]="aiGeneratedDescription()"
         [applyTextareaPadding]="false"
@@ -47,7 +49,7 @@
         [(text)]="collectionDescription"
         (textChange)="onCollectionDescriptionChanged(collectionDescription)"
       ></es-editable-text>
-      } @if (description || editMode) {
+      } @if (description || editMode || descriptionLoading()) {
       <h2 class="mat-heading-3 font-bold">
         <i esIcon="edu-lightbulb" class="important-header-icon"></i>
         <span
@@ -56,7 +58,9 @@
           "
         ></span>
       </h2>
-      } @if (description || editMode) {
+      } @if (descriptionLoading()) {
+      <es-ai-text-placeholder></es-ai-text-placeholder>
+      } @else if (description || editMode) {
       <es-editable-text
         [aiGenerated]="aiGeneratedText()"
         [applyTextareaPadding]="false"

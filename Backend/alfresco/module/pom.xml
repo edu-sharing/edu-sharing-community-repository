@@ -45,8 +45,6 @@
                     <include name="alfresco/mimetype/openoffice-document-formats.xml"/>
                     <include name="net/sf/jooreports/converter/DocumentFamily.class"/>
                     <include name="org/alfresco/repo/search/impl/solr/ESSearchParameters.class"/>
-                    <include name="org/alfresco/repo/search/impl/solr/SolrJSONResultSet.class"/>
-                    <include name="org/alfresco/repo/search/impl/solr/SolrQueryHTTPClient.class"/>
                     <include name="org/alfresco/repo/web/scripts/solr/NodesMetaDataGet.class"/>
                     <include name="org/alfresco/transform/registry/TransformRegistryHelper.class"/>
                   </fileset>
@@ -384,6 +382,13 @@
     <dependency>
       <groupId>org.apache.cxf</groupId>
       <artifactId>cxf-rt-frontend-jaxws</artifactId>
+      <exclusions>
+        <!-- angus-mail 2.x needs jakarta.mail-api >= 2.1, but alfresco ships com.sun.mail:jakarta.mail 2.0.2 -->
+        <exclusion>
+          <groupId>org.eclipse.angus</groupId>
+          <artifactId>angus-mail</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>

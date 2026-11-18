@@ -38,14 +38,6 @@
       5.4.5-5
     </docker.edu_sharing.community.common.alfresco.transform.core.aio.tag>
 
-    <docker.edu_sharing.community.common.alfresco.search.service.name>
-      edu_sharing-community-common-docker-alfresco-search-service
-    </docker.edu_sharing.community.common.alfresco.search.service.name>
-
-    <docker.edu_sharing.community.common.alfresco.search.service.tag>
-      2.0.10-5
-    </docker.edu_sharing.community.common.alfresco.search.service.tag>
-
     <docker.edu_sharing.community.common.alfresco.share.name>
       edu_sharing-community-common-docker-alfresco-share
     </docker.edu_sharing.community.common.alfresco.share.name>

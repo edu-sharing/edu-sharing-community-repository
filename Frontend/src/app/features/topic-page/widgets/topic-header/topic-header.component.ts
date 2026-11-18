@@ -52,6 +52,7 @@ import {
     retrieveNodeId,
     retrieveWidgetConfigFromNode,
 } from '../../shared/utils/template-util';
+import { AiTextPlaceholderComponent } from '../shared/ai-text-placeholder/ai-text-placeholder.component';
 import { ColorPickerComponent } from '../shared/color-picker/color-picker.component';
 import { EditableTextComponent } from '../shared/editable-text/editable-text.component';
 import { ImageWrapperComponent } from '../shared/image-wrapper/image-wrapper.component';
@@ -60,6 +61,7 @@ import { ImageWrapperComponent } from '../shared/image-wrapper/image-wrapper.com
     selector: 'es-topic-header',
     encapsulation: ViewEncapsulation.Emulated,
     imports: [
+        AiTextPlaceholderComponent,
         EduSharingUiCommonModule,
         ColorPickerComponent,
         EditableTextComponent,
@@ -93,6 +95,7 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
     private _collectionNode: Node = null;
     @Input() set collectionNode(value: Node) {
         this._collectionNode = value;
+        this.collectionDescriptionLoading.set(false);
         this.collectionDescription = value?.properties?.[RestConstants.CM_DESCRIPTION]?.[0];
         // a stored description was written by an editor, only a missing one is generated
         this.aiGeneratedDescription.set(false);
@@ -144,8 +147,10 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
     });
     private readonly customExtensionElement = viewChild<ElementRef<HTMLElement>>('customExtension');
     private customExtensionRef: ComponentRef<HeaderExtensionInterface> | null = null;
+    collectionDescriptionLoading: WritableSignal<boolean> = signal(false);
     // description is used for the "description" of importance (stored in a "header" widget node)
     description: string = this.DEFAULT_DESCRIPTION;
+    descriptionLoading: WritableSignal<boolean> = signal(false);
     initialized: WritableSignal<boolean> = signal(false);
     // the page is creating the config node this header asked for
     private nodeCreationPending: boolean = false;
@@ -245,6 +250,7 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
         this.aiGeneratedImage = this.aiSupported();
         this.aiGeneratedText.set(false);
         this.initialized.set(false);
+        this.descriptionLoading.set(false);
         this.description = this.DEFAULT_DESCRIPTION;
         this.textBackgroundColor = this.DEFAULT_HEADER_TEXT_BG_COLOR;
         this.userUploadedNodeId = null;
@@ -329,15 +335,15 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
             colorOnly = !this.nodeId && !!this.propagatedNodeId;
         }
         this.availableNodeId = this.nodeId && node ? this.nodeId : '';
-        // read config from this JSON string and generates an AI text if no description is found
+        // read config from this JSON string; a missing description is generated in the background
         const aiNodeId: string = getNodeOrDefaultNodeId(
             this.defaultTextNodeId,
             this.globalWidgetConfigService.defaultTopicHeaderTextWidgetNodeId,
         );
-        await this.readConfigFromJson(configJson, aiNodeId, colorOnly);
+        this.readConfigFromJson(configJson, aiNodeId, colorOnly);
         await this.loadEditorialMembers(colorOnly ? undefined : JSON.parse(configJson));
         this.storedConfig = JSON.stringify(this.retrieveWidgetConfig());
-        // set the component to be initialized (further processing is done in the child component)
+        // the header is shown right away, AI texts and the image are filled in once available
         this.initialized.set(true);
     }
 
@@ -487,16 +493,19 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
 
     /**
      * Helper function to generate the description of a collection.
+     * The header outlives a topic switch, so a result only applies while its collection is shown.
      */
     private async generateCollectionDescription(contextNodeId: string): Promise<void> {
-        if (!(await this.aiHelperService.hasAISupport())) {
-            return;
-        }
+        const collectionNode: Node = this._collectionNode;
+        this.collectionDescriptionLoading.set(true);
         const mdsConfigId: string = getNodeOrDefaultNodeId(
             this.defaultDescriptionNodeId,
             this.globalWidgetConfigService.defaultTopicHeaderDescriptionWidgetNodeId,
         );
         try {
+            if (!(await this.aiHelperService.hasAISupport())) {
+                return;
+            }
             const promptResponse: CreateChatCompletionResponse =
                 await this.aiHelperService.generateFromPrompt(
                     mdsConfigId,
@@ -504,23 +513,27 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
                     this.contextNodeId || contextNodeId,
                 );
             const responseText: string = retrieveResultString(promptResponse) ?? '';
-            if (responseText !== '') {
+            if (responseText !== '' && collectionNode === this._collectionNode) {
                 this.collectionDescription = responseText;
                 this.aiGeneratedDescription.set(true);
             }
         } catch {
             // AI generation failed; fall back to no collection description
+        } finally {
+            if (collectionNode === this._collectionNode) {
+                this.collectionDescriptionLoading.set(false);
+            }
         }
     }
 
     /**
      * Helper function to read the config from a given string.
      */
-    private async readConfigFromJson(
+    private readConfigFromJson(
         configString: string,
         nodeId: string,
         colorOnly: boolean = false,
-    ): Promise<void> {
+    ): void {
         const config: TopicHeaderConfig = JSON.parse(configString);
         // check whether a text background color is explicitly set (taken over in all modes)
         if (
@@ -532,7 +545,7 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
         // colorOnly (propagated header): only the color is taken over; image and upload fall back
         // to their defaults and the description is (re)generated by AI as the default
         if (colorOnly) {
-            await this.generateDescription(nodeId);
+            void this.generateDescription(nodeId);
             return;
         }
         // this is the case if a widgetNode for the header exists
@@ -540,7 +553,7 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
             this.description = config.description;
             this.aiGeneratedText.set(false);
         } else {
-            await this.generateDescription(nodeId);
+            void this.generateDescription(nodeId);
         }
         // check whether an AI-generated image is explicitly set to false
         if (config.aiGeneratedImage === false) {
@@ -554,21 +567,28 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
 
     /**
      * Helper function to generate the description text via AI.
+     * It only fills an empty description of the topic it was generated for.
      */
     private async generateDescription(nodeId: string): Promise<void> {
-        if (!(await this.aiHelperService.hasAISupport())) {
-            return;
-        }
+        const contextNodeId: string = this.contextNodeId;
+        this.descriptionLoading.set(true);
         try {
+            if (!(await this.aiHelperService.hasAISupport())) {
+                return;
+            }
             const promptResponse: CreateChatCompletionResponse =
-                await this.aiHelperService.generateFromPrompt(nodeId, {}, this.contextNodeId);
+                await this.aiHelperService.generateFromPrompt(nodeId, {}, contextNodeId);
             const responseText: string = retrieveResultString(promptResponse) ?? '';
-            if (responseText !== '') {
+            if (responseText !== '' && contextNodeId === this.contextNodeId && !this.description) {
                 this.description = responseText;
                 this.aiGeneratedText.set(true);
             }
         } catch {
             // AI generation failed; fall back to no description text
+        } finally {
+            if (contextNodeId === this.contextNodeId) {
+                this.descriptionLoading.set(false);
+            }
         }
     }
 

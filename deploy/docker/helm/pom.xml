@@ -121,7 +121,6 @@
 
   <modules>
     <module>frontend-server</module>
-    <module>search-solr</module>
     <module>service</module>
     <module>transform-aio</module>
     <module>transform-es</module>

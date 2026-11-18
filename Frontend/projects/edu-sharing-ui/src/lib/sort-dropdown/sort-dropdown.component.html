@@ -16,9 +16,9 @@
     }}</span>
     } @if (sortBy === item.name && item.name !== 'ccm:collection_ordered_position') { @if
     (sortAscending) {
-    <i class="material-icons" [altText]="'ASCENDING' | translate"> arrow_upward </i>
+    <i esIcon="arrow_upward" [altText]="'ASCENDING' | translate"></i>
     } @if (!sortAscending) {
-    <i class="material-icons" [altText]="'DESCENDING' | translate"> arrow_downward </i>
+    <i esIcon="arrow_downward" [altText]="'DESCENDING' | translate"></i>
     }
     <span class="cdk-visually-hidden">{{ 'SELECTED' | translate }}</span>
     }

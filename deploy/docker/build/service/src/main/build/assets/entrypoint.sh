@@ -102,9 +102,6 @@ repository_database_prot="${REPOSITORY_DATABASE_PROT:-"postgresql"}"
 repository_database_user="${REPOSITORY_DATABASE_USER:-repository}"
 repository_database_jdbc="jdbc:${repository_database_prot}://${repository_database_host}:${repository_database_port}/${repository_database_name}${repository_database_opts}"
 
-repository_search_solr_host="${REPOSITORY_SEARCH_SOLR_HOST:-repository-search-solr}"
-repository_search_solr_port="${REPOSITORY_SEARCH_SOLR_PORT:-8080}"
-
 repository_transform_host="${REPOSITORY_TRANSFORM_HOST:-}"
 repository_transform_port="${REPOSITORY_TRANSFORM_PORT:-}"
 repository_transform_aio_host="${REPOSITORY_TRANSFORM_AIO_HOST:-}"
@@ -417,12 +414,11 @@ grep -q '^[#]*\s*share\.host=' "${alfProps}" || echo "share.host=${my_host_exter
 sed -i -r 's|^[#]*\s*share\.port=.*|share.port='"${my_port_external}"'|' "${alfProps}"
 grep -q '^[#]*\s*share\.port=' "${alfProps}" || echo "share.port=${my_port_external}" >>"${alfProps}"
 
-sed -i -r 's|^[#]*\s*solr\.host=.*|solr.host='"${repository_search_solr_host}"'|' "${alfProps}"
-grep -q '^[#]*\s*solr\.host=' "${alfProps}" || echo "solr.host=${repository_search_solr_host}" >>"${alfProps}"
+# apache solr is no longer part of the deployment: remove stale connection settings that persist in existing config volumes
+sed -i -r '/^\s*solr\.(host|port)=/d' "${alfProps}"
 
-sed -i -r 's|^[#]*\s*solr\.port=.*|solr.port='"${repository_search_solr_port}"'|' "${alfProps}"
-grep -q '^[#]*\s*solr\.port=' "${alfProps}" || echo "solr.port=${repository_search_solr_port}" >>"${alfProps}"
-
+# the elastic tracker uses the alfresco solr tracking webscripts without credentials, this requires secureComms=none
+# (alfresco default is https, which makes the webscripts answer with 403 Forbidden)
 sed -i -r 's|^[#]*\s*solr\.secureComms=.*|solr.secureComms=none|' "${alfProps}"
 grep -q '^[#]*\s*solr\.secureComms=' "${alfProps}" || echo "solr.secureComms=none" >>"${alfProps}"
 
@@ -461,6 +457,10 @@ my_origin="${my_prot_external}://${my_host_external}"
   my_origin="${my_origin}:${my_port_external}"
 }
 
+# edit a private copy and move it into place at the end (see below)
+homePropTmp="$(mktemp "${homeProp}.XXXXXX")"
+cp -p "${homeProp}" "${homePropTmp}"
+
 xmlstarlet ed -L \
   -u '/properties/entry[@key="appid"]' -v "${my_home_appid}" \
   -u '/properties/entry[@key="authenticationwebservice"]' -v "${my_auth_external}" \
@@ -471,25 +471,25 @@ xmlstarlet ed -L \
   -u '/properties/entry[@key="password"]' -v "${my_admin_pass}" \
   -u '/properties/entry[@key="port"]' -v "${my_port_internal}" \
   -u '/properties/entry[@key="allow_origin"]' -v "${my_origin},http://localhost:54361${my_allow_origin}" \
-  ${homeProp}
+  ${homePropTmp}
 
 xmlstarlet ed -L \
   -d '/properties/entry[@key="cookie_attributes"]' \
-  ${homeProp}
+  ${homePropTmp}
 
 [[ -n "${my_home_cookie_attr}" ]] && {
   xmlstarlet ed -L \
     -s '/properties' -t elem -n "entry" -v "${my_home_cookie_attr}" \
     --var entry '$prev' \
     -i '$entry' -t attr -n "key" -v "cookie_attributes" \
-    ${homeProp}
+    ${homePropTmp}
 }
 
 # custom_html_headers of the home application is gone, the value lives in lightbend
 # angular.customHtmlHeaders now - drop a leftover entry of an older image
 xmlstarlet ed -L \
   -d '/properties/entry[@key="custom_html_headers"]' \
-  ${homeProp}
+  ${homePropTmp}
 
 [[ -n "${my_home_auth}" ]] && {
 
@@ -543,54 +543,61 @@ xmlstarlet ed -L \
 
 xmlstarlet ed -L \
   -d '/properties/entry[@key="remote_provider"]' \
-  ${homeProp}
+  ${homePropTmp}
 
 [[ -n "${my_home_provider}" ]] && {
   xmlstarlet ed -L \
     -s '/properties' -t elem -n "entry" -v "${my_home_provider}" \
     --var entry '$prev' \
     -i '$entry' -t attr -n "key" -v "remote_provider" \
-    ${homeProp}
+    ${homePropTmp}
 }
 
 xmlstarlet ed -L \
   -d '/properties/entry[@key="url_dynamic"]' \
-  ${homeProp}
+  ${homePropTmp}
 
 [[ -n "${my_home_url_dynamic}" ]] && {
 	xmlstarlet ed -L \
 		-s '/properties' -t elem -n "entry" -v "${my_home_url_dynamic}" \
 		--var entry '$prev' \
 		-i '$entry' -t attr -n "key" -v "url_dynamic" \
-		${homeProp}
+		${homePropTmp}
 }
+
+# atomic replace: all pods share config/cluster, concurrent in-place writes corrupt the file
+mv -f "${homePropTmp}" "${homeProp}"
+
+# edit a private copy and move it into place at the end (see below)
+eduSConfTmp="$(mktemp "${eduSConf}.XXXXXX")"
+cp -p "${eduSConf}" "${eduSConfTmp}"
 
 if [[ -n ${my_reverse_proxy} ]]; then
   if [[ ${my_reverse_proxy} == "nginx" ]]; then
-    hocon -f ${eduSConf} set "repository.request.proxyHeader.ip" 'x-real-ip'
-    hocon -f ${eduSConf} set "repository.request.proxyHeader.host" 'x-forwarded-host'
+    hocon -f ${eduSConfTmp} set "repository.request.proxyHeader.ip" 'x-real-ip'
+    hocon -f ${eduSConfTmp} set "repository.request.proxyHeader.host" 'x-forwarded-host'
   elif [[ ${my_reverse_proxy} == "apache2" ]]; then
-    hocon -f ${eduSConf} set "repository.request.proxyHeader.ip" 'X-Forwarded-For'
-    hocon -f ${eduSConf} set "repository.request.proxyHeader.host" 'X-Forwarded-Host'
+    hocon -f ${eduSConfTmp} set "repository.request.proxyHeader.ip" 'X-Forwarded-For'
+    hocon -f ${eduSConfTmp} set "repository.request.proxyHeader.host" 'X-Forwarded-Host'
   else
-    [[ $(hocon -f ${eduSConf} get "repository.request.proxyHeader.ip" 2>/dev/null) ]] && {
-      hocon -f ${eduSConf} unset "repository.request.proxyHeader.ip"
+    [[ $(hocon -f ${eduSConfTmp} get "repository.request.proxyHeader.ip" 2>/dev/null) ]] && {
+      hocon -f ${eduSConfTmp} unset "repository.request.proxyHeader.ip"
     }
-    [[ $(hocon -f ${eduSConf} get "repository.request.proxyHeader.host" 2>/dev/null) ]] && {
-      hocon -f ${eduSConf} unset "repository.request.proxyHeader.host"
+    [[ $(hocon -f ${eduSConfTmp} get "repository.request.proxyHeader.host" 2>/dev/null) ]] && {
+      hocon -f ${eduSConfTmp} unset "repository.request.proxyHeader.host"
     }
   fi
 else
-  [[ $(hocon -f ${eduSConf} get "repository.request.proxyHeader.ip" 2>/dev/null) ]] && {
-    hocon -f ${eduSConf} unset "repository.request.proxyHeader.ip"
+  [[ $(hocon -f ${eduSConfTmp} get "repository.request.proxyHeader.ip" 2>/dev/null) ]] && {
+    hocon -f ${eduSConfTmp} unset "repository.request.proxyHeader.ip"
   }
-  [[ $(hocon -f ${eduSConf} get "repository.request.proxyHeader.host" 2>/dev/null) ]] && {
-    hocon -f ${eduSConf} unset "repository.request.proxyHeader.host"
+  [[ $(hocon -f ${eduSConfTmp} get "repository.request.proxyHeader.host" 2>/dev/null) ]] && {
+    hocon -f ${eduSConfTmp} unset "repository.request.proxyHeader.host"
   }
 fi
 
-[[ $(hocon -f ${eduSConf} get "repository.mail.from" 2>/dev/null) ]] && {
-  hocon -f ${eduSConf} unset "repository.mail.from"
+[[ $(hocon -f ${eduSConfTmp} get "repository.mail.from" 2>/dev/null) ]] && {
+  hocon -f ${eduSConfTmp} unset "repository.mail.from"
 }
 # html snippet for the head of every page - a triple quoted string, so quotes and
 # line breaks of the html survive
@@ -603,77 +610,77 @@ else
 fi
 
 [[ -n "${my_mail_from}" ]] && {
-  hocon -f ${eduSConf} set "repository.mail.from" '"'"${my_mail_from}"'"'
+  hocon -f ${eduSConfTmp} set "repository.mail.from" '"'"${my_mail_from}"'"'
 }
 
-[[ $(hocon -f ${eduSConf} get "repository.mail.addReplyTo" 2>/dev/null) ]] && {
-  hocon -f ${eduSConf} unset "repository.mail.addReplyTo"
+[[ $(hocon -f ${eduSConfTmp} get "repository.mail.addReplyTo" 2>/dev/null) ]] && {
+  hocon -f ${eduSConfTmp} unset "repository.mail.addReplyTo"
 }
 [[ -n "${my_mail_addreplyto}" ]] && {
-  hocon -f ${eduSConf} set "repository.mail.addReplyTo" '"'"${my_mail_addreplyto}"'"'
+  hocon -f ${eduSConfTmp} set "repository.mail.addReplyTo" '"'"${my_mail_addreplyto}"'"'
 }
 
-[[ $(hocon -f ${eduSConf} get "repository.mail.register.receiver" 2>/dev/null) ]] && {
-  hocon -f ${eduSConf} unset "repository.mail.register.receiver"
+[[ $(hocon -f ${eduSConfTmp} get "repository.mail.register.receiver" 2>/dev/null) ]] && {
+  hocon -f ${eduSConfTmp} unset "repository.mail.register.receiver"
 }
 [[ -n "${my_mail_register_receiver}" ]] && {
-  hocon -f ${eduSConf} set "repository.mail.register.receiver" '"'"${my_mail_register_receiver}"'"'
+  hocon -f ${eduSConfTmp} set "repository.mail.register.receiver" '"'"${my_mail_register_receiver}"'"'
 }
 
-[[ $(hocon -f ${eduSConf} get "repository.mail.report.receivers" 2>/dev/null) ]] && {
-  hocon -f ${eduSConf} unset "repository.mail.report.receivers"
+[[ $(hocon -f ${eduSConfTmp} get "repository.mail.report.receivers" 2>/dev/null) ]] && {
+  hocon -f ${eduSConfTmp} unset "repository.mail.report.receivers"
 }
 [[ -n "${my_mail_report_receiver}" ]] && {
-  hocon -f ${eduSConf} set "repository.mail.report.receivers" "[\"${my_mail_report_receiver//,/\",\"}\"]"
+  hocon -f ${eduSConfTmp} set "repository.mail.report.receivers" "[\"${my_mail_report_receiver//,/\",\"}\"]"
 }
 
-[[ $(hocon -f ${eduSConf} get "repository.mail.server.smtp.host" 2>/dev/null) ]] && {
-  hocon -f ${eduSConf} unset "repository.mail.server.smtp.host"
+[[ $(hocon -f ${eduSConfTmp} get "repository.mail.server.smtp.host" 2>/dev/null) ]] && {
+  hocon -f ${eduSConfTmp} unset "repository.mail.server.smtp.host"
 }
 [[ -n "${my_mail_server_smtp_host}" ]] && {
-  hocon -f ${eduSConf} set "repository.mail.server.smtp.host" '"'"${my_mail_server_smtp_host}"'"'
+  hocon -f ${eduSConfTmp} set "repository.mail.server.smtp.host" '"'"${my_mail_server_smtp_host}"'"'
 }
 
-[[ $(hocon -f ${eduSConf} get "repository.mail.server.smtp.port" 2>/dev/null) ]] && {
-  hocon -f ${eduSConf} unset "repository.mail.server.smtp.port"
+[[ $(hocon -f ${eduSConfTmp} get "repository.mail.server.smtp.port" 2>/dev/null) ]] && {
+  hocon -f ${eduSConfTmp} unset "repository.mail.server.smtp.port"
 }
 [[ -n "${my_mail_server_smtp_port}" ]] && {
-  hocon -f ${eduSConf} set "repository.mail.server.smtp.port" '"'"${my_mail_server_smtp_port}"'"'
+  hocon -f ${eduSConfTmp} set "repository.mail.server.smtp.port" '"'"${my_mail_server_smtp_port}"'"'
 }
 
-[[ $(hocon -f ${eduSConf} get "repository.mail.server.smtp.username" 2>/dev/null) ]] && {
-  hocon -f ${eduSConf} unset "repository.mail.server.smtp.username"
+[[ $(hocon -f ${eduSConfTmp} get "repository.mail.server.smtp.username" 2>/dev/null) ]] && {
+  hocon -f ${eduSConfTmp} unset "repository.mail.server.smtp.username"
 }
 [[ -n "${my_mail_server_smtp_username}" ]] && {
-  hocon -f ${eduSConf} set "repository.mail.server.smtp.username" '"'"${my_mail_server_smtp_username}"'"'
+  hocon -f ${eduSConfTmp} set "repository.mail.server.smtp.username" '"'"${my_mail_server_smtp_username}"'"'
 }
 
-[[ $(hocon -f ${eduSConf} get "repository.mail.server.smtp.password" 2>/dev/null) ]] && {
-  hocon -f ${eduSConf} unset "repository.mail.server.smtp.password"
+[[ $(hocon -f ${eduSConfTmp} get "repository.mail.server.smtp.password" 2>/dev/null) ]] && {
+  hocon -f ${eduSConfTmp} unset "repository.mail.server.smtp.password"
 }
 [[ -n "${my_mail_server_smtp_password}" ]] && {
-  hocon -f ${eduSConf} set "repository.mail.server.smtp.password" '"'"${my_mail_server_smtp_password}"'"'
+  hocon -f ${eduSConfTmp} set "repository.mail.server.smtp.password" '"'"${my_mail_server_smtp_password}"'"'
 }
 
-[[ $(hocon -f ${eduSConf} get "repository.mail.server.smtp.authtype" 2>/dev/null) ]] && {
-  hocon -f ${eduSConf} unset "repository.mail.server.smtp.authtype"
+[[ $(hocon -f ${eduSConfTmp} get "repository.mail.server.smtp.authtype" 2>/dev/null) ]] && {
+  hocon -f ${eduSConfTmp} unset "repository.mail.server.smtp.authtype"
 }
 [[ -n "${my_mail_server_smtp_authtype}" ]] && {
-  hocon -f ${eduSConf} set "repository.mail.server.smtp.authtype" '"'"${my_mail_server_smtp_authtype}"'"'
+  hocon -f ${eduSConfTmp} set "repository.mail.server.smtp.authtype" '"'"${my_mail_server_smtp_authtype}"'"'
 }
 
-[[ $(hocon -f ${eduSConf} get "repository.httpclient.disableSNI4Hosts" 2>/dev/null) ]] && {
-  hocon -f ${eduSConf} unset "repository.httpclient.disableSNI4Hosts"
+[[ $(hocon -f ${eduSConfTmp} get "repository.httpclient.disableSNI4Hosts" 2>/dev/null) ]] && {
+  hocon -f ${eduSConfTmp} unset "repository.httpclient.disableSNI4Hosts"
 }
 [[ -n "${my_http_client_disablesni4hosts}" ]] && {
-  hocon -f ${eduSConf} set "repository.httpclient.disableSNI4Hosts" '"'"${my_http_client_disablesni4hosts}"'"'
+  hocon -f ${eduSConfTmp} set "repository.httpclient.disableSNI4Hosts" '"'"${my_http_client_disablesni4hosts}"'"'
 }
 
-[[ $(hocon -f ${eduSConf} get "repository.httpclient.proxy.host" 2>/dev/null) ]] && {
-  hocon -f ${eduSConf} unset "repository.httpclient.proxy.host"
+[[ $(hocon -f ${eduSConfTmp} get "repository.httpclient.proxy.host" 2>/dev/null) ]] && {
+  hocon -f ${eduSConfTmp} unset "repository.httpclient.proxy.host"
 }
 [[ -n "${my_http_client_proxy_host}" ]] && {
-  hocon -f ${eduSConf} set "repository.httpclient.proxy.host" '"'"${my_http_client_proxy_host}"'"'
+  hocon -f ${eduSConfTmp} set "repository.httpclient.proxy.host" '"'"${my_http_client_proxy_host}"'"'
 }
 
 [[ -n "${my_http_client_proxy_nonproxyhosts}" ]] && {
@@ -681,11 +688,11 @@ fi
   export CATALINA_OPTS="-Dhttps.nonProxyHosts=\"${my_http_client_proxy_nonproxyhosts//,/|}\" $CATALINA_OPTS"
 }
 
-[[ $(hocon -f ${eduSConf} get "repository.httpclient.proxy.nonproxyhosts" 2>/dev/null) ]] && {
-  hocon -f ${eduSConf} unset "repository.httpclient.proxy.nonproxyhosts"
+[[ $(hocon -f ${eduSConfTmp} get "repository.httpclient.proxy.nonproxyhosts" 2>/dev/null) ]] && {
+  hocon -f ${eduSConfTmp} unset "repository.httpclient.proxy.nonproxyhosts"
 }
 [[ -n "${my_http_client_proxy_nonproxyhosts}" ]] && {
-  hocon -f ${eduSConf} set "repository.httpclient.proxy.nonproxyhosts" '"'"${my_http_client_proxy_nonproxyhosts}"'"'
+  hocon -f ${eduSConfTmp} set "repository.httpclient.proxy.nonproxyhosts" '"'"${my_http_client_proxy_nonproxyhosts}"'"'
 }
 
 [[ -n "${my_http_client_proxy_proxyhost}" ]] && {
@@ -693,11 +700,11 @@ fi
   export CATALINA_OPTS="-Dhttps.proxyHost=${my_http_client_proxy_proxyhost} $CATALINA_OPTS"
 }
 
-[[ $(hocon -f ${eduSConf} get "repository.httpclient.proxy.proxyhost" 2>/dev/null) ]] && {
-  hocon -f ${eduSConf} unset "repository.httpclient.proxy.proxyhost"
+[[ $(hocon -f ${eduSConfTmp} get "repository.httpclient.proxy.proxyhost" 2>/dev/null) ]] && {
+  hocon -f ${eduSConfTmp} unset "repository.httpclient.proxy.proxyhost"
 }
 [[ -n "${my_http_client_proxy_proxyhost}" ]] && {
-  hocon -f ${eduSConf} set "repository.httpclient.proxy.proxyhost" '"'"${my_http_client_proxy_proxyhost}"'"'
+  hocon -f ${eduSConfTmp} set "repository.httpclient.proxy.proxyhost" '"'"${my_http_client_proxy_proxyhost}"'"'
 }
 
 [[ -n "${my_http_client_proxy_proxypass}" ]] && {
@@ -705,11 +712,11 @@ fi
   export CATALINA_OPTS="-Dhttps.proxyPass=${my_http_client_proxy_proxypass} $CATALINA_OPTS"
 }
 
-[[ $(hocon -f ${eduSConf} get "repository.httpclient.proxy.proxypass" 2>/dev/null) ]] && {
-  hocon -f ${eduSConf} unset "repository.httpclient.proxy.proxypass"
+[[ $(hocon -f ${eduSConfTmp} get "repository.httpclient.proxy.proxypass" 2>/dev/null) ]] && {
+  hocon -f ${eduSConfTmp} unset "repository.httpclient.proxy.proxypass"
 }
 [[ -n "${my_http_client_proxy_proxypass}" ]] && {
-  hocon -f ${eduSConf} set "repository.httpclient.proxy.proxypass" '"'"${my_http_client_proxy_proxypass}"'"'
+  hocon -f ${eduSConfTmp} set "repository.httpclient.proxy.proxypass" '"'"${my_http_client_proxy_proxypass}"'"'
 }
 
 [[ -n "${my_http_client_proxy_proxyport}" ]] && {
@@ -717,11 +724,11 @@ fi
   export CATALINA_OPTS="-Dhttps.proxyPort=${my_http_client_proxy_proxyport} $CATALINA_OPTS"
 }
 
-[[ $(hocon -f ${eduSConf} get "repository.httpclient.proxy.proxyport" 2>/dev/null) ]] && {
-  hocon -f ${eduSConf} unset "repository.httpclient.proxy.proxyport"
+[[ $(hocon -f ${eduSConfTmp} get "repository.httpclient.proxy.proxyport" 2>/dev/null) ]] && {
+  hocon -f ${eduSConfTmp} unset "repository.httpclient.proxy.proxyport"
 }
 [[ -n "${my_http_client_proxy_proxyport}" ]] && {
-  hocon -f ${eduSConf} set "repository.httpclient.proxy.proxyport" '"'"${my_http_client_proxy_proxyport}"'"'
+  hocon -f ${eduSConfTmp} set "repository.httpclient.proxy.proxyport" '"'"${my_http_client_proxy_proxyport}"'"'
 }
 
 [[ -n "${my_http_client_proxy_proxyuser}" ]] && {
@@ -729,92 +736,95 @@ fi
   export CATALINA_OPTS="-Dhttps.proxyUser=${my_http_client_proxy_proxyuser} $CATALINA_OPTS"
 }
 
-[[ $(hocon -f ${eduSConf} get "repository.httpclient.proxy.proxyuser" 2>/dev/null) ]] && {
-  hocon -f ${eduSConf} unset "repository.httpclient.proxy.proxyuser"
+[[ $(hocon -f ${eduSConfTmp} get "repository.httpclient.proxy.proxyuser" 2>/dev/null) ]] && {
+  hocon -f ${eduSConfTmp} unset "repository.httpclient.proxy.proxyuser"
 }
 [[ -n "${my_http_client_proxy_proxyuser}" ]] && {
-  hocon -f ${eduSConf} set "repository.httpclient.proxy.proxyuser" '"'"${my_http_client_proxy_proxyuser}"'"'
+  hocon -f ${eduSConfTmp} set "repository.httpclient.proxy.proxyuser" '"'"${my_http_client_proxy_proxyuser}"'"'
 }
 
-[[ $(hocon -f ${eduSConf} get "angular.headers.Content-Security-Policy.default-src" 2>/dev/null) ]] && {
-  hocon -f ${eduSConf} unset "angular.headers.Content-Security-Policy.default-src"
+[[ $(hocon -f ${eduSConfTmp} get "angular.headers.Content-Security-Policy.default-src" 2>/dev/null) ]] && {
+  hocon -f ${eduSConfTmp} unset "angular.headers.Content-Security-Policy.default-src"
 }
 [[ -n "${my_http_server_csp_default}" ]] && {
-  hocon -f ${eduSConf} set "angular.headers.Content-Security-Policy.default-src" '"'"${my_http_server_csp_default}"'"'
+  hocon -f ${eduSConfTmp} set "angular.headers.Content-Security-Policy.default-src" '"'"${my_http_server_csp_default}"'"'
 }
 
-[[ $(hocon -f ${eduSConf} get "angular.headers.Content-Security-Policy.connect-src" 2>/dev/null) ]] && {
-  hocon -f ${eduSConf} unset "angular.headers.Content-Security-Policy.connect-src"
+[[ $(hocon -f ${eduSConfTmp} get "angular.headers.Content-Security-Policy.connect-src" 2>/dev/null) ]] && {
+  hocon -f ${eduSConfTmp} unset "angular.headers.Content-Security-Policy.connect-src"
 }
 [[ -n "${my_http_server_csp_connect}" ]] && {
-  hocon -f ${eduSConf} set "angular.headers.Content-Security-Policy.connect-src" '"'"${my_http_server_csp_connect}"'"'
+  hocon -f ${eduSConfTmp} set "angular.headers.Content-Security-Policy.connect-src" '"'"${my_http_server_csp_connect}"'"'
 }
 
-[[ $(hocon -f ${eduSConf} get "angular.headers.Content-Security-Policy.img-src" 2>/dev/null) ]] && {
-  hocon -f ${eduSConf} unset "angular.headers.Content-Security-Policy.img-src"
+[[ $(hocon -f ${eduSConfTmp} get "angular.headers.Content-Security-Policy.img-src" 2>/dev/null) ]] && {
+  hocon -f ${eduSConfTmp} unset "angular.headers.Content-Security-Policy.img-src"
 }
 [[ -n "${my_http_server_csp_img}" ]] && {
-  hocon -f ${eduSConf} set "angular.headers.Content-Security-Policy.img-src" '"'"${my_http_server_csp_img}"'"'
+  hocon -f ${eduSConfTmp} set "angular.headers.Content-Security-Policy.img-src" '"'"${my_http_server_csp_img}"'"'
 }
 
-[[ $(hocon -f ${eduSConf} get "angular.headers.Content-Security-Policy.script-src" 2>/dev/null) ]] && {
-  hocon -f ${eduSConf} unset "angular.headers.Content-Security-Policy.script-src"
+[[ $(hocon -f ${eduSConfTmp} get "angular.headers.Content-Security-Policy.script-src" 2>/dev/null) ]] && {
+  hocon -f ${eduSConfTmp} unset "angular.headers.Content-Security-Policy.script-src"
 }
 [[ -n "${my_http_server_csp_script}" ]] && {
-  hocon -f ${eduSConf} set "angular.headers.Content-Security-Policy.script-src" '"'"${my_http_server_csp_script}"'"'
+  hocon -f ${eduSConfTmp} set "angular.headers.Content-Security-Policy.script-src" '"'"${my_http_server_csp_script}"'"'
 }
 
-[[ $(hocon -f ${eduSConf} get "angular.headers.Content-Security-Policy.font-src" 2>/dev/null) ]] && {
-  hocon -f ${eduSConf} unset "angular.headers.Content-Security-Policy.font-src"
+[[ $(hocon -f ${eduSConfTmp} get "angular.headers.Content-Security-Policy.font-src" 2>/dev/null) ]] && {
+  hocon -f ${eduSConfTmp} unset "angular.headers.Content-Security-Policy.font-src"
 }
 [[ -n "${my_http_server_csp_font}" ]] && {
-  hocon -f ${eduSConf} set "angular.headers.Content-Security-Policy.font-src" '"'"${my_http_server_csp_font}"'"'
+  hocon -f ${eduSConfTmp} set "angular.headers.Content-Security-Policy.font-src" '"'"${my_http_server_csp_font}"'"'
 }
 
-[[ $(hocon -f ${eduSConf} get "angular.headers.Content-Security-Policy.frame-ancestors" 2>/dev/null) ]] && {
-  hocon -f ${eduSConf} unset "angular.headers.Content-Security-Policy.frame-ancestors"
+[[ $(hocon -f ${eduSConfTmp} get "angular.headers.Content-Security-Policy.frame-ancestors" 2>/dev/null) ]] && {
+  hocon -f ${eduSConfTmp} unset "angular.headers.Content-Security-Policy.frame-ancestors"
 }
 [[ -n "${my_http_server_csp_frame}" ]] && {
-  hocon -f ${eduSConf} set "angular.headers.Content-Security-Policy.frame-ancestors" '"'"${my_http_server_csp_frame}"'"'
+  hocon -f ${eduSConfTmp} set "angular.headers.Content-Security-Policy.frame-ancestors" '"'"${my_http_server_csp_frame}"'"'
 }
 
-[[ $(hocon -f ${eduSConf} get "angular.headers.Content-Security-Policy.frame-src" 2>/dev/null) ]] && {
-  hocon -f ${eduSConf} unset "angular.headers.Content-Security-Policy.frame-src"
+[[ $(hocon -f ${eduSConfTmp} get "angular.headers.Content-Security-Policy.frame-src" 2>/dev/null) ]] && {
+  hocon -f ${eduSConfTmp} unset "angular.headers.Content-Security-Policy.frame-src"
 }
 [[ -n "${my_http_server_csp_framesrc}" ]] && {
-  hocon -f ${eduSConf} set "angular.headers.Content-Security-Policy.frame-src" '"'"${my_http_server_csp_framesrc}"'"'
+  hocon -f ${eduSConfTmp} set "angular.headers.Content-Security-Policy.frame-src" '"'"${my_http_server_csp_framesrc}"'"'
 }
 
-[[ $(hocon -f ${eduSConf} get "angular.headers.Content-Security-Policy.media-src" 2>/dev/null) ]] && {
-  hocon -f ${eduSConf} unset "angular.headers.Content-Security-Policy.media-src"
+[[ $(hocon -f ${eduSConfTmp} get "angular.headers.Content-Security-Policy.media-src" 2>/dev/null) ]] && {
+  hocon -f ${eduSConfTmp} unset "angular.headers.Content-Security-Policy.media-src"
 }
 [[ -n "${my_http_server_csp_media}" ]] && {
-  hocon -f ${eduSConf} set "angular.headers.Content-Security-Policy.media-src" '"'"${my_http_server_csp_media}"'"'
+  hocon -f ${eduSConfTmp} set "angular.headers.Content-Security-Policy.media-src" '"'"${my_http_server_csp_media}"'"'
 }
 
-[[ $(hocon -f ${eduSConf} get "angular.headers.Content-Security-Policy.object-src" 2>/dev/null) ]] && {
-  hocon -f ${eduSConf} unset "angular.headers.Content-Security-Policy.object-src"
+[[ $(hocon -f ${eduSConfTmp} get "angular.headers.Content-Security-Policy.object-src" 2>/dev/null) ]] && {
+  hocon -f ${eduSConfTmp} unset "angular.headers.Content-Security-Policy.object-src"
 }
 [[ -n "${my_http_server_csp_object}" ]] && {
-  hocon -f ${eduSConf} set "angular.headers.Content-Security-Policy.object-src" '"'"${my_http_server_csp_object}"'"'
+  hocon -f ${eduSConfTmp} set "angular.headers.Content-Security-Policy.object-src" '"'"${my_http_server_csp_object}"'"'
 }
 
-[[ $(hocon -f ${eduSConf} get "angular.headers.Content-Security-Policy.style-src" 2>/dev/null) ]] && {
-  hocon -f ${eduSConf} unset "angular.headers.Content-Security-Policy.style-src"
+[[ $(hocon -f ${eduSConfTmp} get "angular.headers.Content-Security-Policy.style-src" 2>/dev/null) ]] && {
+  hocon -f ${eduSConfTmp} unset "angular.headers.Content-Security-Policy.style-src"
 }
 [[ -n "${my_http_server_csp_style}" ]] && {
-  hocon -f ${eduSConf} set "angular.headers.Content-Security-Policy.style-src" '"'"${my_http_server_csp_style}"'"'
+  hocon -f ${eduSConfTmp} set "angular.headers.Content-Security-Policy.style-src" '"'"${my_http_server_csp_style}"'"'
 }
 
-[[ $(hocon -f ${eduSConf} get "jobs.primaryHostname" 2>/dev/null) ]] && {
-  hocon -f ${eduSConf} unset "jobs.primaryHostname"
+[[ $(hocon -f ${eduSConfTmp} get "jobs.primaryHostname" 2>/dev/null) ]] && {
+  hocon -f ${eduSConfTmp} unset "jobs.primaryHostname"
 }
 [[ -n "${my_jobs_primary_hostname}" ]] && {
-  hocon -f ${eduSConf} set "jobs.primaryHostname" '"'"${my_jobs_primary_hostname}"'"'
+  hocon -f ${eduSConfTmp} set "jobs.primaryHostname" '"'"${my_jobs_primary_hostname}"'"'
 }
 
 # clean up empty lines in config after hocon commands
-sed -i '/^[[:space:]]*$/d' ${eduSConf}
+sed -i '/^[[:space:]]*$/d' ${eduSConfTmp}
+
+# atomic replace: all pods share config/cluster, concurrent in-place writes corrupt the file
+mv -f "${eduSConfTmp}" "${eduSConf}"
 
 xmlstarlet ed -L \
   -N x="http://java.sun.com/xml/ns/javaee" \

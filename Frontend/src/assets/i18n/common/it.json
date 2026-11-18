@@ -71,6 +71,7 @@
   "LOGOUT": "Disconnettersi",
   "INVALID_OPERATION": "Questa funzione non è attualmente supportata",
   "SORT_BY": "Ordina per",
+  "SORT_BY_COLUMN": "Ordina per questa colonna",
   "ASCENDING": "ascendente",
   "DESCENDING": "discendente",
   "SELECTED": "selezionato",
@@ -364,6 +365,7 @@
     "COMMENT_PLACEHOLDER": "Fornisci i dettagli...",
     "EMAIL": "il vostro indirizzo e-mail",
     "EMAIL_PLACEHOLDER": "qualcuno@example.it",
+    "EMAIL_FROM_PROFILE": "Ripreso dal profilo",
     "EMAIL_REQUIRED": "Si prega di fornire un indirizzo e-mail valido.",
     "REASON_REQUIRED": "Selezionare il tipo di problema riscontrato.",
     "DONE": "Grazie per il suo messaggio.",
@@ -1298,7 +1300,7 @@
   "MONTHS_AGO": "{{ months }}} mese/i fa",
   "YEARS_AGO": "{{ years }} anno/i fa",
   "STORAGE_LOCATION_SAVE": "Utilizzare questa posizione come predefinita in futuro",
-  "SEARCH_CLEAR": "Libero",
+  "SEARCH_CLEAR": "Cancella la ricerca",
   "TOGGLE_SEARCH_FILTERS": "Mostrare o nascondere i filtri di ricerca",
   "PAGINATOR": {
     "getRangeLabel": "Pagina {{page}} di {{pageCount}}",
@@ -1557,6 +1559,7 @@
     "DONE": "Grazie per il tuo feedback.",
     "EMAIL": "Il tuo indirizzo di posta elettronica",
     "EMAIL_PLACEHOLDER": "qualcuno@example.it",
+    "EMAIL_FROM_PROFILE": "Ripreso dal profilo",
     "EMAIL_REQUIRED": "Si prega di inserire un indirizzo email valido."
   },
   "RENDERING": {

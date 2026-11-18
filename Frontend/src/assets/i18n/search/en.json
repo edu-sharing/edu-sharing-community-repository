@@ -22,6 +22,7 @@
     "EXPANDED_SEARCH_SHORT": "Extended Search",
     "ACTIVE_FILTER": "Active filter criteria",
     "ACTIVE_FILTER_TOOLTIP": "{{count}} criteria filtered",
+    "REMOVE_FILTER_HINT": "Press Enter or Delete to remove",
     "METADATASET": "Choose Metadataset",
     "METADATASET_INFO": "Filter other search criteria",
     "APPLY": "Apply",
