@@ -434,6 +434,13 @@
     <dependency>
       <groupId>org.apache.cxf</groupId>
       <artifactId>cxf-rt-frontend-jaxws</artifactId>
+      <exclusions>
+        <!-- angus-mail 2.x needs jakarta.mail-api >= 2.1, but alfresco ships com.sun.mail:jakarta.mail 2.0.2 -->
+        <exclusion>
+          <groupId>org.eclipse.angus</groupId>
+          <artifactId>angus-mail</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
