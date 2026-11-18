@@ -217,6 +217,10 @@ export CATALINA_OPTS="-Djavax.xml.parsers.SAXParserFactory=com.sun.org.apache.xe
 export CATALINA_OPTS="-Djavax.xml.transform.TransformerFactory=com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl $CATALINA_OPTS"
 export CATALINA_OPTS="-Djavax.xml.validation.SchemaFactory:http://www.w3.org/2001/XMLSchema=com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaFactory $CATALINA_OPTS"
 
+# security: Java4Shell (CVE-2026-114938) mitigation
+# Harmless on CPUs without AVX-512 VBMI. Remove once the JDK is >= 17.0.21.1 / 21.0.13.1.
+export CATALINA_OPTS="-XX:-UseBASE64Intrinsics $CATALINA_OPTS"
+
 # hazelcast 5.3
 export CATALINA_OPTS="--add-modules java.se --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.management/sun.management=ALL-UNNAMED --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED $CATALINA_OPTS"
 
