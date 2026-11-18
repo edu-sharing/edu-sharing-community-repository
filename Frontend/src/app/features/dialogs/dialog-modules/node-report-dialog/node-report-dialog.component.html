@@ -47,8 +47,12 @@
       name="reportMail"
       name="email"
       formControlName="email"
+      [readonly]="emailReadonly()"
       placeholder="{{ data.mode + '.EMAIL_PLACEHOLDER' | translate }}"
     />
+    @if (emailReadonly()) {
+    <mat-hint>{{ data.mode + '.EMAIL_FROM_PROFILE' | translate }}</mat-hint>
+    }
     <mat-error>
       {{ data.mode + '.EMAIL_REQUIRED' | translate }}
     </mat-error>

@@ -364,6 +364,7 @@
     "COMMENT_PLACEHOLDER": "Fornisci i dettagli...",
     "EMAIL": "il vostro indirizzo e-mail",
     "EMAIL_PLACEHOLDER": "qualcuno@example.it",
+    "EMAIL_FROM_PROFILE": "Ripreso dal profilo",
     "EMAIL_REQUIRED": "Si prega di fornire un indirizzo e-mail valido.",
     "REASON_REQUIRED": "Selezionare il tipo di problema riscontrato.",
     "DONE": "Grazie per il suo messaggio.",
@@ -1554,6 +1555,7 @@
     "DONE": "Grazie per il tuo feedback.",
     "EMAIL": "Il tuo indirizzo di posta elettronica",
     "EMAIL_PLACEHOLDER": "qualcuno@example.it",
+    "EMAIL_FROM_PROFILE": "Ripreso dal profilo",
     "EMAIL_REQUIRED": "Si prega di inserire un indirizzo email valido."
   },
   "RENDERING": {
