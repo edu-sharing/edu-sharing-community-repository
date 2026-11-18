@@ -42,7 +42,8 @@
     },
     "AI": {
       "GENERATED": "KI-generiert",
-      "INVALID_PROMPT": "Prompt mit Syntax-Fehlern"
+      "INVALID_PROMPT": "Prompt mit Syntax-Fehlern",
+      "TEXT_LOADING": "Text wird generiert ..."
     },
     "WIDGET": {
       "SUB_HEADING_LABEL_OPTIONAL": "Teil-Überschrift  (optional)",

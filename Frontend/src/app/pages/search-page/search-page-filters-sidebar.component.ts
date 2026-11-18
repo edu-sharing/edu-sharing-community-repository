@@ -1,10 +1,14 @@
+import { InteractivityChecker } from '@angular/cdk/a11y';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import {
     Component,
+    ElementRef,
+    Injector,
     OnDestroy,
     OnInit,
     TemplateRef,
     ViewChild,
+    afterNextRender,
     computed,
     inject,
     signal,
@@ -38,10 +42,13 @@ export class SearchPageFiltersSidebarComponent implements OnInit, OnDestroy {
     private breakpointObserver = inject(BreakpointObserver);
     private searchFieldInternalService = inject(SearchFieldInternalService);
     private configService = inject(ConfigService);
+    private interactivityChecker = inject(InteractivityChecker);
+    private injector = inject(Injector);
 
     @ViewChild('filtersDialogContent', { static: true }) filtersDialogContent: TemplateRef<unknown>;
     @ViewChild('filtersDialogResetButton', { static: true })
     filtersDialogResetButton: TemplateRef<HTMLElement>;
+    @ViewChild('filterBarBody') private filterBarBody: ElementRef<HTMLElement>;
 
     private readonly instanceId = nextInstanceId++;
     /** Label of the panel's `region` landmark. */
@@ -87,6 +94,36 @@ export class SearchPageFiltersSidebarComponent implements OnInit, OnDestroy {
         this.destroyed.next();
         this.destroyed.complete();
         this.searchFieldInternalService.filterPanelId.next(null);
+    }
+
+    /**
+     * Resets all user filters.
+     *
+     * The reset button is only shown while filters are set, so it disappears once activated. To
+     * keep keyboard and screen reader users in place, focus moves to the first focusable control
+     * of the filter area (the sidebar or the filter dialog) once it has been re-rendered.
+     */
+    resetFilters(location: 'sidebar' | 'dialog'): void {
+        this.searchFilters.setUserValue(null);
+        afterNextRender(
+            () => {
+                const container =
+                    location === 'sidebar'
+                        ? this.filterBarBody?.nativeElement
+                        : document.querySelector<HTMLElement>('.filters-dialog-content');
+                this.focusFirstTabbable(container);
+            },
+            { injector: this.injector },
+        );
+    }
+
+    private focusFirstTabbable(container: HTMLElement | null | undefined): void {
+        const first = Array.from(container?.querySelectorAll<HTMLElement>('*') ?? []).find(
+            (element) =>
+                this.interactivityChecker.isTabbable(element) &&
+                this.interactivityChecker.isVisible(element),
+        );
+        first?.focus();
     }
 
     private registerFilterDialog(): void {

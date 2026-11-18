@@ -3,6 +3,7 @@ import {
     Component,
     computed,
     effect,
+    ElementRef,
     EventEmitter,
     inject,
     Injector,
@@ -136,6 +137,7 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
     private uiService = inject(UIService);
     private nodeHelperService = inject(NodeHelperService);
     editorialSidebarService = inject(EditorialSidebarService);
+    private elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     private optionsHelperDataService = inject(OptionsHelperDataService);
     private breakpointObserver = inject(BreakpointObserver);
     private loadingScreenService = inject(LoadingScreenService);
@@ -227,6 +229,8 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
             this.enabledOption();
             this.editorialSidebarService.fullscreenActive.set(false);
         });
+        // the fullscreen sidebar covers the page content, which therefore must not stay reachable
+        effect(() => this.setCoveredContentInert(this.editorialSidebarService.fullscreenActive()));
         // closing the sidebar (via the tab or any other path) resets the opened option, so a later
         // open starts at the option overview instead of the previously shown option
         effect(() => {
@@ -445,7 +449,42 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
     ngOnDestroy(): void {
         this.destroyed.next();
         this.destroyed.complete();
+        this.setCoveredContentInert(false);
         this.editorialSidebarService.unregisterSidebar(this);
+    }
+
+    /** Elements this sidebar made `inert` while covering them in fullscreen mode. */
+    private inertElements: HTMLElement[] = [];
+
+    /**
+     * In fullscreen mode, makes everything around the sidebar inside its `mat-sidenav-container`
+     * `inert` (covered page content, resize handle) so focus stays in the sidebar. Elements that
+     * were already `inert` are left untouched.
+     */
+    private setCoveredContentInert(inert: boolean): void {
+        this.inertElements.forEach((element) => element.removeAttribute('inert'));
+        this.inertElements = [];
+        if (!inert) {
+            return;
+        }
+        const host = this.elementRef.nativeElement;
+        const container = host.closest('mat-sidenav-container');
+        if (!container) {
+            return;
+        }
+        for (let ancestor = host.parentElement; ancestor; ancestor = ancestor.parentElement) {
+            const siblings = Array.from(ancestor.children).filter(
+                (element): element is HTMLElement =>
+                    element instanceof HTMLElement &&
+                    !element.contains(host) &&
+                    !element.hasAttribute('inert'),
+            );
+            siblings.forEach((element) => element.setAttribute('inert', ''));
+            this.inertElements.push(...siblings);
+            if (ancestor === container) {
+                break;
+            }
+        }
     }
 
     private async openDialog(): Promise<CardDialogRef<unknown>> {

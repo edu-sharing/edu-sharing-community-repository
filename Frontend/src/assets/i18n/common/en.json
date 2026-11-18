@@ -400,6 +400,7 @@
     "DONE": "Thanks for your feedback.",
     "EMAIL": "your e-mail-address",
     "EMAIL_PLACEHOLDER": "somebody@example.net",
+    "EMAIL_FROM_PROFILE": "Taken from your profile",
     "EMAIL_REQUIRED": "Please provide a valid e-mail address."
   },
   "NODE_REPORT": {
@@ -410,6 +411,7 @@
     "COMMENT_PLACEHOLDER": "Provide details...",
     "EMAIL": "your e-mail-address",
     "EMAIL_PLACEHOLDER": "somebody@example.net",
+    "EMAIL_FROM_PROFILE": "Taken from your profile",
     "EMAIL_REQUIRED": "Please provide a valind e-mail address.",
     "REASON_REQUIRED": "Please select what kind of problem you are experiencing.",
     "DONE": "Thanks for your message.",

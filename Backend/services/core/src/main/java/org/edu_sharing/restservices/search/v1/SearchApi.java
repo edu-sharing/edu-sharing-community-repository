@@ -372,58 +372,6 @@ public class SearchApi {
 
 	}
 
-	@POST
-	@Path("/queries/{repository}/fingerprint/{nodeid}")
-	@Consumes({"application/json"})
-
-	@Operation(summary = "Perform queries based on metadata sets.", description = "Perform queries based on metadata sets.")
-
-	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = SearchResultNode.class))),
-			@ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
-
-	public Response searchFingerprint(
-			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
-			@Parameter(description = "nodeid", required = true) @PathParam("nodeid") String nodeId,
-			@Parameter(description = "maximum items per page", schema = @Schema(defaultValue = "10")) @QueryParam("maxItems") Integer maxItems,
-			@Parameter(description = "skip a number of items", schema = @Schema(defaultValue = "0")) @QueryParam("skipCount") Integer skipCount,
-			@Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
-			@Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
-			@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue = "-all-"))) @QueryParam("propertyFilter") List<String> propertyFilter,
-			@Context HttpServletRequest req) {
-
-		try {
-			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-
-			Filter filter = new Filter(propertyFilter);
-			NodeSearch nodeSearch = NodeDao.searchFingerprint(repoDao, nodeId, filter);
-			SearchResultNode response = new SearchResultNode();
-
-			List<Node> data = new ArrayList<>();
-			for (org.edu_sharing.restservices.shared.NodeRef ref : nodeSearch.getResult()) {
-				data.add(NodeDao.getNode(repoDao, ref.getId(), filter).asNode());
-			}
-			response.setNodes(data);
-
-
-			Pagination pagination = new Pagination();
-			pagination.setFrom(nodeSearch.getSkip());
-			pagination.setCount(data.size());
-			pagination.setTotal(nodeSearch.getCount());
-
-			response.setPagination(pagination);
-
-			return Response.status(Response.Status.OK).entity(response).build();
-		} catch (Throwable t) {
-			return ErrorResponse.createResponse(t);
-		}
-
-	}
-
-
 	@GET
 	@Path("/custom/{repository}")
 	@Consumes({"application/json"})

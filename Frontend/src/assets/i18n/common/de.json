@@ -579,6 +579,7 @@
     "DONE": "Vielen Dank für Ihr Feedback.",
     "EMAIL": "Ihre E-Mail-Adresse",
     "EMAIL_PLACEHOLDER": "jemand@beispiel.de",
+    "EMAIL_FROM_PROFILE": "Aus dem Profil übernommen",
     "EMAIL_REQUIRED": "Bitte eine gültige E-Mail-Adresse angeben"
   },
   "NODE_REPORT": {
@@ -589,6 +590,7 @@
     "COMMENT_PLACEHOLDER": "Details angeben...",
     "EMAIL": "Ihre E-Mail-Adresse",
     "EMAIL_PLACEHOLDER": "jemand@beispiel.de",
+    "EMAIL_FROM_PROFILE": "Aus dem Profil übernommen",
     "EMAIL_REQUIRED": "Bitte eine gültige E-Mail-Adresse angeben",
     "REASON": "Art des Problems",
     "REASON_REQUIRED": "Bitte wählen Sie aus, welches Problem besteht",

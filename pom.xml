@@ -562,14 +562,6 @@
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-deploy-docker-helm-search-solr</artifactId>
-        <version>${project.version}</version>
-        <type>tar.gz</type>
-        <classifier>bin</classifier>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-repository-deploy-docker-helm-service</artifactId>
         <version>${project.version}</version>
         <type>tar.gz</type>

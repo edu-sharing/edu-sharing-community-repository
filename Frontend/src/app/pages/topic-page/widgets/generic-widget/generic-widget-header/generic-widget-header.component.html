@@ -1,4 +1,6 @@
-@if (shouldShowHeadline()) {
+@if (showHeadlinePlaceholder()) {
+<es-ai-text-placeholder class="headline-placeholder" [lines]="1"></es-ai-text-placeholder>
+} @else if (shouldShowHeadline()) {
 <es-editable-text
   class="generic-widget-headline"
   [aiGenerated]="headlineAiGenerated()"
@@ -14,7 +16,9 @@
   (searchResultsUpdated)="onSearchResultsUpdated($event, 'headline')"
   (textChange)="onTextChange($event, true)"
 ></es-editable-text>
-} @if (shouldShowDescription()) {
+} @if (showDescriptionPlaceholder()) {
+<es-ai-text-placeholder [lines]="2"></es-ai-text-placeholder>
+} @else if (shouldShowDescription()) {
 <es-editable-text
   class="generic-widget-description"
   [aiGenerated]="descriptionAiGenerated()"

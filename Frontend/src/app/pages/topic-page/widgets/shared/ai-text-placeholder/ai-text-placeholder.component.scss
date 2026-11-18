@@ -1,0 +1,40 @@
+@use '../../../topic-page-variables' as topicPageVars;
+
+:host {
+    display: block;
+}
+
+.ai-text-placeholder {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.placeholder-line {
+    height: 1em;
+    width: 100%;
+    border-radius: 4px;
+    background: topicPageVars.$surface-container-highest;
+    animation: ai-text-placeholder-pulse 1.5s ease-in-out infinite;
+
+    &.last-line {
+        width: 60%;
+    }
+}
+
+@keyframes ai-text-placeholder-pulse {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.4;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .placeholder-line {
+        animation: none;
+    }
+}

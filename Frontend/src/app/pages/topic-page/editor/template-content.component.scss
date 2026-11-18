@@ -106,6 +106,12 @@
                             hyphens: auto;
                             word-break: break-word;
                             color: topicPageVars.$on-surface;
+
+                            // the clamped text box has no width of its own while it is empty
+                            .anchor-heading-placeholder {
+                                width: 8em;
+                                max-width: 100%;
+                            }
                         }
                     }
 
@@ -201,6 +207,13 @@
                 align-items: center;
                 position: relative;
                 width: 100%;
+
+                // stands in for the centered heading while it is generated
+                .swimlane-heading-placeholder {
+                    width: 40%;
+                    margin: 0 auto;
+                    font-size: 1.75em;
+                }
 
                 .swimlane-heading-buttons {
                     display: flex;

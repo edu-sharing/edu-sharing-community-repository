@@ -102,18 +102,6 @@
     <div class="nodeRenderLoading">
       <es-spinner></es-spinner>
     </div>
-    } @if (!similarNodes.isEmpty()) {
-    <div class="similarNodes">
-      <div class="caption">Ähnliche Objekte</div>
-      <es-node-entries-wrapper
-        [dataSource]="similarNodes"
-        [displayType]="DisplayType.Grid"
-        [columns]="similarNodeColumns"
-        [checkbox]="false"
-        [elementInteractionType]="InteractionType.DefaultActionLink"
-      >
-      </es-node-entries-wrapper>
-    </div>
     }
     <es-imprint-privacy [separator]="'/'"></es-imprint-privacy>
   </div>

@@ -391,6 +391,12 @@
                     <span class="cdk-visually-hidden">
                       {{ i18nPrefix + 'ANCHOR_ARIA_HEADING' | translate }}
                     </span>
+                    @if (!editMode() && swimlaneIdsWithPendingHeading().has(anchor.id)) {
+                    <es-ai-text-placeholder
+                      class="anchor-heading-placeholder"
+                      [lines]="1"
+                    ></es-ai-text-placeholder>
+                    } @else {
                     {{
                       (anchor.heading
                         | aiTextPrompt
@@ -398,6 +404,7 @@
                           : swimlaneIdToPromptTextMapping.get(anchor.id)) ||
                         (i18nPrefix + 'ANCHOR_FALLBACK_PREFIX' | translate) + ' ' + (i + 1)
                     }}
+                    }
                   </div>
                   <ng-container
                     *ngVar="anchor | swimlaneSearchCount : searchCountTrigger as searchCount"
@@ -648,6 +655,12 @@
             let-isAccordion="isAccordion"
           >
             <div class="swimlane-heading-wrapper" [class.is-accordion]="isAccordion">
+              @if (!editMode() && swimlaneIdsWithPendingHeading().has(swimlane.id)) {
+              <es-ai-text-placeholder
+                class="swimlane-heading-placeholder"
+                [lines]="1"
+              ></es-ai-text-placeholder>
+              } @else {
               <es-editable-text
                 [alignCenter]="true"
                 [applyTextareaPadding]="false"
@@ -662,6 +675,7 @@
                 "
                 (textChange)="swimlaneTitleChanged($event, index)"
               ></es-editable-text>
+              }
               <!-- sharing refers to the collection's page, which a preview does not show -->
               @if (!editMode() && !variantPreview()) {
               <div class="swimlane-heading-buttons">

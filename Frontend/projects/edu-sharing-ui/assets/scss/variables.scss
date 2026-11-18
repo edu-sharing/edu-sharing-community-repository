@@ -135,7 +135,8 @@
 
     --searchInputBorderColor: #ccc;
     --cardSeparatorLineColor: #ccc;
-    --inputBorderColor: #9e9e9e;
+    // input outlines need at least 3:1 against #fff and #f3f3f3 (non-text contrast)
+    --inputBorderColor: #858585;
     // border only defined in dark-mode
     --borderDarkModeOnly: transparent;
 
@@ -243,7 +244,8 @@ body.isDarkTheme {
     // promoted borders
     --searchInputBorderColor: #555;
     --cardSeparatorLineColor: #666;
-    --inputBorderColor: #666;
+    // input outlines need at least 3:1 against the dark surfaces (non-text contrast)
+    --inputBorderColor: #808080;
     // faint edge for surfaces that nearly match the page background in dark mode
     --borderDarkModeOnly: #444;
     // the tab blends into the dark surfaces; its border carries the separation instead of a shadow

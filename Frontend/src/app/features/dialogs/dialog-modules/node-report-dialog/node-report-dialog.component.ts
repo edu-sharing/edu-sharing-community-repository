@@ -7,6 +7,7 @@ import {
     OnInit,
     ViewChild,
     inject,
+    signal,
 } from '@angular/core';
 import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
@@ -48,6 +49,11 @@ export class NodeReportDialogComponent implements OnInit {
 
     readonly reasons = ['UNAVAILABLE', 'INAPPROPRIATE_CONTENT', 'INVALID_METADATA', 'OTHER'];
     @ViewChild('formElement') formRef: ElementRef<HTMLFormElement>;
+    /**
+     * Whether the email field shows the logged-in user's address. The field is read-only rather
+     * than disabled, so the address stays readable (text contrast) and reachable by keyboard.
+     */
+    readonly emailReadonly = signal(false);
 
     readonly form = new UntypedFormGroup({
         reason: new UntypedFormControl(''),
@@ -80,8 +86,8 @@ export class NodeReportDialogComponent implements OnInit {
             this.userService.observeCurrentUser().pipe(first()),
         ).subscribe(([login, user]) => {
             if (!login.isGuest && !!user?.person?.profile?.email) {
-                this.form.get('email').disable();
                 this.form.patchValue({ email: user.person.profile.email });
+                this.emailReadonly.set(true);
             }
         });
         // Disable close by backdrop click as soon as the user enters any value .

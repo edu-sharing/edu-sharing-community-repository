@@ -85,7 +85,10 @@ import { InfobarService } from '../infobar/infobar.service';
 import { SelectionChange } from '@angular/cdk/collections';
 import { ConnectedPosition } from '@angular/cdk/overlay';
 import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
-import { GlobalCollectionsPageService } from '../global-collections-page.service';
+import {
+    GlobalCollectionsPageService,
+    GlobalCollectionsPageServiceInternal,
+} from '../global-collections-page.service';
 import {
     NodesSelectorConfig,
     TabType,
@@ -123,6 +126,8 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     private translation = inject(TranslateService);
     private uiService = inject(UIService);
     private globalCollectionsPageService = inject(GlobalCollectionsPageService);
+    /** custom templates registered by extensions, e.g. `belowSubcollections` */
+    readonly customTemplates = inject(GlobalCollectionsPageServiceInternal).customTemplates;
 
     /**
      * root level scopes which are not expected to be empty
