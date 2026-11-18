@@ -2646,6 +2646,8 @@ public class SearchServiceElastic implements SearchService {
                     list.add(authority);
                     if(patternIsUuid) {
                         // only one entry when an uuid was requested
+                        // logged to find out whether callers still rely on this shortcut before removing it
+                        log.warn("authority lookup used the UUID shortcut (early break); use GET /iam/v1/groups/{repository}/{group}/member?authorityName= instead");
                         break;
                     } else {
                         continue;
