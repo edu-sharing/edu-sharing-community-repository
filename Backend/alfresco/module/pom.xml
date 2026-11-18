@@ -28,17 +28,6 @@
         <artifactId>copy-rename-maven-plugin</artifactId>
         <executions>
           <execution>
-            <id>fix1</id>
-            <goals>
-              <goal>rename</goal>
-            </goals>
-            <phase>package</phase>
-            <configuration>
-              <sourceFile>${project.build.directory}/classes/org/alfresco/repo/search/impl/solr/SolrJSONResultSet.class</sourceFile>
-              <destinationFile>${project.build.directory}/fixes/org/alfresco/repo/search/impl/solr/SolrJSONResultSet.class</destinationFile>
-            </configuration>
-          </execution>
-          <execution>
             <id>fix2</id>
             <goals>
               <goal>rename</goal>
@@ -47,17 +36,6 @@
             <configuration>
               <sourceFile>${project.build.directory}/classes/org/alfresco/repo/search/impl/solr/ESSearchParameters.class</sourceFile>
               <destinationFile>${project.build.directory}/fixes/org/alfresco/repo/search/impl/solr/ESSearchParameters.class</destinationFile>
-            </configuration>
-          </execution>
-          <execution>
-            <id>fix3</id>
-            <goals>
-              <goal>rename</goal>
-            </goals>
-            <phase>package</phase>
-            <configuration>
-              <sourceFile>${project.build.directory}/classes/org/alfresco/repo/search/impl/solr/SolrQueryHTTPClient.class</sourceFile>
-              <destinationFile>${project.build.directory}/fixes/org/alfresco/repo/search/impl/solr/SolrQueryHTTPClient.class</destinationFile>
             </configuration>
           </execution>
           <execution>
@@ -467,6 +445,13 @@
     <dependency>
       <groupId>org.apache.cxf</groupId>
       <artifactId>cxf-rt-frontend-jaxws</artifactId>
+      <exclusions>
+        <!-- angus-mail 2.x needs jakarta.mail-api >= 2.1, but alfresco ships com.sun.mail:jakarta.mail 2.0.2 -->
+        <exclusion>
+          <groupId>org.eclipse.angus</groupId>
+          <artifactId>angus-mail</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>

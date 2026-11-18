@@ -100,12 +100,6 @@ public class SearchServiceAdapter implements SearchService {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
-	@Override
-	public SearchResultNodeRef searchFingerPrint(String nodeId) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	/**
 	 * @deprecated Replaced by the managed contributor registry
