@@ -372,6 +372,13 @@ body {
             color: var(--defaultBackground) !important;
         }
     }
+    // keep the filled background of unchecked boxes while hovered or focused, so the box
+    // stays visible on any background (e.g. on top of preview images)
+    .mdc-checkbox
+        .mdc-checkbox__native-control:enabled:not(:checked):not(:indeterminate)
+        ~ .mdc-checkbox__background {
+        background-color: var(--defaultBackground);
+    }
     &.mdc-checkbox--disabled {
         &.mat-mdc-checkbox-checked,
         &.mat-mdc-checkbox-indeterminate {
