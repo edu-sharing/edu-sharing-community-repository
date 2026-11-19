@@ -150,7 +150,7 @@ export class AdminMessagesComponent implements OnInit {
             this.editorConfig = {
                 ...getTinyMceBaseConfig(
                     this.platformLocation.getBaseHrefFromDOM(),
-                    this.translate.getDefaultLang(),
+                    this.translate.getFallbackLang(),
                 ),
                 ...AdminMessagesEditorConfig,
                 ...getTinyMceThemeConfig(this.theme.isDarkMode()),

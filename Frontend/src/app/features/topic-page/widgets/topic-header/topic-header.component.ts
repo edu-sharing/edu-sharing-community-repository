@@ -21,7 +21,7 @@ import {
     ChangeDetectionStrategy,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { Node, ParentEntries } from 'ngx-edu-sharing-api';
 import { CreateChatCompletionResponse } from 'ngx-edu-sharing-b-api';
 import {
@@ -69,7 +69,7 @@ import { ImageWrapperComponent } from '../shared/image-wrapper/image-wrapper.com
         ImageWrapperComponent,
         SharedModule,
         SpinnerComponent,
-        TranslateModule,
+        TranslatePipe,
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA],
     templateUrl: './topic-header.component.html',

@@ -1,6 +1,6 @@
 import { Component, Input, signal, ChangeDetectionStrategy } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { IconDirective } from '../directives/icon.directive';
 
 @Component({
@@ -8,7 +8,7 @@ import { IconDirective } from '../directives/icon.directive';
     templateUrl: 'info-message.component.html',
     styleUrls: ['info-message.component.scss'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [TranslateModule, IconDirective, MatButtonModule],
+    imports: [TranslatePipe, IconDirective, MatButtonModule],
 })
 export class InfoMessageComponent {
     /**

@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 
 import { EduHtmlComponent } from './eduHtml.component';
 
@@ -9,7 +9,8 @@ describe('EduHtmlComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [EduHtmlComponent, TranslateModule.forRoot()],
+            imports: [EduHtmlComponent],
+            providers: [provideTranslateService()],
         }).compileComponents();
 
         fixture = TestBed.createComponent(EduHtmlComponent);

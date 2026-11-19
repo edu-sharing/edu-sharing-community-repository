@@ -3,7 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { AuthenticationService, ScopeInfo, ScopesService } from 'ngx-edu-sharing-api';
 import { EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
 import { Toast } from '../../../services/toast';
@@ -21,7 +21,7 @@ import { Toast } from '../../../services/toast';
         MatButtonModule,
         MatMenuModule,
         MatTooltipModule,
-        TranslateModule,
+        TranslatePipe,
     ],
 })
 export class ScopeSwitcherComponent {

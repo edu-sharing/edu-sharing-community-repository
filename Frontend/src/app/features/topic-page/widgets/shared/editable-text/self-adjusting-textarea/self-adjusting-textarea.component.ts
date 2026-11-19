@@ -28,7 +28,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltip } from '@angular/material/tooltip';
 import '@github/markdown-toolbar-element';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
 import { take } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
@@ -50,7 +50,7 @@ import { containsAiTags } from '../../../../shared/utils/ai-util';
         MatTooltip,
         ReactiveFormsModule,
         TooltipAriaLabelDirective,
-        TranslateModule,
+        TranslatePipe,
     ],
     templateUrl: './self-adjusting-textarea.component.html',
     styleUrls: ['./self-adjusting-textarea.component.scss'],

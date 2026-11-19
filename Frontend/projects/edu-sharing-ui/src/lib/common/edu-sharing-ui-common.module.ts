@@ -5,7 +5,7 @@ import { MatRippleModule } from '@angular/material/core';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ActionbarComponent } from '../actionbar/actionbar.component';
 import { BorderBoxObserverDirective } from '../directives/border-box-observer.directive';
 import { CheckTextOverflowDirective } from '../directives/check-text-overflow.directive';
@@ -93,7 +93,7 @@ import { DropdownBottomSheetComponent } from '../dropdown/dropdown-bottom-sheet/
         HtmlTextPipe,
         MatTooltipModule,
         MatRippleModule,
-        TranslateModule,
+        TranslatePipe,
         RouterModule,
     ],
     exports: [

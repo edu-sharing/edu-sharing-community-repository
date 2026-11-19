@@ -11,7 +11,7 @@ import { FormsModule } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
 import { MatButtonToggle, MatButtonToggleGroup } from '@angular/material/button-toggle';
 import { MatTooltip } from '@angular/material/tooltip';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
 import { CollectionListDisplayType } from '../../../shared/types/collection-list-display-type';
@@ -29,7 +29,7 @@ import { MediaRenderingDisplayType } from '../../../shared/types/media-rendering
         MatButtonToggle,
         MatButtonToggleGroup,
         MatTooltip,
-        TranslateModule,
+        TranslatePipe,
     ],
     templateUrl: './widget-configuration-buttons.component.html',
     changeDetection: ChangeDetectionStrategy.Eager,

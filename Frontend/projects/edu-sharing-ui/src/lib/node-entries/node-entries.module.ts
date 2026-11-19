@@ -17,7 +17,7 @@ import { MatSortModule } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTreeModule } from '@angular/material/tree';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { EduSharingUiCommonModule } from '../common/edu-sharing-ui-common.module';
 import { NodesDragSourceDirective } from '../directives/drag-nodes/nodes-drag-source.directive';
 import { NodesDragDirective } from '../directives/drag-nodes/nodes-drag.directive';
@@ -92,7 +92,7 @@ import { SortSelectPanelComponent } from './sort-select-panel/sort-select-panel.
         MatSortModule,
         MatTooltipModule,
         MatTreeModule,
-        TranslateModule,
+        TranslatePipe,
     ],
     exports: [
         ListItemLabelPipe,

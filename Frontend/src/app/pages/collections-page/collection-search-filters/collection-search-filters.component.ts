@@ -17,7 +17,7 @@ import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { ActivatedRoute, Router } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { Values } from 'ngx-edu-sharing-ui';
 import { combineLatest, Subject } from 'rxjs';
 import { debounceTime, map, takeUntil } from 'rxjs/operators';
@@ -52,7 +52,7 @@ let nextInstanceId = 0;
         MatButtonModule,
         MatSlideToggleModule,
         MdsModule,
-        TranslateModule,
+        TranslatePipe,
         ResizableSidenavDirective,
         EdgeToggleComponent,
     ],

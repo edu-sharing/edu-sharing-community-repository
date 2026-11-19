@@ -1,7 +1,7 @@
 import { Component, computed, inject, input, InputSignal, output, Signal } from '@angular/core';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
 import { TooltipAriaLabelDirective } from '../../shared/directives/tooltip-aria-label.directive';
@@ -35,7 +35,7 @@ export interface SwimlaneCompletionCounts {
         MatIconButton,
         MatTooltip,
         TooltipAriaLabelDirective,
-        TranslateModule,
+        TranslatePipe,
     ],
     templateUrl: './topic-page-status-bar.component.html',
     styleUrls: ['./topic-page-status-bar.component.scss'],

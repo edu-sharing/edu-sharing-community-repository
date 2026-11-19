@@ -1,5 +1,5 @@
 import { Component, computed, inject, input } from '@angular/core';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { IconDirective } from 'ngx-edu-sharing-ui';
 import { NodeHelperService } from '../../../services/node-helper.service';
@@ -9,7 +9,7 @@ import { NodeHelperService } from '../../../services/node-helper.service';
     selector: 'es-collection-scope-label',
     templateUrl: 'collection-scope-label.component.html',
     styleUrls: ['collection-scope-label.component.scss'],
-    imports: [TranslateModule, IconDirective],
+    imports: [TranslatePipe, IconDirective],
 })
 export class CollectionScopeLabelComponent {
     private readonly nodeHelper = inject(NodeHelperService);

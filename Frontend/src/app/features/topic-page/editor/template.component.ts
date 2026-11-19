@@ -34,7 +34,7 @@ import {
 } from '@angular/core';
 import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ActivatedRoute, Params, Router, UrlTree } from '@angular/router';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import {
     HOME_REPOSITORY,
     MdsService,
@@ -298,7 +298,7 @@ const isEditableTarget = (target: EventTarget | null): boolean =>
         TopicHeaderComponent,
         TopicPageFiltersSidebarComponent,
         TopicPageStatusBarComponent,
-        TranslateModule,
+        TranslatePipe,
         VarDirective,
         VariantSelectComponent,
     ],

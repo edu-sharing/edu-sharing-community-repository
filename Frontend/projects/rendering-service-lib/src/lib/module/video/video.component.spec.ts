@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 
 import { VideoComponent } from './video.component';
 import { CurrentRenderRootUrlService } from '../../current-render-root-url.service';
@@ -11,8 +11,9 @@ describe('VideoComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [VideoComponent, TranslateModule.forRoot()],
+            imports: [VideoComponent],
             providers: [
+                provideTranslateService(),
                 {
                     provide: CurrentRenderRootUrlService,
                     useValue: { rootUrl: 'http://localhost' },

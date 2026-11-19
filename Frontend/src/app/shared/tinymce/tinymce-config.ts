@@ -22,7 +22,7 @@ export function getTinyMceLanguage(language: string): string {
 /**
  * Options every editor instance needs.
  * @param baseHref the app's base href, i.e. `PlatformLocation.getBaseHrefFromDOM()`
- * @param language the app language, e.g. `TranslateService.getDefaultLang()`
+ * @param language the app language, e.g. `TranslateService.getFallbackLang()`
  */
 export function getTinyMceBaseConfig(baseHref: string, language: string): Record<string, any> {
     return {

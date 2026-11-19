@@ -1,7 +1,7 @@
 import { Component, input, model } from '@angular/core';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { IconDirective } from 'ngx-edu-sharing-ui';
 
 /** One selectable entry of an {@link ViewToggleGroupComponent}. */
@@ -23,7 +23,7 @@ export interface ViewToggleItem<T = string> {
     selector: 'es-view-toggle-group',
     templateUrl: 'view-toggle-group.component.html',
     styleUrls: ['view-toggle-group.component.scss'],
-    imports: [MatButtonToggleModule, MatTooltipModule, TranslateModule, IconDirective],
+    imports: [MatButtonToggleModule, MatTooltipModule, TranslatePipe, IconDirective],
 })
 export class ViewToggleGroupComponent<T = string> {
     readonly items = input.required<ViewToggleItem<T>[]>();

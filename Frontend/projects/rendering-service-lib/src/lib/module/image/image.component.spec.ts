@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 
 import { ImageComponent } from './image.component';
 import { CurrentRenderRootUrlService } from '../../current-render-root-url.service';
@@ -11,8 +11,9 @@ describe('ImageComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [ImageComponent, TranslateModule.forRoot()],
+            imports: [ImageComponent],
             providers: [
+                provideTranslateService(),
                 {
                     provide: CurrentRenderRootUrlService,
                     useValue: { rootUrl: 'http://localhost' },

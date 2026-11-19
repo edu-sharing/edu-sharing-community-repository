@@ -10,7 +10,7 @@ import {
     ChangeDetectionStrategy,
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
 import { VarDirective } from '../../../shared/directives/ng-var.directive';
 import { HighlightSearchPipe } from '../../../shared/pipes/highlight-search.pipe';
@@ -26,7 +26,7 @@ import { SelfAdjustingTextareaComponent } from './self-adjusting-textarea/self-a
         EduSharingUiCommonModule,
         MatButtonModule,
         SelfAdjustingTextareaComponent,
-        TranslateModule,
+        TranslatePipe,
         VarDirective,
     ],
     providers: [HighlightSearchPipe, MarkdownPipe],

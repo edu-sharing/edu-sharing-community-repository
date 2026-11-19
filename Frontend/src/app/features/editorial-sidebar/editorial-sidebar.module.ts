@@ -11,7 +11,7 @@ import { EditorialSidebarComponent } from './editorial-sidebar.component';
 import { CdkMonitorFocus } from '@angular/cdk/a11y';
 import { MatButtonModule } from '@angular/material/button';
 import { EdgeToggleComponent } from '../../shared/components/edge-toggle/edge-toggle.component';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { SubmissionSidebarComponent } from '../../pages/editorial-page/submission-sidebar/submission-sidebar.component';
 import { NodesSelectorComponent } from '../../pages/editorial-page/nodes-selector/nodes-selector.component';
 import { MetadataSidebarComponent } from '../../pages/workspace-page/metadata/metadata-sidebar.component';
@@ -38,7 +38,7 @@ import { ScopeBadgesComponent } from '../scopes/scope-badges/scope-badges.compon
         EdgeToggleComponent,
         CommonModule,
         MatButtonModule,
-        TranslateModule,
+        TranslatePipe,
         AssignmentSidebarComponent,
         SubmissionSidebarComponent,
         NodesSelectorComponent,

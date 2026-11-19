@@ -51,7 +51,7 @@ import {
     SessionStorageService,
 } from 'ngx-edu-sharing-api';
 import { trigger } from '@angular/animations';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { RestConstants } from '../../core-module/rest/rest-constants';
 import { Params, Router, RouterLink } from '@angular/router';
 import { filter, first } from 'rxjs/operators';
@@ -73,7 +73,7 @@ type ShareDetails = { key: string; result: SearchResultGeneric<NodeShare>; param
         CommonModule,
         DashboardInteractivityStreamComponent,
         EduSharingUiCommonModule,
-        TranslateModule,
+        TranslatePipe,
         MatButtonModule,
         NodeEntriesModule,
         RouterLink,

@@ -1,6 +1,5 @@
 import { Component, effect, inject, input, viewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { TranslateModule } from '@ngx-translate/core';
 import { Node } from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
@@ -33,7 +32,6 @@ const BUTTON_OPTIONS = ['OPTIONS.INVITE', 'OPTIONS.QR_CODE'];
     providers: [MdsEditorInstanceService, CollectionDetailsService, OptionsHelperDataService],
     imports: [
         MatButtonModule,
-        TranslateModule,
         CollectionInfoSectionComponent,
         EduSharingUiCommonModule,
         CollectionInfoHeroComponent,

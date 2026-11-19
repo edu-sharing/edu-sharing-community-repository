@@ -24,7 +24,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { MdsAiConfig, MdsDefinition, MdsService, MdsWidget, Node } from 'ngx-edu-sharing-api';
 import { NodeConfig } from 'ngx-edu-sharing-b-api';
 import { MdsWidgetType, SpinnerComponent } from 'ngx-edu-sharing-ui';
@@ -65,7 +65,7 @@ import { WidgetConfigurationButtonsComponent } from '../shared/widget-configurat
         MdsModule,
         ReactiveFormsModule,
         SpinnerComponent,
-        TranslateModule,
+        TranslatePipe,
         WidgetConfigurationButtonsComponent,
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA],

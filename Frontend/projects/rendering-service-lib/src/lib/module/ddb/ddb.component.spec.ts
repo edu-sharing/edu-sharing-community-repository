@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 
 import { DdbComponent } from './ddb.component';
 
@@ -9,7 +9,8 @@ describe('DdbComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [DdbComponent, TranslateModule.forRoot()],
+            imports: [DdbComponent],
+            providers: [provideTranslateService()],
         }).compileComponents();
 
         fixture = TestBed.createComponent(DdbComponent);

@@ -6,7 +6,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import {
     DEFAULT,
     HOME_REPOSITORY,
@@ -130,7 +130,7 @@ const FREE_TEXT_WIDGETS: string[] = [
         // preview card
         NodeEntriesModule,
         ScopePropertyListComponent,
-        TranslateModule,
+        TranslatePipe,
     ],
 })
 export class ScopeManagementComponent implements OnInit {

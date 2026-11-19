@@ -1,5 +1,5 @@
 import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { FeedbackData, FeedbackV1Service } from 'ngx-edu-sharing-api';
 import { EduSharingUiCommonModule, EduSharingUiModule } from 'ngx-edu-sharing-ui';
 import { firstValueFrom } from 'rxjs';
@@ -10,7 +10,7 @@ import { ViewFeedbackDialogData } from './view-feedback-dialog-data';
 
 @Component({
     selector: 'es-view-feedback-dialog',
-    imports: [EduSharingUiCommonModule, EduSharingUiModule, TranslateModule],
+    imports: [EduSharingUiCommonModule, EduSharingUiModule, TranslatePipe],
     templateUrl: './view-feedback-dialog.component.html',
     changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./view-feedback-dialog.component.scss'],

@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 
 import { BinderComponent } from './binder.component';
 
@@ -9,7 +9,8 @@ describe('BinderComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [BinderComponent, TranslateModule.forRoot()],
+            imports: [BinderComponent],
+            providers: [provideTranslateService()],
         }).compileComponents();
 
         fixture = TestBed.createComponent(BinderComponent);

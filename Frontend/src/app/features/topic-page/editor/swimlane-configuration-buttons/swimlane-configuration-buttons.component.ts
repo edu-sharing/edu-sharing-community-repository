@@ -15,7 +15,7 @@ import {
 import { FormsModule } from '@angular/forms';
 import { MatIconButton } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
 import { TopicPageHelperService } from '../../shared/services/topic-page-helper.service';
@@ -36,7 +36,7 @@ import { SwimlaneBackgroundShapeComponent } from '../swimlane-background-shape/s
         MatIconButton,
         MatMenuModule,
         SwimlaneBackgroundShapeComponent,
-        TranslateModule,
+        TranslatePipe,
     ],
     templateUrl: './swimlane-configuration-buttons.component.html',
     changeDetection: ChangeDetectionStrategy.Eager,

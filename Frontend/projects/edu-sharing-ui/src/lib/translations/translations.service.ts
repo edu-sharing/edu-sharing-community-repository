@@ -43,7 +43,8 @@ export class TranslationsService {
                 ?.observe('language')
                 .subscribe((lang) => {
                     // language has changed, i.e. user has different preference
-                    if (this.translate.currentLang && this.translate.currentLang !== lang) {
+                    const currentLang = this.translate.getCurrentLang();
+                    if (currentLang && currentLang !== lang) {
                         this.initialize().subscribe(() => {
                             this.ref.tick();
                         });
@@ -189,11 +190,11 @@ export class TranslationsService {
                             .set('language', selectedLanguage);
                     }
                     if (selectedLanguage === 'none') {
-                        this.translate.setDefaultLang('none');
+                        this.translate.setFallbackLang('none');
                     } else if (selectedLanguage?.startsWith('de-')) {
-                        this.translate.setDefaultLang('de');
+                        this.translate.setFallbackLang('de');
                     } else {
-                        this.translate.setDefaultLang(supportedLanguages[0]);
+                        this.translate.setFallbackLang(supportedLanguages[0]);
                     }
                 }),
                 // Configure `ngx-translate` to use the determined language and trigger loading of
@@ -215,7 +216,7 @@ export class TranslationsService {
     private async initializeCordova(supportedLanguages = DEFAULT_SUPPORTED_LANGUAGES) {
         this.translate.addLangs(supportedLanguages);
         let language = supportedLanguages[0];
-        this.translate.setDefaultLang(language);
+        this.translate.setFallbackLang(language);
         this.translate.use(language);
         this.language = language;
         const data = await this.appService.getLanguage();
@@ -291,7 +292,7 @@ export class TranslationsService {
         }
     }
 
-    /** Same as `translate.currentLang`. */
+    /** Same as `translate.getCurrentLang()`. */
     getLanguage(): string {
         return this.language;
     }

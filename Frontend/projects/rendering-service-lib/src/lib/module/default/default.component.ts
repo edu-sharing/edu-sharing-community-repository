@@ -11,12 +11,12 @@ import { RenderModule } from '../RenderModule';
 import { Node } from 'ngx-edu-sharing-api';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { EduSharingUiModule, NodeHelperService, NodesRightMode } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'rs-module-default',
-    imports: [RenderingModule, MatButtonModule, MatIconModule, TranslateModule, EduSharingUiModule],
+    imports: [RenderingModule, MatButtonModule, MatIconModule, TranslatePipe, EduSharingUiModule],
     templateUrl: './default.component.html',
     changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './default.component.scss',

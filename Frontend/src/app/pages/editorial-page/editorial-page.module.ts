@@ -7,7 +7,7 @@ import { ResizableSidenavDirective } from './resizable-sidenav.directive';
 import { EditorialBreadcrumbComponent } from './editorial-breadcrumb/editorial-breadcrumb.component';
 import { MdsModule } from '../../features/mds/mds.module';
 import { EduSharingUiCommonModule, InfoMessageComponent } from 'ngx-edu-sharing-ui';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ManageAssignmentComponent } from './manage-assignment/manage-assignment.component';
 import { ManageAssignmentNodesComponent } from './manage-assignment-nodes/manage-assignment-nodes.component';
 import { AssignmentSubmissionComponent } from './assignment-submission/assignment-submission.component';
@@ -37,7 +37,7 @@ import { ScopeSettingsComponent } from './scope-settings/scope-settings.componen
         EduSharingUiCommonModule,
         SharedModule,
         MdsModule,
-        TranslateModule,
+        TranslatePipe,
     ],
     providers: [EditorialBreadcrumbService],
 })

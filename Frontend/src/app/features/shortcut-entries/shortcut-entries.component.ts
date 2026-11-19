@@ -20,7 +20,7 @@ import { FormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 import { Router } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import {
     ClientConfig,
     ConfigService,
@@ -64,7 +64,7 @@ import { ShortcutEntryTitlePipe } from './shortcut-entry-title.pipe';
         MatInputModule,
         MatMenuModule,
         ShortcutEntryTitlePipe,
-        TranslateModule,
+        TranslatePipe,
     ],
 })
 export class ShortcutEntriesComponent implements OnInit {

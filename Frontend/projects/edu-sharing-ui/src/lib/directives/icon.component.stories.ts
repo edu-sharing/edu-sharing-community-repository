@@ -2,7 +2,7 @@ import { type Meta, moduleMetadata, type StoryObj } from '@storybook/angular';
 import { IconComponent } from './icon.component';
 import { ButtonComponent } from '../../../../../src/storybook/button/button.component';
 import { SharedModule } from '../../../../../src/app/shared/shared.module';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 
 const icon: Meta<IconComponent> = {
     title: 'Material/Icons',
@@ -10,7 +10,8 @@ const icon: Meta<IconComponent> = {
     decorators: [
         moduleMetadata({
             declarations: [], // Prevent duplicate declaration of InfoMessageComponent
-            imports: [SharedModule, TranslateModule.forRoot()],
+            imports: [SharedModule],
+            providers: [provideTranslateService()],
         }),
     ],
     args: {},

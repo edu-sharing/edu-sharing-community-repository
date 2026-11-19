@@ -2,7 +2,7 @@ import { Component, NgZone, OnDestroy, inject, ChangeDetectionStrategy } from '@
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { UIService } from '../../../../core-module/core.module';
 import { CordovaService } from '../../../../services/cordova.service';
@@ -14,7 +14,7 @@ import { CreateLtiToolDialogData, CreateLtiToolDialogResult } from './create-lti
 
 @Component({
     selector: 'es-create-lti-tool-dialog',
-    imports: [FormsModule, MatFormFieldModule, MatInputModule, TranslateModule],
+    imports: [FormsModule, MatFormFieldModule, MatInputModule, TranslatePipe],
     templateUrl: './create-lti-tool-dialog.component.html',
     changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./create-lti-tool-dialog.component.scss'],

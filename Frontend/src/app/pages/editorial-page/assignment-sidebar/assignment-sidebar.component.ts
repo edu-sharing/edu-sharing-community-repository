@@ -3,7 +3,7 @@ import { ListItem, ListItemsModule, NodeEntriesService, TreeNodeService } from '
 import { SharedModule } from '../../../shared/shared.module';
 import { CommentsListComponent } from '../../../features/mds/mds-editor/widgets/mds-editor-widget-comments/comments-list/comments-list.component';
 import { AssignmentConfig } from '../submission-sidebar/submission-sidebar.component';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { AssignmentFile, Node, SubmissionFile } from 'ngx-edu-sharing-api';
 
 /**
@@ -14,7 +14,7 @@ import { AssignmentFile, Node, SubmissionFile } from 'ngx-edu-sharing-api';
     selector: 'es-assignment-sidebar',
     templateUrl: 'assignment-sidebar.component.html',
     styleUrls: ['assignment-sidebar.component.scss'],
-    imports: [SharedModule, ListItemsModule, TranslateModule],
+    imports: [SharedModule, ListItemsModule, TranslatePipe],
     changeDetection: ChangeDetectionStrategy.Eager,
     providers: [NodeEntriesService, TreeNodeService],
 })

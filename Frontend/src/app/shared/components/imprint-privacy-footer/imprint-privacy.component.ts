@@ -1,7 +1,7 @@
 import { A11yModule } from '@angular/cdk/a11y';
 import { CommonModule } from '@angular/common';
 import { Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ImprintPrivacyService } from './imprint-privacy-service';
 
 @Component({
@@ -9,7 +9,7 @@ import { ImprintPrivacyService } from './imprint-privacy-service';
     templateUrl: './imprint-privacy.component.html',
     styleUrls: ['./imprint-privacy.component.scss'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [CommonModule, A11yModule, TranslateModule],
+    imports: [CommonModule, A11yModule, TranslatePipe],
 })
 export class ImprintPrivacyComponent {
     service = inject(ImprintPrivacyService);
