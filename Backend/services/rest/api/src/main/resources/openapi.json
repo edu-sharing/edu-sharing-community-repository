@@ -5925,6 +5925,9 @@
       },
       "NodeShare": {
         "properties": {
+          "download": {
+            "type": "boolean"
+          },
           "downloadCount": {
             "format": "int32",
             "type": "integer"
@@ -5951,6 +5954,9 @@
           },
           "url": {
             "type": "string"
+          },
+          "view": {
+            "type": "boolean"
           }
         },
         "type": "object"
@@ -9242,6 +9248,9 @@
       },
       "SharingInfo": {
         "properties": {
+          "download": {
+            "type": "boolean"
+          },
           "expired": {
             "type": "boolean"
           },
@@ -9255,6 +9264,9 @@
             "type": "boolean"
           },
           "passwordMatches": {
+            "type": "boolean"
+          },
+          "view": {
             "type": "boolean"
           }
         },
@@ -40893,6 +40905,22 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "description": "the recipient may view the content in the browser, leave empty for the default of the current context",
+            "in": "query",
+            "name": "view",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "the recipient may download the content, leave empty for the default of the current context",
+            "in": "query",
+            "name": "download",
+            "schema": {
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
@@ -41108,6 +41136,22 @@
             "name": "password",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "description": "the recipient may view the content in the browser, leave empty if you don't want to change it",
+            "in": "query",
+            "name": "view",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "the recipient may download the content, leave empty if you don't want to change it",
+            "in": "query",
+            "name": "download",
+            "schema": {
+              "type": "boolean"
             }
           }
         ],
@@ -48955,6 +48999,125 @@
         ]
       }
     },
+    "/sharing/v1/sharing/{repository}/{node}/{share}/metadata/secured": {
+      "get": {
+        "description": "Like the signed metadata of a node, but authorized by the share instead of a login. The share has to allow viewing; the included jwt only grants the permissions of the share.",
+        "operationId": "getMetadataSigned_1",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "ID of node",
+            "in": "path",
+            "name": "node",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Share token",
+            "in": "path",
+            "name": "share",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Password (required if share is locked)",
+            "in": "query",
+            "name": "password",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Id of a node below the shared node, e.g. an element of a shared folder (optional)",
+            "in": "query",
+            "name": "child",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignedNodeEntry"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "security": [],
+        "summary": "Get signed metadata of a shared node for the rendering.",
+        "tags": [
+          "SHARING v1"
+        ]
+      }
+    },
     "/statistic/v1/facets/{context}": {
       "post": {
         "description": "Statistics.",
@@ -52532,6 +52695,112 @@
           }
         },
         "summary": "Track a user interaction",
+        "tags": [
+          "TRACKING v1"
+        ]
+      }
+    },
+    "/tracking/v1/tracking/{repository}/{event}/share-link": {
+      "put": {
+        "description": "The recipient of a link share has no account, so the interaction is reported by a registered application (e.g. the rendering service) with a signed request. Limited to view interactions.",
+        "operationId": "trackShareLinkEvent",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "type of event to track",
+            "in": "path",
+            "name": "event",
+            "required": true,
+            "schema": {
+              "enum": [
+                "DOWNLOAD_MATERIAL",
+                "OPEN_EXTERNAL_LINK",
+                "VIEW_MATERIAL",
+                "VIEW_COLLECTION",
+                "VIEW_MATERIAL_EMBEDDED",
+                "VIEW_MATERIAL_GDPR_CONFIRMED",
+                "VIEW_MATERIAL_PLAY_MEDIA",
+                "EDIT_MATERIAL",
+                "CREATE_MATERIAL",
+                "ARCHIVE_MATERIAL",
+                "DELETE_MATERIAL",
+                "MOVE_MATERIAL",
+                "COPY_MATERIAL",
+                "REVERT_MATERIAL_VERSION",
+                "CHANGE_MATERIAL_CONTENT",
+                "CHANGE_MATERIAL_OWNER",
+                "FORK_MATERIAL",
+                "COMMENT_MATERIAL",
+                "RATE_MATERIAL",
+                "UNRATE_MATERIAL",
+                "LINK_SHARE_MATERIAL",
+                "LINK_UNSHARE_MATERIAL",
+                "FEEDBACK_MATERIAL",
+                "REPORT_MATERIAL",
+                "EDIT_MATERIAL_RELATION",
+                "PROPOSE_MATERIAL_TO_COLLECTION",
+                "WORKFLOW_CHANGED_ON_MATERIAL",
+                "ADD_MATERIAL_TO_COLLECTION"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "node id for which the event is tracked",
+            "in": "query",
+            "name": "node",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "security": [],
+        "summary": "Track a user interaction of a link share recipient",
         "tags": [
           "TRACKING v1"
         ]

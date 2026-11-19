@@ -1,4 +1,4 @@
-import { Component, ViewChild, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ViewChild, inject, ChangeDetectionStrategy, signal } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import {
     ColumnType,
@@ -10,11 +10,14 @@ import {
     ListSortConfig,
     NodeDataSource,
     NodeEntriesDisplayType,
+    NodeClickEvent,
     NodeEntriesWrapperComponent,
     NodePersonNamePipe,
     OPEN_URL_MODE,
     OptionItem,
     Scope,
+    CombinedRenderData,
+    RenderHelperService,
     TemporaryStorageService,
     TranslationsService,
     UIConstants,
@@ -36,6 +39,7 @@ import { BridgeService } from '../../services/bridge.service';
 import { NodeHelperService } from '../../services/node-helper.service';
 import { ConfigService, Node } from 'ngx-edu-sharing-api';
 import { OptionsHelperService } from '../../services/options-helper.service';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
     selector: 'es-sharing-page',
@@ -59,12 +63,18 @@ export class SharingPageComponent {
     private config = inject(ConfigService);
     private nodePersonNamePipe = inject(NodePersonNamePipe);
     private translations = inject(TranslationsService);
+    private renderHelper = inject(RenderHelperService);
 
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
     readonly Scope = Scope;
     @ViewChild('nodeEntries') nodeEntries: NodeEntriesWrapperComponent<Node>;
     loading = true;
+    /** data of the rendered (shared or child) node, only set if the share allows viewing */
+    renderData = signal<CombinedRenderData | null>(null);
+    renderLoading = signal(false);
+    /** the element of a shared folder that is currently displayed, null for the shared node itself */
+    viewedChild = signal<Node | null>(null);
     passwordInput: string;
     private params: Params;
     sharingInfo: SharingInfo;
@@ -109,7 +119,8 @@ export class SharingPageComponent {
         });
         open.group = DefaultGroups.Primary;
         open.showAsAction = true;
-        download.customShowCallback = async (nodes: Node[]) => nodes?.[0]?.mediatype !== 'link';
+        download.customShowCallback = async (nodes: Node[]) =>
+            !!this.sharingInfo?.download && nodes?.[0]?.mediatype !== 'link';
         open.customShowCallback = async (nodes: Node[]) => nodes?.[0]?.mediatype === 'link';
         this.options.addOptions.push(download);
         this.options.addOptions.push(open);
@@ -129,6 +140,7 @@ export class SharingPageComponent {
                             return;
                         }
                         this.loadChildren();
+                        void this.loadRenderData();
                     },
                     (error) => {
                         console.warn(error);
@@ -153,7 +165,67 @@ export class SharingPageComponent {
                 }
                 this.sharingInfo = result;
                 this.loadChildren();
+                void this.loadRenderData();
             });
+    }
+
+    /**
+     * Whether the content of the shared node is displayed in the browser: only if the share allows
+     * viewing and the node itself has content (a folder only lists its elements, a link has none)
+     */
+    get showsRenderedNode(): boolean {
+        return (
+            !!this.sharingInfo?.view &&
+            !this.sharingInfo.node.isDirectory &&
+            this.sharingInfo.node.mediatype !== 'link'
+        );
+    }
+
+    /**
+     * Loads the data to render the shared node or - for a shared folder - the given element
+     */
+    private async loadRenderData(child: Node | null = null): Promise<void> {
+        this.viewedChild.set(child);
+        const viewsChild = !!child && !!this.sharingInfo?.view;
+        if (!viewsChild && !this.showsRenderedNode) {
+            this.renderData.set(null);
+            return;
+        }
+        if (this.sharingInfo.password && !this.sharingInfo.passwordMatches) {
+            return;
+        }
+        this.renderLoading.set(true);
+        // the renderer only reads its inputs on creation, so drop the old data first
+        this.renderData.set(null);
+        try {
+            const securedNode = await firstValueFrom(
+                this.sharingService.getSecuredNode(
+                    this.params.nodeId,
+                    this.params.token,
+                    this.passwordInput ?? '',
+                    child?.ref.id ?? null,
+                ),
+            );
+            this.renderData.set(await this.renderHelper.getRenderDataForShare(securedNode));
+        } catch (error) {
+            console.warn(error);
+            this.toast.error(error);
+        } finally {
+            this.renderLoading.set(false);
+        }
+    }
+
+    /**
+     * Click on an element of a shared folder: display it if the share allows viewing
+     */
+    openChild(event: NodeClickEvent<Node>) {
+        if (this.sharingInfo?.view && event.element.mediatype !== 'link') {
+            void this.loadRenderData(event.element);
+        }
+    }
+
+    closeChild() {
+        void this.loadRenderData(null);
     }
     download(children: Node[] = null) {
         const node = this.params.nodeId;

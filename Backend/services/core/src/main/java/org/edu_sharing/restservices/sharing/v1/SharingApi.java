@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.node.v1.model.NodeEntries;
+import org.edu_sharing.restservices.node.v1.model.SignedNodeEntry;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.restservices.shared.NodeRef;
@@ -114,6 +115,37 @@ public class SharingApi {
         }
     }
 
+
+    @GET
+    @SecurityRequirements
+    @Path("/sharing/{repository}/{node}/{share}/metadata/secured")
+    @Operation(summary = "Get signed metadata of a shared node for the rendering.", description = "Like the signed metadata of a node, but authorized by the share instead of a login. The share has to allow viewing; the included jwt only grants the permissions of the share.")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = SignedNodeEntry.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+    public Response getMetadataSigned(
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Parameter(description = "Share token", required = true) @PathParam("share") String token,
+            @Parameter(description = "Password (required if share is locked)", required = false, schema = @Schema(defaultValue = "")) @QueryParam("password") String password,
+            @Parameter(description = "Id of a node below the shared node, e.g. an element of a shared folder (optional)", required = false) @QueryParam("child") String child,
+            @Context HttpServletRequest req) {
+
+        try {
+            return AuthenticationUtil.runAsSystem(() -> {
+                RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+                return Response.status(Response.Status.OK).entity(SharingDao.getSignedNode(repoDao, node, token, password, child)).build();
+            });
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
+    }
 
     @POST
     @Path("/share/{repository}/{node}/reject")

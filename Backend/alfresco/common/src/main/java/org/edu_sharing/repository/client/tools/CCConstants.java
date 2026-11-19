@@ -964,6 +964,8 @@ public class CCConstants {
     public final static String CCM_PROP_SHARE_MAIL = "{http://www.campuscontent.de/model/1.0}share_mail";
     public final static String CCM_PROP_SHARE_TOKEN = "{http://www.campuscontent.de/model/1.0}share_token";
     public final static String CCM_PROP_SHARE_DOWNLOAD_COUNTER = "{http://www.campuscontent.de/model/1.0}share_download_counter";
+    public final static String CCM_PROP_SHARE_VIEW = "{http://www.campuscontent.de/model/1.0}share_view";
+    public final static String CCM_PROP_SHARE_DOWNLOAD = "{http://www.campuscontent.de/model/1.0}share_download";
 
     public final static String CCM_PROP_SYSUPDATE_ID = "{http://www.campuscontent.de/model/1.0}sysupdate_id";
     public final static String CCM_PROP_SYSUPDATE_DATE = "{http://www.campuscontent.de/model/1.0}sysupdate_date";

@@ -17,11 +17,17 @@ public class SharingInfo {
     private boolean passwordMatches;
     private boolean password;
     private boolean expired;
+    /** the recipient may view the content in the browser */
+    private boolean view;
+    /** the recipient may download the content */
+    private boolean download;
     private Person invitedBy = null;
     private Node node;
 
     public SharingInfo(Share share, NodeDao nodeDao, String passwordCheck) throws DAOException {
         this.password=share.getPassword()!=null;
+        this.view=share.isViewAllowed();
+        this.download=share.isDownloadAllowed();
         setInvitedBy(convertToPerson(share, nodeDao));
         if(passwordCheck!=null && !passwordCheck.isEmpty()){
             this.passwordMatches= GlobalShareServiceImpl.encryptPassword(passwordCheck).equals(share.getPassword());

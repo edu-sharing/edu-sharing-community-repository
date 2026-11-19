@@ -8,7 +8,14 @@ public interface GlobalShareService {
 	long EXPIRY_DATE_UNLIMITED = - 1;
 	String EMAIL_TYPE_LINK = "LINK";
 	
-	Share createShare(String nodeId, long expiryDate, String password) throws EMailValidationException, EMailSendFailedException, ExpiryDateValidationException, NodeDoesNotExsistException, PermissionFailedException;
+	/**
+	 * Creates a link share.
+	 *
+	 * @param view     whether the recipient may view the content in the browser, {@code null} for the default of the current context
+	 * @param download whether the recipient may download the content, {@code null} for the default of the current context
+	 * @throws IllegalArgumentException if neither view nor download would be allowed
+	 */
+	Share createShare(String nodeId, long expiryDate, String password, Boolean view, Boolean download) throws EMailValidationException, EMailSendFailedException, ExpiryDateValidationException, NodeDoesNotExsistException, PermissionFailedException;
 	String createShare(String nodeId, String[] emails, long expiryDate, String password, String emailMessageLocale) throws EMailValidationException, EMailSendFailedException, ExpiryDateValidationException, NodeDoesNotExsistException, PermissionFailedException;
 	
 	void updateShare(String nodeId, String email, long expiryDate) throws EMailValidationException, ExpiryDateValidationException, NodeDoesNotExsistException, PermissionFailedException;

@@ -21,6 +21,18 @@ import { EduSharingUiConfiguration } from '../edu-sharing-ui-configuration';
 import { OptionsHelperDataService } from './options-helper-data.service';
 import { Scope } from '../types/option-item';
 
+/**
+ * Signed node data the rendering service needs, structurally the `SignedNodeEntry` of the api
+ */
+export type SecuredNodeData = {
+    node: Node;
+    jwt: string;
+    signedNode: string;
+    signature: string;
+    signatureAlgorithm?: string;
+    renderingBaseUrl?: string;
+};
+
 export type CombinedRenderData = {
     node: Node;
     /**
@@ -134,25 +146,52 @@ export class RenderHelperService {
                 error: 'RENDERING.ERROR.RS2_NOT_CONFIGURED',
             };
         }
-        const rootUrl = await this.prepareRootUrl();
-        const token = securedNode.jwt;
-        const request = {
-            eventType,
-            nodeId: node.ref.id,
-            repoId: node.ref.repo,
-            securedNode: securedNode.signedNode,
-            signature: securedNode.signature,
-            signatureAlgorithm: securedNode.signatureAlgorithm,
-            token: token,
-            renderingBaseUrl:
-                rootUrl === securedNode.renderingBaseUrl ? null : securedNode.renderingBaseUrl,
-        } as RenderDataRequestWithToken;
-
         return {
             node,
             nodeParent,
-            request,
+            request: await this.createRenderRequest(securedNode, eventType),
         };
+    }
+
+    /**
+     * Render data for a node that is accessed via a link share. The signed data is authorized by the
+     * share (see `RestSharingService.getSecuredNode`), so no login, options or parent lookup is involved.
+     */
+    async getRenderDataForShare(
+        securedNode: SecuredNodeData,
+        eventType: NonNullable<UserEvent['eventType']> = 'VIEW_MATERIAL',
+    ): Promise<CombinedRenderData> {
+        const about = await firstValueFrom(this.aboutService.getAbout());
+        const node = securedNode.node;
+        if (!about.renderingService2) {
+            console.error('no rendering service 2 url was configured. Will not continue.');
+            return {
+                node,
+                error: 'RENDERING.ERROR.RS2_NOT_CONFIGURED',
+            };
+        }
+        return {
+            node,
+            request: await this.createRenderRequest(securedNode, eventType),
+        };
+    }
+
+    private async createRenderRequest(
+        securedNode: SecuredNodeData,
+        eventType: NonNullable<UserEvent['eventType']>,
+    ): Promise<RenderDataRequestWithToken> {
+        const rootUrl = await this.prepareRootUrl();
+        return {
+            eventType,
+            nodeId: securedNode.node.ref.id,
+            repoId: securedNode.node.ref.repo,
+            securedNode: securedNode.signedNode,
+            signature: securedNode.signature,
+            signatureAlgorithm: securedNode.signatureAlgorithm,
+            token: securedNode.jwt,
+            renderingBaseUrl:
+                rootUrl === securedNode.renderingBaseUrl ? null : securedNode.renderingBaseUrl,
+        } as RenderDataRequestWithToken;
     }
 
     async getRenderDataForLms(

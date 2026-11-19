@@ -1169,6 +1169,8 @@ public class NodeApi {
             @Parameter(description = "share id", required = true) @PathParam("shareId") String shareId,
             @Parameter(description = "expiry date for this share, leave empty or -1 for unlimited", required = false, schema = @Schema(defaultValue = "" + GlobalShareService.EXPIRY_DATE_UNLIMITED)) @QueryParam("expiryDate") Long expiryDate,
             @Parameter(description = "new password for share, leave empty if you don't want to change it", required = false, schema = @Schema(defaultValue = "")) @QueryParam("password") String password,
+            @Parameter(description = "the recipient may view the content in the browser, leave empty if you don't want to change it", required = false) @QueryParam("view") Boolean view,
+            @Parameter(description = "the recipient may download the content, leave empty if you don't want to change it", required = false) @QueryParam("download") Boolean download,
             @Context HttpServletRequest req) {
 
         try {
@@ -1176,7 +1178,7 @@ public class NodeApi {
             RepositoryDao repoDao = RepositoryDao.getRepository(repository);
             NodeDao nodeDao = NodeDao.getNode(repoDao, node);
 
-            NodeShare response = nodeDao.updateShare(shareId, expiryDate == null ? GlobalShareService.EXPIRY_DATE_UNLIMITED : expiryDate, password);
+            NodeShare response = nodeDao.updateShare(shareId, expiryDate == null ? GlobalShareService.EXPIRY_DATE_UNLIMITED : expiryDate, password, view, download);
             return Response.status(Response.Status.OK).entity(response).build();
         } catch (Throwable t) {
             return ErrorResponse.createResponse(t);
@@ -1282,13 +1284,15 @@ public class NodeApi {
             @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
             @Parameter(description = "expiry date for this share, leave empty or -1 for unlimited", required = false, schema = @Schema(defaultValue = "" + GlobalShareService.EXPIRY_DATE_UNLIMITED)) @QueryParam("expiryDate") Long expiryDate,
             @Parameter(description = "password for this share, use none to not use a password", required = false, schema = @Schema(defaultValue = "")) @QueryParam("password") String password,
+            @Parameter(description = "the recipient may view the content in the browser, leave empty for the default of the current context", required = false) @QueryParam("view") Boolean view,
+            @Parameter(description = "the recipient may download the content, leave empty for the default of the current context", required = false) @QueryParam("download") Boolean download,
             @Context HttpServletRequest req) {
 
         try {
 
             RepositoryDao repoDao = RepositoryDao.getRepository(repository);
             NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-            NodeShare response = nodeDao.createShare(expiryDate == null ? GlobalShareService.EXPIRY_DATE_UNLIMITED : expiryDate, password);
+            NodeShare response = nodeDao.createShare(expiryDate == null ? GlobalShareService.EXPIRY_DATE_UNLIMITED : expiryDate, password, view, download);
 
             activityEventService.trackActivityOnNode(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node), null, ActivityOnNodeEventType.LINK_SHARE_MATERIAL, AuthenticationUtil.getFullyAuthenticatedUser());
 

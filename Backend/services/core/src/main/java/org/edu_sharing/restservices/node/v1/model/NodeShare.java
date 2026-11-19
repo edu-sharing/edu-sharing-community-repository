@@ -17,6 +17,10 @@ public class NodeShare  {
 	private int downloadCount;
 	private String url;
 	private String shareId;
+	/** the recipient may view the content in the browser */
+	private boolean view;
+	/** the recipient may download the content */
+	private boolean download;
 
 
 	public NodeShare(){}
@@ -28,6 +32,8 @@ public class NodeShare  {
 		expiryDate=share.getExpiryDate();
 		invitedAt=share.getInvitedAt().getTime();
 		downloadCount=share.getDownloadCount();
+		view=share.isViewAllowed();
+		download=share.isDownloadAllowed();
 		url=URLTool.getShareServletUrl(node, share.getToken());
 	}
 }

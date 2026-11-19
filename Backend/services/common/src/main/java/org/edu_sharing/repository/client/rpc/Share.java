@@ -25,6 +25,15 @@ public class Share implements Serializable{
 	private String password;
 	private Map<String, Object> properties;
 
+	/** as stored, null for shares created before view/download could be chosen, see {@link #isViewAllowed()} */
+	private Boolean view;
+	/** as stored, null for shares created before view/download could be chosen, see {@link #isDownloadAllowed()} */
+	private Boolean download;
+	/** context default for a share that has no stored {@link #view}, not persisted */
+	private Boolean defaultView;
+	/** context default for a share that has no stored {@link #download}, not persisted */
+	private Boolean defaultDownload;
+
 	public Share() {}
 	
 	public String getEmail() {
@@ -93,5 +102,54 @@ public class Share implements Serializable{
 
 	public Map<String, Object> getProperties() {
 		return properties;
+	}
+
+	/**
+	 * Raw value as stored, {@code null} if the share was created before view/download could be chosen.
+	 */
+	public Boolean getView() {
+		return view;
+	}
+
+	public void setView(Boolean view) {
+		this.view = view;
+	}
+
+	public Boolean getDownload() {
+		return download;
+	}
+
+	public void setDownload(Boolean download) {
+		this.download = download;
+	}
+
+	public void setDefaultView(Boolean defaultView) {
+		this.defaultView = defaultView;
+	}
+
+	public void setDefaultDownload(Boolean defaultDownload) {
+		this.defaultDownload = defaultDownload;
+	}
+
+	/**
+	 * Whether the recipient may view the content in the browser. A share without stored value uses the
+	 * context default; without a known default it does not allow it.
+	 */
+	public boolean isViewAllowed() {
+		if (view != null) {
+			return view;
+		}
+		return Boolean.TRUE.equals(defaultView);
+	}
+
+	/**
+	 * Whether the recipient may download the content. A share without stored value uses the context
+	 * default; without a known default it allows it, as before view/download could be chosen.
+	 */
+	public boolean isDownloadAllowed() {
+		if (download != null) {
+			return download;
+		}
+		return defaultDownload == null || defaultDownload;
 	}
 }

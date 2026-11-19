@@ -48,6 +48,10 @@ export class ShareLinkDialogComponent implements OnInit {
     passwordString: string;
     _expiryDate: Date;
     passwordAlreadySet: boolean;
+    /** the recipient may view the content in the browser */
+    viewEnabled = true;
+    /** the recipient may download the content */
+    downloadEnabled = true;
     buttons: DialogButton[];
     today = new Date();
     set expiryDate(date: Date) {
@@ -99,6 +103,7 @@ export class ShareLinkDialogComponent implements OnInit {
                 this._expiryDate = new Date(new Date().getTime() + 3600 * 24 * 1000);
                 if (data.length) {
                     this.currentShare = data[0];
+                    this.applyActions(data[0]);
                     this.expiry = data[0].expiryDate > 0;
                     this.passwordEnabled = data[0].password;
                     if (this.passwordEnabled) {
@@ -135,9 +140,13 @@ export class ShareLinkDialogComponent implements OnInit {
                 this.currentShare.shareId,
                 date,
                 this.getPasswordParameter(),
+                undefined,
+                this.viewEnabled,
+                this.downloadEnabled,
             )
             .subscribe((data: NodeShare) => {
                 this.currentShare = data;
+                this.applyActions(data);
                 if (date == 0)
                     this.currentShare.url = this.translate.instant('WORKSPACE.SHARE_LINK.DISABLED');
                 this.loading$.next(false);
@@ -165,6 +174,30 @@ export class ShareLinkDialogComponent implements OnInit {
         this.updateShare();
     }
 
+    /**
+     * The link has to allow at least one of view and download; the toggle that was just changed is
+     * reverted if it would switch off the last remaining option.
+     */
+    setActions(changed: 'view' | 'download') {
+        if (!this.viewEnabled && !this.downloadEnabled) {
+            if (changed === 'view') {
+                this.viewEnabled = true;
+            } else {
+                this.downloadEnabled = true;
+            }
+            this.toast.error(null, 'WORKSPACE.SHARE_LINK.ACTIONS_MIN_ONE');
+            return;
+        }
+        if (this.enabled) {
+            this.updateShare();
+        }
+    }
+
+    private applyActions(share: NodeShare) {
+        this.viewEnabled = share.view ?? false;
+        this.downloadEnabled = share.download ?? true;
+    }
+
     setPassword() {
         if (!this.passwordEnabled) {
             this.passwordString = null;
@@ -179,6 +212,7 @@ export class ShareLinkDialogComponent implements OnInit {
             (data: NodeShare) => {
                 this.passwordAlreadySet = false;
                 this.currentShare = data;
+                this.applyActions(data);
                 this.dialogRef.patchState({ isLoading: false });
                 this.enabled = true;
             },

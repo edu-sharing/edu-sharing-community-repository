@@ -997,7 +997,8 @@
     "PASSWORD_PLACEHOLDER": "Enter password ...",
     "PASSWORD_CORRECT": "Password correct",
     "SUBELEMENT_SINGLE": "contains 1 more element",
-    "SUBELEMENT_MULTI": "contains {{count}} more elements"
+    "SUBELEMENT_MULTI": "contains {{count}} more elements",
+    "BACK_TO_LIST": "Back to list"
   },
   "VIDEO_CONTROLS": {
     "HEADING": "Select a clip for saving to a collection",

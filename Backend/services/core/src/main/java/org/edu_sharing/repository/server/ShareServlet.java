@@ -118,6 +118,10 @@ public class ShareServlet extends DownloadServlet {
                         return null;
                     }
                 }
+				if (!share.isDownloadAllowed()) {
+                    resp.sendRedirect(URLTool.getNgMessageUrl("invalid_share"));
+                    return null;
+                }
 				if (share.getPassword() != null && (!share.getPassword().equals(GlobalShareServiceImpl.encryptPassword(password)))) {
                     resp.sendRedirect(URLHelper.getNgComponentsUrl() + "sharing?" + req.getQueryString());
                 }

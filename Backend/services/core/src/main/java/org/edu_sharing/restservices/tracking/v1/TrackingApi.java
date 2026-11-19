@@ -7,10 +7,13 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
+import org.edu_sharing.repository.server.tools.security.JwtTokenUtil;
 import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Pagination;
@@ -79,6 +82,55 @@ public class TrackingApi {
         }
     }
 
+
+    /**
+     * Interactions the rendering service may report for the recipient of a link share
+     */
+    private static final List<ActivityOnNodeEventType> SHARE_LINK_EVENTS = Arrays.asList(
+            ActivityOnNodeEventType.VIEW_MATERIAL,
+            ActivityOnNodeEventType.VIEW_MATERIAL_PLAY_MEDIA,
+            ActivityOnNodeEventType.VIEW_MATERIAL_GDPR_CONFIRMED
+    );
+
+    @PUT
+    @SecurityRequirements
+    @Path("/tracking/{repository}/{event}/share-link")
+    @Operation(summary = "Track a user interaction of a link share recipient", description = "The recipient of a link share has no account, so the interaction is reported by a registered application (e.g. the rendering service) with a signed request. Limited to view interactions.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200),
+            @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public Response trackShareLinkEvent(
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = "type of event to track", required = true) @PathParam("event") ActivityOnNodeEventType event,
+            @Parameter(description = "node id for which the event is tracked", required = true) @QueryParam("node") String node,
+            @Context HttpServletRequest req) {
+        try {
+            if (ContextManagementFilter.accessTool.get() == null) {
+                return Response.status(Response.Status.FORBIDDEN)
+                        .entity(new ErrorResponse(new IllegalAccessException("only a registered application may track for a link share")))
+                        .build();
+            }
+            if (!SHARE_LINK_EVENTS.contains(event) || node == null || node.isBlank()) {
+                throw new IllegalArgumentException("the given event or node is not supported for link shares");
+            }
+            AuthenticationUtil.runAsSystem(() -> {
+                activityEventService.trackActivityOnNode(
+                        new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node),
+                        null,
+                        event,
+                        JwtTokenUtil.SHARE_LINK_USERNAME);
+                return null;
+            });
+            return Response.status(Response.Status.OK).build();
+        } catch (IllegalArgumentException e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse(e)).build();
+        } catch (Throwable t) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
+        }
+    }
 
     @GET
     @Path("/tracking/{repository}/userNodeActivities/{user}")

@@ -477,7 +477,14 @@
       "LINK_DOWNLOADS": "Bisherige Downloads: {{ count }}",
       "COPIED_CLIPBOARD": "Link wurde in die Zwischenablage kopiert",
       "COPIED_CLIPBOARD_ERROR": "Link konnte nicht kopiert werden. Bitte markieren und kopieren Sie den Link manuell",
-      "QR_CODE_ARIA_LABEL": "QR-Code für diesen Freigabelink"
+      "QR_CODE_ARIA_LABEL": "QR-Code für diesen Freigabelink",
+      "VIEW_TITLE": "Ansicht im Browser erlauben",
+      "VIEW_INFO": "Das Objekt kann über den Link direkt im Browser angesehen werden",
+      "DOWNLOAD_TITLE": "Download erlauben",
+      "DOWNLOAD_INFO": "Das Objekt kann über den Link heruntergeladen werden",
+      "ACTIONS_MIN_ONE": "Mindestens eine der beiden Optionen muss aktiviert bleiben",
+      "LINK_INFO_VIEW": "Jeder, der Zugriff auf den Link hat, darf das Objekt ansehen.",
+      "LINK_INFO_VIEW_FOLDER": "Jeder, der Zugriff auf den Link hat, darf alle Dateien des Ordners ansehen. Auf Unterordner kann nicht zugegriffen werden."
     },
     "WORKFLOW": {
       "TITLE": "Workflow",

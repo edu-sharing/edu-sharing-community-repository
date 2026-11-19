@@ -2640,16 +2640,53 @@ public class NodeDao {
         // (expensive) metadata conversion
         Map<String, String[]> properties = node.getProperties() == null ? Collections.emptyMap() : node.getProperties();
 
-        String replicationSource = Arrays.stream(properties
-                        .getOrDefault(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE), new String[0]))
-                .findFirst()
-                .orElse(null);
-
-        String resourceType = Arrays.stream(properties.getOrDefault(CCConstants.getValidLocalName(CCConstants.CCM_PROP_CCRESSOURCETYPE), new String[0]))
-                .findFirst()
-                .orElse(null);
+        String replicationSource = getFirstValue(properties, CCConstants.CCM_PROP_IO_REPLICATIONSOURCE);
+        String resourceType = getFirstValue(properties, CCConstants.CCM_PROP_CCRESSOURCETYPE);
 
         return JwtTokenUtil.generateToken(user, node.getRef().getId(), permissions, node.getMimetype(), node.getMediatype(), replicationSource, resourceType, userProfile);
+    }
+
+    /**
+     * Builds the jwt for a node that is accessed via a link share. The recipient is not logged in, so the
+     * token carries the pseudo user {@link JwtTokenUtil#SHARE_LINK_USERNAME} without any profile data. Its
+     * permissions are limited to what the share allows, never the ones of the user the node was read with.
+     *
+     * @param permissions the permissions granted by the share, see {@link #getSharePermissions(boolean)}
+     */
+    public static String getShareJWT(Node node, java.util.Collection<String> permissions) throws GeneralSecurityException {
+        Map<String, String[]> properties = node.getProperties() == null ? Collections.emptyMap() : node.getProperties();
+        return JwtTokenUtil.generateToken(
+                JwtTokenUtil.SHARE_LINK_USERNAME,
+                node.getRef().getId(),
+                permissions,
+                node.getMimetype(),
+                node.getMediatype(),
+                getFirstValue(properties, CCConstants.CCM_PROP_IO_REPLICATIONSOURCE),
+                getFirstValue(properties, CCConstants.CCM_PROP_CCRESSOURCETYPE),
+                new UserProfile(),
+                true,
+                true);
+    }
+
+    /**
+     * The permissions a link share grants on its content: viewing always, the download only if the share allows it.
+     * Without {@link CCConstants#PERMISSION_DOWNLOAD_CONTENT} the rendering service encodes the content data.
+     */
+    public static List<String> getSharePermissions(boolean download) {
+        List<String> permissions = new ArrayList<>(List.of(
+                CCConstants.PERMISSION_READ,
+                CCConstants.PERMISSION_READ_PREVIEW,
+                CCConstants.PERMISSION_READ_ALL));
+        if (download) {
+            permissions.add(CCConstants.PERMISSION_DOWNLOAD_CONTENT);
+        }
+        return permissions;
+    }
+
+    private static String getFirstValue(Map<String, String[]> properties, String globalName) {
+        return Arrays.stream(properties.getOrDefault(CCConstants.getValidLocalName(globalName), new String[0]))
+                .findFirst()
+                .orElse(null);
     }
 
     private String getMimetype() {
@@ -2840,11 +2877,15 @@ public class NodeDao {
         return entries;
     }
 
-    public NodeShare createShare(long expiryDate, String password) throws DAOException {
+    /**
+     * @param view     {@code null} for the default of the current context
+     * @param download {@code null} for the default of the current context
+     */
+    public NodeShare createShare(long expiryDate, String password, Boolean view, Boolean download) throws DAOException {
         GlobalShareService service = ApplicationContextFactory.getApplicationContext().getBean(GlobalShareService.class);
         try {
             throwIfPermissionIsMissing(CCConstants.PERMISSION_CHANGEPERMISSIONS);
-            return new NodeShare(new org.alfresco.service.cmr.repository.NodeRef(NodeDao.storeRef, this.nodeId), service.createShare(nodeId, expiryDate, password));
+            return new NodeShare(new org.alfresco.service.cmr.repository.NodeRef(NodeDao.storeRef, this.nodeId), service.createShare(nodeId, expiryDate, password, view, download));
         } catch (Exception e) {
             throw DAOException.mapping(e);
         }
@@ -2862,13 +2903,23 @@ public class NodeDao {
         throw DAOException.mapping(new Exception("share " + shareId + " was not found on node " + nodeId));
     }
 
-    public NodeShare updateShare(String shareId, long expiryDate, String password) throws DAOException {
+    /**
+     * @param view     {@code null} to keep the current value
+     * @param download {@code null} to keep the current value
+     */
+    public NodeShare updateShare(String shareId, long expiryDate, String password, Boolean view, Boolean download) throws DAOException {
         throwIfPermissionIsMissing(CCConstants.PERMISSION_CHANGEPERMISSIONS);
         GlobalShareService service = ApplicationContextFactory.getApplicationContext().getBean(GlobalShareService.class);
         for (Share share : service.getShares(this.nodeId)) {
             if (share.getNodeId().equals(shareId)) {
                 share.setExpiryDate(expiryDate);
                 share.setPassword(password);
+                if (view != null) {
+                    share.setView(view);
+                }
+                if (download != null) {
+                    share.setDownload(download);
+                }
                 service.updateShare(share);
                 return new NodeShare(new org.alfresco.service.cmr.repository.NodeRef(NodeDao.storeRef, this.nodeId), share);
             }

@@ -51,6 +51,8 @@ public class GlobalShareServiceImpl implements GlobalShareService {
     public static final QName SHARE_PROP_SHARE_MAIL = QName.createQName(CCConstants.CCM_PROP_SHARE_MAIL);
     public static final QName SHARE_PROP_SHARE_TOKEN = QName.createQName(CCConstants.CCM_PROP_SHARE_TOKEN);
     public static final QName SHARE_PROP_DOWNLOAD_COUNTER = QName.createQName(CCConstants.CCM_PROP_SHARE_DOWNLOAD_COUNTER);
+    public static final QName SHARE_PROP_VIEW = QName.createQName(CCConstants.CCM_PROP_SHARE_VIEW);
+    public static final QName SHARE_PROP_DOWNLOAD = QName.createQName(CCConstants.CCM_PROP_SHARE_DOWNLOAD);
 
     public static String I18n_MailSubject = "dialog_share_mailsubject_file";
     public static String I18n_MailSubjectLink = "dialog_share_mailsubject_link";
@@ -64,13 +66,34 @@ public class GlobalShareServiceImpl implements GlobalShareService {
     private final PersonService personService;
     private final OwnableService ownableService;
     private final ToolPermissionService toolPermissionService;
+    private final ShareLinkConfigProvider shareLinkConfigProvider;
 
-    public Share createShare(String nodeId, long expiryDate, String password) throws EMailValidationException, EMailSendFailedException, ExpiryDateValidationException, NodeDoesNotExsistException, PermissionFailedException {
-        return getShare(nodeId, createShare(nodeId, new String[]{EMAIL_TYPE_LINK}, expiryDate, password, null));
+    @Override
+    public Share createShare(String nodeId, long expiryDate, String password, Boolean view, Boolean download) throws EMailValidationException, EMailSendFailedException, ExpiryDateValidationException, NodeDoesNotExsistException, PermissionFailedException {
+        ShareLinkConfigProvider.Defaults defaults = shareLinkConfigProvider.getCurrentDefaults();
+        boolean resolvedView = view != null ? view : defaults.view();
+        boolean resolvedDownload = download != null ? download : defaults.download();
+        validateActions(resolvedView, resolvedDownload);
+        return getShare(nodeId, createShare(nodeId, new String[]{EMAIL_TYPE_LINK}, expiryDate, password, null, resolvedView, resolvedDownload));
+    }
+
+    /**
+     * a share that allows neither viewing nor downloading would be unusable
+     */
+    public static void validateActions(boolean view, boolean download) {
+        if (!view && !download) {
+            throw new IllegalArgumentException("A share has to allow at least one of view and download");
+        }
     }
 
     @Override
     public String createShare(String nodeId, String[] emails, long expiryDate, String password, String emailMessageLocale) throws EMailValidationException, EMailSendFailedException, ExpiryDateValidationException,
+            NodeDoesNotExsistException {
+        // the actions are only chosen for links, shares by mail store none and use the context default
+        return createShare(nodeId, emails, expiryDate, password, emailMessageLocale, null, null);
+    }
+
+    private String createShare(String nodeId, String[] emails, long expiryDate, String password, String emailMessageLocale, Boolean view, Boolean download) throws EMailValidationException, EMailSendFailedException, ExpiryDateValidationException,
             NodeDoesNotExsistException {
         if (!toolPermissionService.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_LINK)) {
             throw new ToolPermissionException(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_LINK);
@@ -132,6 +155,12 @@ public class GlobalShareServiceImpl implements GlobalShareService {
 
             props.put(SHARE_PROP_SHARE_TOKEN, token);
             props.put(SHARE_PROP_DOWNLOAD_COUNTER, 0);
+            if (view != null) {
+                props.put(SHARE_PROP_VIEW, view);
+            }
+            if (download != null) {
+                props.put(SHARE_PROP_DOWNLOAD, download);
+            }
 
             ChildAssociationRef createdChild = nodeService.createNode(io, SHARE_ASSOC, QName.createQName(email), SHARE_TYPE, props);
             shareInfoService.createShare(io.getId(), authService.getCurrentUserName(), createdChild.getChildRef().getId(), ShareType.LINK);
@@ -215,6 +244,19 @@ public class GlobalShareServiceImpl implements GlobalShareService {
 
         props.put(SHARE_PROP_SHARE_MAIL, share.getEmail());
         props.put(SHARE_PROP_DOWNLOAD_COUNTER, share.getDownloadCount());
+        // setProperties replaces all properties, so unset actions (legacy shares) must be carried over
+        Boolean view = share.getView() != null ? share.getView() : (Boolean) nodeService.getProperty(shareNodeRef, SHARE_PROP_VIEW);
+        if (view != null) {
+            props.put(SHARE_PROP_VIEW, view);
+        }
+        Boolean download = share.getDownload() != null ? share.getDownload() : (Boolean) nodeService.getProperty(shareNodeRef, SHARE_PROP_DOWNLOAD);
+        if (download != null) {
+            props.put(SHARE_PROP_DOWNLOAD, download);
+        }
+        // unset values use the context default, which always allows at least one action
+        if (view != null || download != null) {
+            validateActions(view == null ? share.isViewAllowed() : view, download == null ? share.isDownloadAllowed() : download);
+        }
         throwIfScopedNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, share.getIoNodeId()));
         nodeService.setProperties(shareNodeRef, props);
     }
@@ -286,6 +328,14 @@ public class GlobalShareServiceImpl implements GlobalShareService {
         share.setDownloadCount((Integer) propsNative.get(SHARE_PROP_DOWNLOAD_COUNTER));
         share.setInvitedAt((Date) propsNative.get(QName.createQName(CCConstants.CM_PROP_C_CREATED)));
         share.setToken((String) propsNative.get(SHARE_PROP_SHARE_TOKEN));
+        share.setView((Boolean) propsNative.get(SHARE_PROP_VIEW));
+        share.setDownload((Boolean) propsNative.get(SHARE_PROP_DOWNLOAD));
+        if (share.getView() == null || share.getDownload() == null) {
+            // shares without stored actions (e.g. created before they could be chosen) use the context default
+            ShareLinkConfigProvider.Defaults defaults = shareLinkConfigProvider.getCurrentDefaults();
+            share.setDefaultView(defaults.view());
+            share.setDefaultDownload(defaults.download());
+        }
 
         return share;
     }

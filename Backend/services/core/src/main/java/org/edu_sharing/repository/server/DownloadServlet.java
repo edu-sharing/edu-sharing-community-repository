@@ -315,6 +315,9 @@ public class DownloadServlet extends SpringHttpServlet {
                 share = globalShareService.getShare(parentNodeId, token);
                 if (share == null)
                     throw new Exception();
+                if (!share.isDownloadAllowed()) {
+                    throw new Exception("the share does not allow downloads");
+                }
                 if (share.getPassword() != null && (!share.getPassword().equals(GlobalShareServiceImpl.encryptPassword(password)))) {
                     throw new Exception();
                 }

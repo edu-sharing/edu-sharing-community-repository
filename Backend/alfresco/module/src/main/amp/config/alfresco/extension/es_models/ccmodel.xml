@@ -339,6 +339,13 @@
                 <property name="ccm:share_download_counter">
                     <type>d:int</type>
                 </property>
+                <!-- allowed actions of a link share; if not set (e.g. shares created earlier) the default of the context applies -->
+                <property name="ccm:share_view">
+                    <type>d:boolean</type>
+                </property>
+                <property name="ccm:share_download">
+                    <type>d:boolean</type>
+                </property>
             </properties>
         </type>
 

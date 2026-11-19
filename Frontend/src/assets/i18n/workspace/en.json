@@ -438,7 +438,14 @@
       "LINK_DOWNLOADS": "Number downloads: {{ count }}",
       "COPIED_CLIPBOARD": "Link copied to clipboard",
       "COPIED_CLIPBOARD_ERROR": "Failed to copy link. Please mark and copy it manually",
-      "QR_CODE_ARIA_LABEL": "QR code for this share link"
+      "QR_CODE_ARIA_LABEL": "QR code for this share link",
+      "VIEW_TITLE": "Allow viewing in the browser",
+      "VIEW_INFO": "The object can be viewed directly in the browser via the link",
+      "DOWNLOAD_TITLE": "Allow download",
+      "DOWNLOAD_INFO": "The object can be downloaded via the link",
+      "ACTIONS_MIN_ONE": "At least one of the two options has to stay enabled",
+      "LINK_INFO_VIEW": "Anyone with access to the link may view the object.",
+      "LINK_INFO_VIEW_FOLDER": "Anyone with access to the link may view all files of the folder. Subfolders cannot be accessed."
     },
     "WORKFLOW": {
       "TITLE": "workflow",

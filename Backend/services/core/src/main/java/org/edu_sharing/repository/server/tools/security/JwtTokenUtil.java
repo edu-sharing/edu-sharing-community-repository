@@ -19,7 +19,23 @@ import java.util.UUID;
 @Slf4j
 public class JwtTokenUtil {
 
+    /**
+     * Pseudo user of the tokens for link shares. Recipients of a link share are not logged in (and the
+     * guest account may be disabled), so the token carries this fixed identity instead.
+     */
+    public static final String SHARE_LINK_USERNAME = "share-link";
+
     public static String generateToken(String username, String nodeId, Collection<String> permissions, String mimeType, String mediaType, String replicationSource, String resourceType, UserProfile userProfile) throws GeneralSecurityException {
+        boolean guest = AlfAppContextGate.getApplicationContext().getBean(GuestService.class).isGuestUser(username);
+        return generateToken(username, nodeId, permissions, mimeType, mediaType, replicationSource, resourceType, userProfile, guest, false);
+    }
+
+    /**
+     * @param guest whether the token is issued for a guest
+     * @param share whether the token is issued for a link share, the rendering service then
+     *              authenticates its callbacks with the share instead of the user
+     */
+    public static String generateToken(String username, String nodeId, Collection<String> permissions, String mimeType, String mediaType, String replicationSource, String resourceType, UserProfile userProfile, boolean guest, boolean share) throws GeneralSecurityException {
         Key privateKey = new Signing().getPemPrivateKey(ApplicationInfoList.getHomeRepository().getPrivateKey(), CCConstants.SECURITY_KEY_ALGORITHM);
 
         Date date = new Date();
@@ -44,7 +60,8 @@ public class JwtTokenUtil {
                 .claim("lastName", userProfile.getLastName())
                 .claim("userEmail", userProfile.getEmail())
                 .claim("primaryAffiliation", userProfile.getPrimaryAffiliation())
-                .claim("isGuest", AlfAppContextGate.getApplicationContext().getBean(GuestService.class).isGuestUser(username))
+                .claim("isGuest", guest)
+                .claim("share", share)
                 .signWith(privateKey)
                 .compact();
 

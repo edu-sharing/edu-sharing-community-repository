@@ -21,6 +21,32 @@
   </div>
   <div class="configuration-link">
     <div class="info-left">
+      <div class="heading">{{ 'WORKSPACE.SHARE_LINK.VIEW_TITLE' | translate }}</div>
+      <p>{{ 'WORKSPACE.SHARE_LINK.VIEW_INFO' | translate }}</p>
+    </div>
+    <div class="info-right">
+      <mat-slide-toggle
+        [(ngModel)]="viewEnabled"
+        (change)="setActions('view')"
+        [disabled]="!enabled"
+      ></mat-slide-toggle>
+    </div>
+  </div>
+  <div class="configuration-link">
+    <div class="info-left">
+      <div class="heading">{{ 'WORKSPACE.SHARE_LINK.DOWNLOAD_TITLE' | translate }}</div>
+      <p>{{ 'WORKSPACE.SHARE_LINK.DOWNLOAD_INFO' | translate }}</p>
+    </div>
+    <div class="info-right">
+      <mat-slide-toggle
+        [(ngModel)]="downloadEnabled"
+        (change)="setActions('download')"
+        [disabled]="!enabled"
+      ></mat-slide-toggle>
+    </div>
+  </div>
+  <div class="configuration-link">
+    <div class="info-left">
       <div class="heading">{{ 'WORKSPACE.SHARE_LINK.PASSWORD' | translate }}</div>
       <p>{{ 'WORKSPACE.SHARE_LINK.PASSWORD_INFO' | translate }}</p>
     </div>
@@ -90,7 +116,11 @@
 
 <div class="group">
   <div class="link-info">
-    {{ 'WORKSPACE.SHARE_LINK.LINK_INFO' + (_node.isDirectory ? '_FOLDER' : '') | translate }}
+    {{
+      'WORKSPACE.SHARE_LINK.LINK_INFO' +
+        (downloadEnabled ? '' : '_VIEW') +
+        (_node.isDirectory ? '_FOLDER' : '') | translate
+    }}
   </div>
   @if (enabled) {
   <div class="link-downloads">
