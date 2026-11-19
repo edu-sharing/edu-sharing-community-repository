@@ -150,10 +150,10 @@ export class translateProvider {
 
     /** storybook always loads the german translations (see `loadStorybookTranslations`) */
     readonly currentLang = 'de';
-    readonly defaultLang = 'de';
+    readonly fallbackLang = 'de';
 
-    getDefaultLang(): string {
-        return this.defaultLang;
+    getFallbackLang(): string {
+        return this.fallbackLang;
     }
 
     getCurrentLang(): string {
@@ -161,7 +161,7 @@ export class translateProvider {
     }
 
     onTranslationChange = of({ lang: 'none' });
-    onDefaultLangChange = of({ lang: 'none' });
+    onFallbackLangChange = of({ lang: 'none' });
     onLangChange = of({});
 }
 
@@ -176,13 +176,13 @@ export class TranslationsServiceMock {
         );
     }
     getLanguage(): string {
-        return this.translateProvider.currentLang ?? 'de';
+        return this.translateProvider.getCurrentLang() ?? 'de';
     }
     getISOLanguage(): string {
         return LANGUAGES[this.getLanguage()];
     }
     getLocale(): string {
-        return this.translateProvider.currentLang ?? 'de';
+        return this.translateProvider.getCurrentLang() ?? 'de';
     }
 }
 @Injectable()
@@ -201,7 +201,7 @@ export class MdsEditorInstanceServiceMock extends MdsEditorInstanceService {
 @NgModule()
 export class I18nModule {
     constructor(translate: TranslateService) {
-        translate.setDefaultLang('de');
+        translate.setFallbackLang('de');
         translate.use('de');
     }
 }

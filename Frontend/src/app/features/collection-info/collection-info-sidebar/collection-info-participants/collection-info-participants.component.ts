@@ -1,5 +1,5 @@
 import { Component, computed, inject, input } from '@angular/core';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { Ace, Node, Person, RestConstants } from 'ngx-edu-sharing-api';
 import { EduSharingUiCommonModule, UserAvatarComponent } from 'ngx-edu-sharing-ui';
 import { CollectionInfoSectionComponent } from '../collection-info-section/collection-info-section.component';
@@ -38,7 +38,7 @@ const HIDDEN_AUTHORITY_NAMES = ['System'];
     templateUrl: 'collection-info-participants.component.html',
     styleUrls: ['collection-info-participants.component.scss'],
     imports: [
-        TranslateModule,
+        TranslatePipe,
         EduSharingUiCommonModule,
         CollectionInfoSectionComponent,
         UserAvatarComponent,

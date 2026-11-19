@@ -85,7 +85,7 @@ export class MdsEditorWidgetTinyMCEComponent extends MdsEditorWidgetBase impleme
         this.editorConfig.set({
             ...getTinyMceBaseConfig(
                 this.platformLocation.getBaseHrefFromDOM(),
-                this.translate.getDefaultLang(),
+                this.translate.getFallbackLang(),
             ),
             ...this.editorConfigDefault,
             // custom configuration of the mds widget definition

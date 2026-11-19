@@ -52,7 +52,7 @@ import { FrontendModuleConfig } from './dto/FrontendModuleConfig';
 import { AudioComponent } from './module/audio/audio.component';
 import { BinderComponent } from './module/binder/binder.component';
 import { DdbComponent } from './module/ddb/ddb.component';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { EduSharingUiCommonModule, NodeHelperService } from 'ngx-edu-sharing-ui';
 import { ErrorComponent } from './module/error/error.component';
 import {
@@ -89,7 +89,7 @@ import { CurrentRenderRootUrlService } from './current-render-root-url.service';
         EduSharingUiCommonModule,
         RevokedComponent,
         ErrorComponent,
-        TranslateModule,
+        TranslatePipe,
         MoodleComponent,
         H5pComponent,
     ],

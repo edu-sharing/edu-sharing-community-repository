@@ -22,7 +22,7 @@ import {
 import { ActivatedRoute } from '@angular/router';
 import { Assignment, AssignmentV1Service, Submission, SubmissionFile } from 'ngx-edu-sharing-api';
 import { map, switchMap, takeUntil, tap } from 'rxjs/operators';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import {
     AuthorityNamePipe,
     ColumnType,
@@ -60,7 +60,7 @@ import { GenericDialogButton } from '../../../features/dialogs/dialog-modules/ge
     templateUrl: 'assignment-submission.component.html',
     styleUrls: ['assignment-submission.component.scss'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [SharedModule, TranslateModule, NgxExtendedPdfViewerModule, RenderWrapperComponent],
+    imports: [SharedModule, TranslatePipe, NgxExtendedPdfViewerModule, RenderWrapperComponent],
 })
 export class AssignmentSubmissionComponent implements OnDestroy {
     private route = inject(ActivatedRoute);

@@ -25,7 +25,7 @@ import {
     Submission,
     SubmissionFile,
 } from 'ngx-edu-sharing-api';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import {
     combineLatest,
     firstValueFrom,
@@ -101,7 +101,7 @@ import { ThemeService } from '../../../services/theme.service';
     styleUrls: ['submit-assignment.component.scss'],
     imports: [
         SharedModule,
-        TranslateModule,
+        TranslatePipe,
         EditorComponent,
         RenderWrapperComponent,
         NgxExtendedPdfViewerModule,
@@ -147,7 +147,7 @@ export class SubmitAssignmentComponent implements OnDestroy {
     readonly editorConfig = computed(() => ({
         ...getTinyMceBaseConfig(
             this.platformLocation.getBaseHrefFromDOM(),
-            this.translateService.getDefaultLang(),
+            this.translateService.getFallbackLang(),
         ),
         ...AssignmentEditorConfig,
         ...getTinyMceThemeConfig(this.theme.isDarkMode()),

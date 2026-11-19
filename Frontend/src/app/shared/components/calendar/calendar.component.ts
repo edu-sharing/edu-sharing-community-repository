@@ -41,8 +41,7 @@ export class CalendarComponent {
         this.showDatepicker = false;
     }
     constructor() {
-        this.translate.currentLang;
-        this._adapter.setLocale(this.translate.currentLang.split('-')[0]);
+        this._adapter.setLocale(this.translate.getCurrentLang().split('-')[0]);
     }
     getFormatted() {
         if (this.date) {

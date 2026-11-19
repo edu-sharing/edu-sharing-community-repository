@@ -12,7 +12,7 @@ import { NodeSourcePipe } from './node-source.pipe';
 import { CommonModule } from '@angular/common';
 import { EduSharingUiCommonModule } from '../common/edu-sharing-ui-common.module';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ListNodeAssignmentComponent } from './list-node-assignment/list-node-assignment.component';
 import { ListNodeSuggestionComponent } from './list-node-suggestion/list-node-suggestion.component';
 import { UserAvatarComponent } from '../user-avatar/user-avatar.component';
@@ -37,7 +37,7 @@ import { UserAvatarComponent } from '../user-avatar/user-avatar.component';
         EduSharingUiCommonModule,
         UserAvatarComponent,
         MatTooltipModule,
-        TranslateModule,
+        TranslatePipe,
     ],
     exports: [
         ListBaseComponent,

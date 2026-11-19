@@ -148,7 +148,7 @@ export class DateHelper {
             //return dateFormat+time;
             let str = prefix;
             if (addDate) {
-                if (translation.currentLang === 'en') {
+                if (translation.getCurrentLang() === 'en') {
                     str +=
                         dateObject.getFullYear() +
                         '-' +

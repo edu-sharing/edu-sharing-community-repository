@@ -6,9 +6,10 @@ import { NodeHelperService } from './node-helper.service';
 import { RepoUrlService } from './repo-url.service';
 import { Toast } from './abstract/toast.service';
 
+let currentLang = 'de';
 const translateServiceMock = {
-    currentLang: 'de',
-} as TranslateService;
+    getCurrentLang: () => currentLang,
+} as unknown as TranslateService;
 
 describe('Test NodeHelper', () => {
     describe('Test cc license links', () => {
@@ -30,7 +31,7 @@ describe('Test NodeHelper', () => {
             underTest = TestBed.inject(NodeHelperService);
         });
         it('cc by 4.0', async () => {
-            translateServiceMock.currentLang = 'de';
+            currentLang = 'de';
             expect(await underTest.getLicenseUrlByString('CC_BY', '4.0', '').toPromise()).toBe(
                 'https://creativecommons.org/licenses/by/4.0/deed.de',
             );
@@ -39,7 +40,7 @@ describe('Test NodeHelper', () => {
             );
         });
         it('cc by sa 3.0', async () => {
-            translateServiceMock.currentLang = 'de';
+            currentLang = 'de';
             expect(await underTest.getLicenseUrlByString('CC_BY_SA', '3.0', '').toPromise()).toBe(
                 'https://creativecommons.org/licenses/by-sa/3.0/deed.de',
             );
@@ -53,7 +54,7 @@ describe('Test NodeHelper', () => {
                 'https://creativecommons.org/licenses/by-sa/3.0/de/deed.de',
             );
 
-            translateServiceMock.currentLang = 'en';
+            currentLang = 'en';
             expect(await underTest.getLicenseUrlByString('CC_BY_SA', '3.0', 'de').toPromise()).toBe(
                 'https://creativecommons.org/licenses/by-sa/3.0/de/deed.en',
             );

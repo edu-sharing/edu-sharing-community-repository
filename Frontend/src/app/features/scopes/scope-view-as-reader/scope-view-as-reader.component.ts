@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ScopesService } from 'ngx-edu-sharing-api';
 
 /**
@@ -12,7 +12,7 @@ import { ScopesService } from 'ngx-edu-sharing-api';
     selector: 'es-scope-view-as-reader',
     templateUrl: './scope-view-as-reader.component.html',
     styleUrls: ['./scope-view-as-reader.component.scss'],
-    imports: [MatSlideToggleModule, TranslateModule],
+    imports: [MatSlideToggleModule, TranslatePipe],
 })
 export class ScopeViewAsReaderComponent {
     private scopesService = inject(ScopesService);

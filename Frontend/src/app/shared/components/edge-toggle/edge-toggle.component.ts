@@ -17,7 +17,7 @@ import {
 import { GlobalPositionStrategy, Overlay, OverlayModule, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { CommonModule } from '@angular/common';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
 
 /**
@@ -34,7 +34,7 @@ import { EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
 @Component({
     selector: 'es-edge-toggle',
     standalone: true,
-    imports: [CommonModule, OverlayModule, TranslateModule, EduSharingUiCommonModule],
+    imports: [CommonModule, OverlayModule, TranslatePipe, EduSharingUiCommonModule],
     templateUrl: './edge-toggle.component.html',
     changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./edge-toggle.component.scss'],

@@ -1,6 +1,6 @@
 import { NgTemplateOutlet } from '@angular/common';
 import { Component, inject, input, viewChild } from '@angular/core';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { ActionbarComponent, EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
 import { CollectionNavigationService } from '../../../features/collection-info/collection-navigation.service';
@@ -18,7 +18,7 @@ import { CollectionThumbnailComponent } from '../../../features/collection-info/
     styleUrls: ['collection-header-bar.component.scss'],
     imports: [
         NgTemplateOutlet,
-        TranslateModule,
+        TranslatePipe,
         EduSharingUiCommonModule,
         SharedModule,
         CollectionThumbnailComponent,

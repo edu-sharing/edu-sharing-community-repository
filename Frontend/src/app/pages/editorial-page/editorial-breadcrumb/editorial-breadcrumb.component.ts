@@ -1,6 +1,6 @@
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { EduSharingUiCommonModule, UIConstants } from 'ngx-edu-sharing-ui';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ScopesService } from 'ngx-edu-sharing-api';
 
 import { RouterLink } from '@angular/router';
@@ -11,7 +11,7 @@ import { EditorialBreadcrumbService } from './editorial-breadcrumb.service';
     templateUrl: 'editorial-breadcrumb.component.html',
     styleUrls: ['editorial-breadcrumb.component.scss'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [EduSharingUiCommonModule, TranslateModule, RouterLink],
+    imports: [EduSharingUiCommonModule, TranslatePipe, RouterLink],
 })
 export class EditorialBreadcrumbComponent {
     editorialBreadcrumbService = inject(EditorialBreadcrumbService);

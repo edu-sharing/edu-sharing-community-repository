@@ -77,7 +77,7 @@
     "@angular/platform-browser-dynamic": "^22.2.1",
     "@angular/router": "^22.2.1",
     "@github/markdown-toolbar-element": "^2.2.3",
-    "@ngx-translate/core": "^15.0.0",
+    "@ngx-translate/core": "^18.1.0",
     "@tinymce/tinymce-angular": "^9.1.2",
     "angular-material-css-vars": "^10.0.0",
     "angular-resizable-element": "^7.0.2",

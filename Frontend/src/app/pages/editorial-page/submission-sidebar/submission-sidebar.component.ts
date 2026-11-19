@@ -93,7 +93,7 @@ export class SubmissionSidebarComponent {
     readonly editorConfig = computed(() => ({
         ...getTinyMceBaseConfig(
             this.platformLocation.getBaseHrefFromDOM(),
-            this.translateService.getDefaultLang(),
+            this.translateService.getFallbackLang(),
         ),
         ...AssignmentEditorConfig,
         ...getTinyMceThemeConfig(this.theme.isDarkMode()),

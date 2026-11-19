@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { Toast } from 'ngx-edu-sharing-ui';
 
 import { PdfComponent } from './pdf.component';
@@ -10,8 +10,9 @@ describe('PdfComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [PdfComponent, TranslateModule.forRoot()],
+            imports: [PdfComponent],
             providers: [
+                provideTranslateService(),
                 { provide: Toast, useValue: { toast: (): void => {}, error: (): void => {} } },
             ],
         }).compileComponents();

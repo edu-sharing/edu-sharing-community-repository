@@ -3,7 +3,8 @@ import { TranslateService } from '@ngx-translate/core';
 
 const translateServiceMock = {
     instant: (key: string, values?: any) => key + JSON.stringify(values),
-} as TranslateService;
+    getCurrentLang: () => 'de',
+} as unknown as TranslateService;
 describe('testing relative dates', () => {
     const date_now = new Date(new Date().getTime());
     const date_10_mins_before = new Date(new Date().getTime() - 1000 - 10 * 60 * 1000);

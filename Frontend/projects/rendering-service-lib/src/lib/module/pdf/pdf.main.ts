@@ -6,14 +6,14 @@ import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/com
 import { ApiHelpersService } from 'ngx-edu-sharing-api';
 import { importProvidersFrom } from '@angular/core';
 import { RenderingServiceApiModule } from 'ngx-rendering-service-api';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 
 void (async () => {
     const app = await createApplication({
         providers: [
             ApiHelpersService,
             importProvidersFrom(RenderingServiceApiModule.forRoot()),
-            importProvidersFrom(TranslateModule.forRoot()),
+            provideTranslateService(),
             provideHttpClient(withXhr(), withInterceptorsFromDi()),
         ],
     });

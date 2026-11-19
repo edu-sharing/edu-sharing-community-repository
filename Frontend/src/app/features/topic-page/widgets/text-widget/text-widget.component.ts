@@ -11,7 +11,6 @@ import {
     WritableSignal,
     ChangeDetectionStrategy,
 } from '@angular/core';
-import { TranslateModule } from '@ngx-translate/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { SpinnerComponent } from 'ngx-edu-sharing-ui';
 import { ConfigurationOption } from '../../shared/types/configuration-option';
@@ -21,7 +20,7 @@ import { WidgetConfigurationButtonsComponent } from '../shared/widget-configurat
 @Component({
     selector: 'es-text-widget',
     encapsulation: ViewEncapsulation.Emulated,
-    imports: [SpinnerComponent, TranslateModule, WidgetConfigurationButtonsComponent],
+    imports: [SpinnerComponent, WidgetConfigurationButtonsComponent],
     schemas: [CUSTOM_ELEMENTS_SCHEMA],
     templateUrl: './text-widget.component.html',
     changeDetection: ChangeDetectionStrategy.Eager,

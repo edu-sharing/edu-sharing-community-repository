@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { Toast } from 'ngx-edu-sharing-ui';
 import {
@@ -16,8 +16,9 @@ import { RenderComponent } from './render.component';
 describe('RenderComponent', () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [RenderComponent, TranslateModule.forRoot()],
+            imports: [RenderComponent],
             providers: [
+                provideTranslateService(),
                 { provide: Toast, useValue: { toast: (): void => {}, error: (): void => {} } },
             ],
         }).compileComponents();
@@ -50,8 +51,9 @@ describe('RenderComponent module selection', () => {
             'getModulesInfo',
         ]);
         await TestBed.configureTestingModule({
-            imports: [RenderComponent, TranslateModule.forRoot()],
+            imports: [RenderComponent],
             providers: [
+                provideTranslateService(),
                 { provide: Toast, useValue: { toast: (): void => {}, error: (): void => {} } },
                 { provide: RenderControllerWrapperService, useValue: renderService },
                 { provide: TrackingService, useValue: trackingService },

@@ -6,12 +6,12 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { RenderData } from '../../dto/RenderData';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { EduSharingUiModule } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'rs-module-moodle',
-    imports: [RenderingModule, MatButtonModule, MatIconModule, TranslateModule, EduSharingUiModule],
+    imports: [RenderingModule, MatButtonModule, MatIconModule, TranslatePipe, EduSharingUiModule],
     templateUrl: './moodle.component.html',
     styleUrl: './moodle.component.scss',
     // Without the iframe there is nothing that fills the module box, so the host page can size the

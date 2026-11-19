@@ -1,5 +1,5 @@
 import { Component, input } from '@angular/core';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 
 /**
  * A titled block of a detail panel. The heading is a translation key; the content is projected.
@@ -9,7 +9,7 @@ import { TranslateModule } from '@ngx-translate/core';
     selector: 'es-collection-info-section',
     templateUrl: 'collection-info-section.component.html',
     styleUrls: ['collection-info-section.component.scss'],
-    imports: [TranslateModule],
+    imports: [TranslatePipe],
 })
 export class CollectionInfoSectionComponent {
     readonly heading = input<string>();

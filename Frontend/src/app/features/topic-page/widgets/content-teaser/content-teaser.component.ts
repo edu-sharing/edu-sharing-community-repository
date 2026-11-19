@@ -25,7 +25,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { Sort } from '@angular/material/sort';
 import { NavigationExtras } from '@angular/router';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MdsQueryCriteria, Node } from 'ngx-edu-sharing-api';
 import {
     EduSharingUiCommonModule,
@@ -66,7 +66,7 @@ import { GenericNodeEntriesComponent } from './generic-node-entries/generic-node
         MatButtonToggleModule,
         MatFormFieldModule,
         MatInputModule,
-        TranslateModule,
+        TranslatePipe,
         WidgetConfigurationButtonsComponent,
     ],
     providers: [

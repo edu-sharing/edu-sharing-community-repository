@@ -1,6 +1,6 @@
 import { Component, computed, inject, input } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { Node, RestConstants, ScopesService } from 'ngx-edu-sharing-api';
 import { EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
 import { switchMap } from 'rxjs/operators';
@@ -16,7 +16,7 @@ import { ScopeMdsService } from '../../../features/scopes/scope-mds.service';
     selector: 'es-scope-status-cell',
     templateUrl: 'scope-status-cell.component.html',
     styleUrls: ['scope-status-cell.component.scss'],
-    imports: [EduSharingUiCommonModule, TranslateModule],
+    imports: [EduSharingUiCommonModule, TranslatePipe],
 })
 export class ScopeStatusCellComponent {
     private scopesService = inject(ScopesService);

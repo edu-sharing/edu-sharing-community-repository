@@ -1,7 +1,7 @@
 import { Component, computed, input, InputSignal, output, Signal } from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
 import { DEFAULT_PAGE_VARIANT_NAME_PREFIX } from '../../shared/types/custom-definitions';
@@ -11,7 +11,7 @@ import { DEFAULT_PAGE_VARIANT_NAME_PREFIX } from '../../shared/types/custom-defi
  */
 @Component({
     selector: 'es-topic-page-variant-select',
-    imports: [EduSharingUiCommonModule, MatFormFieldModule, MatSelectModule, TranslateModule],
+    imports: [EduSharingUiCommonModule, MatFormFieldModule, MatSelectModule, TranslatePipe],
     templateUrl: './variant-select.component.html',
     styleUrls: ['./variant-select.component.scss'],
 })

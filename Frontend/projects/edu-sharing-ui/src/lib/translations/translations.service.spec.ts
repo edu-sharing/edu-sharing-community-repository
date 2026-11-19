@@ -51,9 +51,10 @@ describe('TranslationsService', () => {
         beforeEach(() => {
             translateServiceSpy = jasmine.createSpyObj('TranslateService', [
                 'use',
+                'getCurrentLang',
                 'addLangs',
                 'getBrowserLang',
-                'setDefaultLang',
+                'setFallbackLang',
                 'getTranslation',
             ]);
             translateServiceSpy.getTranslation.and.callFake(() => rxjs.of(null));
@@ -111,10 +112,10 @@ describe('TranslationsService', () => {
             expect(translateServiceSpy.use.calls.mostRecent().args).toEqual(['de']);
         });
 
-        it('should call translate.setDefaultLang()', async () => {
+        it('should call translate.setFallbackLang()', async () => {
             await callInitialize();
-            expect(translateServiceSpy.setDefaultLang.calls.count()).toBe(1);
-            expect(translateServiceSpy.setDefaultLang.calls.mostRecent().args).toEqual(['de']);
+            expect(translateServiceSpy.setFallbackLang.calls.count()).toBe(1);
+            expect(translateServiceSpy.setFallbackLang.calls.mostRecent().args).toEqual(['de']);
         });
 
         it('should use browserLang', async () => {

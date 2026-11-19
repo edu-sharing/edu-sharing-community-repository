@@ -1,4 +1,4 @@
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { moduleMetadata, type Meta, type StoryObj } from '@storybook/angular';
 import { SharedModule } from '../../../../../src/app/shared/shared.module';
 import { InfoMessageComponent } from './info-message.component';
@@ -11,7 +11,8 @@ const meta: Meta<InfoMessageComponent> = {
     decorators: [
         moduleMetadata({
             declarations: [], // Prevent duplicate declaration of InfoMessageComponent
-            imports: [IconDirective, TranslateModule.forRoot()],
+            imports: [IconDirective],
+            providers: [provideTranslateService()],
         }),
     ],
     tags: ['autodocs'],

@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { NgxColorsColor, NgxColorsModule } from 'ngx-colors';
 import { ConfigService } from 'ngx-edu-sharing-api';
 import { ColorHelper } from 'ngx-edu-sharing-ui';
@@ -18,7 +18,7 @@ import { TopicPageGlobalService } from '../../../shared/services/topic-page-glob
 
 @Component({
     selector: 'es-color-picker',
-    imports: [FormsModule, MatButton, NgxColorsModule, TranslateModule],
+    imports: [FormsModule, MatButton, NgxColorsModule, TranslatePipe],
     templateUrl: './color-picker.component.html',
     changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./color-picker.component.scss'],

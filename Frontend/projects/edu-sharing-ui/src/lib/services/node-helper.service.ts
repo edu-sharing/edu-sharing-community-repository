@@ -198,7 +198,7 @@ export class NodeHelperService {
                 licenseVersion,
                 licenseLocale,
                 // use base language for de- special variants
-                this.translate.currentLang?.split('-')?.[0] || 'en',
+                this.translate.getCurrentLang()?.split('-')?.[0] || 'en',
             ),
         );
     }

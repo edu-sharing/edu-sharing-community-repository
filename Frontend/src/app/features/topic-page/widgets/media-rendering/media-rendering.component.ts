@@ -25,7 +25,7 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { NavigationExtras } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { EduSharingUiCommonModule, NodeTitlePipe } from 'ngx-edu-sharing-ui';
 import { Subject } from 'rxjs';
@@ -58,7 +58,7 @@ import { WidgetConfigurationButtonsComponent } from '../shared/widget-configurat
         MatInputModule,
         RenderWrapperComponent,
         SharedModule,
-        TranslateModule,
+        TranslatePipe,
         WidgetConfigurationButtonsComponent,
     ],
     providers: [HighlightSearchPipe, NodeTitlePipe],

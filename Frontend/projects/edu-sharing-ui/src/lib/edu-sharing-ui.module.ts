@@ -1,6 +1,6 @@
 import { ModuleWithProviders, NgModule, Provider } from '@angular/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { CommonModule } from '@angular/common';
 import { EduSharingUiConfigurationParams, getConfigProvider } from './edu-sharing-ui-configuration';
 import { ListItemsModule } from './list-items/list-items.module';
@@ -18,7 +18,7 @@ import { UserAvatarComponent } from './user-avatar/user-avatar.component';
     declarations: [],
     imports: [
         CommonModule,
-        TranslateModule,
+        TranslatePipe,
         EduSharingUiCommonModule,
         ListItemsModule,
         UserAvatarComponent,
@@ -31,7 +31,7 @@ import { UserAvatarComponent } from './user-avatar/user-avatar.component';
         CommonModule,
         MdsModule,
         MatTooltipModule,
-        TranslateModule,
+        TranslatePipe,
         EduSharingUiCommonModule,
         ListItemsModule,
         NodeEntriesModule,

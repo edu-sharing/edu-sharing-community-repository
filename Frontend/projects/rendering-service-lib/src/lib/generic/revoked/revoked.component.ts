@@ -2,7 +2,7 @@ import { Component, Input, inject, ChangeDetectionStrategy } from '@angular/core
 import { Node } from 'ngx-edu-sharing-api';
 import { DialogsService } from '../../services/abstract/dialogs.service';
 import { EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 
 import { MatButton, MatButtonModule } from '@angular/material/button';
 
@@ -12,7 +12,7 @@ import { MatButton, MatButtonModule } from '@angular/material/button';
     styleUrls: ['./revoked.component.scss'],
     standalone: true,
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatButtonModule, EduSharingUiCommonModule, TranslateModule],
+    imports: [MatButtonModule, EduSharingUiCommonModule, TranslatePipe],
 })
 export class RevokedComponent {
     dialogsService = inject(DialogsService, { optional: true });

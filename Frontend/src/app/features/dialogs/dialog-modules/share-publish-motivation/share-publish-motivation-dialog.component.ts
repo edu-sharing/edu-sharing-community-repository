@@ -14,7 +14,7 @@ import { CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
 import { SharePublishMotivationDialogComponentData } from './share-publish-motivation-dialog-dialog-data';
 import * as confetti from 'canvas-confetti';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { DialogButton } from '../../../../util/dialog-button';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import { ShareDialogData, ShareDialogResult } from '../share-dialog/share-dialog-data';
@@ -33,7 +33,7 @@ export const ConfigMotivationDefaultConfig: MotivationConfig = {
 
 @Component({
     selector: 'es-share-publish-motivation-dialog',
-    imports: [SharedModule, TranslateModule],
+    imports: [SharedModule, TranslatePipe],
     templateUrl: './share-publish-motivation-dialog.component.html',
     changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./share-publish-motivation-dialog.component.scss'],

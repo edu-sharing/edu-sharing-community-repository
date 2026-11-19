@@ -1,5 +1,5 @@
 import { Component, computed, inject, input } from '@angular/core';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { EduSharingUiCommonModule, IconDirective } from 'ngx-edu-sharing-ui';
 import { Node } from 'ngx-edu-sharing-api';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
@@ -23,7 +23,7 @@ import { CollectionScopeLabelComponent } from '../../collection-scope-label/coll
     templateUrl: 'collection-info-facts.component.html',
     styleUrls: ['collection-info-facts.component.scss'],
     imports: [
-        TranslateModule,
+        TranslatePipe,
         EduSharingUiCommonModule,
         IconDirective,
         CollectionInfoSectionComponent,

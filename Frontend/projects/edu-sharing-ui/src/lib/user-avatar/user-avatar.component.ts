@@ -5,7 +5,7 @@
 import { Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { DomSanitizer } from '@angular/platform-browser';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateService } from '@ngx-translate/core';
 import { AuthenticationService, Group, Person, RestConstants } from 'ngx-edu-sharing-api';
 import { map } from 'rxjs/operators';
 import { EduSharingUiCommonModule } from '../common/edu-sharing-ui-common.module';
@@ -18,7 +18,7 @@ import { AuthorityNamePipe } from '../pipes/authority-name.pipe';
     templateUrl: 'user-avatar.component.html',
     styleUrls: ['user-avatar.component.scss'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [TranslateModule, EduSharingUiCommonModule, CommonModule],
+    imports: [EduSharingUiCommonModule, CommonModule],
 })
 export class UserAvatarComponent {
     private router = inject(Router);

@@ -9,13 +9,13 @@ import {
     ChangeDetectionStrategy,
 } from '@angular/core';
 import { MatIconButton } from '@angular/material/button';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-side-menu-wrapper',
     encapsulation: ViewEncapsulation.Emulated,
-    imports: [EduSharingUiCommonModule, MatIconButton, TranslateModule],
+    imports: [EduSharingUiCommonModule, MatIconButton, TranslatePipe],
     templateUrl: './side-menu-wrapper.component.html',
     changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./side-menu-wrapper.component.scss'],

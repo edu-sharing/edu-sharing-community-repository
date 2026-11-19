@@ -14,11 +14,11 @@ import { Node } from 'ngx-edu-sharing-api';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { RenderData, AssetStateItem } from '../../dto/RenderData';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
     selector: 'rs-module-image',
-    imports: [RenderingModule, MatButtonModule, MatIconModule, TranslateModule],
+    imports: [RenderingModule, MatButtonModule, MatIconModule, TranslatePipe],
     templateUrl: './image.component.html',
     changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './image.component.scss',

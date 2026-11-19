@@ -1,6 +1,6 @@
 import { Component, computed, DestroyRef, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MatButtonModule } from '@angular/material/button';
 import { firstValueFrom } from 'rxjs';
 import { ScopeQuery, ScopesService } from 'ngx-edu-sharing-api';
@@ -18,7 +18,7 @@ import { navigateToBaseQuerySearch } from './scope-base-query-navigation';
     selector: 'es-scope-settings',
     templateUrl: 'scope-settings.component.html',
     styleUrls: ['scope-settings.component.scss'],
-    imports: [TranslateModule, MatButtonModule, EduSharingUiCommonModule, InfoMessageComponent],
+    imports: [TranslatePipe, MatButtonModule, EduSharingUiCommonModule, InfoMessageComponent],
 })
 export class ScopeSettingsComponent {
     private scopesService = inject(ScopesService);

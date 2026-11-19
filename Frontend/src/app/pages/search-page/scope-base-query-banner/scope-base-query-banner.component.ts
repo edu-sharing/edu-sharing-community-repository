@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { MatButtonModule } from '@angular/material/button';
 import { firstValueFrom } from 'rxjs';
 import { DEFAULT, ScopeQuery, ScopesService } from 'ngx-edu-sharing-api';
@@ -18,7 +18,7 @@ import { SCOPE_BASE_QUERY_PARAMS } from '../../editorial-page/scope-settings/sco
     selector: 'es-scope-base-query-banner',
     templateUrl: 'scope-base-query-banner.component.html',
     styleUrls: ['scope-base-query-banner.component.scss'],
-    imports: [TranslateModule, MatButtonModule, EduSharingUiCommonModule],
+    imports: [TranslatePipe, MatButtonModule, EduSharingUiCommonModule],
 })
 export class ScopeBaseQueryBannerComponent {
     private route = inject(ActivatedRoute);

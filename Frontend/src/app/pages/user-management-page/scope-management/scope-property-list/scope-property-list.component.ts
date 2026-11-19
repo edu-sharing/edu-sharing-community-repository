@@ -15,7 +15,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { EduSharingUiCommonModule, ListItem } from 'ngx-edu-sharing-ui';
 
 /** context of the row template: the property id and its position */
@@ -40,7 +40,7 @@ export type ScopePropertyRowContext = { $implicit: string; index: number };
         MatInputModule,
         MatTooltipModule,
         NgTemplateOutlet,
-        TranslateModule,
+        TranslatePipe,
     ],
 })
 export class ScopePropertyListComponent {

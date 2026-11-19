@@ -1,6 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { ModuleWithProviders, NgModule, Optional, inject } from '@angular/core';
-import { MissingTranslationHandler, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import {
+    MissingTranslationHandler,
+    TranslateLoader,
+    provideTranslateService,
+} from '@ngx-translate/core';
 import { ConfigService } from 'ngx-edu-sharing-api';
 import { EduSharingUiConfiguration } from '../edu-sharing-ui-configuration';
 import { FallbackTranslationHandler } from './fallback-translation-handler';
@@ -10,12 +14,12 @@ import { I18N_CONFIG } from '../types/injection-tokens';
 /**
  * Import this module once in the app module to provide the `TranslateService`.
  *
- * Export `TranslateModule` in the shared module to provide directives and pipes.
+ * Import `TranslatePipe` and `TranslateDirective` where translations are used in templates.
  */
 @NgModule({
     declarations: [],
-    imports: [
-        TranslateModule.forRoot({
+    providers: [
+        provideTranslateService({
             loader: {
                 provide: TranslateLoader,
                 useFactory: TranslationLoader.create,

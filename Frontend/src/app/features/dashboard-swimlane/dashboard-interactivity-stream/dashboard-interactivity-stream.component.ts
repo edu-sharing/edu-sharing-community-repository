@@ -9,7 +9,7 @@ import {
 import { InviteEvent, NodeShare, NodeEvent, UserEvent } from 'ngx-edu-sharing-api';
 import { MatButtonModule } from '@angular/material/button';
 import { trigger } from '@angular/animations';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { SharedModule } from '../../../shared/shared.module';
 
 enum TimeGroups {
@@ -39,7 +39,7 @@ type EventsGrouped = { [key in TimeGroups]?: UserEvent[] };
     imports: [
         CommonModule,
         EduSharingUiCommonModule,
-        TranslateModule,
+        TranslatePipe,
         MatButtonModule,
         NodeEntriesModule,
         SharedModule,
