@@ -708,7 +708,7 @@
     "STREAM": "Aggiungi al flusso",
     "LICENSE": "Assegnare una licenza",
     "CONTRIBUTOR": "Contribuenti",
-    "SHARE_LINK": "Condividi il link per il download",
+    "SHARE_LINK": "Condividi il link",
     "WORKFLOW": "Flusso di lavoro",
     "TEMPLATE": "Modello di metadati",
     "VARIANT": "Creare una variante",
@@ -919,6 +919,7 @@
     "PASSWORD_CORRECT": "Password corretta",
     "SUBELEMENT_SINGLE": "contiene 1 altro elemento",
     "SUBELEMENT_MULTI": "contiene {{count}} più elementi",
+    "ERROR_RENDER": "Il materiale non può essere visualizzato",
     "EMPTY_FOLDER": "La cartella condivisa non contiene ancora alcun file."
   },
   "VIDEO_CONTROLS": {

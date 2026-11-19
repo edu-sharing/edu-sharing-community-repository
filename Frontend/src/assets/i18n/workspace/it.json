@@ -392,6 +392,13 @@
       "LINK_DOWNLOADS": "Numero di download: {{ count }}",
       "COPIED_CLIPBOARD": "Link copiato negli appunti",
       "COPIED_CLIPBOARD_ERROR": "Impossibile copiare il link. Contrassegnare e copiare manualmente",
+      "VIEW_TITLE": "Consenti la visualizzazione nel browser",
+      "VIEW_INFO": "L'oggetto può essere visualizzato direttamente nel browser tramite il link",
+      "DOWNLOAD_TITLE": "Consenti il download",
+      "DOWNLOAD_INFO": "L'oggetto può essere scaricato tramite il link",
+      "ACTIONS_MIN_ONE": "Almeno una delle due opzioni deve rimanere attiva",
+      "LINK_INFO_VIEW": "Chiunque abbia accesso al link può visualizzare l'oggetto.",
+      "LINK_INFO_VIEW_FOLDER": "Chiunque abbia accesso al link può visualizzare tutti i file della cartella. Non è possibile accedere alle sottocartelle.",
       "PASSWORD_EDIT_HINT": "Inserendo queste informazioni nel campo verrà impostata una nuova password."
     },
     "WORKFLOW": {

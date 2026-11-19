@@ -708,7 +708,7 @@
     "STREAM": "Ajouter au flux",
     "LICENSE": "Attribuer une licence",
     "CONTRIBUTOR": "Les contributeurs",
-    "SHARE_LINK": "Partager le lien de téléchargement",
+    "SHARE_LINK": "Partager le lien",
     "WORKFLOW": "Flux de travail",
     "TEMPLATE": "Modèle de métadonnées",
     "VARIANT": "Créer une variante",
@@ -919,6 +919,7 @@
     "PASSWORD_CORRECT": "Mot de passe correct",
     "SUBELEMENT_SINGLE": "contient 1 élément supplémentaire",
     "SUBELEMENT_MULTI": "contient {{count}} plus d'éléments",
+    "ERROR_RENDER": "Le matériel ne peut pas être affiché",
     "EMPTY_FOLDER": "Le dossier partagé ne contient encore aucun fichier."
   },
   "VIDEO_CONTROLS": {

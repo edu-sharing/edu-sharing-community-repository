@@ -396,6 +396,13 @@
       "LINK_DOWNLOADS": "Nombre de téléchargements : {{ count }}",
       "COPIED_CLIPBOARD": "Lien copié dans le presse-papiers",
       "COPIED_CLIPBOARD_ERROR": "La copie du lien a échoué. Veuillez le marquer et le copier manuellement",
+      "VIEW_TITLE": "Autoriser l'affichage dans le navigateur",
+      "VIEW_INFO": "L'objet peut être affiché directement dans le navigateur via le lien",
+      "DOWNLOAD_TITLE": "Autoriser le téléchargement",
+      "DOWNLOAD_INFO": "L'objet peut être téléchargé via le lien",
+      "ACTIONS_MIN_ONE": "Au moins une des deux options doit rester activée",
+      "LINK_INFO_VIEW": "Toute personne ayant accès à ce lien peut afficher l'objet.",
+      "LINK_INFO_VIEW_FOLDER": "Toute personne ayant accès à ce lien peut afficher tous les fichiers de ce dossier. Les sous-dossiers ne sont pas accessibles.",
       "PASSWORD_EDIT_HINT": "La saisie de ces informations dans ce champ permettra de définir un nouveau mot de passe."
     },
     "WORKFLOW": {
