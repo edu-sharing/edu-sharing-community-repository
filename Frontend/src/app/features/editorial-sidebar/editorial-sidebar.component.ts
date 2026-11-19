@@ -137,6 +137,11 @@ export type PreviewConfig = {
     groupId?: string;
     /** custom options for the actionbar of the embedded preview. */
     customOptions?: CustomOptions;
+    /**
+     * offer the link to the full view of the node. Default: true. Switch it off where that view is
+     * not reachable, e.g. for a recipient of a link share.
+     */
+    showAllDetails?: boolean;
 };
 export type OptionConfig =
     | NodesSelectorConfig

@@ -15,6 +15,7 @@ import org.edu_sharing.restservices.node.v1.model.NodeEntries;
 import org.edu_sharing.restservices.node.v1.model.SignedNodeEntry;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Filter;
+import org.edu_sharing.restservices.shared.Mds;
 import org.edu_sharing.restservices.shared.NodeRef;
 import org.edu_sharing.restservices.sharing.v1.model.SharingInfo;
 import org.edu_sharing.service.search.model.SortDefinition;
@@ -141,6 +142,37 @@ public class SharingApi {
             return AuthenticationUtil.runAsSystem(() -> {
                 RepositoryDao repoDao = RepositoryDao.getRepository(repository);
                 return Response.status(Response.Status.OK).entity(SharingDao.getSignedNode(repoDao, node, token, password, child)).build();
+            });
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
+    }
+
+    @GET
+    @SecurityRequirements
+    @Path("/sharing/{repository}/{node}/{share}/metadataset")
+    @Operation(summary = "Get the metadata set of a shared node.", description = "The metadata set the viewer of a shared node needs. Authorized by the share instead of a login; the share has to allow viewing.")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Mds.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+    public Response getMetadataSet(
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Parameter(description = "Share token", required = true) @PathParam("share") String token,
+            @Parameter(description = "Password (required if share is locked)", required = false, schema = @Schema(defaultValue = "")) @QueryParam("password") String password,
+            @Parameter(description = "Id of a node below the shared node, e.g. an element of a shared folder (optional)", required = false) @QueryParam("child") String child,
+            @Context HttpServletRequest req) {
+
+        try {
+            return AuthenticationUtil.runAsSystem(() -> {
+                RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+                return Response.status(Response.Status.OK).entity(SharingDao.getMetadataSet(repoDao, node, token, password, child)).build();
             });
         } catch (Throwable t) {
             return ErrorResponse.createResponse(t);

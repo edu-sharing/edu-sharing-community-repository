@@ -83,6 +83,7 @@
       <i esIcon="arrow_back"></i>
       <span>{{ 'EDITORIAL.SIDEBAR.PREVIOUS' | translate }}</span>
     </button>
+    @if (showAllDetails) {
     <a
       mat-stroked-button
       [routerLink]="allDetailsLink"
@@ -93,6 +94,10 @@
     >
       <span>{{ 'ALL_DETAILS' | translate }}</span>
     </a>
+    } @else {
+    <!-- keeps the previous / next buttons at their place -->
+    <span></span>
+    }
     <button
       mat-button
       color="primary"

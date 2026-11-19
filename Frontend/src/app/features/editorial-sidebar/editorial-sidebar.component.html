@@ -134,6 +134,7 @@
             editorialSidebarService.previewCustomOptions()[editorialSidebarService.scope()]
           "
           [showStickyBar]="!editorialSidebarService.fullscreenActive()"
+          [showAllDetails]="$any(enabledOption()?.optionConfig)?.showAllDetails !== false"
         ></es-preview-sidebar>
         }
       </div>

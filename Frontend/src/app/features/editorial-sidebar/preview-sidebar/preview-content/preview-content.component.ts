@@ -96,6 +96,11 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
      */
     @Input() showStickyBar = true;
 
+    /**
+     * whether the link to the full view of the node is offered in the sticky bar
+     */
+    @Input() showAllDetails = true;
+
     @Input() customOptions: CustomOptions;
     /** Editor mode for the embedded mds-editor-wrapper. */
     @Input() editorMode: EditorMode = 'viewer';

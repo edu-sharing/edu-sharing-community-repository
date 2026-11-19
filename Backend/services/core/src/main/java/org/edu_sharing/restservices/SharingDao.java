@@ -5,6 +5,8 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.restservices.sharing.v1.model.SharingInfo;
 import org.edu_sharing.restservices.node.v1.model.SignedNodeEntry;
+import org.edu_sharing.metadataset.v2.MetadataSet;
+import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 
@@ -46,22 +48,7 @@ public class SharingDao {
 	public static SignedNodeEntry getSignedNode(RepositoryDao repositoryDao, String node, String token, String password, String childId) throws DAOException {
 		try {
 			Share share = getShare(node, token);
-			if (share.getExpiryDate() != GlobalShareService.EXPIRY_DATE_UNLIMITED && new Date().after(new Date(share.getExpiryDate()))) {
-				throw new InsufficientPermissionException("Share expired");
-			}
-			if (share.getPassword() != null && !share.getPassword().equals(GlobalShareServiceImpl.encryptPassword(password))) {
-				throw new InsufficientPermissionException("Invalid password supplied");
-			}
-			if (!share.isViewAllowed()) {
-				throw new InsufficientPermissionException("The share does not allow to view the content");
-			}
-			String targetId = childId == null || childId.isEmpty() ? node : childId;
-			if (!targetId.equals(node)) {
-				GlobalShareService service = ApplicationContextFactory.getApplicationContext().getBean(GlobalShareService.class);
-				if (!service.isNodeAccessibleViaShare(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node), targetId)) {
-					throw new InsufficientPermissionException("The node is not part of the share");
-				}
-			}
+			String targetId = resolveViewTarget(share, node, password, childId);
 
 			NodeDao nodeDao = NodeDao.getNode(repositoryDao, targetId);
 			// resolve the additional, dynamic links for the rs2
@@ -88,6 +75,50 @@ public class SharingDao {
 		} catch (Throwable t) {
 			throw DAOException.mapping(t);
 		}
+	}
+
+	/**
+	 * The metadata set of a node that is accessed via a link share, i.e. the definition the viewer of
+	 * the node needs. The regular metadata set api requires a login, which a recipient of a share
+	 * does not have. Always the set of the node itself is returned, never an arbitrary one.
+	 * <p>
+	 * The same conditions as for {@link #getSignedNode} apply.
+	 */
+	public static Mds getMetadataSet(RepositoryDao repositoryDao, String node, String token, String password, String childId) throws DAOException {
+		try {
+			Share share = getShare(node, token);
+			String targetId = resolveViewTarget(share, node, password, childId);
+			MetadataSet metadataSet = MetadataHelper.getMetadataset(new NodeRef(repositoryDao, targetId));
+			return MdsDao.getMds(repositoryDao, metadataSet.getId()).asMds();
+		} catch (Throwable t) {
+			throw DAOException.mapping(t);
+		}
+	}
+
+	/**
+	 * Checks that the share may be used to view content and returns the id of the node to view.
+	 *
+	 * @param childId optional id of a node below the shared node; it has to be part of the share
+	 * @return the id of the shared node or of the given child
+	 */
+	private static String resolveViewTarget(Share share, String node, String password, String childId) throws InsufficientPermissionException {
+		if (share.getExpiryDate() != GlobalShareService.EXPIRY_DATE_UNLIMITED && new Date().after(new Date(share.getExpiryDate()))) {
+			throw new InsufficientPermissionException("Share expired");
+		}
+		if (share.getPassword() != null && !share.getPassword().equals(GlobalShareServiceImpl.encryptPassword(password))) {
+			throw new InsufficientPermissionException("Invalid password supplied");
+		}
+		if (!share.isViewAllowed()) {
+			throw new InsufficientPermissionException("The share does not allow to view the content");
+		}
+		String targetId = childId == null || childId.isEmpty() ? node : childId;
+		if (!targetId.equals(node)) {
+			GlobalShareService service = ApplicationContextFactory.getApplicationContext().getBean(GlobalShareService.class);
+			if (!service.isNodeAccessibleViaShare(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node), targetId)) {
+				throw new InsufficientPermissionException("The node is not part of the share");
+			}
+		}
+		return targetId;
 	}
 
 	public static List<NodeRef> getChildren(RepositoryDao repositoryDao, String node, String token, String password) throws DAOException {

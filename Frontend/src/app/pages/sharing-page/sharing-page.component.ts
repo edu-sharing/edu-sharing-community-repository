@@ -1,4 +1,11 @@
-import { Component, ViewChild, inject, ChangeDetectionStrategy, signal } from '@angular/core';
+import {
+    Component,
+    ViewChild,
+    inject,
+    ChangeDetectionStrategy,
+    HostBinding,
+    OnDestroy,
+} from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import {
     ColumnType,
@@ -37,7 +44,13 @@ import { Helper } from '../../core-module/rest/helper';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { BridgeService } from '../../services/bridge.service';
 import { NodeHelperService } from '../../services/node-helper.service';
-import { ConfigService, Node } from 'ngx-edu-sharing-api';
+import { ConfigService, MdsService, Node } from 'ngx-edu-sharing-api';
+import { SelectionChange } from '@angular/cdk/collections';
+import { PreviewConfig } from '../../features/editorial-sidebar/editorial-sidebar.component';
+import { EditorialSidebarService } from '../../features/editorial-sidebar/editorial-sidebar.service';
+import { RENDER_DATA_LOADER } from '../render2-page/render-wrapper-component/render-data-loader';
+import { ShareAccessService, ShareMdsService } from './share-mds.service';
+import { ShareRenderService } from './share-render.service';
 import { OptionsHelperService } from '../../services/options-helper.service';
 import { firstValueFrom } from 'rxjs';
 
@@ -45,11 +58,17 @@ import { firstValueFrom } from 'rxjs';
     selector: 'es-sharing-page',
     templateUrl: 'sharing-page.component.html',
     styleUrls: ['sharing-page.component.scss'],
-    providers: [OptionsHelperService],
+    providers: [
+        OptionsHelperService,
+        ShareAccessService,
+        { provide: MdsService, useClass: ShareMdsService },
+        ShareRenderService,
+        { provide: RENDER_DATA_LOADER, useFactory: () => inject(ShareRenderService).load },
+    ],
     changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false,
 })
-export class SharingPageComponent {
+export class SharingPageComponent implements OnDestroy {
     private router = inject(Router);
     private route = inject(ActivatedRoute);
     private connector = inject(RestConnectorService);
@@ -64,17 +83,15 @@ export class SharingPageComponent {
     private nodePersonNamePipe = inject(NodePersonNamePipe);
     private translations = inject(TranslationsService);
     private renderHelper = inject(RenderHelperService);
+    private access = inject(ShareAccessService);
+    private shareRender = inject(ShareRenderService);
+    readonly editorialSidebar = inject(EditorialSidebarService);
 
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
     readonly Scope = Scope;
     @ViewChild('nodeEntries') nodeEntries: NodeEntriesWrapperComponent<Node>;
     loading = true;
-    /** data of the rendered (shared or child) node, only set if the share allows viewing */
-    renderData = signal<CombinedRenderData | null>(null);
-    renderLoading = signal(false);
-    /** the element of a shared folder that is currently displayed, null for the shared node itself */
-    viewedChild = signal<Node | null>(null);
     passwordInput: string;
     private params: Params;
     sharingInfo: SharingInfo;
@@ -127,6 +144,8 @@ export class SharingPageComponent {
         this.translations.waitForInit().subscribe(() => {
             this.route.queryParams.subscribe((params) => {
                 this.params = params;
+                this.access.nodeId = params.nodeId;
+                this.access.token = params.token;
                 this.sharingService.getInfo(params.nodeId, params.token).subscribe(
                     (result) => {
                         this.loading = false;
@@ -140,7 +159,6 @@ export class SharingPageComponent {
                             return;
                         }
                         this.loadChildren();
-                        void this.loadRenderData();
                     },
                     (error) => {
                         console.warn(error);
@@ -157,6 +175,7 @@ export class SharingPageComponent {
     }
 
     validatePassword() {
+        this.access.password = this.passwordInput ?? '';
         this.sharingService
             .getInfo(this.params.nodeId, this.params.token, this.passwordInput)
             .subscribe((result) => {
@@ -165,67 +184,116 @@ export class SharingPageComponent {
                 }
                 this.sharingInfo = result;
                 this.loadChildren();
-                void this.loadRenderData();
             });
     }
 
+    ngOnDestroy(): void {
+        // the sidebar service is shared by all pages, so what was selected here must not outlive the page
+        this.editorialSidebar.close();
+    }
+
+    get nodeId(): string {
+        return this.params?.nodeId;
+    }
+
     /**
-     * Whether the content of the shared node is displayed in the browser: only if the share allows
-     * viewing and the node itself has content (a folder only lists its elements, a link has none)
+     * The share allows viewing and the password (if any) was given
      */
-    get showsRenderedNode(): boolean {
+    private get viewable(): boolean {
+        const info = this.sharingInfo;
+        return !!info?.view && (!info.password || info.passwordMatches);
+    }
+
+    /**
+     * Whether the page shows the shared material like the regular render page: the content has to
+     * be displayable (a link has none) and not be a folder
+     */
+    get rendersMaterial(): boolean {
         return (
-            !!this.sharingInfo?.view &&
+            this.viewable &&
             !this.sharingInfo.node.isDirectory &&
             this.sharingInfo.node.mediatype !== 'link'
         );
     }
 
     /**
-     * Loads the data to render the shared node or - for a shared folder - the given element
+     * Whether the page shows a shared folder with the viewed element and the list of elements in the
+     * right column
      */
-    private async loadRenderData(child: Node | null = null): Promise<void> {
-        this.viewedChild.set(child);
-        const viewsChild = !!child && !!this.sharingInfo?.view;
-        if (!viewsChild && !this.showsRenderedNode) {
-            this.renderData.set(null);
-            return;
-        }
-        if (this.sharingInfo.password && !this.sharingInfo.passwordMatches) {
-            return;
-        }
-        this.renderLoading.set(true);
-        // the renderer only reads its inputs on creation, so drop the old data first
-        this.renderData.set(null);
-        try {
-            const securedNode = await firstValueFrom(
-                this.sharingService.getSecuredNode(
-                    this.params.nodeId,
-                    this.params.token,
-                    this.passwordInput ?? '',
-                    child?.ref.id ?? null,
-                ),
-            );
-            this.renderData.set(await this.renderHelper.getRenderDataForShare(securedNode));
-        } catch (error) {
-            console.warn(error);
-            this.toast.error(error);
-        } finally {
-            this.renderLoading.set(false);
-        }
+    @HostBinding('class.folder-view')
+    get rendersFolder(): boolean {
+        return this.viewable && this.sharingInfo.node.isDirectory;
     }
 
     /**
-     * Click on an element of a shared folder: display it if the share allows viewing
+     * Loads the render data of the shared material (single view) through the share
      */
-    openChild(event: NodeClickEvent<Node>) {
-        if (this.sharingInfo?.view && event.element.mediatype !== 'link') {
-            void this.loadRenderData(event.element);
-        }
+    renderDataLoader = this.shareRender.load;
+
+    /**
+     * Actions of the render view: the download of the shown material, if the share allows it
+     */
+    renderOptions: OptionItem[] = this.createRenderOptions();
+
+    /** what the preview in the sidebar offers: the download of the element, no link to the full view */
+    private readonly previewConfig: PreviewConfig = {
+        showAllDetails: false,
+        customOptions: { useDefaultOptions: false, addOptions: this.renderOptions },
+    };
+
+    private createRenderOptions(): OptionItem[] {
+        const download = new OptionItem('SHARING.DOWNLOAD', 'cloud_download', () =>
+            // the single view downloads the shared node, the sidebar the selected element of the folder
+            this.download(
+                this.sharingInfo?.node.isDirectory
+                    ? (this.editorialSidebar.nodes() as Node[])
+                    : null,
+            ),
+        );
+        download.elementType = [ElementType.Node];
+        download.group = DefaultGroups.View;
+        download.showAsAction = true;
+        download.customShowCallback = async () => !!this.sharingInfo?.download;
+        return [download];
     }
 
-    closeChild() {
-        void this.loadRenderData(null);
+    /**
+     * Click on an element of a shared folder: show it in the sidebar like the search does, if the
+     * share allows viewing. Mirrors `EditorialSidebarService.handleSelect`, except that the sidebar
+     * offers nothing besides the preview, so there is no way back to an option list.
+     */
+    onClick(entries: NodeEntriesWrapperComponent<Node>, event: NodeClickEvent<Node>) {
+        if (!this.sharingInfo?.view || event.element.mediatype === 'link') {
+            return;
+        }
+        const selection = entries.getSelection();
+        const wasSelected =
+            selection.selected.length === 1 && selection.selected[0] === event.element;
+        selection.clear();
+        if (wasSelected) {
+            this.editorialSidebar.close();
+            return;
+        }
+        selection.select(event.element);
+        // the list of a share is no primary list, so the preview has to be told which one to step through
+        // (after clearing the selection, since closing the sidebar forgets it)
+        this.editorialSidebar.setPreviewList(entries);
+        this.editorialSidebar.scope.set(Scope.Sharing);
+        this.editorialSidebar.nodes.set([event.element]);
+        this.editorialSidebar.showOption({
+            option: 'PREVIEW',
+            trap: true,
+            optionConfig: this.previewConfig,
+        });
+    }
+
+    /**
+     * Keeps the sidebar and what the metadata set is loaded for in sync with the selection, also when
+     * the preview steps to the previous / next element
+     */
+    selectionChange(selection: SelectionChange<Node>) {
+        this.access.childId = selection.source.selected[0]?.ref.id ?? null;
+        this.editorialSidebar.handleSelection(selection);
     }
     download(children: Node[] = null) {
         const node = this.params.nodeId;

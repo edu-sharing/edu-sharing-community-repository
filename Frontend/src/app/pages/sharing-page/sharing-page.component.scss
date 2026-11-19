@@ -1,4 +1,6 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 
 .container {
     min-height: 100%;
@@ -161,8 +163,96 @@ es-powered-by {
     }
 }
 
-.render {
-    margin: 20px 0;
+// the render view of a shared material, laid out like the regular render page
+:host {
+    display: block;
+}
+.render-layout {
+    height: calc(100vh - var(--mainnavCurrentHeight));
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+// shared folder, laid out like the search and collection page: the list in the main column, the
+// viewed element in the detail column on the right
+:host(.folder-view) {
+    // same as the search page: lock to the viewport height below the main nav and clip, so the
+    // page produces no body scrollbar - the list card scrolls internally instead
     position: relative;
-    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - var(--mainnavCurrentHeight));
+    overflow: hidden;
+}
+:host(.folder-view) ::ng-deep {
+    mat-sidenav-container mat-sidenav-content {
+        display: flex;
+    }
+}
+.folder-container {
+    flex: 1;
+    background: transparent;
+}
+.main-content {
+    flex-grow: 1;
+    min-width: 0;
+    @include mixins.roundedContainerCard(vars.$mobileTabSwitchWidth, vars.$mobileTabNavHeight);
+    @include mixins.roundedContainerStaticScroll(
+        vars.$mobileTabSwitchWidth,
+        vars.$mobileTabNavHeight
+    );
+}
+.main-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 20px;
+    @include mixins.materialScrollbarLight();
+}
+.folder-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    .icon {
+        margin-right: 14px;
+        width: 50px;
+    }
+    .name {
+        font-size: 1.4em;
+    }
+}
+es-render-wrapper-component {
+    @include mixins.roundedContainerCard(vars.$mobileTabSwitchWidth, vars.$mobileTabNavHeight);
+    @include mixins.roundedContainerStaticScroll(
+        vars.$mobileTabSwitchWidth,
+        vars.$mobileTabNavHeight
+    );
+    // keep the topbar fixed, only the content below scrolls (same as on the render page)
+    ::ng-deep .render-before {
+        flex-shrink: 0;
+    }
+    ::ng-deep .render-scroll {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        @include mixins.materialScrollbarLight();
+    }
+}
+.render-footer {
+    margin-top: auto;
+    flex-shrink: 0;
+    width: 100%;
+    .invited-by {
+        text-align: center;
+        color: var(--textLight);
+        padding: 15px 0 0 0;
+    }
+}
+es-imprint-privacy {
+    display: block;
+    width: 100%;
+    padding: 15px 0;
+    border-top: 1px solid var(--borderLight);
 }

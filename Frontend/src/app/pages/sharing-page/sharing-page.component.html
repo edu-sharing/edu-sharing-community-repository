@@ -2,7 +2,49 @@
 <es-global-progress></es-global-progress>
 }
 <h1 esTitle class="cdk-visually-hidden">{{ 'SHARING.TITLE' | translate }}</h1>
-@if (!loading && sharingInfo) {
+@if (!loading && sharingInfo && rendersMaterial) {
+<div class="render-layout">
+  <es-render-wrapper-component
+    [nodeId]="nodeId"
+    [showBack]="false"
+    [dataLoader]="renderDataLoader"
+    [customOptions]="renderOptions"
+  >
+    <ng-container *ngTemplateOutlet="renderFooter"></ng-container>
+  </es-render-wrapper-component>
+</div>
+} @else if (!loading && sharingInfo && rendersFolder) {
+<mat-sidenav-container
+  class="folder-container"
+  [class.mat-sidenav-container-right-open]="editorialSidebar.sidebarOpened()"
+>
+  <mat-sidenav
+    #rightSidenav
+    [mode]="'side'"
+    [opened]="editorialSidebar.sidebarOpened()"
+    [defaultWidthPx]="600"
+    [maxWidth]="0.5"
+    class="es-mat-sidenav"
+    storageKey="SHARING_SIDENAV_RIGHT_WIDTH"
+    esResizableSidenav
+    position="end"
+  >
+    <div class="es-mat-sidenav-content">
+      <es-editorial-sidebar [primaryMode]="'search'"></es-editorial-sidebar>
+    </div>
+  </mat-sidenav>
+  <div class="main-content">
+    <div class="main-scroll">
+      <div class="folder-header">
+        <img class="icon" [src]="sharingInfo.node | esNodeIcon | async" />
+        <div class="name">{{ sharingInfo.node.name }}</div>
+      </div>
+      <ng-container *ngTemplateOutlet="folderList"></ng-container>
+      <ng-container *ngTemplateOutlet="renderFooter"></ng-container>
+    </div>
+  </div>
+</mat-sidenav-container>
+} @else if (!loading && sharingInfo) {
 <div class="container">
   <div class="container-inside">
     <div class="branding">
@@ -68,57 +110,11 @@
         <i esIcon="done"></i>{{ 'SHARING.PASSWORD_CORRECT' | translate }}
       </div>
       } @if (sharingInfo.node.isDirectory) {
-      <div>
-        @if (!nodesDataSource?.isEmpty() && sharingInfo.download) {
-        <div class="download-top">
-          <button mat-raised-button color="primary" (click)="download()">
-            <i esIcon="cloud_download"></i>{{ 'SHARING.DOWNLOAD_ZIP' | translate }}
-          </button>
-        </div>
-        }
-        <div class="folder">
-          <es-node-entries-wrapper
-            #nodeEntries
-            [dataSource]="nodesDataSource"
-            [scope]="Scope.Sharing"
-            [columns]="columns"
-            [checkbox]="false"
-            [sort]="sort"
-            [elementInteractionType]="
-              sharingInfo.view ? InteractionType.Emitter : InteractionType.None
-            "
-            [displayType]="NodeEntriesDisplayType.Table"
-            (sortChange)="changeSort($event)"
-            (clickItem)="openChild($event)"
-          >
-            <ng-template #empty>
-              <div class="empty mat-heading-5">{{ 'SHARING.EMPTY_FOLDER' | translate }}</div>
-            </ng-template>
-          </es-node-entries-wrapper>
-        </div>
-      </div>
-      } @if (showsRenderedNode || viewedChild()) {
-      <div class="render">
-        @if (viewedChild()) {
-        <button mat-button color="primary" (click)="closeChild()">
-          <i esIcon="keyboard_arrow_left"></i>{{ 'SHARING.BACK_TO_LIST' | translate }}
-        </button>
-        } @if (renderLoading()) {
-        <es-spinner></es-spinner>
-        } @if (renderData()?.error) {
-        <es-info-message mode="error">{{ renderData().error | translate }}</es-info-message>
-        } @if (renderData()?.request && renderData()?.node) {
-        <rs-root [node]="renderData().node" [request]="renderData().request"></rs-root>
-        }
-      </div>
+      <ng-container *ngTemplateOutlet="folderList"></ng-container>
       } @if ((!sharingInfo.node.isDirectory || !nodesDataSource?.isEmpty()) && (sharingInfo.download
       || sharingInfo.node.mediatype === 'link')) {
       <div class="download">
-        <button
-          mat-raised-button
-          [color]="showsRenderedNode ? undefined : 'primary'"
-          (click)="download()"
-        >
+        <button mat-raised-button color="primary" (click)="download()">
           <i esIcon="cloud_download"></i
           >{{
             'SHARING.' +
@@ -137,3 +133,59 @@
   <es-powered-by mode="color"></es-powered-by>
 </div>
 }
+
+<ng-template #renderFooter>
+  <div class="render-footer">
+    @if (inviterIsAuthor()) {
+    <div class="invited-by">
+      {{
+        'SHARING.INVITED_AND_CREATED_BY'
+          | translate : { inviter: getPersonName(sharingInfo.invitedBy) }
+      }}
+    </div>
+    } @else {
+    <div class="invited-by">
+      {{
+        'SHARING.INVITED_PLUS_CREATED_BY'
+          | translate
+            : {
+                inviter: getPersonName(sharingInfo.invitedBy),
+                creator: getPersonName(sharingInfo.node.createdBy)
+              }
+      }}
+    </div>
+    }
+    <es-imprint-privacy [separator]="'/'"></es-imprint-privacy>
+  </div>
+</ng-template>
+
+<ng-template #folderList>
+  <div>
+    @if (!nodesDataSource?.isEmpty() && sharingInfo.download) {
+    <div class="download-top">
+      <button mat-raised-button color="primary" (click)="download()">
+        <i esIcon="cloud_download"></i>{{ 'SHARING.DOWNLOAD_ZIP' | translate }}
+      </button>
+    </div>
+    }
+    <div class="folder">
+      <es-node-entries-wrapper
+        #nodeEntries
+        [dataSource]="nodesDataSource"
+        [scope]="Scope.Sharing"
+        [columns]="columns"
+        [checkbox]="false"
+        [sort]="sort"
+        [elementInteractionType]="sharingInfo.view ? InteractionType.Emitter : InteractionType.None"
+        [displayType]="NodeEntriesDisplayType.Table"
+        (sortChange)="changeSort($event)"
+        (selectionChange)="selectionChange($event)"
+        (clickItem)="onClick(nodeEntries, $event)"
+      >
+        <ng-template #empty>
+          <div class="empty mat-heading-5">{{ 'SHARING.EMPTY_FOLDER' | translate }}</div>
+        </ng-template>
+      </es-node-entries-wrapper>
+    </div>
+  </div>
+</ng-template>

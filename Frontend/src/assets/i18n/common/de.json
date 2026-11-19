@@ -1136,7 +1136,7 @@
     "PASSWORD_CORRECT": "Passwort korrekt",
     "SUBELEMENT_SINGLE": "enthält 1 weiteres Element",
     "SUBELEMENT_MULTI": "enthält {{count}} weitere Elemente",
-    "BACK_TO_LIST": "Zurück zur Liste"
+    "ERROR_RENDER": "Das Material kann nicht angezeigt werden"
   },
   "VIDEO_CONTROLS": {
     "HEADING": "Einen Ausschnitt zum Speichern in einer Sammlung festlegen.",

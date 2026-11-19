@@ -54,6 +54,8 @@ export class PreviewSidebarComponent implements OnDestroy {
     @Input() groupId: string;
     /** whether the sticky footer bar (navigation / details / save) is shown. */
     @Input() showStickyBar = true;
+    /** whether the link to the full view of the node is offered. */
+    @Input() showAllDetails = true;
     /** Emits when the user clicked the "close" button. */
     @Output() closed = new EventEmitter<void>();
 

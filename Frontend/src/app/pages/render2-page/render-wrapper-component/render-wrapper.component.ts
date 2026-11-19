@@ -34,6 +34,7 @@ import { firstValueFrom } from 'rxjs';
 import { NodeHelperService } from '../../../services/node-helper.service';
 import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
 import { provideReusableOptionsHelperData } from '../../../services/options-helper-data.provider';
+import { RENDER_DATA_LOADER } from './render-data-loader';
 
 @Component({
     selector: 'es-render-wrapper-component',
@@ -58,11 +59,26 @@ export class RenderWrapperComponent implements OnChanges {
     private translations = inject(TranslationsService);
     private optionsHelper = inject(OptionsHelperDataService);
     private editorialSidebarService = inject(EditorialSidebarService);
+    private providedDataLoader = inject(RENDER_DATA_LOADER, { optional: true });
 
     @ViewChild(ActionbarComponent) actionbar: ActionbarComponent;
     @ViewChild(RenderComponent) private renderComponent?: RenderComponent;
     @Input() showTopbar = true;
+    /**
+     * show the back button in the topbar, see {@link closeClick}
+     */
+    @Input() showBack = true;
     @Input() showMetadata = true;
+    /**
+     * Loads the render data of a node instead of the (logged in) node api, e.g. for a node that is
+     * accessed via a link share. Falls back to the loader a host provides via {@link RENDER_DATA_LOADER}.
+     */
+    @Input() dataLoader: ((nodeId: string) => Promise<CombinedRenderData>) | null = null;
+    /**
+     * Options of the actionbar in place of the default ones. The default options rely on a user and
+     * its permissions, so a host that loads the data itself (see {@link dataLoader}) provides its own.
+     */
+    @Input() customOptions: OptionItem[] | null = null;
     /**
      * shall childobjects be shown (as a list at the top)
      */
@@ -175,11 +191,13 @@ export class RenderWrapperComponent implements OnChanges {
             activeObjects: [node],
             selectedObjects: [node],
             allObjects: [node],
-            parent: { ref: { id: node.parent.id } },
-            customOptions: {
-                useDefaultOptions: true,
-                addOptions,
-            },
+            parent: { ref: { id: node.parent?.id } },
+            customOptions: this.customOptions
+                ? { useDefaultOptions: false, addOptions: this.customOptions }
+                : {
+                      useDefaultOptions: true,
+                      addOptions,
+                  },
             postPrepareOptions: (o) => {
                 const isSodix =
                     node?.properties?.['ccm:replicationsource']?.[0]?.toLowerCase() === 'sodix';
@@ -255,19 +273,21 @@ export class RenderWrapperComponent implements OnChanges {
          the metadata dialog was closed - would keep displaying the outdated node.
          */
         this.data.set(null);
-        const data = await this.renderHelperService.getRenderData(
-            nodeId,
-            this.version,
-            this.repository,
-        );
-        // register currently rendered node for sidebar interactions (incl. download-all btn + postPrepareOptions)
-        this.addDownloadAllBtn(data.node);
-        // surface the rendered node so a host can populate its editorial sidebar options
-        this.nodeChange.emit(data.node);
-        setTimeout(async () => {
-            await this.optionsHelper.initComponents(this.actionbar);
-            await this.optionsHelper.refreshComponents();
-        });
+        const loader = this.dataLoader ?? this.providedDataLoader;
+        const data = loader
+            ? await loader(nodeId)
+            : await this.renderHelperService.getRenderData(nodeId, this.version, this.repository);
+        // a host-provided loader may report an error without a node
+        if (data.node) {
+            // register currently rendered node for sidebar interactions (incl. download-all btn + postPrepareOptions)
+            this.addDownloadAllBtn(data.node);
+            // surface the rendered node so a host can populate its editorial sidebar options
+            this.nodeChange.emit(data.node);
+            setTimeout(async () => {
+                await this.optionsHelper.initComponents(this.actionbar);
+                await this.optionsHelper.refreshComponents();
+            });
+        }
         this.loading.set(false);
         this.data.set(data);
     }

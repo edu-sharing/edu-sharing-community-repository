@@ -1,12 +1,13 @@
 @if (showTopbar) {
 <div class="render-before">
+  @if (showBack) {
   <div class="back">
     <button mat-button color="primary" (click)="goBack()">
       <i esIcon="keyboard_arrow_left"></i>
       <span class="back-caption">{{ 'BACK' | translate }}</span>
     </button>
   </div>
-  @if (data()?.node) {
+  } @if (data()?.node) {
   <div class="title">
     <h1 esTitle>{{ data().node | nodeTitle }}</h1>
     <button

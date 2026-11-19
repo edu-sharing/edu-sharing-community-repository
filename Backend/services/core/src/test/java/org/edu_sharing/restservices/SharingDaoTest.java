@@ -110,6 +110,34 @@ class SharingDaoTest {
     }
 
     @Test
+    void getMetadataSet_withDownloadOnlyShare_throws() {
+        // Arrange
+        share(false, true, GlobalShareService.EXPIRY_DATE_UNLIMITED, null);
+
+        // Act / Assert
+        assertThrows(DAOSecurityException.class, () -> SharingDao.getMetadataSet(repoDao, NODE, TOKEN, null, null));
+    }
+
+    @Test
+    void getMetadataSet_withWrongPassword_throws() {
+        // Arrange
+        share(true, true, GlobalShareService.EXPIRY_DATE_UNLIMITED, GlobalShareServiceImpl.encryptPassword("secret"));
+
+        // Act / Assert
+        assertThrows(DAOSecurityException.class, () -> SharingDao.getMetadataSet(repoDao, NODE, TOKEN, "wrong", null));
+    }
+
+    @Test
+    void getMetadataSet_withChildOutsideTheShare_throws() {
+        // Arrange
+        share(true, false, GlobalShareService.EXPIRY_DATE_UNLIMITED, null);
+        when(globalShareService.isNodeAccessibleViaShare(any(), Mockito.eq("foreign"))).thenReturn(false);
+
+        // Act / Assert
+        assertThrows(DAOSecurityException.class, () -> SharingDao.getMetadataSet(repoDao, NODE, TOKEN, null, "foreign"));
+    }
+
+    @Test
     void getSignedNode_withChildOutsideTheShare_throws() {
         // Arrange
         share(true, false, GlobalShareService.EXPIRY_DATE_UNLIMITED, null);
