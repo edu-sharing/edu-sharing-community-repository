@@ -2,6 +2,14 @@
 
 .report {
     margin-bottom: 20px;
+    .reason-label {
+        color: var(--textLight);
+        font-size: $fontSizeSmall;
+        margin-bottom: 5px;
+    }
+    mat-error {
+        margin-bottom: 5px;
+    }
     mat-radio-group {
         display: flex;
         padding-bottom: 10px;
@@ -26,5 +34,5 @@ h2 {
     margin: 0 0 20px 0;
     font-size: 110%;
     font-weight: bold;
-    color: $textLight;
+    color: var(--textLight);
 }

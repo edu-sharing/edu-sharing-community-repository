@@ -484,11 +484,18 @@ export class UIHelper {
     }
 
     static copyToClipboard(text: string) {
+        // copying needs a focused, temporary textarea; give focus back to the triggering control
+        // afterwards, otherwise it falls to the body and the next Tab starts at the page top
+        const previouslyFocused = document.activeElement as HTMLElement | null;
         let input = document.createElement('textarea') as HTMLTextAreaElement;
         input.innerHTML = text;
         document.body.appendChild(input);
-        UIHelper.copyElementToClipboard(input);
-        document.body.removeChild(input);
+        try {
+            UIHelper.copyElementToClipboard(input);
+        } finally {
+            document.body.removeChild(input);
+            previouslyFocused?.focus?.({ preventScroll: true });
+        }
     }
 
     static mergePermissions(source: (Ace | ExtendedAce)[], add: Ace[]) {

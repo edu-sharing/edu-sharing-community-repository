@@ -220,6 +220,8 @@
           mat-button
           color="primary"
           class="count"
+          aria-haspopup="dialog"
+          [attr.aria-expanded]="!!collectionContentRef?.selectionOverlayOpen"
           (click)="
             collectionContentRef.selectionOverlayOpen = !collectionContentRef.selectionOverlayOpen
           "
@@ -246,6 +248,8 @@
           mat-button
           color="primary"
           class="count"
+          aria-haspopup="dialog"
+          [attr.aria-expanded]="!!clipboardOverlayOpen"
           (click)="clipboardOverlayOpen = !clipboardOverlayOpen"
         >
           {{ 'SEARCH.N_IN_CLIPBOARD' | translate : { count: clipboard()?.nodes?.length || 0 } }}

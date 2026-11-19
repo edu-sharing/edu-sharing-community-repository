@@ -125,6 +125,8 @@
     mat-button
     color="primary"
     class="count"
+    aria-haspopup="dialog"
+    [attr.aria-expanded]="!!selectionOverlayOpen"
     (click)="selectionOverlayOpen = !selectionOverlayOpen"
   >
     {{ 'SEARCH.N_SELECTED' | translate : { count: (searchPage.selection | async)?.length || 0 } }}

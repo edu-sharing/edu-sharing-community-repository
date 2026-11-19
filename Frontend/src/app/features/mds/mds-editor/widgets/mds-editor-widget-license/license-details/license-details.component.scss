@@ -28,9 +28,11 @@ h5 {
     display: table;
     margin: auto;
     padding: 10px 0;
-    h4,
     div {
         display: table-cell;
+    }
+    .licenseNameText {
+        font-weight: bold;
     }
 }
 .oerStatus {

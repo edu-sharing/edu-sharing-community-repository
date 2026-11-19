@@ -285,6 +285,24 @@ public class GroupDao {
         }
     }
 
+    /**
+     * Checks by exact comparison whether the given authority is a direct member of this group.
+     *
+     * @param memberAuthorityName the exact authority name (user name or GROUP_ prefixed group name)
+     * @return true if the authority is a direct member of this group
+     * @throws DAOException on validation or access errors
+     */
+    public boolean isDirectMember(String memberAuthorityName) throws DAOException {
+        try {
+            if (memberAuthorityName == null || memberAuthorityName.isBlank()) {
+                throw new IllegalArgumentException("authorityName must not be empty");
+            }
+            return authorityService.getMembershipsOfGroup(groupName).contains(memberAuthorityName);
+        } catch (Throwable t) {
+            throw DAOException.mapping(t);
+        }
+    }
+
     public void checkAdminAccess() {
         if (!authorityService.hasAdminAccessToGroup(groupName)) {
             throw new AccessDeniedException("User does not have permissions to manage this group");

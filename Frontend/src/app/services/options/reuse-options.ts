@@ -71,7 +71,8 @@ export function createReuseOptions({
         ElementType.Person,
         ElementType.SavedSearch,
     ];
-    shortcutNode.constrains = [Constrain.User];
+    // the shortcut dialog adds or replaces a single tile
+    shortcutNode.constrains = [Constrain.User, Constrain.NoBulk];
     shortcutNode.group = DefaultGroups.Reuse;
     shortcutNode.priority = 21;
 

@@ -79,6 +79,7 @@ $tileSize: 124px;
     width: $tileSize;
     height: $tileSize;
     color: var(--landingPageShortcutTileFontColor);
+    --focusColor: var(--landingPageShortcutTileFontColor);
     background-color: var(--landingPageShortcutTileBackground);
     border-radius: 8px;
     @include mixins.materialShadowBottom();
@@ -101,6 +102,12 @@ $tileSize: 124px;
     .entry-menu-button:focus {
         opacity: 1 !important;
         pointer-events: auto !important;
+    }
+    // Material only shows a faint state layer on focus and the browser's default ring lacks
+    // contrast on the tile background, so keyboard focus gets the app focus ring
+    .entry-menu-button:focus-visible,
+    .entry-title:focus-visible {
+        @include mixins.setGlobalKeyboardFocus();
     }
 
     // on hover, change the background color and slightly move the title

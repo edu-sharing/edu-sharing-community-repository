@@ -18,7 +18,8 @@
   </div>
   }
   <div class="licenseName">
-    <h4>{{ getLicenseName() }}</h4>
+    <!-- plain text, not a heading: no content section follows the license name -->
+    <div class="licenseNameText">{{ getLicenseName() }}</div>
     @if (getLicenseProperty() !== 'MULTI') {
     <div class="oerStatus">
       @if (isOerLicense()) {

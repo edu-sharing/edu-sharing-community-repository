@@ -20,6 +20,12 @@
     > .main-bar {
         background: var(--workspaceTopBarBackground);
         color: var(--workspaceTopBarFontColor);
+        // the bar is dark in both themes, so it needs a light focus ring
+        --focusColor: var(--focusColorOnDarkSurface);
+        // the main menu opens on a light surface but is nested in the bar
+        es-main-menu-sidebar {
+            --focusColor: var(--primaryBackground700);
+        }
         height: 70px;
         display: flex;
         // flex-wrap: wrap;

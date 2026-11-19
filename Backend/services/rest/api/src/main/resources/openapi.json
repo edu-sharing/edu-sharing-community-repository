@@ -24952,6 +24952,108 @@
         ]
       }
     },
+    "/iam/v1/groups/{repository}/{group}/member": {
+      "get": {
+        "description": "Get a single direct member of the group by exact authority name. The authority name is passed as query parameter because it may contain a slash. Returns 404 if the authority is not a member of the group. (admin rights are required.)",
+        "operationId": "getMember",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "authority name of the group (begins with GROUP_)",
+            "in": "path",
+            "name": "group",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "exact authority name of the member (user name or GROUP_ prefixed group name)",
+            "in": "query",
+            "name": "authorityName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Authority"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Group or member is not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Get a single direct member of the group by exact authority name.",
+        "tags": [
+          "IAM v1"
+        ]
+      }
+    },
     "/iam/v1/groups/{repository}/{group}/members": {
       "delete": {
         "description": "Delete members from the group. (admin rights are required.) The whole list is processed within a single transaction, i.e. if one member fails, no member is removed. At most 1000 members are accepted per request, larger requests are rejected with 400. A batch size of 100 is recommended. Batches must not be sent in parallel for the same group, since all of them write to the same group node and would only run into transaction retries.",

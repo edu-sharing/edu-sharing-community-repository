@@ -1482,6 +1482,42 @@ public class IamApi {
 
 
     @GET
+    @Path("/groups/{repository}/{group}/member")
+    @Operation(summary = "Get a single direct member of the group by exact authority name.", description = "Get a single direct member of the group by exact authority name. The authority name is passed as query parameter because it may contain a slash. Returns 404 if the authority is not a member of the group. (admin rights are required.)")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "OK.", content = @Content(schema = @Schema(implementation = Authority.class))),
+                    @ApiResponse(responseCode = "400", description = "Preconditions are not present.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = "Authorization failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = "Session user has insufficient rights to perform this operation.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = "Group or member is not found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = "Fatal error occured.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+    public Response getMember(
+            @Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = "authority name of the group (begins with GROUP_)", required = true) @PathParam("group") String group,
+            @Parameter(description = "exact authority name of the member (user name or GROUP_ prefixed group name)", required = true) @QueryParam("authorityName") String authorityName,
+            @Context HttpServletRequest req) {
+
+        try {
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            GroupDao groupDao = GroupDao.getGroup(repoDao, group);
+            groupDao.checkAdminAccess();
+            if (!groupDao.isDirectMember(authorityName)) {
+                throw new DAOMissingException(new IllegalArgumentException(
+                        "Authority " + authorityName + " is not a member of group " + group));
+            }
+            Authority result = authorityName.startsWith(PermissionService.GROUP_PREFIX) ?
+                    new GroupDao(repoDao, authorityName).asGroup(false) :
+                    new PersonDao(repoDao, authorityName).asPersonSimple(false);
+            return Response.status(Response.Status.OK).entity(result).build();
+
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
+    }
+
+    @GET
     @Path("/groups/{repository}/{group}/type/{type}")
     @Operation(summary = "Get a subgroup by the specified type", description = "Get a subgroup by the specified type")
     @ApiResponses(

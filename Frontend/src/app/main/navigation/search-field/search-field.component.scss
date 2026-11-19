@@ -25,6 +25,8 @@ form {
     @include mixins.materialShadowBottom(0.05);
     border-radius: 3px;
     .search-field {
+        // the field has a light background even inside the dark top bar
+        --focusColor: var(--primaryBackground700);
         display: flex;
         width: 100%;
         input {
