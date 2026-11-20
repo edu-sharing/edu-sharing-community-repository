@@ -29,7 +29,7 @@
         <jackson.version>2.21.7</jackson.version>
         <!-- security overrides of versions managed by spring-boot-dependencies; the BOM is imported,
              so its own properties can't be overridden and the versions are pinned explicitly below -->
-        <tomcat-embed.version>11.0.26</tomcat-embed.version>
+        <tomcat-embed.version>11.0.29</tomcat-embed.version>
         <jackson3.version>3.1.7</jackson3.version>
         <httpclient5.version>5.6.4</httpclient5.version>
         <httpcore5.version>5.4.4</httpcore5.version>
