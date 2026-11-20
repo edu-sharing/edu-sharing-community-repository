@@ -128,6 +128,15 @@ export class RenderHelperService {
                 });
             },
             (error) => {
+                // the user may see a collection ref but not its original (403)
+                // or the original may be gone (404) -> just hide the collections box
+                if (
+                    [RestConstants.HTTP_FORBIDDEN, RestConstants.HTTP_NOT_FOUND].includes(
+                        error?.status,
+                    )
+                ) {
+                    error.preventDefault?.();
+                }
                 removeCollectionsContainer();
             },
         );

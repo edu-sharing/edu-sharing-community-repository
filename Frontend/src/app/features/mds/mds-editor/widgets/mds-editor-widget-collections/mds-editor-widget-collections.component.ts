@@ -1,3 +1,4 @@
+import { HttpStatusCode } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { distinctUntilChanged, filter, map, startWith } from 'rxjs/operators';
@@ -56,13 +57,27 @@ export class MdsEditorWidgetCollectionsComponent implements OnInit, NativeWidget
                     }
                     if (isFromHomeRepo) {
                         this.dataSource.isLoading = true;
-                        const result = (
-                            (await firstValueFrom(
-                                this.usageService.getUsagesByNodeCollections({ nodeId }),
-                            )) as unknown as any[]
-                        ).map((n) => n.collection) as Node[];
-                        this.dataSource.setData(result);
-                        this.dataSource.isLoading = false;
+                        try {
+                            const result = (
+                                (await firstValueFrom(
+                                    this.usageService.getUsagesByNodeCollections({ nodeId }),
+                                )) as unknown as any[]
+                            ).map((n) => n.collection) as Node[];
+                            this.dataSource.setData(result);
+                        } catch (e) {
+                            // the user may see a collection ref but not its original (403)
+                            // or the original may be gone (404) -> just show no collections
+                            if (
+                                [HttpStatusCode.Forbidden, HttpStatusCode.NotFound].includes(
+                                    e?.status,
+                                )
+                            ) {
+                                e.preventDefault?.();
+                            }
+                            this.dataSource.setData([]);
+                        } finally {
+                            this.dataSource.isLoading = false;
+                        }
                     }
                 }
             });
