@@ -115,6 +115,11 @@ export type TableConfig = {
     dataColumnLayout: 'scroll' | 'limit';
     /** whether to render the table header row; defaults to true when omitted */
     headers?: boolean;
+    /**
+     * whether the header of the checkbox column holds a checkbox selecting or deselecting all
+     * entries; defaults to true when omitted
+     */
+    selectAll?: boolean;
 };
 export type TreeConfig = {
     /**

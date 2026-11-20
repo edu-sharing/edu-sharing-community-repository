@@ -258,6 +258,7 @@
   "LIST_TABLE": {
     "DUMMY_ICON_LABEL": "Type de fichier",
     "TOGGLE_ALL": "Sélectionner tous/aucun",
+    "COLUMN_SELECT": "Sélection",
     "CONFIGURE_COLUMNS": "Configurer les colonnes"
   },
   "NODE": {

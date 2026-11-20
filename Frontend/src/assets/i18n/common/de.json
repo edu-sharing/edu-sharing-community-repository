@@ -314,6 +314,7 @@
   "LIST_TABLE": {
     "DUMMY_ICON_LABEL": "Dateityp",
     "TOGGLE_ALL": "Alle / Nichts auswählen",
+    "COLUMN_SELECT": "Auswahl",
     "CONFIGURE_COLUMNS": "Spalten konfigurieren",
     "COLUMN_ACTIONS": "Optionen",
     "ENTRY_COUNT": "{{total}} Einträge",

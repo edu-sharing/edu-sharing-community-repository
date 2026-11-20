@@ -272,6 +272,7 @@
   "LIST_TABLE": {
     "DUMMY_ICON_LABEL": "File type",
     "TOGGLE_ALL": "Select all/none",
+    "COLUMN_SELECT": "Selection",
     "CONFIGURE_COLUMNS": "Configure columns",
     "COLUMN_ACTIONS": "Actions",
     "ENTRY_COUNT": "{{total}} entries",

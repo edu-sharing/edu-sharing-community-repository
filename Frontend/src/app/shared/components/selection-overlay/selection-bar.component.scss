@@ -1,0 +1,69 @@
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
+
+// Upper bound of the panel, so the node list above keeps its share of the height even in short
+// viewports (e.g. zoomed in).
+$panelMaxHeight: 40vh;
+// Top padding of `es-search-selection-overlay` in table mode.
+$overlayTablePaddingTop: 30px;
+
+:host {
+    display: none;
+    // Shrinks together with the node list above when the panel grows; the panel then scrolls.
+    flex: 0 1 auto;
+    min-height: 0;
+    // Row 1 holds the panel (only while open), row 2 the bar's controls. The panel follows the
+    // toggle button in the DOM but is laid out above the controls.
+    grid-template-columns: auto auto minmax(0, 1fr);
+    grid-template-rows: minmax(0, auto) minmax(vars.$secondaryBarHeight, auto);
+    align-items: center;
+    column-gap: 10px;
+    // Side padding of the bar; host pages may override it to match their card.
+    --selection-bar-padding: 25px;
+    padding: 0 var(--selection-bar-padding);
+    background-color: var(--roundedContainerBackground);
+    @include mixins.materialShadowTop();
+    // paint the shadow above the scrolled content
+    position: relative;
+    z-index: 1;
+}
+:host(.visible) {
+    display: grid;
+}
+
+.clear-selection,
+.count,
+.actions {
+    grid-row: 2;
+}
+.count {
+    font-weight: 500;
+    white-space: nowrap;
+}
+.actions {
+    min-width: 0;
+    padding-left: 10px;
+}
+
+.selection-panel {
+    grid-row: 1;
+    grid-column: 1 / -1;
+    align-self: stretch;
+    min-height: 0;
+    max-height: $panelMaxHeight;
+    // Span the full bar width, including its side padding.
+    margin: 0 calc(-1 * var(--selection-bar-padding));
+    overflow-y: auto;
+    @include mixins.materialScrollbarLight();
+    &:focus {
+        outline: none;
+    }
+    // The table layout of the panel scrolls its rows itself; keep that list within the panel's
+    // bound so only one of them scrolls.
+    ::ng-deep es-search-selection-overlay.table-mode es-node-entries-wrapper {
+        max-height: min(
+            #{vars.$nodeEntriesTableRowHeight * 4},
+            calc(#{$panelMaxHeight} - #{$overlayTablePaddingTop})
+        );
+    }
+}

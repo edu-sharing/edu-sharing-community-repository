@@ -198,31 +198,8 @@ $addToWidth: 450px;
 
 // Static footer pinned at the bottom of the card; the card's overflow:hidden rounds its corners.
 // Mirrors the search-/workspace-page selection bar.
-.selection-action-bar {
-    display: none;
-    flex-shrink: 0;
-    align-items: center;
-    gap: 10px;
-    min-height: $secondaryBarHeight;
-    padding: 0 25px;
-    background-color: var(--roundedContainerBackground);
-    @include mixins.materialShadowTop();
+es-selection-bar {
     border-radius: 0 0 var(--borderRadiusCards) var(--borderRadiusCards);
-    // paint the shadow above the scrolled content
-    position: relative;
-    z-index: 1;
-
-    es-actionbar {
-        padding-left: 10px;
-    }
-    &.visible {
-        display: flex;
-    }
-
-    .count {
-        font-weight: 500;
-        white-space: nowrap;
-    }
 }
 .searchEmbedded {
     padding: 10px;
