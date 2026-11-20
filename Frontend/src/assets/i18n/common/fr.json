@@ -791,6 +791,7 @@
     }
   },
   "SHARE_APP": {
+    "TITLE": "Partager",
     "TEXT_SNIPPET": "Note",
     "IMAGE": "Image",
     "WILL_BE_SAVED_AT": "Sera stocké à l'adresse suivante",

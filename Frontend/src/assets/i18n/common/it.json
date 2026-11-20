@@ -790,6 +790,7 @@
     }
   },
   "SHARE_APP": {
+    "TITLE": "Condividi",
     "TEXT_SNIPPET": "Nota",
     "IMAGE": "Immagine",
     "WILL_BE_SAVED_AT": "Sarà conservato presso",

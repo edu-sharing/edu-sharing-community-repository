@@ -921,6 +921,7 @@
     "CHANGES_SAVED_SUCCESSFULLY": "Ihre Änderungen wurden erfolgreich gespeichert."
   },
   "SHARE_APP": {
+    "TITLE": "Teilen",
     "TEXT_SNIPPET": "Notiz",
     "IMAGE": "Bild",
     "WILL_BE_SAVED_AT": "Wird gespeichert unter",
