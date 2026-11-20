@@ -288,7 +288,11 @@ export class AppSharePageComponent {
                     })
                     .subscribe(
                         (data) => {
-                            this.collections.setData(data.collections, data.pagination);
+                            // sharing into a collection needs the right to add to it
+                            const collections = data.collections.filter((collection) =>
+                                collection.access?.includes(RestConstants.ACCESS_ADD_CHILDREN),
+                            );
+                            this.collections.setData(collections, data.pagination);
                             this.collections.isLoading = false;
                         },
                         (error) => {
