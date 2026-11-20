@@ -5,7 +5,6 @@
     width: 100%;
     max-width: calc(var(--cardWidth) * 4 + 125px);
     margin: auto;
-    margin-top: var(--mainnavHeight);
     display: flex;
     flex-direction: column;
     .breadcrumbs {
@@ -60,9 +59,19 @@
             margin-top: 2px;
         }
     }
-    .save {
+    // the save button keeps its row; on narrow screens the location wraps beside it
+    .save-to-inbox {
         display: flex;
-        justify-content: flex-end;
+        align-items: center;
+        gap: 10px;
+        .location {
+            flex: 1;
+            min-width: 0;
+            flex-wrap: wrap;
+        }
+        button {
+            flex-shrink: 0;
+        }
     }
     .collections {
         margin-top: 40px;
