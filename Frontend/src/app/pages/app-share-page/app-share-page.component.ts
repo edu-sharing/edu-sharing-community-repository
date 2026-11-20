@@ -30,6 +30,8 @@ import { Node } from 'ngx-edu-sharing-api';
 import { Component } from '@angular/core';
 import { Helper } from '../../core-module/rest/helper';
 import { CordovaService, OnBackBehaviour } from '../../services/cordova.service';
+import { BridgeService } from '../../services/bridge.service';
+import { NodeHelperService } from '../../services/node-helper.service';
 
 @Component({
     selector: 'es-app-share-page',
@@ -71,6 +73,8 @@ export class AppSharePageComponent {
         private collectionApi: RestCollectionService,
         private cordova: CordovaService,
         private connector: RestConnectorService,
+        private bridge: BridgeService,
+        private nodeHelper: NodeHelperService,
     ) {
         // when the user finished sharing and navigates back he must return to the origin app
         this.cordova.setOnBackBehaviour(OnBackBehaviour.closeApp);
@@ -152,9 +156,15 @@ export class AppSharePageComponent {
                     true,
                     RestConstants.COMMENT_MAIN_FILE_UPLOAD,
                 )
-                .subscribe((data) => {
-                    callback(data.node);
-                });
+                .subscribe(
+                    (data) => {
+                        callback(data.node);
+                    },
+                    (error) => {
+                        this.toast.error(error);
+                        this.globalProgress = false;
+                    },
+                );
         } else {
             let prop: any = RestHelper.createNameProperty(this.title);
             if (this.editorType) {
@@ -199,12 +209,26 @@ export class AppSharePageComponent {
     }
     saveToCollection(collection: Node) {
         this.saveInternal((node: Node) => {
-            this.collectionApi
-                .addNodeToCollection(collection.ref.id, node.ref.id, node.ref.repo)
-                .subscribe(() => {
-                    UIHelper.goToCollection(this.router, collection, null, { replaceUrl: true });
+            UIHelper.addToCollection(
+                this.nodeHelper,
+                this.collectionApi,
+                this.router,
+                this.bridge,
+                collection,
+                [node],
+                false,
+                (added) => {
                     this.events.broadcastEvent(FrameEventsService.EVENT_SHARED, node);
-                });
+                    if (added.length > 0) {
+                        UIHelper.goToCollection(this.router, collection, null, {
+                            replaceUrl: true,
+                        });
+                    } else {
+                        // the upload stays in the inbox when the collection does not take it
+                        this.goToInbox();
+                    }
+                },
+            );
         });
     }
     private isLink() {
