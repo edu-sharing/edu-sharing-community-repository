@@ -440,10 +440,17 @@ body {
     @include setGlobalKeyboardFocus();
     outline-offset: calc(-1 * var(--focusWidth));
 }
-// Keyboard focus ring around a chip while its main action has focus; the chip's own focus state is
-// only a faint overlay. A focused trailing action (e.g. remove) keeps its own indication.
-.mat-mdc-chip:has(.mdc-evolution-chip__action--primary:focus-visible) {
+// Keyboard focus ring around a chip while its main action, or a link or button inside it, has
+// focus; the chip's own focus state is only a faint overlay. The ring replaces the inner element's
+// own ring. A focused trailing action (e.g. remove) keeps its own indication.
+.mat-mdc-chip:has(
+        .mdc-evolution-chip__action--primary:focus-visible,
+        .mdc-evolution-chip__action--primary :focus-visible
+    ) {
     @include setGlobalKeyboardFocus();
+    .mdc-evolution-chip__action--primary :focus-visible {
+        outline: none;
+    }
 }
 .mat-mdc-raised-button {
     &:not(.mat-primary) {
