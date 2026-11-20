@@ -115,6 +115,8 @@ es-render-wrapper-component {
     position: sticky;
     bottom: 0;
     z-index: 2;
+    // the navigation below adapts to the bar's own width, which also is narrow in a narrow sidebar
+    container-type: inline-size;
 }
 
 // three-column grid so the "all details" link stays centered while the
@@ -138,6 +140,26 @@ es-render-wrapper-component {
 .all-details-link {
     border-radius: var(--borderRadiusButtons);
     justify-self: center;
+}
+
+// Where the three labels don't fit next to each other, previous/next show their arrow only; the
+// label stays in the button (visually hidden) as its accessible name.
+@container (max-width: 360px) {
+    .preview-navigation .nav-button {
+        min-width: 0;
+        padding: 0 8px;
+        .nav-label {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            clip: rect(0 0 0 0);
+            white-space: nowrap;
+        }
+        i {
+            margin: 0;
+        }
+    }
 }
 
 .save-button {
