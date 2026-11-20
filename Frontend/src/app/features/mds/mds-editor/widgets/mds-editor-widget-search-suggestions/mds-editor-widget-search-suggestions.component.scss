@@ -1,10 +1,36 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
 
-.mat-chip.mat-standard-chip {
+.suggestion-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+// styled like the chips of the active filters above
+.suggestion-button {
+    min-height: 32px;
+    padding: 5px 12px;
+    border: none;
+    border-radius: 16px;
+    background-color: var(--primaryBackground100);
+    color: var(--textMain);
+    font: inherit;
+    text-align: start;
+    word-break: break-word;
     cursor: pointer;
     @each $property, $color in $chip-colors {
         &.filter-chip-#{$property} {
             background-color: var(--chip-color-#{$property});
         }
+    }
+    &:hover {
+        filter: brightness(0.95);
+    }
+    &:focus-visible {
+        outline: 2px solid var(--focusColor);
+        outline-offset: 2px;
     }
 }

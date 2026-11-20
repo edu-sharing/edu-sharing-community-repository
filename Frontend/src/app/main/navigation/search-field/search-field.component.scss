@@ -160,17 +160,25 @@ form {
     }
 }
 
+// the panel follows the form in the DOM and is laid out below the search field, on top of the page
 .suggestion-card {
-    width: 100%;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    max-height: calc(100vh - var(--mainnavCurrentHeight) - 16px);
+    overflow-y: auto;
+    box-sizing: border-box;
     background-color: $backgroundColor;
+    color: $textMain;
     border-radius: 2px;
     padding: 10px;
-}
-
-::ng-deep .cdk-overlay-container .suggestion-card {
-    es-mds-editor-widget-container {
-        label {
-            @include suggestionCardHeading;
-        }
+    // the panel only takes focus when clicked on its background, to keep it open
+    &:focus {
+        outline: none;
+    }
+    ::ng-deep es-mds-editor-widget-container label {
+        @include suggestionCardHeading;
     }
 }

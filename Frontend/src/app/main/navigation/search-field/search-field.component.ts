@@ -1,4 +1,4 @@
-import { CdkConnectedOverlay, CdkOverlayOrigin, ConnectedPosition } from '@angular/cdk/overlay';
+import { LiveAnnouncer } from '@angular/cdk/a11y';
 import {
     AfterViewInit,
     Component,
@@ -12,6 +12,7 @@ import {
 } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 import { MatChip } from '@angular/material/chips';
+import { TranslateService } from '@ngx-translate/core';
 import {
     FacetsDict,
     LabeledValue,
@@ -21,7 +22,14 @@ import {
 } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { distinctUntilChanged, filter, map, switchMap, takeUntil } from 'rxjs/operators';
+import {
+    debounceTime,
+    distinctUntilChanged,
+    filter,
+    map,
+    switchMap,
+    takeUntil,
+} from 'rxjs/operators';
 import { MdsHelperService, MdsWidgetType } from 'ngx-edu-sharing-ui';
 import { SearchFieldFacetsComponent } from '../../../features/mds/mds-editor/search-field-facets/search-field-facets.component';
 import {
@@ -48,11 +56,15 @@ export class SearchFieldComponent implements OnInit, OnDestroy, AfterViewInit {
     private loadingScreen = inject(LoadingScreenService);
     private mdsService = inject(MdsService);
     private ngZone = inject(NgZone);
+    private announcer = inject(LiveAnnouncer);
+    private translate = inject(TranslateService);
 
     /** The number of filters visible on the facets overlay. */
     filtersCount: number;
     /** DOM id of the "active filters" heading, referenced by the chip list's aria-labelledby. */
-    readonly activeFiltersLabelId = `es-search-field-active-filters-${nextUniqueId++}`;
+    readonly activeFiltersLabelId = `es-search-field-active-filters-${nextUniqueId}`;
+    /** DOM id of the suggestions panel, referenced by the search input's aria-controls. */
+    readonly panelId = `es-search-field-panel-${nextUniqueId++}`;
     /** The total number of filters independently of categories of the facets overlay. */
     totalFiltersCount: number;
     config: SearchFieldConfig;
@@ -66,7 +78,7 @@ export class SearchFieldComponent implements OnInit, OnDestroy, AfterViewInit {
     set input(value: ElementRef<HTMLInputElement>) {
         this.inputSubject.next(value);
     }
-    @ViewChild(CdkConnectedOverlay) overlay: CdkConnectedOverlay;
+    @ViewChild('panel') private panel: ElementRef<HTMLElement>;
     @ViewChild(SearchFieldFacetsComponent) private searchFieldFacets: SearchFieldFacetsComponent;
     @ViewChild(MatChip) private firstActiveChip: MatChip;
 
@@ -83,16 +95,6 @@ export class SearchFieldComponent implements OnInit, OnDestroy, AfterViewInit {
     showOverlay = new BehaviorSubject(false);
     inhibitOverlay = false;
     hasSuggestions = true;
-    readonly overlayPositions: ConnectedPosition[] = [
-        {
-            originX: 'center',
-            originY: 'bottom',
-            offsetX: 0,
-            offsetY: 4,
-            overlayX: 'center',
-            overlayY: 'top',
-        },
-    ];
     readonly mdsInfo$ = this.internal.mdsInfo$;
     inputHasFocus = false;
     isLoading: boolean;
@@ -160,6 +162,29 @@ export class SearchFieldComponent implements OnInit, OnDestroy, AfterViewInit {
                     this.showOverlay.next(true);
                 }
             });
+        // Announce the number of suggestions to screen reader users while they type, since the
+        // panel appears without moving the focus.
+        rxjs.combineLatest([this.suggestions$, this.rawFilters$])
+            .pipe(
+                map(([suggestions, filters]) => this.getSuggestionsCount(suggestions, filters)),
+                debounceTime(500),
+                distinctUntilChanged(),
+                filter(() => this.inputHasFocus && !!this.inputControl.value),
+                // last, so a pending debounced value is dropped instead of flushed on destroy
+                takeUntil(this.destroyed$),
+            )
+            .subscribe((count) =>
+                this.announcer.announce(
+                    this.translate.instant(
+                        count === 0
+                            ? 'SEARCH.SUGGESTIONS_NONE'
+                            : count === 1
+                            ? 'SEARCH.SUGGESTIONS_COUNT_ONE'
+                            : 'SEARCH.SUGGESTIONS_COUNT',
+                        { count },
+                    ),
+                ),
+            );
         this.showOverlay
             .pipe(
                 distinctUntilChanged(),
@@ -218,46 +243,90 @@ export class SearchFieldComponent implements OnInit, OnDestroy, AfterViewInit {
         // filter.
         this.inputControl.setValue('');
         this.internal.setFilterValues(values, { emitValuesChange: true });
+        // the activated suggestion disappears from the panel; continue in the search input
+        if (this.elementRef.nativeElement.contains(document.activeElement)) {
+            this.input.nativeElement.focus();
+        }
     }
 
     onRemoveFilter(property: string, filter: LabeledValue): void {
         this.internal.removeFilter(property, filter);
     }
 
-    onOutsideClick(event: MouseEvent): void {
-        const clickTarget = event.target as HTMLElement;
-        const origin = this.overlay.origin as CdkOverlayOrigin;
-        const element = origin.elementRef.nativeElement as HTMLElement;
-        if (!element.contains(clickTarget)) {
-            this.showOverlay.next(false);
+    /** Whether the suggestions panel below the search field is shown. */
+    get panelOpen(): boolean {
+        return (
+            this.showOverlay.value &&
+            (!!this.filtersCount || this.hasSuggestions) &&
+            !this.isLoading
+        );
+    }
+
+    /** Moves the focus from the search input to the first control of the open panel. */
+    focusPanel(event: Event): void {
+        event.preventDefault();
+        if (this.panelOpen) {
+            this.focusFirstPanelControl();
+        } else if (this.filtersCount || this.hasSuggestions) {
+            // open the panel first and move the focus once its content is rendered
+            this.showOverlay.next(true);
+            setTimeout(() => this.focusFirstPanelControl());
         }
     }
 
-    focusOverlayIfOpen(event: Event): void {
+    private focusFirstPanelControl(): void {
         if (this.firstActiveChip) {
             this.firstActiveChip.focus();
-            event.stopPropagation();
-            event.preventDefault();
-        } else if (this.showOverlay.value && this.hasSuggestions) {
+        } else {
             this.searchFieldFacets.focus();
-            event.stopPropagation();
-            event.preventDefault();
         }
     }
 
-    onDetach(): void {
-        const focusWasOnOverlay = this.overlay.overlayRef.overlayElement.contains(
-            document.activeElement,
-        );
-        if (focusWasOnOverlay) {
-            this.input.nativeElement.focus();
-        }
-        // Update `showOverlay` if the user closed the overlay by hitting Esc, but leave it if it
-        // was detached because we have no suggestions right now. In the latter case, we want to
-        // show the overlay again as soon as suggestions become available.
-        if (this.hasSuggestions) {
+    /** Closes the panel once the focus has left the search field and the panel. */
+    @HostListener('focusout', ['$event'])
+    onFocusOut(event: FocusEvent): void {
+        const target = event.relatedTarget as HTMLElement | null;
+        if (!target || !this.elementRef.nativeElement.contains(target)) {
             this.showOverlay.next(false);
         }
+    }
+
+    /** Closes the panel on clicks elsewhere on the page, including ones that don't move focus. */
+    @HostListener('document:click', ['$event'])
+    onDocumentClick(event: MouseEvent): void {
+        // the event path is fixed at dispatch, so it still holds a suggestion button that was
+        // removed from the DOM by its own click handler
+        if (
+            this.showOverlay.value &&
+            !event.composedPath().includes(this.elementRef.nativeElement)
+        ) {
+            this.showOverlay.next(false);
+        }
+    }
+
+    /**
+     * Esc in the search input or inside the panel closes the panel and leaves the focus in (or
+     * returns it to) the search input. Esc on the other buttons of the field is left alone.
+     */
+    @HostListener('keydown.escape', ['$event'])
+    onEscape(event: Event): void {
+        const target = event.target as Node;
+        const input = this.input.nativeElement;
+        const fromInput = target === input;
+        const fromPanel = !!this.panel?.nativeElement.contains(target);
+        if (!this.panelOpen || (!fromInput && !fromPanel)) {
+            return;
+        }
+        this.showOverlay.next(false);
+        if (fromPanel) {
+            input.focus();
+            // focusing the input would otherwise reopen the panel right away
+            this.showOverlay.next(false);
+        }
+        // the key press is consumed here, so page-level Esc handlers (sidebars, dialogs) and the
+        // browser's clearing of the search input do not act on it as well
+        event.preventDefault();
+        event.stopPropagation();
     }
 
     onInputFocus(): void {
@@ -267,13 +336,8 @@ export class SearchFieldComponent implements OnInit, OnDestroy, AfterViewInit {
         }
     }
 
-    onInputBlur(event: FocusEvent): void {
+    onInputBlur(): void {
         this.inputHasFocus = false;
-        if (
-            !this.overlay?.overlayRef?.overlayElement.contains(event.relatedTarget as HTMLElement)
-        ) {
-            this.showOverlay.next(false);
-        }
     }
 
     /** the "Filters" button element, for returning focus on panel close */
@@ -296,6 +360,20 @@ export class SearchFieldComponent implements OnInit, OnDestroy, AfterViewInit {
             !!suggestions &&
             Object.values(suggestions).some((suggestion) => suggestion.values.length > 0)
         );
+    }
+
+    /** Number of suggestions shown in the panel, i.e. without values already set as filter. */
+    private getSuggestionsCount(suggestions: FacetsDict, filters: Values | null): number {
+        if (!suggestions) {
+            return 0;
+        }
+        return Object.entries(suggestions)
+            .map(
+                ([property, facet]) =>
+                    facet.values.filter((value) => !filters?.[property]?.includes(value.value))
+                        .length,
+            )
+            .reduce((a, b) => a + b, 0);
     }
 
     getFiltersCount(filters: LabeledValuesDict | null, categories: string[]): number {

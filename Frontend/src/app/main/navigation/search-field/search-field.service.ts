@@ -124,18 +124,21 @@ export class SearchFieldInstance {
     }
 
     /**
-     * Whether the search field's suggestions overlay is currently being displayed.
+     * Whether the search field's suggestions panel is currently being displayed.
+     *
+     * @deprecated The panel is part of the search field's DOM; kept for callers outside the core.
      */
     overlayIsOpen(): boolean {
-        return this._internal.searchFieldComponent.value?.overlay.overlayRef != null;
+        return this._internal.searchFieldComponent.value?.panelOpen ?? false;
     }
 
     /**
-     * If the overlay is currently visible, updates its position.
+     * Does nothing: the suggestions panel is laid out by CSS directly below the search field and
+     * follows it without explicit position updates.
+     *
+     * @deprecated No longer needed; kept for callers outside the core.
      */
-    updateOverlayPosition(): void {
-        this._internal.searchFieldComponent.value?.overlay.overlayRef?.updatePosition();
-    }
+    updateOverlayPosition(): void {}
 }
 
 /**
