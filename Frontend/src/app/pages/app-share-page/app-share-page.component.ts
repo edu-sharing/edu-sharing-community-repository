@@ -32,6 +32,7 @@ import { Helper } from '../../core-module/rest/helper';
 import { CordovaService, OnBackBehaviour } from '../../services/cordova.service';
 import { BridgeService } from '../../services/bridge.service';
 import { NodeHelperService } from '../../services/node-helper.service';
+import { MainNavService } from '../../main/navigation/main-nav.service';
 
 @Component({
     selector: 'es-app-share-page',
@@ -75,7 +76,9 @@ export class AppSharePageComponent {
         private connector: RestConnectorService,
         private bridge: BridgeService,
         private nodeHelper: NodeHelperService,
+        private mainNav: MainNavService,
     ) {
+        this.mainNav.setMainNavConfig({ title: 'SHARE_APP.TITLE', currentScope: 'app-share' });
         // when the user finished sharing and navigates back he must return to the origin app
         this.cordova.setOnBackBehaviour(OnBackBehaviour.closeApp);
         this.columns = {

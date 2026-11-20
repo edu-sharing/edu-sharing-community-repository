@@ -858,6 +858,7 @@
     "CHANGES_SAVED_SUCCESSFULLY": "Your changes have been saved successfully."
   },
   "SHARE_APP": {
+    "TITLE": "Share",
     "TEXT_SNIPPET": "Note",
     "IMAGE": "Image",
     "WILL_BE_SAVED_AT": "Will be stored at",
