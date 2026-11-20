@@ -208,6 +208,11 @@ export class AppSharePageComponent {
         });
     }
     saveToCollection(collection: Node) {
+        // the server takes a reference only into a collection the user may add children to
+        if (!collection.access?.includes(RestConstants.ACCESS_ADD_CHILDREN)) {
+            this.toast.error(null, 'COLLECTIONS.NO_ADD_PERMISSIONS');
+            return;
+        }
         this.saveInternal((node: Node) => {
             UIHelper.addToCollection(
                 this.nodeHelper,
@@ -254,12 +259,6 @@ export class AppSharePageComponent {
         UIHelper.goToWorkspaceFolder(this.node, this.router, null, this.inbox.ref.id, {
             replaceUrl: true,
         });
-    }
-    hasWritePermissions(node: any) {
-        if (node.access.indexOf(RestConstants.ACCESS_WRITE) == -1) {
-            return { status: false, message: 'NO_WRITE_PERMISSIONS' };
-        }
-        return { status: true };
     }
     private init() {
         this.translations.waitForInit().subscribe(() => {
