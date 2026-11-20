@@ -289,6 +289,7 @@
     "sys:archivedDate": "deleted",
     "cclom:version": "version",
     "virtual:usagecount": "usage count",
+    "virtual:direct_link": "Direct link",
     "ccm:author_freetext": "General Author information",
     "ccm:lifecyclecontributer_authorFN": "author",
     "ccm:wf_status": "status",
