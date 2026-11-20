@@ -203,6 +203,7 @@ export class RestConstants {
 
     public static CONTRIBUTOR_LIFECYCLE_PREFIX = 'ccm:lifecyclecontributer_';
     public static CONTRIBUTOR_METADATA_PREFIX = 'ccm:metadatacontributer_';
+    public static CCM_PROP_LIFECYCLECONTRIBUTER_REDAKTION = 'ccm:lifecyclecontributer_redaktion';
     public static getAllVCardFields() {
         let list = [];
         for (let role of RestConstants.CONTRIBUTOR_ROLES_LIFECYCLE) {
@@ -211,6 +212,8 @@ export class RestConstants {
         for (let role of RestConstants.CONTRIBUTOR_ROLES_METADATA) {
             list.push(RestConstants.CONTRIBUTOR_METADATA_PREFIX + role);
         }
+        // custom vcard field (not a selectable contributor role)
+        list.push(RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_REDAKTION);
         return list;
     }
 }
