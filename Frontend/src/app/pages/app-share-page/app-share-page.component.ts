@@ -174,7 +174,13 @@ export class AppSharePageComponent {
                 prop[RestConstants.LOM_PROP_GENERAL_DESCRIPTION] = [this.text];
             }
             this.node
-                .createNode(this.inbox.ref.id, RestConstants.CCM_TYPE_IO, [], prop, true)
+                .createNode(
+                    this.inbox?.ref?.id || RestConstants.INBOX,
+                    RestConstants.CCM_TYPE_IO,
+                    [],
+                    prop,
+                    true,
+                )
                 .subscribe(
                     (data) => {
                         this.node
@@ -203,7 +209,7 @@ export class AppSharePageComponent {
     }
     saveFile() {
         this.saveInternal((node: Node) => {
-            this.goToInbox();
+            this.goToInbox(node);
             this.events.broadcastEvent(FrameEventsService.EVENT_SHARED, node);
         });
     }
@@ -230,7 +236,7 @@ export class AppSharePageComponent {
                         });
                     } else {
                         // the upload stays in the inbox when the collection does not take it
-                        this.goToInbox();
+                        this.goToInbox(node);
                     }
                 },
             );
@@ -255,8 +261,10 @@ export class AppSharePageComponent {
         if (!this.uri) return false;
         return !this.uri.startsWith('content://') && !this.uri.startsWith('file://');
     }
-    private goToInbox() {
-        UIHelper.goToWorkspaceFolder(this.node, this.router, null, this.inbox.ref.id, {
+    /** Opens the inbox, or the folder the shared node was saved to while the inbox is not loaded. */
+    private goToInbox(node: Node) {
+        const folder = this.inbox?.ref?.id ?? node?.parent?.id;
+        UIHelper.goToWorkspaceFolder(this.node, this.router, null, folder, {
             replaceUrl: true,
         });
     }
@@ -300,12 +308,14 @@ export class AppSharePageComponent {
                             this.collections.isLoading = false;
                         },
                     );
-                this.node
-                    .getNodeParents(RestConstants.INBOX, false)
-                    .subscribe((data: ParentList) => {
+                this.node.getNodeParents(RestConstants.INBOX, false).subscribe(
+                    (data: ParentList) => {
                         this.inboxPath = data.nodes;
                         this.inbox = data.nodes[0];
-                    });
+                    },
+                    // saving falls back to the inbox id, which the server resolves itself
+                    () => {},
+                );
                 this.previewUrl = this.connector.getThemeMimePreview(this.getType() + '.svg');
                 if (this.isLink()) {
                     this.utilities.getWebsiteInformation(this.getUri()).subscribe(
