@@ -19,6 +19,7 @@
   [infiniteScrollWindow]="false"
   [singleClickHint]="'static'"
   (sortChange)="setSorting($event)"
+  primaryActionLabel="OPEN_PREVIEW_FOR"
   (clickItem)="clickItem($event)"
   (selectionChange)="selectionChange($event)"
   (dblClickItem)="openNode.emit($event.element)"

@@ -81,7 +81,11 @@
   <button
     class="card-body"
     matRipple
-    [attr.aria-label]="node | nodeTitle"
+    [attr.aria-label]="
+      entriesService.getPrimaryActionLabel(node)
+        ? (entriesService.getPrimaryActionLabel(node) | translate : { element: (node | nodeTitle) })
+        : (node | nodeTitle)
+    "
     (click)="
       entriesService.onClicked({
         event: $event,

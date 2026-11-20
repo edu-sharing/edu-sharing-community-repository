@@ -162,6 +162,8 @@ form {
 
 // the panel follows the form in the DOM and is laid out below the search field, on top of the page
 .suggestion-card {
+    // the panel has a light background even inside the dark top bar
+    --focusColor: var(--primaryBackground700);
     position: absolute;
     top: calc(100% + 4px);
     left: 0;

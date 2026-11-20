@@ -732,6 +732,7 @@
   "QR_CODE_SHORTLINK_LABEL": "Short link",
   "QR_CODE_SHORTLINK_COPY": "Copy link",
   "OPTIONS_FOR": "Actions for {{element}}",
+  "OPEN_PREVIEW_FOR": "Open preview: {{element}}",
   "NO_AVAILABLE_OPTIONS": "No actions are available for the selected items",
   "OPTIONS": {
     "SHOW_ALL_OPTIONS": "More actions",

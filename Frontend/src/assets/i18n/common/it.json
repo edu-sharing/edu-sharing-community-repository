@@ -1310,6 +1310,7 @@
   "PUBLISHED_COPY_TOOLTIP": "Copia pubblicata",
   "CHILDOBJECT_COUNT": "{{count}} elementi (sequenza)",
   "OPTIONS_FOR": "Azioni per {{element}}",
+  "OPEN_PREVIEW_FOR": "Apri anteprima: {{element}}",
   "NO_AVAILABLE_OPTIONS": "Non sono disponibili azioni per gli elementi selezionati",
   "NODE_SEARCH_SELECTOR": {
     "MORE_FILTERS": "Filtri di ricerca estesi",

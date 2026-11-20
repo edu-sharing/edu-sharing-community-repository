@@ -190,6 +190,10 @@
           })
       "
     >
+      <!-- names the click action ahead of the title; an aria-label would hide the rest of the cell -->
+      @if (first && entriesService.getPrimaryActionLabel(node); as actionLabel) {
+      <span class="cdk-visually-hidden">{{ actionLabel | translate : { element: '' } }}</span>
+      }
       <!-- layout wrapper: transparent to the cell layout normally, a stacked box when the
            column has a sub title; the click target is the cell itself -->
       <div class="cell-primary-content" [class.has-sub-title]="first && !!column.secondaryRow">

@@ -150,6 +150,11 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     @Output() displayTypeChange = new EventEmitter<NodeEntriesDisplayType>();
     @Output() selectionChange = new EventEmitter<SelectionChange<T>>();
     @Input() elementInteractionType = InteractionType.DefaultActionLink;
+    /**
+     * Translation key (with `element` = title) naming the click action of non-folder, non-collection
+     * entries, e.g. `OPEN_PREVIEW_FOR`; unset names entries by title only.
+     */
+    @Input() primaryActionLabel: string | null = null;
     @Input() sort: ListSortConfig;
     @Input() dragDrop: ListDragGropConfig<T>;
     @Input() gridConfig: GridConfig;
@@ -313,6 +318,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
             });
         }
         this.entriesService.elementInteractionType = this.elementInteractionType;
+        this.entriesService.primaryActionLabel = this.primaryActionLabel;
         this.entriesService.gridConfig = this.gridConfig;
         if (this.tableConfig) {
             this.entriesService.tableConfig = this.tableConfig;
