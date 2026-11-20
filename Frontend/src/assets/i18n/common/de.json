@@ -328,6 +328,7 @@
     "sys:archivedDate": "gelöscht",
     "cclom:version": "Version",
     "virtual:usagecount": "Anz. Einbettungen",
+    "virtual:direct_link": "Direktlink",
     "ccm:author_freetext": "Freie Urheber{{GENDER_SEPARATOR}}in-Angabe",
     "ccm:lifecyclecontributer_authorFN": "Autor{{GENDER_SEPARATOR}}in",
     "ccm:wf_status": "Status",

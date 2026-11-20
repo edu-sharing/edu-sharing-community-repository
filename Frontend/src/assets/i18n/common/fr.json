@@ -261,6 +261,7 @@
     "sys:archivedDate": "supprimé",
     "cclom:version": "version",
     "virtual:usagecount": "nombre d'utilisations",
+    "virtual:direct_link": "Lien direct",
     "ccm:author_freetext": "Informations générales sur l'auteur-trice",
     "ccm:lifecyclecontributer_authorFN": "auteur-trice",
     "ccm:wf_status": "statut",

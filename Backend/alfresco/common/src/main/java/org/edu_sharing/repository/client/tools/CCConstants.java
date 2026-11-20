@@ -1030,6 +1030,9 @@ public class CCConstants {
 
 	public final static String VIRT_PROP_USAGECOUNT = "{virtualproperty}usagecount";
 
+	/** direct link to the render page of a node (only resolved in specific exports, e.g. mediacenter licensed nodes) */
+	public final static String VIRT_PROP_DIRECT_LINK = "{virtualproperty}direct_link";
+
 	public final static String VIRT_PROP_COMMENTCOUNT = "{virtualproperty}commentcount";
 
 	public final static String VIRT_PROP_CHILDOBJECTCOUNT = "{virtualproperty}childobjectcount";

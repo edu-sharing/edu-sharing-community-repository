@@ -19,6 +19,7 @@ import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.tools.URLHelper;
 import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.mediacenter.v1.model.McOrgConnectResult;
 import org.edu_sharing.restservices.mediacenter.v1.model.MediacentersImportResult;
@@ -364,7 +365,10 @@ public class MediacenterApi {
 				Map<String, List<Serializable>> props=new HashMap<>();
 				for(String prop : properties){
 					Object value;
-					if(prop.startsWith("parent::")){
+					if(CCConstants.VIRT_PROP_DIRECT_LINK.equals(CCConstants.getValidGlobalName(prop))){
+						value = URLHelper.getNgRenderNodeUrl(ref.getNodeId(), null);
+					}
+					else if(prop.startsWith("parent::")){
 						String parentId = NodeServiceFactory.getLocalService().getPrimaryParent(ref.getNodeId());
 						String realProp=prop.substring("parent::".length());
 						value = NodeServiceHelper.getPropertyNative(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,parentId),CCConstants.getValidGlobalName(realProp));

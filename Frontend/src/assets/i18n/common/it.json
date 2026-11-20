@@ -260,6 +260,7 @@
     "sys:archivedDate": "cancellato",
     "cclom:version": "versione",
     "virtual:usagecount": "conteggio dell'utilizzo",
+    "virtual:direct_link": "Link diretto",
     "ccm:author_freetext": "Informazioni sul creatore/creatrice",
     "ccm:lifecyclecontributer_authorFN": "autore",
     "ccm:wf_status": "stato",

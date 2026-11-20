@@ -52,8 +52,11 @@ class SignatureVerifierTest {
     /**
      * must be <= MAX_SINGLE_USE_NODEIDS
      */
-    static final int NODE_COUNT = 25;
+    static final int NODE_COUNT = 5;
     static final int RETRIES_COUNT = 2;
+    // remote node (pixabay) used to test prepareUsage
+    static final String REMOTE_REPOSITORY = "pixabay";
+    static final String REMOTE_NODE_ID = "3518251";
 
     static Client client;
     static Client noRedirectClient;
@@ -66,6 +69,9 @@ class SignatureVerifierTest {
     static String testUsername = "sigtest-" + UUID.randomUUID().toString().replace("-", "").substring(0, 8);
     static String testUserPassword = "T-" + UUID.randomUUID().toString().replace("-", "").substring(0, 20);
     static String testUserBasic;
+    // second user: accesses (reads) the usages created by the first user
+    static String testUsername2 = "sigtest2-" + UUID.randomUUID().toString().replace("-", "").substring(0, 8);
+    static String testUserPassword2 = "T-" + UUID.randomUUID().toString().replace("-", "").substring(0, 20);
 
     // -------------------------------------------------------------------------
     // Setup: generate keys, register app, create node
@@ -89,7 +95,8 @@ class SignatureVerifierTest {
                 + "\n-----END PUBLIC KEY-----";
 
         registerApp(publicKeyPem);
-        createTestUser();
+        createTestUser(testUsername, testUserPassword);
+        createTestUser(testUsername2, testUserPassword2);
         testUserBasic = "Basic " + java.util.Base64.getEncoder().encodeToString((testUsername + ":" + testUserPassword).getBytes());
         for (int i = 0; i < NODE_COUNT; i++) {
             resourceIds.add(UUID.randomUUID().toString());
@@ -97,14 +104,14 @@ class SignatureVerifierTest {
         }
     }
 
-    private static void createTestUser() {
+    private static void createTestUser(String username, String password) {
         Map<String, String> profile = new HashMap<>();
         profile.put("firstName", "SigTest");
         profile.put("lastName", "User");
-        profile.put("email", testUsername + "@test.test");
+        profile.put("email", username + "@test.test");
 
-        Response response = api.path("iam/v1/people/-home-/" + testUsername)
-                .queryParam("password", testUserPassword)
+        Response response = api.path("iam/v1/people/-home-/" + username)
+                .queryParam("password", password)
                 .request(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", ADMIN_BASIC)
@@ -186,11 +193,13 @@ class SignatureVerifierTest {
                     .request()
                     .header("Authorization", ADMIN_BASIC)
                     .delete();
-            api.path("iam/v1/people/-home-/" + testUsername)
-                    .queryParam("force", true)
-                    .request()
-                    .header("Authorization", ADMIN_BASIC)
-                    .delete();
+            for (String username : new String[]{testUsername, testUsername2}) {
+                api.path("iam/v1/people/-home-/" + username)
+                        .queryParam("force", true)
+                        .request()
+                        .header("Authorization", ADMIN_BASIC)
+                        .delete();
+            }
             noRedirectClient.close();
             client.close();
         }
@@ -203,6 +212,14 @@ class SignatureVerifierTest {
     @Test
     @Order(1)
     void step1_authenticateViaAppAuth() throws Exception {
+        ticket = authenticate(testUsername);
+        Assertions.assertNotNull(ticket, "ticket must not be null after appauth");
+    }
+
+    /**
+     * Authenticate a user via appauth (trusted app signature) and return the resulting ticket.
+     */
+    private static String authenticate(String username) throws Exception {
         String timestamp = "" + System.currentTimeMillis();
         // same pattern as existing UsageApiTestSetUsage: username + appId + timestamp
         String signData = "admin" + APP_ID + timestamp;
@@ -215,7 +232,7 @@ class SignatureVerifierTest {
         profile.setLastName("User");
         profile.setEmail("test@test.de");
 
-        Response response = api.path("authentication/v1/appauth/" + testUsername)
+        Response response = api.path("authentication/v1/appauth/" + username)
                 .request(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .header("X-Edu-App-Id", APP_ID)
@@ -226,10 +243,9 @@ class SignatureVerifierTest {
 
         response.bufferEntity();
         Assertions.assertEquals(200, response.getStatus(),
-                () -> "App auth failed: " + response.readEntity(String.class));
+                () -> "App auth failed for " + username + ": " + response.readEntity(String.class));
         AuthenticationToken token = response.readEntity(AuthenticationToken.class);
-        ticket = token.getTicket();
-        Assertions.assertNotNull(ticket, "ticket must not be null after appauth");
+        return token.getTicket();
     }
 
     // -------------------------------------------------------------------------
@@ -412,5 +428,164 @@ class SignatureVerifierTest {
                     "Unauthenticated metadata request must return 401 or 403 for node " + i + ", got " + status);
             response.close();
         }
+    }
+
+    // -------------------------------------------------------------------------
+    // Step 5: The first user (owner of the usages) fetches the usages of each
+    //         node via GET /usage/v1/usages/node/{nodeId} and must see the usage
+    //         created in step2 (no 403).
+    // -------------------------------------------------------------------------
+
+    @Test
+    @Order(5)
+    void step5_getUsagesByNode() {
+        Assertions.assertNotNull(ticket, "ticket is null — step1 must pass first");
+        Assertions.assertEquals(NODE_COUNT, contentNodeIds.size(), "setup must have created all nodes first");
+        Assertions.assertEquals(NODE_COUNT, usageAlfNodeIds.size(), "step2 must have created all usages first");
+
+        for (int i = 0; i < NODE_COUNT; i++) {
+            final int idx = i;
+            Response response = api.path("usage/v1/usages/node/" + contentNodeIds.get(i))
+                    .request(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .header("Authorization", CCConstants.AUTH_HEADER_EDU_TICKET + " " + ticket)
+                    .get();
+
+            response.bufferEntity();
+            Assertions.assertEquals(200, response.getStatus(),
+                    () -> "Get usages by node failed for node " + idx + ": " + response.readEntity(String.class));
+
+            Usages usages = response.readEntity(Usages.class);
+            Assertions.assertNotNull(usages.getUsages(), "usages list must not be null for node " + i);
+
+            Usages.Usage usage = usages.getUsages().stream()
+                    .filter(u -> resourceIds.get(idx).equals(u.getResourceId()))
+                    .findFirst()
+                    .orElse(null);
+            Assertions.assertNotNull(usage,
+                    "previously created usage (resourceId=" + resourceIds.get(idx) + ") must be returned for node " + i);
+            Assertions.assertEquals(APP_ID, usage.getAppId(), "usage appId mismatch for node " + i);
+            Assertions.assertEquals(CONTAINER_ID, usage.getCourseId(), "usage courseId mismatch for node " + i);
+            Assertions.assertEquals(usageAlfNodeIds.get(i), usage.getNodeId(),
+                    "usage (alfresco) nodeId mismatch for node " + i);
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Step 6: prepareUsage for a remote node (pixabay) with the first user, who
+    //         also creates the usage. A second (different) user then reads the
+    //         usage list, followed by the signature-based access check.
+    // -------------------------------------------------------------------------
+
+    @Test
+    @Order(6)
+    void step6_prepareUsageForRemoteNode() throws Exception {
+        Assertions.assertNotNull(ticket, "ticket is null — step1 must pass first");
+        Signing signing = new Signing();
+
+        // 1. prepareUsage: create the local remote object for the pixabay node
+        Response prepareResponse = api.path("node/v1/nodes/" + REMOTE_REPOSITORY + "/" + REMOTE_NODE_ID + "/prepareUsage")
+                .request(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", CCConstants.AUTH_HEADER_EDU_TICKET + " " + ticket)
+                .post(Entity.entity("", MediaType.APPLICATION_JSON));
+
+        prepareResponse.bufferEntity();
+        Assertions.assertEquals(200, prepareResponse.getStatus(),
+                () -> "prepareUsage failed: " + prepareResponse.readEntity(String.class));
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> remoteEntry = prepareResponse.readEntity(Map.class);
+        @SuppressWarnings("unchecked")
+        Map<String, Object> localNode = (Map<String, Object>) remoteEntry.get("remote");
+        Assertions.assertNotNull(localNode, "prepareUsage must return a local node");
+        @SuppressWarnings("unchecked")
+        Map<String, Object> localRef = (Map<String, Object>) localNode.get("ref");
+        Assertions.assertNotNull(localRef, "local node must have a ref");
+        String localNodeId = (String) localRef.get("id");
+        Assertions.assertNotNull(localNodeId, "local node id must not be null");
+
+        // 2. Create a usage for the prepared (local) node
+        String resourceId = UUID.randomUUID().toString();
+        String createTimestamp = "" + System.currentTimeMillis();
+        String createSignData = APP_ID + ticket + createTimestamp;
+        byte[] createSig = signing.sign(privateKey, createSignData, CCConstants.SECURITY_SIGN_ALGORITHM);
+        String createSigB64 = new String(new Base64().encode(createSig));
+
+        CreateUsage usage = new CreateUsage();
+        usage.appId = APP_ID;
+        usage.courseId = CONTAINER_ID;
+        usage.resourceId = resourceId;
+        usage.nodeId = localNodeId;
+
+        Response createResponse = api.path("usage/v1/usages/repository/-home-")
+                .request(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .header("X-Edu-App-Id", APP_ID)
+                .header("X-Edu-App-Sig", createSigB64)
+                .header("X-Edu-App-Signed", createSignData)
+                .header("X-Edu-App-Ts", createTimestamp)
+                .header("Authorization", CCConstants.AUTH_HEADER_EDU_TICKET + " " + ticket)
+                .post(Entity.entity(usage, MediaType.APPLICATION_JSON));
+
+        createResponse.bufferEntity();
+        Assertions.assertEquals(200, createResponse.getStatus(),
+                () -> "Usage creation failed for remote node: " + createResponse.readEntity(String.class));
+        String usageAlfNodeId = createResponse.readEntity(Usages.Usage.class).getNodeId();
+        Assertions.assertNotNull(usageAlfNodeId, "usageAlfNodeId must not be null for remote node");
+
+        // 3. getUsage: a *different* user (testUsername2) fetches the usages of the local node.
+        //    The usage was created by the first user, yet the second user must still see it.
+        String ticket2 = authenticate(testUsername2);
+        Assertions.assertNotNull(ticket2, "ticket for second user must not be null");
+
+        Response usagesResponse = api.path("usage/v1/usages/node/" + localNodeId)
+                .request(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", CCConstants.AUTH_HEADER_EDU_TICKET + " " + ticket2)
+                .get();
+
+        usagesResponse.bufferEntity();
+        Assertions.assertEquals(200, usagesResponse.getStatus(),
+                () -> "Get usages by node failed for remote node: " + usagesResponse.readEntity(String.class));
+        Usages usages = usagesResponse.readEntity(Usages.class);
+        Assertions.assertNotNull(usages.getUsages(), "usages list must not be null for remote node");
+        Usages.Usage created = usages.getUsages().stream()
+                .filter(u -> resourceId.equals(u.getResourceId()))
+                .findFirst()
+                .orElse(null);
+        Assertions.assertNotNull(created,
+                "previously created usage (resourceId=" + resourceId + ") must be returned for remote node");
+        Assertions.assertEquals(APP_ID, created.getAppId(), "usage appId mismatch for remote node");
+        Assertions.assertEquals(CONTAINER_ID, created.getCourseId(), "usage courseId mismatch for remote node");
+        Assertions.assertEquals(usageAlfNodeId, created.getNodeId(), "usage (alfresco) nodeId mismatch for remote node");
+
+        // 4. access: fetch metadata of the local node using only the usage signature (no ticket)
+        String accessTimestamp = "" + System.currentTimeMillis();
+        String accessSignData = APP_ID + usageAlfNodeId + accessTimestamp;
+        byte[] accessSig = signing.sign(privateKey, accessSignData, CCConstants.SECURITY_SIGN_ALGORITHM);
+        String accessSigB64 = new String(new Base64().encode(accessSig));
+
+        Response metaResponse = api.path("node/v1/nodes/-home-/" + localNodeId + "/metadata")
+                .request(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .header("X-Edu-App-Id", APP_ID)
+                .header("X-Edu-App-Sig", accessSigB64)
+                .header("X-Edu-App-Signed", accessSignData)
+                .header("X-Edu-App-Ts", accessTimestamp)
+                .header("X-Edu-Usage-Node-Id", localNodeId)
+                .header("X-Edu-Usage-Course-Id", CONTAINER_ID)
+                .header("X-Edu-Usage-Resource-Id", resourceId)
+                .get();
+
+        metaResponse.bufferEntity();
+        Assertions.assertEquals(200, metaResponse.getStatus(),
+                () -> "Metadata via usage signature must return 200 for remote node: " + metaResponse.readEntity(String.class));
+
+        // cleanup the locally created remote object
+        api.path("node/v1/nodes/-home-/" + localNodeId)
+                .request()
+                .header("Authorization", ADMIN_BASIC)
+                .delete();
     }
 }

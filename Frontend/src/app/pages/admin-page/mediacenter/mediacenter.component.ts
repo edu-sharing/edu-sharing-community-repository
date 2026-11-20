@@ -50,6 +50,8 @@ import { firstValueFrom } from 'rxjs';
     standalone: false,
 })
 export class AdminMediacenterComponent {
+    /** virtual column with a direct link to the render page */
+    static readonly VIRTUAL_PROP_DIRECT_LINK = 'virtual:direct_link';
     readonly AuthoritySearchMode = AuthoritySearchMode;
     readonly SCOPES = Scope;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
@@ -222,6 +224,12 @@ export class AdminMediacenterComponent {
                     licensedNodeReq,
                 )
                 .subscribe((data) => {
+                    // virtual column: provide the render url (content.url) for the table
+                    data.nodes.forEach((n) => {
+                        n.properties[AdminMediacenterComponent.VIRTUAL_PROP_DIRECT_LINK] = [
+                            n.content?.url,
+                        ];
+                    });
                     if (
                         this.mediacenterNodesDataSource.isEmpty() ||
                         (this.mediacenterNodesSearchWord != null &&
