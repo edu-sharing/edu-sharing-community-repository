@@ -94,6 +94,18 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <!-- repository/pom.xml pins tools.jackson core and databind to 3.0.1; an inherited explicit entry wins
+                 against the imported bom above, so both are pinned here as well (this module only) -->
+            <dependency>
+                <groupId>tools.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>${jackson3.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>tools.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson3.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.apache.tomcat.embed</groupId>
                 <artifactId>tomcat-embed-core</artifactId>
