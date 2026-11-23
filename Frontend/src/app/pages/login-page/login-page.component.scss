@@ -185,6 +185,10 @@ es-powered-by {
     .login-help {
         display: none;
     }
+    // in the app the card starts below the top bar to keep its header visible
+    .in-app ::ng-deep es-card .card-dialog[width] {
+        top: var(--mainnavHeight);
+    }
 }
 @media screen and (max-width: $mobileWidth+$mobileStage*1), (max-height: 750px) {
     [showProviders='true'] .branding {
