@@ -117,6 +117,37 @@ $cardLineHeight: 1.4;
         background-color: unset;
         color: unset;
     }
+    // card body whose only interactive element is the title button: the button's ::after covers
+    // the whole body, so a click anywhere on image or metadata activates it
+    .card-body-stretched {
+        position: relative;
+        .card-body-action {
+            border: unset;
+            padding: unset;
+            background-color: unset;
+            font: inherit;
+            cursor: pointer;
+            &::after {
+                content: '';
+                position: absolute;
+                inset: 0;
+            }
+            &:focus-visible {
+                @include removeDefaultFocus();
+            }
+        }
+        // title and metadata values stay above the stretched click area, so their tooltips work
+        // on hover (clicks on the title still reach the button, which contains it)
+        .card-body-action > es-list-base,
+        .card-meta-row:not(:first-child) > es-list-base {
+            position: relative;
+            z-index: 1;
+        }
+    }
+    // the ring goes around the whole card (on the page background), not just around the title
+    &:has(.card-body-stretched .card-body-action:focus-visible) {
+        @include setGlobalKeyboardFocus();
+    }
     .card-image-area {
         height: $imageHeight;
         padding: 0;
@@ -176,7 +207,8 @@ $cardLineHeight: 1.4;
             &:first-child {
                 font-size: 120%;
                 > es-list-base,
-                > es-node-url {
+                > es-node-url,
+                > .card-body-action {
                     width: 100%;
                     font-size: 120%;
                     color: var(--textMain);

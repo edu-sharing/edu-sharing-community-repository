@@ -40,6 +40,7 @@ import { LoadingScreenService } from '../../main/loading-screen/loading-screen.s
 import { provideReusableOptionsHelperData } from '../../services/options-helper-data.provider';
 import { trigger } from '@angular/animations';
 import { BreakpointObserver } from '@angular/cdk/layout';
+import { hasModifierKey } from '@angular/cdk/keycodes';
 import { EdgeToggleComponent } from '../../shared/components/edge-toggle/edge-toggle.component';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
@@ -130,6 +131,7 @@ let nextInstanceId = 0;
     animations: [trigger('overlay', UIAnimation.openOverlay())],
     host: {
         '[class.fullscreen]': 'editorialSidebarService.fullscreenActive()',
+        '(keydown.escape)': 'onEscape($any($event))',
     },
 })
 export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
@@ -534,5 +536,23 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
 
     close() {
         this.editorialSidebarService.close();
+    }
+
+    /**
+     * Escape closes the sidebar through the service, like the close button. Stopping the event keeps
+     * the surrounding mat-sidenav from closing itself, which would bypass the service (the sidebar
+     * would still count as open) and drop the focus instead of returning it to the trigger.
+     */
+    onEscape(event: KeyboardEvent): void {
+        if (
+            event.defaultPrevented ||
+            hasModifierKey(event) ||
+            !this.editorialSidebarService.sidebarOpened()
+        ) {
+            return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        this.close();
     }
 }
