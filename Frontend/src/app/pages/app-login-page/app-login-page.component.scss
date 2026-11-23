@@ -43,11 +43,16 @@
         }
     }
 }
-@media only screen and (max-width: $mobileWidth - $mobileStage*1) {
+// on narrow screens the card fills the page and shows the title itself
+@media only screen and (max-width: $mobileWidth) {
     .infoTop {
-        left: 0;
-        width: 100%;
-        margin-left: 0;
+        display: none;
+    }
+}
+// on phones the card starts below the top bar to keep its header visible
+@media only screen and (max-width: $mobileTabSwitchWidth) {
+    :host ::ng-deep es-card .card-dialog[width] {
+        top: var(--mainnavHeight);
     }
 }
 @media only screen and (max-width: $mobileWidth+$mobileStage*1) {
