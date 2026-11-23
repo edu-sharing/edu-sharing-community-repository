@@ -15,6 +15,9 @@
     },
     "dirty": "${git.dirty}"
   },
+  "docker": {
+    "tag": "${docker.tag}"
+  },
   "maven": {
     "project": {
       "artifactId": "${project.artifactId}",

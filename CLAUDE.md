@@ -334,6 +334,16 @@ Backs the admin node browser (`/admin/v1/elastic/indices`, `/elastic/export`, `/
 - Exports scroll over all hits (no 10k limit) and stream csv / json / `dump` (zip: mapping, settings, aliases + `data-*.ndjson` in `_bulk` format, chunked per 10 000 docs).
 - Async variant `scheduleExport` uses `@Queued` (same concept as the statistics `*Async` endpoints): parameters must stay JSON-serializable primitives, the result is written to the user's inbox and a notification is sent. The admin check is repeated inside the job.
 
+## Status Report — `StatusReportService` / `StatusReportJob`
+
+- Sends the versions of the repository, its plugins and the connected systems (`ApplicationInfoList`, home repo excluded) to a central server (cve tracking). Library details are resolved centrally via image tag / commit, so the payload stays small: no config values, only a sha-256 `configHash`.
+- Config `repository.statusReport` (`url`, `clientId`, `clientSecret`, `timeout`); does nothing while any of the first three is empty. Auth is HTTP Basic, the installation is identified by `clientId` only (not part of the payload).
+- Payload `model/v1/StatusReportV1`, schema version also sent as header `X-ES-Schema-Version`. Additive optional fields stay in v1; breaking changes go into a new `model.v2` package.
+
+### Default jobs — `jobs.defaultEntries`
+
+`JobHandler.getJobEntries` schedules `jobs.defaultEntries` (an **object** key → job, not a list) in addition to `jobs.entries`, because projects often replace the `jobs.entries` list completely. Change a single default via `jobs.defaultEntries.<key>.trigger = "..."`, disable via `jobs.defaultEntries.<key>.enabled = false`; an entry in `jobs.entries` with the same `name` replaces the default. Like all quartz jobs they only run on the primary repository.
+
 ## i18n
 
 Backend i18n uses plain `.properties` files loaded by `I18nServer`.
