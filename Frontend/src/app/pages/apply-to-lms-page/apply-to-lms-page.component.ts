@@ -72,12 +72,6 @@ export class ApplyToLmsPageComponent {
     node: Node;
     reurl: string;
 
-    private static roundNumber(number: number) {
-        number = Math.round(number);
-        if (Number.isNaN(number)) return 0;
-        return number;
-    }
-
     forward() {
         this.nodeApi.prepareUsage(this.node.ref.id, this.node.ref.repo).subscribe(
             (nodeWrapper) => {
@@ -93,63 +87,31 @@ export class ApplyToLmsPageComponent {
         const node: NodeLMS = wrapper.node;
         // copy the main object to remote (in this case, it's simply a regular, local object)
         if (!wrapper.remote) wrapper.remote = wrapper.node;
-        const reurl = this.reurl;
+        // only frame communication is supported, absolute urls (redirects) are no longer allowed
+        if (this.reurl !== 'IFRAME' && this.reurl !== 'WINDOW') {
+            console.error(
+                'Unsupported value for the "reurl" parameter. Only "IFRAME" or "WINDOW" are supported, please use frame communication',
+            );
+            this.toast.error(null);
+            return;
+        }
         // the ccrep should always point to the local object (relevant if it's from a remote repo)
-        const ccrepUrl =
+        node.objectUrl =
             'ccrep://' +
             encodeURIComponent(wrapper.remote.ref.repo) +
             '/' +
             encodeURIComponent(wrapper.remote.ref.id);
-        if (reurl == 'IFRAME' || reurl == 'WINDOW') {
-            node.objectUrl = ccrepUrl;
-            node.nodeId = wrapper.remote.ref.id;
-            this.nodeHelper.appendImageData(node).then(
-                (data) => {
-                    this.events.broadcastEvent(FrameEventsService.EVENT_APPLY_NODE, data);
-                    window.history.back();
-                },
-                (error) => {
-                    console.warn('failed to fetch image data', error);
-                    this.events.broadcastEvent(FrameEventsService.EVENT_APPLY_NODE, node);
-                    window.history.back();
-                },
-            );
-            return;
-        }
-        console.warn(
-            'Using an absolute url for the "reurl" parameter is deprecated. Please prefer the value "WINDOW" and use frame communication',
+        node.nodeId = wrapper.remote.ref.id;
+        this.nodeHelper.appendImageData(node).then(
+            (data) => {
+                this.events.broadcastEvent(FrameEventsService.EVENT_APPLY_NODE, data);
+                window.history.back();
+            },
+            (error) => {
+                console.warn('failed to fetch image data', error);
+                this.events.broadcastEvent(FrameEventsService.EVENT_APPLY_NODE, node);
+                window.history.back();
+            },
         );
-        let params = reurl.indexOf('?') == -1 ? '?' : '&';
-        params += 'nodeId=' + ccrepUrl;
-        params += '&localId=' + encodeURIComponent(node.ref.id);
-        if (node.title) params += '&title=' + encodeURIComponent(node.title);
-        else params += '&title=' + encodeURIComponent(node.name);
-        params += '&mimeType=' + encodeURIComponent(node.mimetype);
-        params += '&mediatype=' + encodeURIComponent(node.mediatype);
-        params +=
-            '&h=' +
-            ApplyToLmsPageComponent.roundNumber(node.properties[RestConstants.CCM_PROP_HEIGHT]);
-        params +=
-            '&w=' +
-            ApplyToLmsPageComponent.roundNumber(node.properties[RestConstants.CCM_PROP_WIDTH]);
-        if (node.content.version) params += '&v=' + node.content.version;
-        if (node.properties[RestConstants.CCM_PROP_CCRESSOURCETYPE])
-            params +=
-                '&resourceType=' +
-                encodeURIComponent(node.properties[RestConstants.CCM_PROP_CCRESSOURCETYPE]);
-        if (node.properties[RestConstants.CCM_PROP_CCRESSOURCEVERSION])
-            params +=
-                '&resourceVersion=' +
-                encodeURIComponent(node.properties[RestConstants.CCM_PROP_CCRESSOURCEVERSION]);
-        params += '&isDirectory=' + node.isDirectory;
-        params += '&iconURL=' + encodeURIComponent(node.iconURL);
-        params += '&previewURL=' + encodeURIComponent(node.preview.url);
-        params += '&repoType=' + encodeURIComponent(node.repositoryType);
-        // reurl + params
-        // let contentParams = node.contentUrl.indexOf("?") == -1 ? '?' : '&';
-        // contentParams += "LMS_URL=" + encodeURIComponent(reurl);
-        // console.log(node.contentUrl + contentParams);
-        this.temporaryStorage.set(TemporaryStorageService.APPLY_TO_LMS_PARAMETER_NODE, node);
-        window.location.replace(reurl + params);
     }
 }

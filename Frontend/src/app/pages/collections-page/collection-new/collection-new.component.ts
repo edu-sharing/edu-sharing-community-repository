@@ -1044,9 +1044,10 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
                 this.imageWindow = UIHelper.openSearchWithReurl(
                     this.platformLocation,
                     this.router,
-                    'WINDOW',
-                    { queryParams: { reurlCreate: false, reurlTypes: ['image'] } },
-                ) as Window;
+                    {
+                        queryParams: { reurlCreate: false, reurlTypes: ['image'] },
+                    },
+                );
                 /*this.route
                 r.navigate([], {
                         relativeTo: this.route,
