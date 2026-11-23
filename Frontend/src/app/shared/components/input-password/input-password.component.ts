@@ -14,6 +14,11 @@ export class InputPasswordComponent {
     @Input() autocomplete: string;
     @Input() inputClass = '';
     @Input() hint = '';
+    /**
+     * id(s) of external elements describing this field (e.g. an error message)
+     * mat-form-field merges its own hint ids with this value
+     */
+    @Input() ariaDescribedBy: string = null;
     @Input() label = '';
     @Input() floatLabel: FloatLabelType = 'auto';
     @Input() displayStrength = false;

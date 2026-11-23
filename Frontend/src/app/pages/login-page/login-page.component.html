@@ -99,6 +99,7 @@
                 label="{{ 'LOGIN.PASSWORD' | translate }}"
                 floatLabel="always"
                 [required]="true"
+                [ariaDescribedBy]="isSafeLogin ? 'login-safe-error' : null"
                 (keydown.enter)="login()"
                 [(value)]="password"
               ></es-input-password>
@@ -142,13 +143,16 @@
               {{ 'LOGIN.LOGIN' | translate }}
             </button>
           </div>
-          <div
-            *ngIf="isSafeLogin && loginSafeFailed"
-            innerHTML="{{
-              'LOGIN.ERROR_SAFE_DETAIL'
-                | translate : { safeAccountUrl: config.register.recoverUrlSafe }
-            }}"
-          ></div>
+          <!-- the live region container must exist before its content is inserted, otherwise screen readers will not announce it -->
+          <div *ngIf="isSafeLogin" id="login-safe-error" aria-live="polite">
+            <div
+              *ngIf="loginSafeFailed"
+              innerHTML="{{
+                'LOGIN.ERROR_SAFE_DETAIL'
+                  | translate : { safeAccountUrl: config.register.recoverUrlSafe }
+              }}"
+            ></div>
+          </div>
         </div>
       </div>
     </div>
