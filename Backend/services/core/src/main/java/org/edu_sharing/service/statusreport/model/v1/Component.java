@@ -26,10 +26,6 @@ public class Component {
      * repository / plugin: name of the version file, connector: app id
      */
     private String name;
-    /**
-     * connectors only: host of the connected system
-     */
-    private String host;
     private String version;
     private String imageTag;
     private String commit;

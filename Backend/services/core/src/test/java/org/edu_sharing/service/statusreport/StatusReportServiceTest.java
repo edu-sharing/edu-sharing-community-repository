@@ -3,7 +3,6 @@ package org.edu_sharing.service.statusreport;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpServer;
-import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -80,9 +79,11 @@ class StatusReportServiceTest {
         ApplicationInfo home = app("local", ApplicationInfo.TYPE_REPOSITORY, "repo.example.org", null);
         ApplicationInfo rs1 = app("rs1", ApplicationInfo.TYPE_RENDERSERVICE, "rs1.example.org", null);
         ApplicationInfo rs1Other = app("rs1-other", ApplicationInfo.TYPE_RENDERSERVICE, "rs1-other.example.org", null);
-        ApplicationInfo rs2 = app("rs2", ApplicationInfo.TYPE_RENDERSERVICE_2, null, "https://rs2.example.org/rendering");
+        // not reachable (port 1), so the version request fails fast
+        ApplicationInfo rs2 = app("rs2", ApplicationInfo.TYPE_RENDERSERVICE_2, null, "http://127.0.0.1:1/rendering");
         ApplicationInfo lms = app("moodle", ApplicationInfo.TYPE_LMS, "moodle.example.org", null);
-        mockApplicationInfos(home, rs1, rs1Other, rs2, lms);
+        ApplicationInfo lms2 = app("ilias", ApplicationInfo.TYPE_LMS, "ilias.example.org", null);
+        mockApplicationInfos(home, rs1, rs1Other, rs2, lms, lms2);
         applicationInfoList.when(ApplicationInfoList::getRenderService).thenReturn(rs1);
 
         Map<String, RepositoryVersionInfo> plugins = Map.of("plugin-x", versionInfo("plugin-x", "1.2.0", "${docker.tag}", "def456"));
@@ -93,13 +94,11 @@ class StatusReportServiceTest {
         when(versionService.getPluginVersionInfo()).thenReturn(plugins);
         when(versionService.getRenderserviceVersion()).thenReturn("9.0.3");
 
-        Config config = ConfigFactory.parseString("a: 1, repository.statusReport.clientSecret: \"secret\"");
-        StatusReportV1 report = underTest.buildReport(config);
+        StatusReportV1 report = underTest.buildReport();
 
         assertEquals(StatusReportV1.SCHEMA_VERSION, report.getSchemaVersion());
         assertNotNull(report.getGeneratedAt());
         assertEquals("local", report.getInstallation().getAppId());
-        assertTrue(report.getConfigHash().startsWith("sha256:"));
 
         Component repository = find(report.getComponents(), "repository");
         assertEquals(Component.TYPE_REPOSITORY, repository.getType());
@@ -117,19 +116,23 @@ class StatusReportServiceTest {
         assertEquals(Component.TYPE_CONNECTOR, rs1Component.getType());
         assertEquals(ApplicationInfo.TYPE_RENDERSERVICE, rs1Component.getSubtype());
         assertEquals("9.0.3", rs1Component.getVersion());
-        // the version is only known for the rendering service the repository uses
-        Component rs1OtherComponent = find(report.getComponents(), "rs1-other");
-        assertEquals(ApplicationInfo.TYPE_RENDERSERVICE, rs1OtherComponent.getSubtype());
-        assertNull(rs1OtherComponent.getVersion());
+        // a system that can report a version stays a component when the request fails, so the broken connection is visible
         Component rs2Component = find(report.getComponents(), "rs2");
         assertEquals(ApplicationInfo.TYPE_RENDERSERVICE_2, rs2Component.getSubtype());
-        assertEquals("rs2.example.org", rs2Component.getHost());
         assertNull(rs2Component.getVersion());
-        assertEquals("moodle.example.org", find(report.getComponents(), "moodle").getHost());
+
+        // systems without version (lms, further rendering services 1, ...) are only counted per type
+        assertNull(findOrNull(report.getComponents(), "rs1-other"));
+        assertNull(findOrNull(report.getComponents(), "moodle"));
+        assertNull(findOrNull(report.getComponents(), "ilias"));
+        assertEquals(Map.of(ApplicationInfo.TYPE_LMS, 2, ApplicationInfo.TYPE_RENDERSERVICE, 1), report.getConnectedSystems());
 
         String json = new ObjectMapper().writeValueAsString(report);
         assertFalse(json.contains("secret"), "no config values must be sent");
         assertFalse(json.contains("clientId"), "the installation is identified by the basic auth only");
+        assertFalse(json.contains("\"host\""), "no hosts / ips of the connected systems are sent");
+        assertFalse(json.contains("moodle.example.org"));
+        assertTrue(json.contains("\"connectedSystems\":{\"LMS\":2,\"SERVICE\":1}"), json);
     }
 
     @Test
@@ -214,14 +217,6 @@ class StatusReportServiceTest {
         assertEquals("https://example.org/connector/version.php", StatusReportService.getVersionUrl("https://example.org/connector/index.php?x=1", "version.php"));
         assertEquals("https://example.org/rendering/public/version", StatusReportService.getVersionUrl("https://example.org/rendering", "public/version"));
         assertNull(StatusReportService.getVersionUrl(" ", "version.php"));
-    }
-
-    @Test
-    void configHashChangesWithConfig() {
-        assertEquals(StatusReportService.getConfigHash(ConfigFactory.parseString("a: 1")),
-                StatusReportService.getConfigHash(ConfigFactory.parseString("a: 1")));
-        assertNotEquals(StatusReportService.getConfigHash(ConfigFactory.parseString("a: 1")),
-                StatusReportService.getConfigHash(ConfigFactory.parseString("a: 2")));
     }
 
     @Test

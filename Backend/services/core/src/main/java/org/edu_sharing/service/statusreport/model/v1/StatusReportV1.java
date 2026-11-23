@@ -5,6 +5,8 @@ import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * payload sent to the central status server, schema version 1
@@ -24,9 +26,9 @@ public class StatusReportV1 {
      */
     private String generatedAt;
     private Installation installation;
-    /**
-     * sha-256 of the merged (lightbend) config, to detect config changes without sending any values
-     */
-    private String configHash;
     private List<Component> components = new ArrayList<>();
+    /**
+     * connected systems that can not report a version (lms, cms, remote repositories, ...)
+     */
+    private Map<String, Integer> connectedSystems = new TreeMap<>();
 }

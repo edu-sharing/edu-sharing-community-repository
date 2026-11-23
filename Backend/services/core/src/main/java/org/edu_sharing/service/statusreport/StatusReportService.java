@@ -4,10 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.typesafe.config.Config;
-import com.typesafe.config.ConfigRenderOptions;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
@@ -25,7 +23,6 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
@@ -36,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * Builds and sends the status report (versions of the repository, its plugins and the connected systems) to a central
@@ -88,7 +86,7 @@ public class StatusReportService {
             log.info("status report is not configured ({}.url, clientId, clientSecret), nothing to send", CONFIG_PATH);
             return null;
         }
-        String payload = objectMapper.writeValueAsString(buildReport(config));
+        String payload = objectMapper.writeValueAsString(buildReport());
         if (dryRun) {
             log.info("status report (dry run, not sent): {}", payload);
             return payload;
@@ -97,16 +95,16 @@ public class StatusReportService {
         return payload;
     }
 
-    public StatusReportV1 buildReport(Config config) {
+    public StatusReportV1 buildReport() {
         StatusReportV1 report = new StatusReportV1();
         report.setGeneratedAt(Instant.now().truncatedTo(ChronoUnit.SECONDS).toString());
         ApplicationInfo home = ApplicationInfoList.getHomeRepository();
         if (home != null) {
             report.setInstallation(new Installation(home.getAppId()));
         }
-        report.setConfigHash(getConfigHash(config));
         report.getComponents().addAll(getVersionComponents());
         report.getComponents().addAll(getConnectorComponents(home));
+        report.getConnectedSystems().putAll(getConnectedSystemCounts(home));
         return report;
     }
 
@@ -160,19 +158,22 @@ public class StatusReportService {
         return result;
     }
 
+    /**
+     * connected systems that can report a version (rendering service 1 used by the repository, rendering service 2,
+     * services-connector), one component each. All other ones are only counted, see {@link #getConnectedSystemCounts}.
+     */
     List<Component> getConnectorComponents(ApplicationInfo home) {
         List<Component> result = new ArrayList<>();
         // the version can only be fetched from the (single) rendering service the repository uses
         ApplicationInfo renderService = ApplicationInfoList.getRenderService();
-        for (ApplicationInfo app : ApplicationInfoList.getApplicationInfos().values()) {
-            if (app == null || (home != null && StringUtils.equals(app.getAppId(), home.getAppId()))) {
+        for (ApplicationInfo app : getConnectedApps(home)) {
+            if (!canReportVersion(app, renderService)) {
                 continue;
             }
             Component.ComponentBuilder component = Component.builder()
                     .type(Component.TYPE_CONNECTOR)
                     .subtype(app.getType())
-                    .name(app.getAppId())
-                    .host(getHost(app));
+                    .name(app.getAppId());
             addConnectorVersion(component, app, renderService);
             result.add(component.build());
         }
@@ -181,11 +182,43 @@ public class StatusReportService {
     }
 
     /**
-     * only systems which can be queried for their version are filled, all other ones stay null
-     *
+     * connected systems that can not report a version, counted per application type
+     */
+    Map<String, Integer> getConnectedSystemCounts(ApplicationInfo home) {
+        ApplicationInfo renderService = ApplicationInfoList.getRenderService();
+        Map<String, Integer> result = new TreeMap<>();
+        for (ApplicationInfo app : getConnectedApps(home)) {
+            if (!canReportVersion(app, renderService)) {
+                result.merge(StringUtils.defaultIfBlank(app.getType(), "UNKNOWN"), 1, Integer::sum);
+            }
+        }
+        return result;
+    }
+
+    private static List<ApplicationInfo> getConnectedApps(ApplicationInfo home) {
+        List<ApplicationInfo> result = new ArrayList<>();
+        for (ApplicationInfo app : ApplicationInfoList.getApplicationInfos().values()) {
+            if (app != null && (home == null || !StringUtils.equals(app.getAppId(), home.getAppId()))) {
+                result.add(app);
+            }
+        }
+        return result;
+    }
+
+    /**
      * {@link VersionService#getRenderserviceVersion()} always queries the rendering service of
-     * {@link ApplicationInfoList#getRenderService()}, so only that app gets the version, further rendering services
-     * (type {@link ApplicationInfo#TYPE_RENDERSERVICE}) are reported without one
+     * {@link ApplicationInfoList#getRenderService()}, so only that one counts as a system with a version, further
+     * rendering services 1 are only counted
+     */
+    static boolean canReportVersion(ApplicationInfo app, ApplicationInfo renderService) {
+        return (renderService != null && StringUtils.equals(app.getAppId(), renderService.getAppId()))
+                || ApplicationInfo.TYPE_CONNECTOR.equals(app.getType())
+                || ApplicationInfo.TYPE_RENDERSERVICE_2.equals(app.getType());
+    }
+
+    /**
+     * fetches the version of a system for which {@link #canReportVersion} is true; if that fails the component is
+     * still reported (without version), so a broken connection is visible centrally
      */
     private void addConnectorVersion(Component.ComponentBuilder component, ApplicationInfo app, ApplicationInfo renderService) {
         if (renderService != null && StringUtils.equals(app.getAppId(), renderService.getAppId())) {
@@ -260,29 +293,6 @@ public class StatusReportService {
         String url = StringUtils.substringBefore(contentUrl.trim(), "?");
         url = StringUtils.removeEnd(url, "index.php");
         return StringUtils.appendIfMissing(url, "/") + path;
-    }
-
-    static String getHost(ApplicationInfo app) {
-        if (StringUtils.isNotBlank(app.getHost())) {
-            return app.getHost();
-        }
-        for (String url : new String[]{app.getContentUrl(), app.getLtitoolUrl()}) {
-            if (StringUtils.isNotBlank(url)) {
-                try {
-                    String host = URI.create(url.trim()).getHost();
-                    if (host != null) {
-                        return host;
-                    }
-                } catch (IllegalArgumentException ignored) {
-                    // not a valid url, try the next one
-                }
-            }
-        }
-        return null;
-    }
-
-    static String getConfigHash(Config config) {
-        return "sha256:" + DigestUtils.sha256Hex(config.root().render(ConfigRenderOptions.concise()));
     }
 
     /**
