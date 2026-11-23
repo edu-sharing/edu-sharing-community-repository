@@ -103,14 +103,15 @@ export class UploadDialogService {
         showMetadataAfterUpload = true,
     ): Promise<Node[] | null> {
         const dialogRef = await this.dialogs.openFileUploadProgressDialog(data);
-        const result = await dialogRef.afterClosed().toPromise();
-        if (result.status === 'FINISHED' && result.nodes) {
+        // the dialog closes without a result when nothing was uploaded
+        const result = await firstValueFrom(dialogRef.afterClosed());
+        if (result?.status === 'FINISHED' && result.nodes) {
             if (showMetadataAfterUpload) {
                 return this._onFilesUploaded(result.nodes);
             } else {
                 return result.nodes;
             }
-        } else if (result.status === 'CANCELED' && result.nodes) {
+        } else if (result?.status === 'CANCELED' && result.nodes) {
             try {
                 await Promise.all(
                     result.nodes.map((n) =>
