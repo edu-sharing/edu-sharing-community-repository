@@ -83,7 +83,7 @@ public class StatusReportService {
         Config config = LightbendConfigLoader.get();
         Optional<Settings> settings = getSettings(config);
         if (settings.isEmpty() && !dryRun) {
-            log.info("status report is not configured ({}.url, clientId, clientSecret), nothing to send", CONFIG_PATH);
+            log.debug("status report is not configured ({}.url, clientId, clientSecret), nothing to send", CONFIG_PATH);
             return null;
         }
         String payload = objectMapper.writeValueAsString(buildReport());

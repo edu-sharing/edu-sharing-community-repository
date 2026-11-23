@@ -338,6 +338,7 @@ Backs the admin node browser (`/admin/v1/elastic/indices`, `/elastic/export`, `/
 
 - Sends the versions of the repository, its plugins and the connected systems (`ApplicationInfoList`, home repo excluded) to a central server (cve tracking). Only systems that can report a version (`StatusReportService.canReportVersion`: the RS1 of `getRenderService()`, RS2, services-connector) become `components` — also when the request fails; all others (LMS, CMS, further RS1, remote repos, …) are only counted per type in `connectedSystems` (no app ids / hosts), which keeps the report small with thousands of registered apps. Library details are resolved centrally via image tag / commit, so the payload stays small: no config values, no hosts / ips of the connected systems.
 - Config `repository.statusReport` (`url`, `clientId`, `clientSecret`, `timeout`); does nothing while any of the first three is empty. Auth is HTTP Basic, the installation is identified by `clientId` only (not part of the payload).
+- `StatusReportJob` is in `JobLogger.IGNORABLE_JOBS` (no entry in the admin job history); the `dryRun` report goes to the repository log.
 - Payload `model/v1/StatusReportV1`, schema version also sent as header `X-ES-Schema-Version`. Additive optional fields stay in v1; breaking changes go into a new `model.v2` package.
 
 ### Default jobs — `jobs.defaultEntries`
