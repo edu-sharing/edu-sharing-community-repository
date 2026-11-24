@@ -629,10 +629,12 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
         this.totalSearchResultCountChanged.emit(pagination.total - numberOfBlacklistedVisibleNodes);
 
         let customCardsCount: number;
+        // note: as the requests are cached, do not change the original result object, otherwise, it is changed permanently
+        const displayedPagination: Pagination = JSON.parse(JSON.stringify(pagination));
         // in edit mode, display all requested nodes; the data source gets its own array, as the
         // custom cards injected into it must not shift the node indices used to address the cards
         if (this.hasEditRightsAndIsEditMode) {
-            this.dataSource.setData([...this.allRequestedNodes], pagination);
+            this.dataSource.setData([...this.allRequestedNodes], displayedPagination);
             customCardsCount = this.allRequestedNodes.length;
         }
         // in view mode, display the filtered nodes
@@ -640,10 +642,8 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
             const filteredNodes: Node[] = this.allRequestedNodes.filter(
                 (node: Node) => !this.blacklistedNodeIds.includes(node.ref.id),
             );
-            // note: as the requests are cached, do not change the original result object, otherwise, it is changed permanently
-            const updatedPagination: Pagination = JSON.parse(JSON.stringify(pagination));
-            updatedPagination.total -= this.allRequestedNodes.length - filteredNodes.length;
-            this.dataSource.setData(filteredNodes, updatedPagination);
+            displayedPagination.total -= this.allRequestedNodes.length - filteredNodes.length;
+            this.dataSource.setData(filteredNodes, displayedPagination);
             customCardsCount = filteredNodes.length;
         }
 
@@ -658,6 +658,17 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
         ].includes(this.layout);
         if ((this.includeCustomCard() || this.hasEditRightsAndIsEditMode) && isGridItemType) {
             this.injectCustomCards(customCardsCount);
+            // the total has to count the injected cards as well, as whether more results exist
+            // is decided by comparing it with the number of displayed items
+            const injectedCards: number = this.dataSource
+                .getData()
+                .filter((item: Node) => !item?.ref?.id).length;
+            if (injectedCards) {
+                this.dataSource.setPagination({
+                    ...displayedPagination,
+                    total: displayedPagination.total + injectedCards,
+                });
+            }
         }
 
         // emit the currently loaded visible nodes
