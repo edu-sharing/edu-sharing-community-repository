@@ -100,6 +100,14 @@ export class BreadcrumbComponent implements OnChanges, OnInit, OnDestroy {
         (): boolean =>
             this.canManagePageTemplate() && this.pageTemplateExists() && !this.templateMode(),
     );
+    // a single variant offers nothing to switch to outside the edit mode, so the switcher is hidden
+    variantSwitcherVisible: Signal<boolean> = computed((): boolean => {
+        const variantCount: number = this.pageVariantConfigNodes().length;
+        if (this.templateSwitchable()) {
+            return true;
+        }
+        return variantCount > 1 || (variantCount === 1 && this.editMode());
+    });
     // reverse Array to get the correct order for breadcrumb
     processedNodes: Signal<Node[]> = computed((): Node[] => {
         return this.parentEntries()?.nodes?.slice()?.reverse() || [];
