@@ -1,5 +1,6 @@
 import { NgTemplateOutlet } from '@angular/common';
 import {
+    afterNextRender,
     Component,
     ElementRef,
     EventEmitter,
@@ -19,6 +20,7 @@ import {
     ViewEncapsulation,
     WritableSignal,
     inject,
+    Injector,
 } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Sort } from '@angular/material/sort';
@@ -96,6 +98,7 @@ export enum CustomCardRole {
 })
 export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit {
     private elementRef = inject(ElementRef);
+    private injector = inject(Injector);
     genericWidgetGlobalService = inject(GenericWidgetGlobalService);
     private mdsHelperService = inject(MdsHelperService);
     private mdsService = inject(MdsService);
@@ -891,16 +894,21 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
             // the next page starts after all search results loaded so far; the displayed items
             // differ from them by the hidden nodes and the injected custom cards
             await this.setDataSource(false, this.allRequestedNodes.length);
-            if (this.hasEditRightsAndIsEditMode) {
-                this.dynamicallyAddCssClasses(
-                    this.allRequestedNodes,
-                    this.blacklistedNodeIds,
-                    this.blacklistedClassName,
-                );
-            }
         } finally {
             // a failed page must not wedge the list in a state where nothing can load any more
             this.dataSource.isLoading = false;
+        }
+        // the cards of the appended page only exist once they are rendered
+        if (this.hasEditRightsAndIsEditMode) {
+            afterNextRender(
+                () =>
+                    this.dynamicallyAddCssClasses(
+                        this.allRequestedNodes,
+                        this.blacklistedNodeIds,
+                        this.blacklistedClassName,
+                    ),
+                { injector: this.injector },
+            );
         }
     }
 
