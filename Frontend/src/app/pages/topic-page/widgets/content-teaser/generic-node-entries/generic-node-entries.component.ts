@@ -603,9 +603,10 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
         );
 
         let customCardsCount: number;
-        // in edit mode, display all requested nodes
+        // in edit mode, display all requested nodes; the data source gets its own array, as the
+        // custom cards injected into it must not shift the node indices used to address the cards
         if (this.hasEditRightsAndIsEditMode) {
-            this.dataSource.setData(this.allRequestedNodes, searchResult.pagination);
+            this.dataSource.setData([...this.allRequestedNodes], searchResult.pagination);
             customCardsCount = this.allRequestedNodes.length;
         }
         // in view mode, display the filtered nodes
