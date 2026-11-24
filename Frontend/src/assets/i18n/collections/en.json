@@ -101,6 +101,7 @@
       "SORT_SAVED_CUSTOM": "The order established will apply to all viewers of the collection in the future"
     },
     "NEW": {
+      "AUTHOR": "Author",
       "AUTHOR_FREETEXT": "Name of author",
       "IMAGE": {
         "UPLOAD": "Upload image",

@@ -208,6 +208,9 @@ $imagePath: '../../../../assets/images/collections/';
     .dialog-input-area {
         padding-top: 0;
         padding-bottom: 0;
+        mat-form-field + mat-form-field {
+            margin-top: 8px;
+        }
     }
     .collection-new-owner {
         display: flex;
@@ -294,6 +297,13 @@ $imagePath: '../../../../assets/images/collections/';
     min-height: 120px;
     padding: 16px;
     color: var(--textBlack);
+    // the background is tinted with the collection color (20 % alpha), on which the default warn
+    // color is too light; these shades keep at least 4.5:1 for all default collection colors
+    --formErrorTextColor: color-mix(in srgb, var(--warn), black 25%);
+    --mat-form-field-error-text-color: var(--formErrorTextColor);
+    --mat-form-field-outlined-error-label-text-color: var(--formErrorTextColor);
+    --mat-form-field-outlined-error-focus-label-text-color: var(--formErrorTextColor);
+    --mat-form-field-outlined-error-hover-label-text-color: var(--formErrorTextColor);
     transition: $transitionNormal all;
 
     --mat-form-field-outlined-hover-label-text-color: #333;
@@ -305,6 +315,10 @@ $imagePath: '../../../../assets/images/collections/';
     input,
     textarea {
         background-color: transparent;
+    }
+
+    :host-context(body.isDarkTheme) & {
+        --formErrorTextColor: color-mix(in srgb, var(--warn), white 65%);
     }
 }
 

@@ -101,6 +101,7 @@
       "SORT_SAVED_CUSTOM": "L'ordine stabilito si applicherà a tutti gli spettatori della collezione in futuro"
     },
     "NEW": {
+      "AUTHOR": "Autore",
       "AUTHOR_FREETEXT": "Nome dell'autore",
       "IMAGE": {
         "UPLOAD": "Carica immagine",

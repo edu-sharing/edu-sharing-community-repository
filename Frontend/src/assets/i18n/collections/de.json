@@ -101,6 +101,7 @@
       "SORT_SAVED_CUSTOM": "Die festgelegte Reihenfolge gilt zukünftig für alle Betrachter der Sammlung"
     },
     "NEW": {
+      "AUTHOR": "Verfassende Person",
       "AUTHOR_FREETEXT": "Bezeichnung der verfassenden Person",
       "IMAGE": {
         "UPLOAD": "Bild hochladen",

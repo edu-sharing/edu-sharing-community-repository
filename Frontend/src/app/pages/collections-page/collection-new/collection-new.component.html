@@ -175,6 +175,8 @@
               <!-- Autofocus and autocomplete don't work well together here, because the
                   autocomplete list will open before the card animation finishes. -->
               <input
+                #titleInput
+                #titleModel="ngModel"
                 matInput
                 class="title"
                 [(ngModel)]="currentCollection.title"
@@ -183,6 +185,9 @@
                 autocomplete="off"
                 data-test="new-collection-name-input"
               />
+              @if (titleModel.hasError('required')) {
+              <mat-error>{{ 'COLLECTIONS.ENTER_NAME' | translate }}</mat-error>
+              }
             </mat-form-field>
             <mat-form-field>
               <mat-label>{{ 'collectionNew_placeholderDescription' | translate }}</mat-label>
@@ -192,7 +197,10 @@
           <div class="collection-new-owner">
             @if (!authorFreetext) {
             <i esIcon="person"></i>
-            <span>{{ user | authorityName }}</span>
+            <span
+              ><span class="cdk-visually-hidden">{{ 'COLLECTIONS.NEW.AUTHOR' | translate }}: </span
+              >{{ user | authorityName }}</span
+            >
             @if (authorFreetextAllowed || authorFreetextFixedAllowed) {
             <button
               mat-icon-button
