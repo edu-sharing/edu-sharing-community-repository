@@ -1627,7 +1627,10 @@ public class NodeApi  {
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
 	    	
-	    	NodeDao newNode = nodeDao.changeContent(inputStream, mimetype, versionComment);
+	    	// the frontend sends "auto" when overwriting a file, which must not be stored as mimetype:
+	    	// for null (or any other invalid value) writeContent guesses the mimetype from the file name
+	    	String finalMimetype = mimetype == null || !mimetype.contains("/") ? null : mimetype;
+	    	NodeDao newNode = nodeDao.changeContent(inputStream, finalMimetype, versionComment);
 	    	
 	    	NodeEntry response = new NodeEntry();
 	    	response.setNode(newNode.asNode());
