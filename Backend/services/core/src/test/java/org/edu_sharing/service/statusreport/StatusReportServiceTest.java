@@ -6,6 +6,7 @@ import com.sun.net.httpserver.HttpServer;
 import com.typesafe.config.ConfigFactory;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.security.AppAssertionSigner;
 import org.edu_sharing.repository.server.tools.security.HomeRepositorySigner;
 import org.edu_sharing.service.statusreport.model.v1.Component;
 import org.edu_sharing.service.statusreport.model.v1.StatusReportV1;
@@ -34,6 +35,7 @@ class StatusReportServiceTest {
 
     private VersionService versionService;
     private HomeRepositorySigner signer;
+    private AppAssertionSigner appAssertionSigner;
     private StatusReportService underTest;
     private MockedStatic<ApplicationInfoList> applicationInfoList;
     private HttpServer server;
@@ -45,7 +47,9 @@ class StatusReportServiceTest {
         when(signer.appId()).thenReturn("local");
         when(signer.algorithm()).thenReturn("SHA512withRSA");
         when(signer.sign(Mockito.anyString())).thenAnswer(invocation -> "sig(" + invocation.getArgument(0) + ")");
-        underTest = new StatusReportService(versionService, signer);
+        appAssertionSigner = Mockito.mock(AppAssertionSigner.class);
+        when(appAssertionSigner.sign(Mockito.anyString())).thenAnswer(invocation -> "jws(" + invocation.getArgument(0) + ")");
+        underTest = new StatusReportService(versionService, signer, appAssertionSigner);
     }
 
     @AfterEach
@@ -186,11 +190,13 @@ class StatusReportServiceTest {
     }
 
     @Test
-    void renderingService2VersionIsFetchedSigned() throws Exception {
+    void renderingService2VersionIsFetchedWithTheAppAssertion() throws Exception {
         Map<String, String> received = new ConcurrentHashMap<>();
         server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
         server.createContext("/rendering/public/version", exchange -> {
-            received.put("X-Edu-App-Sig", String.valueOf(exchange.getRequestHeaders().getFirst("X-Edu-App-Sig")));
+            for (String header : List.of("X-Edu-App-Assertion", "Authorization", "X-Edu-App-Sig")) {
+                received.put(header, String.valueOf(exchange.getRequestHeaders().getFirst(header)));
+            }
             byte[] body = "{\"version\":\"11.0.4\",\"commit\":\"ad3ffe49\",\"imageTag\":\"11.0.4\"}".getBytes(StandardCharsets.UTF_8);
             exchange.sendResponseHeaders(200, body.length);
             exchange.getResponseBody().write(body);
@@ -207,7 +213,9 @@ class StatusReportServiceTest {
         assertEquals("11.0.4", component.getVersion());
         assertEquals("ad3ffe49", component.getCommit());
         assertEquals("11.0.4", component.getImageTag());
-        assertTrue(received.get("X-Edu-App-Sig").startsWith("sig(local"));
+        assertEquals("jws(rendering-service)", received.get("X-Edu-App-Assertion"));
+        assertEquals("null", received.get("Authorization"), "the assertion is no Authorization: the service would read it as the token of a user");
+        assertEquals("null", received.get("X-Edu-App-Sig"), "the rendering service 2 gets no app signature headers any more");
     }
 
     @Test

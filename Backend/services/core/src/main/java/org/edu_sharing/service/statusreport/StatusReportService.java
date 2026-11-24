@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.security.AppAssertionSigner;
 import org.edu_sharing.repository.server.tools.security.HomeRepositorySigner;
 import org.edu_sharing.service.statusreport.model.v1.Component;
 import org.edu_sharing.service.statusreport.model.v1.Installation;
@@ -34,6 +35,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.function.Consumer;
 
 /**
  * Builds and sends the status report (versions of the repository, its plugins and the connected systems) to a central
@@ -50,9 +52,12 @@ public class StatusReportService {
     public static final String HEADER_SCHEMA_VERSION = "X-ES-Schema-Version";
     private static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(15);
     private static final Duration CONNECTOR_VERSION_TIMEOUT = Duration.ofSeconds(5);
+    /** What the rendering service 2 expects in {@code aud} of the assertion (its {@code app.security.app-assertion.audience}) */
+    static final String RENDERING_SERVICE_2_AUDIENCE = "rendering-service";
 
     private final VersionService versionService;
     private final HomeRepositorySigner signer;
+    private final AppAssertionSigner appAssertionSigner;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
@@ -228,21 +233,21 @@ public class StatusReportService {
                 log.warn("could not fetch version of rendering service {}: {}", app.getAppId(), e.getMessage());
             }
         } else if (ApplicationInfo.TYPE_CONNECTOR.equals(app.getType())) {
-            addSignedVersion(component, app, getVersionUrl(app.getContentUrl(), "version.php"));
+            addSignedVersion(component, app, getVersionUrl(app.getContentUrl(), "version.php"), this::addSignatureHeaders);
         } else if (ApplicationInfo.TYPE_RENDERSERVICE_2.equals(app.getType())) {
-            addSignedVersion(component, app, getVersionUrl(app.getContentUrl(), "public/version"));
+            addSignedVersion(component, app, getVersionUrl(app.getContentUrl(), "public/version"), this::addAppAssertionHeader);
         }
     }
 
     /**
-     * fetches the build info of a connected system with a request signed by this repository (app signature headers),
-     * the system verifies it with the public key of this repository (services-connector: from the repository metadata,
-     * rendering service 2: from its registration)
+     * fetches the build info of a connected system with a request signed by this repository, the system verifies it with the
+     * public key of this repository (services-connector: app signature headers, key from the repository metadata; rendering
+     * service 2: app assertion, key from its registration)
      *
      * Every system answers with the same fields {@code {"version": "...", "commit": "...", "imageTag": "..."}},
      * fields it does not know are missing or null (e.g. the services-connector has no image tag).
      */
-    private void addSignedVersion(Component.ComponentBuilder component, ApplicationInfo app, String url) {
+    private void addSignedVersion(Component.ComponentBuilder component, ApplicationInfo app, String url, Consumer<HttpHeaders> signing) {
         if (url == null) {
             return;
         }
@@ -255,7 +260,7 @@ public class StatusReportService {
                     .build()
                     .get()
                     .uri(url)
-                    .headers(this::addSignatureHeaders)
+                    .headers(signing)
                     .retrieve()
                     .body(String.class);
             JsonNode info = objectMapper.readTree(body);
@@ -279,6 +284,13 @@ public class StatusReportService {
         headers.set("X-Edu-App-Signed", signed);
         headers.set("X-Edu-App-Sig", signer.sign(signed));
         headers.set("X-Edu-App-SignedAlg", signer.algorithm());
+    }
+
+    /**
+     * the app assertion (a JWS of this repository, valid for a few seconds) in its own header, not in {@code Authorization}
+     */
+    void addAppAssertionHeader(HttpHeaders headers) {
+        headers.set(AppAssertionSigner.HEADER, appAssertionSigner.sign(RENDERING_SERVICE_2_AUDIENCE));
     }
 
     /**

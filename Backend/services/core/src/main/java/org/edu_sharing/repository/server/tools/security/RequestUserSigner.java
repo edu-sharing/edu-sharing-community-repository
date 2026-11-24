@@ -1,7 +1,5 @@
 package org.edu_sharing.repository.server.tools.security;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
@@ -37,7 +35,6 @@ public class RequestUserSigner {
     public static final long LIFETIME_SECONDS = 30;
 
     private static final SecureRandom RANDOM = new SecureRandom();
-    private static final ObjectMapper JSON = new ObjectMapper();
 
     private final HomeRepositorySigner signer;
 
@@ -59,11 +56,6 @@ public class RequestUserSigner {
     }
 
     String sign(String audience, String apiKey, String method, String rawPathAndQuery, String user, long issuedAtSeconds, String jti) {
-        String algorithm = signer.algorithm();
-        Map<String, Object> header = new LinkedHashMap<>();
-        header.put("alg", signer.jwsAlgorithm());
-        header.put("typ", TYP);
-        header.put("kid", signer.jwkThumbprint());
         Map<String, Object> claims = new LinkedHashMap<>();
         claims.put("iss", signer.appId());
         claims.put("aud", audience);
@@ -74,17 +66,7 @@ public class RequestUserSigner {
         claims.put("htm", method.toUpperCase(Locale.ROOT));
         claims.put("hpq", rawPathAndQuery);
         claims.put("ath", apiKeyHash(apiKey));
-        String signingInput = encode(header) + "." + encode(claims);
-        byte[] signature = signer.signBytes(signingInput.getBytes(StandardCharsets.US_ASCII), algorithm);
-        return signingInput + "." + Base64.getUrlEncoder().withoutPadding().encodeToString(signature);
-    }
-
-    private static String encode(Map<String, Object> part) {
-        try {
-            return Base64.getUrlEncoder().withoutPadding().encodeToString(JSON.writeValueAsString(part).getBytes(StandardCharsets.UTF_8));
-        } catch (JsonProcessingException e) {
-            throw new IllegalStateException(e);
-        }
+        return signer.signJws(TYP, claims);
     }
 
     /** 16 random bytes, URL-safe Base64 without padding (22 characters). */

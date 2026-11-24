@@ -43,6 +43,30 @@ class HomeRepositorySignerTest {
     }
 
     @Test
+    void signsAnyClaimsAsACompactJwsWithItsKeyAndTheTypeOfTheCaller() throws Exception {
+        // Arrange
+        HomeRepositorySigner signer = signer("SHA384withRSA");
+        Map<String, Object> claims = new java.util.LinkedHashMap<>();
+        claims.put("z", 1);
+        claims.put("a", "x");
+
+        // Act
+        String jws = signer.signJws("some+jwt", claims);
+
+        // Assert
+        String[] parts = jws.split("\\.");
+        assertEquals(3, parts.length);
+        assertEquals("{\"alg\":\"RS384\",\"typ\":\"some+jwt\",\"kid\":\"" + KID + "\"}",
+                new String(java.util.Base64.getUrlDecoder().decode(parts[0]), java.nio.charset.StandardCharsets.UTF_8));
+        assertEquals("{\"z\":1,\"a\":\"x\"}", new String(java.util.Base64.getUrlDecoder().decode(parts[1]), java.nio.charset.StandardCharsets.UTF_8),
+                "the claims keep the order of the map");
+        java.security.Signature verifier = java.security.Signature.getInstance("SHA384withRSA");
+        verifier.initVerify(publicKey());
+        verifier.update((parts[0] + "." + parts[1]).getBytes(java.nio.charset.StandardCharsets.US_ASCII));
+        assertTrue(verifier.verify(java.util.Base64.getUrlDecoder().decode(parts[2])));
+    }
+
+    @Test
     void withoutAHomeApplicationAnAppIdOrAKeyItFailsWithItsOwnException() {
         ApplicationInfo noKey = Mockito.mock(ApplicationInfo.class);
         when(noKey.getAppId()).thenReturn(APP_ID);
