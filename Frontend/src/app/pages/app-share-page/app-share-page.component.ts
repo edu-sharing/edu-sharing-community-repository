@@ -26,7 +26,13 @@ import {
 } from '../../core-module/core.module';
 import { DomSanitizer } from '@angular/platform-browser';
 import { TranslateService } from '@ngx-translate/core';
-import { Node } from 'ngx-edu-sharing-api';
+import {
+    DEFAULT,
+    HOME_REPOSITORY,
+    Node,
+    PROPERTY_FILTER_ALL,
+    SearchService,
+} from 'ngx-edu-sharing-api';
 import { Component } from '@angular/core';
 import { Helper } from '../../core-module/rest/helper';
 import { CordovaService, OnBackBehaviour } from '../../services/cordova.service';
@@ -77,6 +83,7 @@ export class AppSharePageComponent {
         private bridge: BridgeService,
         private nodeHelper: NodeHelperService,
         private mainNav: MainNavService,
+        private searchService: SearchService,
     ) {
         this.mainNav.setMainNavConfig({ title: 'SHARE_APP.TITLE', currentScope: 'app-share' });
         // when the user finished sharing and navigates back he must return to the origin app
@@ -290,17 +297,30 @@ export class AppSharePageComponent {
                 this.description = null;
                 this.collections.reset();
                 this.collections.isLoading = true;
-                this.collectionApi
-                    .search('', {
-                        sortBy: [RestConstants.CM_MODIFIED_DATE],
-                        offset: 0,
-                        count: 50,
-                        sortAscending: false,
+                this.searchService
+                    .requestSearch({
+                        repository: HOME_REPOSITORY,
+                        metadataset: DEFAULT,
+                        query: 'collections',
+                        contentType: 'COLLECTIONS',
+                        propertyFilter: [PROPERTY_FILTER_ALL],
+                        sortProperties: [RestConstants.CM_MODIFIED_DATE],
+                        sortAscending: [false],
+                        skipCount: 0,
+                        maxItems: 50,
+                        // the index holds roles, Coordinator is not resolved into AddChildren
+                        body: {
+                            criteria: [],
+                            permissions: [
+                                RestConstants.PERMISSION_COORDINATOR,
+                                RestConstants.PERMISSION_COLLABORATOR,
+                            ],
+                        },
                     })
                     .subscribe(
                         (data) => {
                             // sharing into a collection needs the right to add to it
-                            const collections = data.collections.filter((collection) =>
+                            const collections = data.nodes.filter((collection) =>
                                 collection.access?.includes(RestConstants.ACCESS_ADD_CHILDREN),
                             );
                             this.collections.setData(collections, data.pagination);
