@@ -46,6 +46,7 @@ import org.alfresco.service.cmr.version.VersionService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
@@ -59,8 +60,12 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.context.ApplicationContext;
 
+import java.io.Serializable;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @JobDescription(description = "refresh the mimetype and preview for a given elastic search filter and optionally the mimetype of the version history")
 public class RefreshMimetypePreviewJob extends AbstractJobMapAnnotationParams {
@@ -171,7 +176,7 @@ public class RefreshMimetypePreviewJob extends AbstractJobMapAnnotationParams {
 							} else if (archive) {
 								// previews are only generated for the workspace store
 								if (skipMimeTypeFix) logger.info("skipping preview generation for archived node:" + nodeRef);
-								else refreshMimetypeMetadataOnly(nodeRef, nodeRef, name, "archived node " + nodeRef);
+								else refreshOriginalMimetype(nodeRef, name, "archived node " + nodeRef);
 							} else if (skipMimeTypeFix) {
 								if (execute) triggerThumbnailAction(nodeRef);
 								else logger.info("protocol mode: would regenerate preview for " + nodeRef);
@@ -205,7 +210,7 @@ public class RefreshMimetypePreviewJob extends AbstractJobMapAnnotationParams {
 	 * (ContentData.hashCode), so the rendering service picks up the node again.
 	 */
 	private void refreshMimetype(NodeRef nodeRef, String name) {
-		if (!refreshMimetypeMetadataOnly(nodeRef, nodeRef, name, "workspace node " + nodeRef)) {
+		if (refreshOriginalMimetype(nodeRef, name, "workspace node " + nodeRef) == null) {
 			return;
 		}
 		if (execute) {
@@ -252,39 +257,87 @@ public class RefreshMimetypePreviewJob extends AbstractJobMapAnnotationParams {
 	 * @param readRef     ref used to read the content
 	 * @param writableRef ref used to write the properties (may differ from readRef for the version store)
 	 * @param label       description of the node for logging
-	 * @return true if the mimetype differs and was (or in protocol mode would be) changed
+	 * @return the new mimetype if it differs and was (or in protocol mode would be) changed, otherwise null
 	 */
-	private boolean refreshMimetypeMetadataOnly(NodeRef readRef, NodeRef writableRef, String name, String label) {
+	private String refreshMimetypeMetadataOnly(NodeRef readRef, NodeRef writableRef, String name, String label) {
 		ContentReader reader = contentService.getReader(readRef, ContentModel.PROP_CONTENT);
 		if (reader == null || !reader.exists()) {
 			logger.warn("no content found for " + label);
-			return false;
+			return null;
 		}
 		String oldMimeType = reader.getMimetype();
 		if (onlyInvalidMimetype && isValidMimetype(oldMimeType)) {
-			return false;
+			return null;
 		}
 
 		String newMimetype = guessMimetype(reader, name);
 		logger.debug(label + (writableRef.equals(readRef) ? "" : " (" + writableRef + ")")
 				+ " oldMimeType:" + oldMimeType + " newMimeType:" + newMimetype);
 		if (newMimetype == null || newMimetype.equals(oldMimeType)) {
-			return false;
+			return null;
 		}
 		if (!execute) {
 			logger.info("protocol mode: would set mimetype " + newMimetype + " (was: " + oldMimeType + ") for " + label);
-			return true;
+			return newMimetype;
 		}
 
 		ContentData contentData = (ContentData) nodeService.getProperty(writableRef, ContentModel.PROP_CONTENT);
 		if (contentData == null) {
 			logger.warn("no content data found on " + writableRef + " (" + label + ")");
-			return false;
+			return null;
 		}
 		logger.info("execute mode: set mimetype " + newMimetype + " (was: " + oldMimeType + ") for " + label);
 		nodeService.setProperty(writableRef, ContentModel.PROP_CONTENT, ContentData.setMimetype(contentData, newMimetype));
 		nodeService.setProperty(writableRef, QName.createQName(CCConstants.LOM_PROP_TECHNICAL_FORMAT), newMimetype);
-		return true;
+		return newMimetype;
+	}
+
+	/**
+	 * fixes the mimetype metadata of an original (workspace or archived) node and syncs the changed
+	 * cclom:format to its collection references. The sync is normally done by
+	 * NodeCustomizationPolicies.onUpdateProperties, which is disabled while this job writes.
+	 *
+	 * @return the new mimetype if it was (or in protocol mode would be) changed, otherwise null
+	 */
+	private String refreshOriginalMimetype(NodeRef nodeRef, String name, String label) {
+		Serializable oldFormat = nodeService.getProperty(nodeRef, QName.createQName(CCConstants.LOM_PROP_TECHNICAL_FORMAT));
+		String newMimetype = refreshMimetypeMetadataOnly(nodeRef, nodeRef, name, label);
+		if (newMimetype != null) {
+			syncCollectionRefs(nodeRef, oldFormat, newMimetype, label);
+		}
+		return newMimetype;
+	}
+
+	/**
+	 * syncs cclom:format to all collection references of the original. Like the policy, a ref is only
+	 * updated when it still has the old value of the original (customized refs are kept).
+	 */
+	private void syncCollectionRefs(NodeRef original, Serializable oldFormat, String newMimetype, String label) {
+		QName formatProp = QName.createQName(CCConstants.LOM_PROP_TECHNICAL_FORMAT);
+		for (NodeRef ref : NodeCustomizationPolicies.fetchCollectionReferencesByCmis(original)) {
+			Serializable refFormat = nodeService.getProperty(ref, formatProp);
+			if (!Objects.equals(Objects.toString(refFormat, null), Objects.toString(oldFormat, null))) {
+				logger.info("skipping customized collection ref " + ref + " (cclom:format: " + refFormat + ") of " + label);
+				continue;
+			}
+			if (!execute) {
+				logger.info("protocol mode: would sync cclom:format " + newMimetype + " (was: " + refFormat + ") to collection ref " + ref + " of " + label);
+				continue;
+			}
+			Map<QName, Serializable> before = new HashMap<>();
+			before.put(formatProp, oldFormat);
+			Map<QName, Serializable> after = new HashMap<>();
+			after.put(formatProp, newMimetype);
+			try {
+				policyBehaviourFilter.disableBehaviour(ref);
+				logger.info("execute mode: sync cclom:format " + newMimetype + " (was: " + refFormat + ") to collection ref " + ref + " of " + label);
+				NodeCustomizationPolicies.syncCollectionRefProps(original, ref, before, after, true, nodeService);
+			} catch (Exception e) {
+				logger.error("error while syncing collection ref " + ref + " of " + label + ": " + e.getMessage(), e);
+			} finally {
+				policyBehaviourFilter.enableBehaviour(ref);
+			}
+		}
 	}
 
 	private String guessMimetype(ContentReader reader, String name) {
