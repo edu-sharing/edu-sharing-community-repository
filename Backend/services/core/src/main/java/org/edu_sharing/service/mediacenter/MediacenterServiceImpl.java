@@ -674,6 +674,7 @@ public class MediacenterServiceImpl implements MediacenterService {
                     policyBehaviourFilter.disableBehaviour(nodeRef);
                     alfPermissionService.deletePermission(nodeRef, mediacenter, CCConstants.PERMISSION_CONSUMER);
                     alfPermissionService.deletePermission(nodeRef, mediacenter, CCConstants.PERMISSION_CC_PUBLISH);
+                    removeTimedPermissions(nodeRef, mediacenter);
                     policyBehaviourFilter.enableBehaviour(nodeRef);
                 }
             }
@@ -786,6 +787,7 @@ public class MediacenterServiceImpl implements MediacenterService {
                         return null;
                     });
                 }
+                removeTimedPermissions(nodeRef, mediacenterProxyName);
 
                 if (!hasPublishPermissionAdmin) {
                     log.info(mediacenterAdminGroup + " add publish permission for " + nodeRef);
@@ -798,6 +800,25 @@ public class MediacenterServiceImpl implements MediacenterService {
 
                 fixMediacenterStatus(nodeRef, mediacenterGroupName, false);
             }
+        }
+    }
+
+    /**
+     * Removes the timed permissions (stored in the timed permission table) of the authority on the node.
+     * The permissions are removed directly in alfresco, so a leftover table row would otherwise be shown as an
+     * active permission although alfresco no longer grants it.
+     */
+    private void removeTimedPermissions(NodeRef nodeRef, String authority) {
+        try {
+            List<ACE> timedAces = Arrays.stream(permissionService.getPermissions(nodeRef.getId()).getAces())
+                    .filter(ace -> authority.equals(ace.getAuthority()) && (ace.getFrom() != null || ace.getTo() != null))
+                    .toList();
+            if (!timedAces.isEmpty()) {
+                log.info("remove {} timed permission(s) of {} for {}", timedAces.size(), authority, nodeRef);
+                permissionService.removePermissions(nodeRef.getId(), timedAces);
+            }
+        } catch (Exception e) {
+            log.error("could not remove timed permissions of {} for {}: {}", authority, nodeRef, e.getMessage(), e);
         }
     }
 
