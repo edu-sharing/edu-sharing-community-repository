@@ -7651,6 +7651,9 @@
           "build": {
             "$ref": "#/components/schemas/VersionBuild"
           },
+          "docker": {
+            "$ref": "#/components/schemas/VersionDocker"
+          },
           "git": {
             "$ref": "#/components/schemas/VersionGit"
           },
@@ -10612,6 +10615,14 @@
       "VersionBuild": {
         "properties": {
           "timestamp": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "VersionDocker": {
+        "properties": {
+          "tag": {
             "type": "string"
           }
         },
