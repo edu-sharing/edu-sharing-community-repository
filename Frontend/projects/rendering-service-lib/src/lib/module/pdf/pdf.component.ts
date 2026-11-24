@@ -15,6 +15,7 @@ import { RenderModule } from '../RenderModule';
 import { Node } from 'ngx-edu-sharing-api';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { TranslateModule } from '@ngx-translate/core';
 import { RenderData } from '../../dto/RenderData';
 import { AssetControllerService, GetAsset$Params } from 'ngx-rendering-service-api';
 import {
@@ -32,7 +33,13 @@ import { NodeHelperService, NodesRightMode } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'rs-module-pdf',
-    imports: [RenderingModule, MatButtonModule, MatIconModule, NgxExtendedPdfViewerModule],
+    imports: [
+        RenderingModule,
+        MatButtonModule,
+        MatIconModule,
+        NgxExtendedPdfViewerModule,
+        TranslateModule,
+    ],
     templateUrl: './pdf.component.html',
     styleUrl: './pdf.component.scss',
 })

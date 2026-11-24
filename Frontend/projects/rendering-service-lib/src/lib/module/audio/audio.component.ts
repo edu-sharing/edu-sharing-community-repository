@@ -11,12 +11,13 @@ import { RenderingModule } from '../../rendering.module';
 import { RenderModule } from '../RenderModule';
 import { Node } from 'ngx-edu-sharing-api';
 import { FormsModule } from '@angular/forms';
+import { TranslateModule } from '@ngx-translate/core';
 import { RenderData, AssetStateItem } from '../../dto/RenderData';
 import { TrackingService } from '../../../tracking.service';
 
 @Component({
     selector: 'rs-module-audio',
-    imports: [RenderingModule, FormsModule],
+    imports: [RenderingModule, FormsModule, TranslateModule],
     templateUrl: './audio.component.html',
     styleUrl: './audio.component.scss',
 })

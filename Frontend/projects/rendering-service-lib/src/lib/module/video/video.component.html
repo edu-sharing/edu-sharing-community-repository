@@ -1,6 +1,11 @@
 @if (activeObject()) {
 <div class="video-wrapper">
-  <video controls #video (play)="onVideoPlay()">
+  <video
+    controls
+    #video
+    [attr.aria-label]="'RENDERING.VIDEO_PLAYER' | translate : { title: node?.title || node?.name }"
+    (play)="onVideoPlay()"
+  >
     <source [src]="activeObject()?.link | rsAssetLink" />
   </video>
   @if (hasMultipleResolutions) {

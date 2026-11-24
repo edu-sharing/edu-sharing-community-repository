@@ -1,6 +1,11 @@
 @if (activeObject()) {
 <div class="audio-wrapper">
-  <video [poster]="previewUrl" controls (play)="onVideoPlay()">
+  <video
+    [poster]="previewUrl"
+    controls
+    [attr.aria-label]="'RENDERING.AUDIO_PLAYER' | translate : { title: node?.title || node?.name }"
+    (play)="onVideoPlay()"
+  >
     <source [src]="activeObject()?.link | rsAssetLink" />
   </video>
 </div>
