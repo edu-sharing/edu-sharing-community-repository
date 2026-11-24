@@ -140,9 +140,13 @@
                 <i esIcon="arrow_forward"></i>
               </a>
               } @if (collection) { @if (!isRootLevelCollection() && !isLoading) {
+              <!-- es-breadcrumbs is a named navigation landmark itself; only a custom template
+                   needs the wrapper as landmark, otherwise the landmarks would be nested -->
               <div
-                role="navigation"
-                [attr.aria-label]="'NAV.COLLECTIONS' | translate"
+                [attr.role]="customTemplates.value.breadcrumbs ? 'navigation' : null"
+                [attr.aria-label]="
+                  customTemplates.value.breadcrumbs ? ('NAV.COLLECTIONS' | translate) : null
+                "
                 class="breadcrumb-space"
               >
                 @if (customTemplates.value.breadcrumbs) {
@@ -150,6 +154,7 @@
                 } @else {
                 <es-breadcrumbs
                   class="collections-breadcrumb"
+                  navLabel="NAV.COLLECTIONS"
                   [home]="'COLLECTIONS.TAB.' + tabSelected"
                   [showLanding]="true"
                   [homeRouterLink]="{

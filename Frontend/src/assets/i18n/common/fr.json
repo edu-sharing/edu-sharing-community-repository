@@ -1276,6 +1276,7 @@
     "TITLE": "Chat"
   },
   "NAV": {
+    "BREADCRUMBS": "Fil d'Ariane",
     "MAIN": "principal",
     "SKIP": "sauter",
     "COLLECTIONS": "collections"

@@ -1411,6 +1411,7 @@
     "TITLE": "Chat"
   },
   "NAV": {
+    "BREADCRUMBS": "Breadcrumb navigation",
     "MAIN": "main",
     "SKIP": "skip",
     "COLLECTIONS": "collections",

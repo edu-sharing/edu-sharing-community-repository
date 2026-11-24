@@ -1628,6 +1628,7 @@
     }
   },
   "NAV": {
+    "BREADCRUMBS": "Brotkrumennavigation",
     "MAIN": "Hauptmenü",
     "SKIP": "Sprungmarken",
     "COLLECTIONS": "Sammlungshierarchie",

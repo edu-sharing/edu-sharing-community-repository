@@ -1276,6 +1276,7 @@
     "TITLE": "Chat"
   },
   "NAV": {
+    "BREADCRUMBS": "Percorso di navigazione",
     "MAIN": "principale",
     "SKIP": "saltare",
     "COLLECTIONS": "collezioni"
