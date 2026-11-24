@@ -256,7 +256,6 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
         policyComponent.bindClassBehaviour(OnContentUpdatePolicy.QNAME, QName.createQName(CCConstants.CCM_TYPE_IO), new JavaBehaviour(this, "onContentUpdate"));
 
         // update the cache for changed previews for folders or collections
-        policyComponent.bindClassBehaviour(OnContentUpdatePolicy.QNAME, CCConstants.CCM_PROP_MAP_ICON, new JavaBehaviour(this, "onContentUpdate"));
         policyComponent.bindClassBehaviour(OnContentUpdatePolicy.QNAME, QName.createQName(CCConstants.CCM_TYPE_MAP), new JavaBehaviour(this, "onContentUpdate"));
 
         //for async changed properties refresh node in cache
@@ -287,7 +286,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
     @Override
     public void onContentUpdate(NodeRef nodeRef, boolean newContent) {
 
-        logger.debug("nodeRef:" + nodeRef.getId());
+        logger.debug("ocu nodeRef:" + nodeRef.getId());
 
         if (QName.createQName(CCConstants.CCM_TYPE_IO).equals(nodeService.getType(nodeRef))) {
 
