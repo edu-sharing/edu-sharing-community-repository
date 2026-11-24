@@ -11,11 +11,11 @@
       <es-node-url [node]="node" [mode]="'link'">
         <ng-container *ngTemplateOutlet="nodeTitle; context: { node }"></ng-container>
       </es-node-url>
-      } @if (!last || pageVariantConfigNodes().length || templateSwitchable()) {
+      } @if (!last || variantSwitcherVisible()) {
       <i esIcon="chevron_right"></i>
       }
     </li>
-    } @if (pageVariantConfigNodes().length || templateSwitchable()) {
+    } @if (variantSwitcherVisible()) {
     <li class="es-topic-page-breadcrumb-list-item">
       <mat-form-field class="select-config-field" appearance="outline" subscriptSizing="dynamic">
         <mat-label>

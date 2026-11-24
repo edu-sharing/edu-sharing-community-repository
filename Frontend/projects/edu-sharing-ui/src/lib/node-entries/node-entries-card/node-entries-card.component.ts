@@ -104,6 +104,28 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnIn
         }
     }
 
+    /**
+     * Clicks on the metadata values, which sit above the title button's stretched click area so
+     * their tooltips stay reachable. Clicks on the button itself are handled by the button.
+     */
+    onBodyClick(event: MouseEvent, kind: 'click' | 'dblclick') {
+        const target = event.target as HTMLElement;
+        if (target.closest('.card-body-action')) {
+            return;
+        }
+        if (kind === 'click') {
+            this.entriesService.onClicked({
+                event,
+                element: this.node,
+                source: ClickSource.Metadata,
+            });
+        } else {
+            this.entriesService.dblClickItem.emit({
+                element: this.node,
+                source: ClickSource.Metadata,
+            });
+        }
+    }
     getVisibleColumns() {
         return this.entriesService.columns?.filter((c) => c.visible);
     }

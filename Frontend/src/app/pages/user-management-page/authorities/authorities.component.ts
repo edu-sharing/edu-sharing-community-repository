@@ -13,7 +13,6 @@ import {
     ViewChild,
     inject,
 } from '@angular/core';
-import { ConnectedPosition } from '@angular/cdk/overlay';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import {
@@ -243,16 +242,6 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     selectedItems: GenericAuthority[] = [];
     /** Whether the selected-nodes overlay above the selection footer is open. */
     selectionOverlayOpen = false;
-    /** Open the selection overlay upward (its bottom edge aligned to the footer's top edge). */
-    readonly overlayPositions: ConnectedPosition[] = [
-        {
-            originX: 'start',
-            originY: 'top',
-            overlayX: 'start',
-            overlayY: 'bottom',
-            offsetY: 0,
-        },
-    ];
 
     @Input() set org(org: Organization) {
         this._org = org;

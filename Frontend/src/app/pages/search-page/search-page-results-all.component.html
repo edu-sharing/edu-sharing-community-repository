@@ -35,6 +35,7 @@ own OptionsHelperService instance and take exclusive control of the actionbar. -
   [gridConfig]="{ layout: 'scroll' }"
   [checkbox]="false"
   [initConfig]="{ customOptions: addToCollectionMode.value?.customOptions }"
+  primaryActionLabel="OPEN_PREVIEW_FOR"
   (clickItem)="onClick(wrapper, $event)"
   (dblClickItem)="onDblClick($event.element)"
 >

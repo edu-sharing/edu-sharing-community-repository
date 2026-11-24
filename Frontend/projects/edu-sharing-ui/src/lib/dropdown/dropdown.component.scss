@@ -8,6 +8,11 @@
     &.warn:not(:disabled) > span {
         color: var(--warn);
     }
+    // highlighted (hover / keyboard) entries sit on --listItemSelectedBackground, on which the
+    // primary text color can fall below 4.5:1
+    &:not(:disabled):not(.warn):is(:hover, .cdk-focused) > span {
+        color: var(--itemSelectedTextColor);
+    }
     display: flex;
     align-items: center;
     > i {

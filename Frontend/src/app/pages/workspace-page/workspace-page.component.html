@@ -157,96 +157,25 @@
 
       <!-- Full-width selection bar; mirrors the search/collections selection layout. Without a
         selection it stays visible while the clipboard has content, to offer "paste". -->
-      <div
-        class="selection-action-bar"
-        cdkOverlayOrigin
-        #selectionBar="cdkOverlayOrigin"
+      <es-selection-bar
         [class.visible]="selection.length || showClipboardBar()"
+        [nodes]="selection.length ? selection : clipboard()?.nodes || []"
+        [columns]="selectionColumns"
+        [displayType]="selectionDisplayType"
+        [countLabel]="selection.length ? 'SEARCH.N_SELECTED' : 'SEARCH.N_IN_CLIPBOARD'"
+        [clearLabel]="selection.length ? 'SEARCH.CLEAR_SELECTION' : 'SEARCH.CLEAR_CLIPBOARD'"
+        [panelLabel]="selection.length ? 'SEARCH.SELECTION_PANEL' : 'SEARCH.CLIPBOARD_PANEL'"
+        [open]="selection.length ? selectionOverlayOpen : clipboardOverlayOpen"
+        (openChange)="setBarPanelOpen($event)"
+        (clear)="selection.length ? clearSelection() : clearClipboard()"
+        (deselect)="selection.length ? deselectNode($event) : removeFromClipboard($event)"
       >
-        @if (selection.length) {
-        <button
-          mat-icon-button
-          class="clear-selection"
-          (click)="clearSelection()"
-          [attr.aria-label]="'SEARCH.CLEAR_SELECTION' | translate"
-          matTooltip="{{ 'SEARCH.CLEAR_SELECTION' | translate }}"
-        >
-          <i esIcon="close"></i>
-        </button>
-        <button
-          mat-button
-          color="primary"
-          class="count"
-          aria-haspopup="dialog"
-          [attr.aria-expanded]="!!selectionOverlayOpen"
-          (click)="selectionOverlayOpen = !selectionOverlayOpen"
-        >
-          {{ 'SEARCH.N_SELECTED' | translate : { count: selection.length || 0 } }}
-          <i [esIcon]="selectionOverlayOpen ? 'expand_more' : 'expand_less'"></i>
-        </button>
-        } @else {
-        <button
-          mat-icon-button
-          class="clear-selection"
-          (click)="clearClipboard()"
-          [attr.aria-label]="'SEARCH.CLEAR_CLIPBOARD' | translate"
-          matTooltip="{{ 'SEARCH.CLEAR_CLIPBOARD' | translate }}"
-        >
-          <i esIcon="close"></i>
-        </button>
-        <button
-          mat-button
-          color="primary"
-          class="count"
-          aria-haspopup="dialog"
-          [attr.aria-expanded]="!!clipboardOverlayOpen"
-          (click)="clipboardOverlayOpen = !clipboardOverlayOpen"
-        >
-          {{ 'SEARCH.N_IN_CLIPBOARD' | translate : { count: clipboard()?.nodes?.length || 0 } }}
-          <i [esIcon]="clipboardOverlayOpen ? 'expand_more' : 'expand_less'"></i>
-        </button>
-        }
         <es-actionbar
           #selectionActionbarRef
           [showToggleOptions]="false"
           showCaptions="ifRoom"
         ></es-actionbar>
-      </div>
-
-      <ng-template
-        cdkConnectedOverlay
-        [cdkConnectedOverlayOrigin]="selectionBar"
-        [cdkConnectedOverlayOpen]="selectionOverlayOpen && !!selection.length"
-        [cdkConnectedOverlayPositions]="overlayPositions"
-        [cdkConnectedOverlayWidth]="selectionBar.elementRef.nativeElement.offsetWidth"
-        [cdkConnectedOverlayHasBackdrop]="false"
-        (overlayOutsideClick)="selectionOverlayOpen = false"
-      >
-        <es-search-selection-overlay
-          [nodes]="selection"
-          [columns]="selectionColumns"
-          [displayType]="selectionDisplayType"
-          (deselect)="deselectNode($event)"
-        ></es-search-selection-overlay>
-      </ng-template>
-      <!-- clipboard counterpart of the selection overlay; removing a node takes it off the
-        clipboard -->
-      <ng-template
-        cdkConnectedOverlay
-        [cdkConnectedOverlayOrigin]="selectionBar"
-        [cdkConnectedOverlayOpen]="clipboardOverlayOpen && !selection.length && showClipboardBar()"
-        [cdkConnectedOverlayPositions]="overlayPositions"
-        [cdkConnectedOverlayWidth]="selectionBar.elementRef.nativeElement.offsetWidth"
-        [cdkConnectedOverlayHasBackdrop]="false"
-        (overlayOutsideClick)="clipboardOverlayOpen = false"
-      >
-        <es-search-selection-overlay
-          [nodes]="clipboard()?.nodes || []"
-          [columns]="selectionColumns"
-          [displayType]="selectionDisplayType"
-          (deselect)="removeFromClipboard($event)"
-        ></es-search-selection-overlay>
-      </ng-template>
+      </es-selection-bar>
     </div>
   </mat-sidenav-content>
 </mat-sidenav-container>

@@ -121,6 +121,8 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
     displayType: NodeEntriesDisplayType;
     selection = new CustomSelectionModel<T>(true, []);
     elementInteractionType: InteractionType;
+    /** See `NodeEntriesWrapperComponent.primaryActionLabel`. */
+    primaryActionLabel: string | null = null;
     options$ = new BehaviorSubject<ListOptions>(null);
     get options() {
         return this.options$.value;
@@ -190,6 +192,23 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
         } else {
             this.clickItem.emit({ ...data, ctrlKey: event.ctrlKey || event.metaKey });
         }
+    }
+
+    /**
+     * `primaryActionLabel` for the entry, or `null` (title only) for collections and folders and
+     * outside `InteractionType.Emitter`, where activating an entry does not run the host's action.
+     */
+    getPrimaryActionLabel(entry: T): string | null {
+        const mediatype = (entry as Node)?.mediatype;
+        if (
+            !this.primaryActionLabel ||
+            this.elementInteractionType !== InteractionType.Emitter ||
+            !mediatype ||
+            ['collection', 'folder'].includes(mediatype)
+        ) {
+            return null;
+        }
+        return this.primaryActionLabel;
     }
 
     onCheckboxChanged(node: T, checked: boolean) {

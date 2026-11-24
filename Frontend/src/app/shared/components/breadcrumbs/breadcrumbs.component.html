@@ -1,4 +1,4 @@
-<nav aria-label="breadcrumbs" class="breadcrumbs-wrapper">
+<nav [attr.aria-label]="navLabel | translate" class="breadcrumbs-wrapper">
   @if (clickable) {
   <!-- Full (not short) breadcrumbs -->
   <div class="breadcrumb breadcrumb-full" role="list">

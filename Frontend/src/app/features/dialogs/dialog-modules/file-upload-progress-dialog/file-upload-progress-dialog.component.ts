@@ -268,8 +268,9 @@ export class FileUploadProgressDialogComponent implements OnInit {
                 { label: 'WORKSPACE.UPLOAD_EXISTS.UPLOAD', config: { color: 'primary' } },
             ],
         });
-        const result = await dialogRef.afterClosed().toPromise();
-        if (result === 'CANCEL') {
+        const result = await firstValueFrom(dialogRef.afterClosed());
+        // closing the dialog with (x) or escape yields no result and cancels as well
+        if (!result || result === 'CANCEL') {
             return 'cancel';
         }
         return this.keep ? 'keep' : 'overwrite';

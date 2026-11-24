@@ -29,13 +29,12 @@ import { GlobalSearchPageServiceInternal } from './global-search-page.service';
 import { Subject } from 'rxjs';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { TranslateService } from '@ngx-translate/core';
-import { distinctUntilChanged, skip, switchMap, takeUntil } from 'rxjs/operators';
+import { distinctUntilChanged, filter, skip, switchMap, takeUntil } from 'rxjs/operators';
 import { FrameEventsService } from '../../core-module/rest/services/frame-events.service';
 import { Values } from '../../features/mds/types/types';
 import { ConfigService, Node } from 'ngx-edu-sharing-api';
 import { EditorialSidebarService } from '../../features/editorial-sidebar/editorial-sidebar.service';
 import { SelectionChange } from '@angular/cdk/collections';
-import { ConnectedPosition } from '@angular/cdk/overlay';
 import { Sort } from '@angular/material/sort';
 
 export type SearchFilter = {
@@ -118,18 +117,8 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
      */
     readonly materialOptions = this.searchPage.getCustomMaterialOptions;
 
-    /** Whether the selected-nodes overlay above the selection bar is open. */
+    /** Whether the panel listing the selected nodes above the selection bar is open. */
     selectionOverlayOpen = false;
-    /** Open the selection overlay upward (its bottom edge aligned to the bar's top edge). */
-    readonly overlayPositions: ConnectedPosition[] = [
-        {
-            originX: 'start',
-            originY: 'top',
-            overlayX: 'start',
-            overlayY: 'bottom',
-            offsetY: 0,
-        },
-    ];
 
     constructor() {
         const results = this.results;
@@ -139,6 +128,9 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
         results.diffCount
             .pipe(
                 takeUntil(this.destroyed), // FIXME: replace with takeUntilDestroyed in Angular 16+
+                // The data source re-emits unchanged data, e.g. on selection changes; only actual
+                // additions are worth announcing.
+                filter((newlyLoadedElements) => newlyLoadedElements > 0),
                 switchMap((newlyLoadedElements) =>
                     this.translate.get('SEARCH.LOADED_RESULTS', { count: newlyLoadedElements }),
                 ),

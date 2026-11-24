@@ -425,8 +425,32 @@ body {
         }
     }
 }
-.mat-mdc-checkbox.cdk-keyboard-focused .mat-focus-indicator {
+// Keyboard focus ring around the checkbox. MDC checkboxes do not get the `cdk-keyboard-focused`
+// class, so the ring follows `:focus-visible` of the native input (a sibling of the indicator).
+.mat-mdc-checkbox.cdk-keyboard-focused .mat-focus-indicator,
+.mat-mdc-checkbox .mdc-checkbox__native-control:focus-visible ~ .mat-focus-indicator {
     @include setGlobalKeyboardFocus();
+}
+// Keyboard focus ring for expansion panel headers and tabs, whose own focus state is only a faint
+// background. Drawn inside the element, since panels and tab bars clip overflowing content.
+// `:focus` outweighs Material's `.mat-expansion-panel-header:focus { outline: none }`.
+.mat-expansion-panel-header.cdk-keyboard-focused:focus,
+.mat-mdc-tab.cdk-keyboard-focused:focus,
+.mat-mdc-tab-link.cdk-keyboard-focused:focus {
+    @include setGlobalKeyboardFocus();
+    outline-offset: calc(-1 * var(--focusWidth));
+}
+// Keyboard focus ring around a chip while its main action, or a link or button inside it, has
+// focus; the chip's own focus state is only a faint overlay. The ring replaces the inner element's
+// own ring. A focused trailing action (e.g. remove) keeps its own indication.
+.mat-mdc-chip:has(
+        .mdc-evolution-chip__action--primary:focus-visible,
+        .mdc-evolution-chip__action--primary :focus-visible
+    ) {
+    @include setGlobalKeyboardFocus();
+    .mdc-evolution-chip__action--primary :focus-visible {
+        outline: none;
+    }
 }
 .mat-mdc-raised-button {
     &:not(.mat-primary) {

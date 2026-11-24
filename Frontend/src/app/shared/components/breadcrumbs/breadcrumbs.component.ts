@@ -46,6 +46,10 @@ export class BreadcrumbsComponent {
      */
     @Input() invisibleDescription = false;
     /**
+     * Translation key of the accessible name of the navigation landmark.
+     */
+    @Input() navLabel = 'NAV.BREADCRUMBS';
+    /**
      * The path to give to `routerLink` on the home element.
      *
      * If not given, clicks will be emitted via the `onClick` output.

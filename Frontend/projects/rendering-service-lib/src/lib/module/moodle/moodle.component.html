@@ -1,4 +1,10 @@
-@if (data?.items !== undefined) {
+@if (isWebComponent) {
+<div class="moodle-wrapper">
+  @if (previewUrl) {
+  <img [src]="previewUrl" alt="" />
+  }
+</div>
+} @else if (data?.items !== undefined) {
 <div class="moodle-wrapper">
   @if (showIframe) {
   <iframe [title]="node?.title ?? 'Moodle'" class="frame" [src]="sanitizedUrl"></iframe>

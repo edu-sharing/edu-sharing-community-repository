@@ -10,6 +10,12 @@ public class RepositoryVersionInfo implements Serializable {
 
     public VersionBuild build;
 
+    public VersionDocker docker;
+
+    public static class VersionDocker implements Serializable {
+        public String tag;
+    }
+
     public static class VersionBuild implements Serializable {
         public String timestamp;
     }

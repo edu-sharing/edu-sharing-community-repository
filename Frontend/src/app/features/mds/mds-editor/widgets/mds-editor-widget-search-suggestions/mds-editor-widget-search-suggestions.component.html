@@ -6,24 +6,26 @@
   [wrapInGroup]="false"
   [injectedView]="this"
 >
-  <mat-chip-listbox
-    #chipList
-    [attr.aria-labelledby]="container.labelId"
-    [attr.aria-describedby]="container.descriptionId"
-  >
-    @for (suggestion of suggestions; track suggestion) {
-    <mat-chip-option
-      class="filter-chip-{{ widget.definition.id | propertySlug }}"
-      [selectable]="false"
-      (click)="add(suggestion)"
-      (keydown.enter)="add(suggestion)"
-      [matTooltip]="getTooltip(suggestion)"
-      matTooltipPosition="above"
-    >
-      <span class="caption">{{ suggestion.label }}</span>
-      <!-- <span class="count">({{ value.count }})</span> -->
-    </mat-chip-option>
+  <!-- Each suggestion is a button that adds it as filter; the list is named by the category label. -->
+  <ul class="suggestion-list" [attr.aria-labelledby]="container.labelId">
+    @for (suggestion of suggestions; track suggestion.value) {
+    <li>
+      <button
+        #suggestionButton
+        type="button"
+        class="suggestion-button filter-chip-{{ widget.definition.id | propertySlug }}"
+        [attr.aria-label]="
+          (widget.definition.caption ? 'SEARCH.ADD_FILTER' : 'SEARCH.ADD_FILTER_VALUE')
+            | translate : { property: widget.definition.caption, value: suggestion.label }
+        "
+        (click)="add(suggestion)"
+        [matTooltip]="getTooltip(suggestion)"
+        matTooltipPosition="above"
+      >
+        {{ suggestion.label }}
+      </button>
+    </li>
     }
-  </mat-chip-listbox>
+  </ul>
 </es-mds-editor-widget-container>
 }

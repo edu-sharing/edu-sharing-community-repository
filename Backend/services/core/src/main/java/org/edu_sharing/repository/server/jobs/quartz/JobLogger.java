@@ -37,6 +37,7 @@ public class JobLogger extends AbstractAppender {
         IGNORABLE_JOBS.add(TimedPermissionJob.class.getName());
         IGNORABLE_JOBS.add(DataProtectionExportJob.class.getName());
         IGNORABLE_JOBS.add(LTISessionObjectCleanupJob.class.getName());
+        IGNORABLE_JOBS.add(StatusReportJob.class.getName());
         IGNORABLE_JOBS.add("org.edu_sharing.repository.server.jobs.quartz.ClusterInfoJob");
     }
 

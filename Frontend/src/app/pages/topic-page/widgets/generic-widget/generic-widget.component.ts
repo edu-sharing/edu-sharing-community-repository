@@ -178,11 +178,14 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     headlineLoading: WritableSignal<boolean> = signal(false);
     // the AI config whose texts the widget shows; results of another config are dropped
     private appliedAiConfig: BapiConfigObject = null;
-    // settles once the AI texts of the current config are applied; saves wait for it, as a
-    // headline or description only counts as a prompt after its result has arrived
+    // settles once the AI texts of the current config are applied; saves outside the editor wait
+    // for it, as there a headline or description only holds its prompt after the result arrived
     private aiTextsApplied: Promise<void> = Promise.resolve();
     initialized: WritableSignal<boolean> = signal(false);
     private readonly persistConfigTrigger$: Subject<void> = new Subject<void>();
+    // the save currently running and whether another one was requested meanwhile
+    private persistRun: Promise<void> | null = null;
+    private persistRequested: boolean = false;
     rendering2Supported: WritableSignal<boolean> = signal(false);
     // whether embedding widgets as web components is enabled in the repository backend config
     private webComponentsEnabled: boolean = false;
@@ -310,21 +313,56 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     }
 
     /**
-     * Persists the currently defined config.
+     * Persists the currently defined config. Saves run one after another; requests arriving while
+     * one runs are merged into a single follow-up save of the then current state.
      */
-    async persistConfig(): Promise<void> {
+    persistConfig(): Promise<void> {
+        this.persistRequested = true;
+        if (!this.persistRun) {
+            this.persistRun = this.runRequestedPersists();
+        }
+        return this.persistRun;
+    }
+
+    /**
+     * Saves the config until no further save was requested in the meantime.
+     */
+    private async runRequestedPersists(): Promise<void> {
         this.updateInProgress.set(true);
         this.widgetInstance.updateInProgress.set(true);
-        await this.aiTextsApplied;
+        try {
+            while (this.persistRequested) {
+                this.persistRequested = false;
+                await this.writeConfig();
+            }
+        } finally {
+            this.persistRun = null;
+            this.updateInProgress.set(false);
+            this.widgetInstance.updateInProgress.set(false);
+        }
+    }
+
+    /**
+     * Writes the current config to the widget node and applies the stored state, unless a newer
+     * local change is about to be saved.
+     */
+    private async writeConfig(): Promise<void> {
+        // outside the editor an AI text is empty until its result arrives, so it has to be awaited
+        if (!this.editMode()) {
+            await this.aiTextsApplied;
+        }
         // retrieve the individual widget config
         let baseConfig: BaseWidgetConfig = this.retrieveBaseWidgetConfig();
         let specificWidgetConfig: WidgetConfig = this.widgetInstance.retrieveWidgetConfig
             ? this.widgetInstance.retrieveWidgetConfig()
             : {};
         let widgetConfig: WidgetConfig = { ...baseConfig, ...specificWidgetConfig };
-        // retrieve an AI config object if either the description or the headline contains AI tags
-        const aiDescription: string = this.descriptionAiGenerated() ? this.description : '';
-        const aiHeadline: string = this.headlineAiGenerated() ? this.headline : '';
+        // retrieve an AI config object if either the description or the headline contains AI tags;
+        // in the editor a text still being generated already holds its prompt
+        const aiDescription: string =
+            this.descriptionAiGenerated() || this.descriptionLoading() ? this.description : '';
+        const aiHeadline: string =
+            this.headlineAiGenerated() || this.headlineLoading() ? this.headline : '';
         let keyValue;
         if (this.widgetInstance.retrieveCustomAiKeyValuePairs) {
             keyValue = this.widgetInstance.retrieveCustomAiKeyValuePairs();
@@ -348,7 +386,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
         );
         // this is the case for updated nodes
         // as those do already exist, the properties need to be synchronized
-        if (this.widgetNode) {
+        if (this.widgetNode && !this.persistRequested) {
             // retrieve both the widget and the AI config from the node and update the values in the widget
             widgetConfig = retrieveWidgetConfigFromNode(this.widgetNode);
             aiConfig = retrieveAiConfigFromNode(this.widgetNode);
@@ -361,10 +399,19 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
                     await result;
                 }
             }
-            await this.updateCommonProperties(widgetConfig, aiConfig);
+            // unchanged prompts keep their generated texts instead of being generated again; the
+            // generation is not awaited, so it does not hold back the next save
+            if (!this.isAppliedAiConfig(aiConfig)) {
+                void this.updateCommonProperties(widgetConfig, aiConfig);
+            }
         }
-        this.updateInProgress.set(false);
-        this.widgetInstance.updateInProgress.set(false);
+    }
+
+    /**
+     * Whether the given AI config matches the one whose texts are currently applied.
+     */
+    private isAppliedAiConfig(aiConfig: BapiConfigObject): boolean {
+        return JSON.stringify(aiConfig ?? {}) === JSON.stringify(this.appliedAiConfig ?? {});
     }
 
     /**

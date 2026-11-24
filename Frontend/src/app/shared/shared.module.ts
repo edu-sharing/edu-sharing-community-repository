@@ -68,6 +68,7 @@ import { VersionLabelPipe } from './pipes/version-label.pipe';
 import { SmallCollectionComponent } from './components/small-collection/small-collection.component';
 import { ImprintPrivacyComponent } from './components/imprint-privacy-footer/imprint-privacy.component';
 import { SearchSelectionOverlayComponent } from './components/selection-overlay/search-selection-overlay.component';
+import { SelectionBarComponent } from './components/selection-overlay/selection-bar.component';
 import { extensionSchemas } from '../extension/extension-schemas';
 import { extensionUiProviders } from '../extension/extension-ui-providers';
 
@@ -97,6 +98,7 @@ import { extensionUiProviders } from '../extension/extension-ui-providers';
         PoweredByComponent,
         RegisterCustomPropertyDirective,
         SearchSelectionOverlayComponent,
+        SelectionBarComponent,
         SkipTargetDirective,
         SmallCollectionComponent,
         SplitNewLinesPipe,
@@ -198,6 +200,7 @@ import { extensionUiProviders } from '../extension/extension-ui-providers';
         RegisterCustomPropertyDirective,
         RouterModule,
         SearchSelectionOverlayComponent,
+        SelectionBarComponent,
         SkipTargetDirective,
         SmallCollectionComponent,
         SplitNewLinesPipe,

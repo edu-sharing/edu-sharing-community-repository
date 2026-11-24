@@ -258,6 +258,7 @@
   "LIST_TABLE": {
     "DUMMY_ICON_LABEL": "Type de fichier",
     "TOGGLE_ALL": "Sélectionner tous/aucun",
+    "COLUMN_SELECT": "Sélection",
     "CONFIGURE_COLUMNS": "Configurer les colonnes"
   },
   "NODE": {
@@ -890,6 +891,7 @@
     }
   },
   "SHARE_APP": {
+    "TITLE": "Partager",
     "TEXT_SNIPPET": "Note",
     "IMAGE": "Image",
     "WILL_BE_SAVED_AT": "Sera stocké à l'adresse suivante",
@@ -1274,6 +1276,7 @@
     "TITLE": "Chat"
   },
   "NAV": {
+    "BREADCRUMBS": "Fil d'Ariane",
     "MAIN": "principal",
     "SKIP": "sauter",
     "COLLECTIONS": "collections"
@@ -1309,6 +1312,7 @@
   "PUBLISHED_COPY_TOOLTIP": "Exemplaire publié",
   "CHILDOBJECT_COUNT": "Éléments {{count}} (séquence)",
   "OPTIONS_FOR": "Actions pour {{element}}",
+  "OPEN_PREVIEW_FOR": "Ouvrir l'aperçu : {{element}}",
   "NO_AVAILABLE_OPTIONS": "Aucune action n'est disponible pour les éléments sélectionnés",
   "NODE_SEARCH_SELECTOR": {
     "MORE_FILTERS": "Filtres de recherche étendus",
@@ -1577,6 +1581,9 @@
     "FULLSCREEN": "Plein écran",
     "EXIT_FULLSCREEN": "Quitter le plein écran",
     "VIDEO_RESOLUTION": "Résolution vidéo",
+    "AUDIO_PLAYER": "Lecteur audio : {{title}}",
+    "VIDEO_PLAYER": "Lecteur vidéo : {{title}}",
+    "PDF_VIEWER": "Visionneuse PDF : {{title}}",
     "LINK_TO_OBJECT": "Lien vers l'objet",
     "LINK_NAME_TITLE": "{{label}} – {{title}}",
     "LINK_NAME_TITLE_NEW_WINDOW": "{{label}} – {{title}}, s'ouvre dans une nouvelle fenêtre",

@@ -1,5 +1,10 @@
 @if (fileData !== undefined) {
-<div class="pdf-wrapper" [class.hide-all]="restrictedView">
+<div
+  class="pdf-wrapper"
+  [class.hide-all]="restrictedView"
+  role="region"
+  [attr.aria-label]="'RENDERING.PDF_VIEWER' | translate : { title: node?.title || node?.name }"
+>
   <ngx-extended-pdf-viewer
     [src]="fileData"
     [theme]="isDarkTheme() ? 'dark' : 'light'"

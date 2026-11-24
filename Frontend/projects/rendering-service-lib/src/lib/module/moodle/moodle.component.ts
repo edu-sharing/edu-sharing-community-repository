@@ -33,6 +33,13 @@ export class MoodleComponent implements RenderModule, OnInit {
     ngOnInit() {
         // Not keyed off items[0].link any more: the backend only builds the forward link the
         // frontend is going to use, so in link-only mode there is no iframe url at all.
+        this.previewUrl = this.node?.preview?.url ?? '';
+        // Embedded as a web component the module is only a teaser: preview image only, no course
+        // frame and no forward link.
+        if (this.isWebComponent) {
+            this.showIframe = false;
+            return;
+        }
         const item = this.data?.items?.[0];
         if (!item) {
             return;
@@ -40,11 +47,9 @@ export class MoodleComponent implements RenderModule, OnInit {
         // Configured per repository as a Moodle module credential and normalized to "true"/"false"
         // by the backend. Compared against 'false' rather than 'true' so that a backend which does
         // not send it at all keeps the previous behaviour: the embedded course.
-        this.showIframe =
-            !this.isWebComponent && item.additionalData?.['showPreviewIframe'] !== 'false';
+        this.showIframe = item.additionalData?.['showPreviewIframe'] !== 'false';
         this.sanitizedUrl = this.getSafeUri();
         this.sanitizedLinkUrl = this.getSafeLinkUri();
-        this.previewUrl = this.node?.preview?.url ?? '';
         // A frame without a src would leave an empty box - fall back to the preview image instead.
         this.showIframe = this.showIframe && this.sanitizedUrl !== null;
     }

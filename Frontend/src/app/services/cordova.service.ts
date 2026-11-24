@@ -537,6 +537,8 @@ export class CordovaService {
     }
 
     restartCordova(parameters = ''): void {
+        // the page keeps running until the app leaves it and must not sign in again meanwhile
+        this.oauth = null;
         this.setPermanentStorage(CordovaService.CORDOVA_STORAGE_OAUTHTOKENS, null);
         if (parameters) parameters = '&' + parameters;
         if (navigator.userAgent.includes('ionic / edu-sharing-app')) {

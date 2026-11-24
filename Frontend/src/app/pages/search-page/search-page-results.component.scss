@@ -56,34 +56,6 @@ es-node-entries-wrapper {
     width: 100%;
 }
 
-// Static footer of the results view (sibling of .results-scroll), so the scrollbar ends above it.
-// The .main-content card's `overflow: hidden` rounds its bottom corners.
-.selection-action-bar {
-    display: none;
-    flex-shrink: 0;
-    align-items: center;
-    gap: 10px;
-    min-height: vars.$secondaryBarHeight;
-    padding: 0 25px;
-    background-color: var(--roundedContainerBackground);
-    @include mixins.materialShadowTop();
-    // paint the shadow above the scrolled content
-    position: relative;
-    z-index: 1;
-
-    es-actionbar {
-        padding-left: 10px;
-    }
-    &.visible {
-        display: flex;
-    }
-
-    .count {
-        font-weight: 500;
-        white-space: nowrap;
-    }
-}
-
 .filters-button {
     @media (max-width: 600px) {
         min-width: 0;

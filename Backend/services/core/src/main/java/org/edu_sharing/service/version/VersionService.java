@@ -173,20 +173,31 @@ public class VersionService implements ApplicationListener<RefreshScopeRefreshed
         return version.major + "." + version.minor;
     }
 
+    private static final String VERSION_FILES_DEFAULTS = "config/defaults/*-version.json";
+    private static final String VERSION_FILES_PLUGINS = "config/plugins/**/version.json";
+
     public Map<String, RepositoryVersionInfo> getRepositoryVersionInfo() throws IOException {
+        Map<String, RepositoryVersionInfo> versions = readVersionInfos(VERSION_FILES_DEFAULTS);
+        versions.putAll(readVersionInfos(VERSION_FILES_PLUGINS));
+        return versions;
+    }
 
+    /**
+     * @return only the version infos of the installed plugins (config/plugins), a subset of {@link #getRepositoryVersionInfo()}
+     */
+    public Map<String, RepositoryVersionInfo> getPluginVersionInfo() throws IOException {
+        return readVersionInfos(VERSION_FILES_PLUGINS);
+    }
+
+    private Map<String, RepositoryVersionInfo> readVersionInfos(String locationPattern) throws IOException {
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-        List<Resource> resources = new ArrayList<>(List.of(resolver.getResources("config/defaults/*-version.json")));
-        resources.addAll(List.of(resolver.getResources("config/plugins/**/version.json")));
-
         Map<String, RepositoryVersionInfo> versions = new LinkedHashMap<>();
-        for (Resource resource : resources) {
+        for (Resource resource : resolver.getResources(locationPattern)) {
             try (InputStream is = resource.getInputStream()) {
                 RepositoryVersionInfo versionInfo = new Gson().fromJson(IOUtils.toString(is, StandardCharsets.UTF_8), RepositoryVersionInfo.class);
                 versions.put(versionInfo.repository, versionInfo);
             }
         }
-
         return versions;
     }
 }

@@ -1,6 +1,7 @@
 import {
     Component,
     DestroyRef,
+    ElementRef,
     HostListener,
     inject,
     Input,
@@ -14,6 +15,7 @@ import { RenderModule } from '../RenderModule';
 import { Node } from 'ngx-edu-sharing-api';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { TranslateModule } from '@ngx-translate/core';
 import { RenderData } from '../../dto/RenderData';
 import { AssetControllerService, GetAsset$Params } from 'ngx-rendering-service-api';
 import {
@@ -24,13 +26,20 @@ import {
     AnnotationEditorType,
     NgxExtendedPdfViewerComponent,
     NgxExtendedPdfViewerModule,
+    NgxKeyboardManagerService,
     pdfDefaultOptions,
 } from 'ngx-extended-pdf-viewer';
 import { NodeHelperService, NodesRightMode } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'rs-module-pdf',
-    imports: [RenderingModule, MatButtonModule, MatIconModule, NgxExtendedPdfViewerModule],
+    imports: [
+        RenderingModule,
+        MatButtonModule,
+        MatIconModule,
+        NgxExtendedPdfViewerModule,
+        TranslateModule,
+    ],
     templateUrl: './pdf.component.html',
     styleUrl: './pdf.component.scss',
 })
@@ -72,6 +81,35 @@ export class PdfComponent implements RenderModule, OnChanges {
         );
         observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
         inject(DestroyRef).onDestroy(() => observer.disconnect());
+
+        this.restrictShortcutsToActiveViewer();
+    }
+
+    /**
+     * pdf.js listens for its single-key shortcuts (e.g. `r` rotates, `j`/`k` change the page) on
+     * the whole window, so they would fire wherever the user is working — also for speech-input
+     * users whose dictation contains these letters. Keys are only passed to the viewer while it is
+     * the active area: after a click into it or while the keyboard focus is inside it (the page
+     * area itself cannot take focus, so a click there does not move the focus). A click or focus
+     * anywhere else deactivates it. Ctrl + mouse wheel zoom (reported as `'WHEEL'`) is not
+     * affected.
+     */
+    private restrictShortcutsToActiveViewer(): void {
+        const host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+        const keyboardManager = inject(NgxKeyboardManagerService);
+        let active = false;
+        // composedPath, so a target inside the shadow root of the pdf web component is found too
+        const track = (event: Event) => (active = event.composedPath().includes(host));
+        document.addEventListener('pointerdown', track, true);
+        document.addEventListener('focusin', track, true);
+        const isKeyIgnored = keyboardManager.isKeyIgnored;
+        keyboardManager.isKeyIgnored = (cmd: number, keycode: number | 'WHEEL') =>
+            (keycode !== 'WHEEL' && !active) || isKeyIgnored.call(keyboardManager, cmd, keycode);
+        inject(DestroyRef).onDestroy(() => {
+            document.removeEventListener('pointerdown', track, true);
+            document.removeEventListener('focusin', track, true);
+            keyboardManager.isKeyIgnored = isKeyIgnored;
+        });
     }
 
     ngOnChanges(changes: SimpleChanges) {

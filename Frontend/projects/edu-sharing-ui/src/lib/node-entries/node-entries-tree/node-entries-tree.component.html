@@ -42,6 +42,8 @@
       [esNodesDropTarget]="node.item"
       [canDropNodes]="canDrop"
       (nodeDropped)="drop($event)"
+      (activation)="updateSelectedNodes(node)"
+      [attr.aria-selected]="node.level > 0 ? entriesService.selection.isSelected(node.item) : null"
     >
       @if (entriesService?.columns?.[0]) {
       <es-drag-preview
@@ -103,6 +105,8 @@
       [esNodesDropTarget]="node.item"
       [canDropNodes]="canDrop"
       (nodeDropped)="drop($event)"
+      (activation)="updateSelectedNodes(node)"
+      [attr.aria-selected]="node.level > 0 ? entriesService.selection.isSelected(node.item) : null"
     >
       <es-drag-preview
         *cdkDragPreview

@@ -46,6 +46,8 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.*;
 
+import java.util.stream.Collectors;
+
 import static java.util.stream.Collectors.toList;
 
 @Slf4j
@@ -111,6 +113,11 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
         Set<ACE> inactiveAces = new HashSet<>(); // set of timed aces which need to be stored in db
 
 
+        // currentACL merges the alfresco aces with the rows of the timed permission table. Active timed aces
+        // therefore also match "acesOld" when only the table row exists and alfresco lost the permission.
+        // Remember what is really set in alfresco, so such a node is repaired instead of treated as unchanged.
+        Set<String> alfrescoSetPermissions = getDirectAlfrescoPermissionKeys(nodeRef);
+
         // remove the ones that are already set (didn't change)
         long now = new Date().getTime();
         Iterator<ACE> iteratorNew = acesNew.iterator();
@@ -125,7 +132,8 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
             }
 
             // aces wich should be activated right now
-            if ((ace.getFrom() != null || ace.getTo() != null) && (ace.getFrom() == null || ace.getFrom() < now) && (ace.getTo() == null || ace.getTo() > now)) {
+            boolean activeTimed = (ace.getFrom() != null || ace.getTo() != null) && (ace.getFrom() == null || ace.getFrom() < now) && (ace.getTo() == null || ace.getTo() > now);
+            if (activeTimed) {
                 activeTimedAces.add(ace);
             }
 
@@ -134,7 +142,12 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
                 remove = true;
             }
 
-            if (acesOld.contains(ace)) {
+            boolean missingInAlfresco = activeTimed && !alfrescoSetPermissions.contains(toPermissionKey(ace.getAuthority(), ace.getPermission()));
+            if (missingInAlfresco && acesOld.contains(ace)) {
+                log.warn("timed permission {} for {} on node {} is stored in the table but missing in alfresco, setting it again",
+                        ace.getPermission(), ace.getAuthority(), nodeId);
+            }
+            if (acesOld.contains(ace) && !missingInAlfresco) {
                 acesNotChanged.add(ace);
                 remove = true;
 
@@ -270,6 +283,21 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
                         return null;
                     }, timedPermission.getUser()));
         }
+    }
+
+    /**
+     * Keys (authority and permission) of all permissions that are directly set on the node in alfresco.
+     * Rows of the timed permission table are not part of the result.
+     */
+    private Set<String> getDirectAlfrescoPermissionKeys(NodeRef nodeRef) {
+        return permissionService.getAllSetPermissions(nodeRef).stream()
+                .filter(x -> !x.isInherited())
+                .map(x -> toPermissionKey(x.getAuthority(), x.getPermission()))
+                .collect(Collectors.toSet());
+    }
+
+    private static String toPermissionKey(String authority, String permission) {
+        return authority + "|" + permission;
     }
 
     private void removePermissionInternal(NodeRef nodeRef, String authority, String permission) {

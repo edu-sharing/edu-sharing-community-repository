@@ -134,38 +134,11 @@ mat-sidenav-container {
 }
 
 // Static footer pinned at the bottom of the card; the card's overflow:hidden rounds its corners.
-.selection-action-bar {
-    display: none;
-    flex-shrink: 0;
-    align-items: center;
-    gap: 10px;
-    min-height: $secondaryBarHeight;
-    padding: 0 25px;
-    background-color: var(--roundedContainerBackground);
-    @include mixins.materialShadowTop();
+es-selection-bar {
     border-radius: 0 0 var(--borderRadiusCards) var(--borderRadiusCards);
     // Paint the shadow above the content — including the tree column, which has z-index: 2 and an
     // opaque background, so the bar must sit above it or the tree clips the upward shadow.
-    position: relative;
     z-index: 3;
-
-    es-actionbar {
-        padding-left: 10px;
-    }
-    &.visible {
-        display: flex;
-    }
-
-    .count {
-        font-weight: 500;
-        white-space: nowrap;
-    }
-    // static label shown instead of the selection count while only the clipboard has content
-    .clipboard-count {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-    }
 }
 
 .nodeRender {

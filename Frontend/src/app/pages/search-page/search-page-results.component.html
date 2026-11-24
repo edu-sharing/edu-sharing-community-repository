@@ -70,6 +70,7 @@
       actionbar: actionbars(),
       customOptions: primaryActionOptions || (materialOptions | async)
     }"
+    primaryActionLabel="OPEN_PREVIEW_FOR"
     (clickItem)="onClick($event)"
     (dblClickItem)="onDblClick($event.element)"
     data-test="search-result-grid-material"
@@ -104,53 +105,19 @@
 
 <!-- Action bar shown when items are selected. Lives outside the scroll area (.results-scroll) so the
   scrollbar stops above it; the actionbar stays in the DOM so its ViewChild/initConfig binding resolves. -->
-<div
-  class="selection-action-bar"
-  cdkOverlayOrigin
-  #selectionBar="cdkOverlayOrigin"
+<es-selection-bar
   [class.visible]="
     !primaryActionOptions && !addToCollectionMode.value && (searchPage.selection | async)?.length
   "
+  [nodes]="(searchPage.selection | async) || []"
+  [columns]="resultColumns.value"
+  [displayType]="(state | async).displayType"
+  [(open)]="selectionOverlayOpen"
+  (clear)="clearSelection()"
+  (deselect)="deselectNode($event)"
 >
-  <button
-    mat-icon-button
-    class="clear-selection"
-    (click)="clearSelection()"
-    [attr.aria-label]="'SEARCH.CLEAR_SELECTION' | translate"
-    matTooltip="{{ 'SEARCH.CLEAR_SELECTION' | translate }}"
-  >
-    <i esIcon="close"></i>
-  </button>
-  <button
-    mat-button
-    color="primary"
-    class="count"
-    aria-haspopup="dialog"
-    [attr.aria-expanded]="!!selectionOverlayOpen"
-    (click)="selectionOverlayOpen = !selectionOverlayOpen"
-  >
-    {{ 'SEARCH.N_SELECTED' | translate : { count: (searchPage.selection | async)?.length || 0 } }}
-    <i [esIcon]="selectionOverlayOpen ? 'expand_more' : 'expand_less'"></i>
-  </button>
   <es-actionbar #actionbarActions [showToggleOptions]="false"></es-actionbar>
-</div>
-
-<ng-template
-  cdkConnectedOverlay
-  [cdkConnectedOverlayOrigin]="selectionBar"
-  [cdkConnectedOverlayOpen]="selectionOverlayOpen && !!(searchPage.selection | async)?.length"
-  [cdkConnectedOverlayPositions]="overlayPositions"
-  [cdkConnectedOverlayWidth]="selectionBar.elementRef.nativeElement.offsetWidth"
-  [cdkConnectedOverlayHasBackdrop]="false"
-  (overlayOutsideClick)="selectionOverlayOpen = false"
->
-  <es-search-selection-overlay
-    [nodes]="(searchPage.selection | async) || []"
-    [columns]="resultColumns.value"
-    [displayType]="(state | async).displayType"
-    (deselect)="deselectNode($event)"
-  ></es-search-selection-overlay>
-</ng-template>
+</es-selection-bar>
 
 <ng-template #smallLoadingSpinner>
   <mat-spinner diameter="24" class="small-progress-spinner"></mat-spinner>

@@ -1,0 +1,42 @@
+<button
+  mat-icon-button
+  class="clear-selection"
+  (click)="clear.emit()"
+  [attr.aria-label]="clearLabel() | translate"
+  [matTooltip]="clearLabel() | translate"
+>
+  <i esIcon="close"></i>
+</button>
+<button
+  #toggleRef
+  mat-button
+  color="primary"
+  class="count"
+  aria-haspopup="dialog"
+  [attr.aria-expanded]="panelOpen()"
+  [attr.aria-controls]="panelOpen() ? panelId : null"
+  (click)="toggle()"
+>
+  {{ countLabel() | translate : { count: nodes()?.length || 0 } }}
+  <i [esIcon]="panelOpen() ? 'expand_more' : 'expand_less'"></i>
+</button>
+@if (panelOpen()) {
+<div
+  #panel
+  class="selection-panel"
+  role="dialog"
+  tabindex="-1"
+  [id]="panelId"
+  [attr.aria-label]="panelLabel() | translate"
+>
+  <es-search-selection-overlay
+    [nodes]="nodes()"
+    [columns]="columns()"
+    [displayType]="displayType()"
+    (deselect)="onDeselect($event)"
+  ></es-search-selection-overlay>
+</div>
+}
+<div class="actions">
+  <ng-content></ng-content>
+</div>

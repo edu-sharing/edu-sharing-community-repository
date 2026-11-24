@@ -314,6 +314,7 @@
   "LIST_TABLE": {
     "DUMMY_ICON_LABEL": "Dateityp",
     "TOGGLE_ALL": "Alle / Nichts auswählen",
+    "COLUMN_SELECT": "Auswahl",
     "CONFIGURE_COLUMNS": "Spalten konfigurieren",
     "COLUMN_ACTIONS": "Optionen",
     "ENTRY_COUNT": "{{total}} Einträge",
@@ -855,6 +856,7 @@
   "QR_CODE_SHORTLINK_LABEL": "Kurzlink",
   "QR_CODE_SHORTLINK_COPY": "Link kopieren",
   "OPTIONS_FOR": "Aktionen für {{element}}",
+  "OPEN_PREVIEW_FOR": "Vorschau öffnen: {{element}}",
   "NO_AVAILABLE_OPTIONS": "Es sind keine Aktionen für die ausgewählten Elemente verfügbar.",
   "OPTIONS": {
     "SHOW_ALL_OPTIONS": "Weitere Aktionen",
@@ -1097,6 +1099,7 @@
     "CHANGES_SAVED_SUCCESSFULLY": "Ihre Änderungen wurden erfolgreich gespeichert."
   },
   "SHARE_APP": {
+    "TITLE": "Teilen",
     "TEXT_SNIPPET": "Notiz",
     "IMAGE": "Bild",
     "WILL_BE_SAVED_AT": "Wird gespeichert unter",
@@ -1145,6 +1148,9 @@
     "FULLSCREEN": "Vollbild",
     "EXIT_FULLSCREEN": "Vollbild beenden",
     "VIDEO_RESOLUTION": "Videoauflösung",
+    "AUDIO_PLAYER": "Audioplayer: {{title}}",
+    "VIDEO_PLAYER": "Videoplayer: {{title}}",
+    "PDF_VIEWER": "PDF-Betrachter: {{title}}",
     "LINK_TO_OBJECT": "Zum Objekt",
     "LINK_NAME_TITLE": "{{label}} – {{title}}",
     "LINK_NAME_TITLE_NEW_WINDOW": "{{label}} – {{title}}, öffnet in neuem Fenster",
@@ -1622,6 +1628,7 @@
     }
   },
   "NAV": {
+    "BREADCRUMBS": "Brotkrumennavigation",
     "MAIN": "Hauptmenü",
     "SKIP": "Sprungmarken",
     "COLLECTIONS": "Sammlungshierarchie",

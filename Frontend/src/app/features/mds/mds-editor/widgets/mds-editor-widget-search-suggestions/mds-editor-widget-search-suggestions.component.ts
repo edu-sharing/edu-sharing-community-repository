@@ -1,5 +1,4 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { MatChip } from '@angular/material/chips';
 import { FacetAggregation, FacetValue } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { Observable } from 'rxjs';
@@ -27,7 +26,7 @@ export class MdsEditorWidgetSearchSuggestionsComponent
         map((suggestions) => suggestions?.[this.widget.definition.id]),
     );
 
-    @ViewChild(MatChip) private firstSuggestionChip: MatChip;
+    @ViewChild('suggestionButton') private firstSuggestionButton: ElementRef<HTMLButtonElement>;
 
     private tree: Tree;
 
@@ -44,7 +43,7 @@ export class MdsEditorWidgetSearchSuggestionsComponent
     }
 
     focus(): void {
-        this.firstSuggestionChip?.focus();
+        this.firstSuggestionButton?.nativeElement.focus();
     }
 
     private registerFilteredSuggestions(): void {

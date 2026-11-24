@@ -214,6 +214,9 @@ body.isDarkTheme {
         var(--primary),
         black 55%
     ); // inverted primary 700
+    // text on --listItemSelectedBackground (e.g. a highlighted menu entry); lighter than the
+    // primary so it keeps at least 4.5:1 on the darkened selection background
+    --itemSelectedTextColor: color-mix(in srgb, var(--primary), white 30%);
     --listItemSelectedBackgroundEffect: linear-gradient(
             to right,
             var(--primary) 0,

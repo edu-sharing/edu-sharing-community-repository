@@ -83,7 +83,6 @@ import { BridgeService } from '../../../services/bridge.service';
 import { CollectionInfoBarComponent } from '../collection-info-bar/collection-info-bar.component';
 import { InfobarService } from '../infobar/infobar.service';
 import { SelectionChange } from '@angular/cdk/collections';
-import { ConnectedPosition } from '@angular/cdk/overlay';
 import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
 import {
     GlobalCollectionsPageService,
@@ -192,16 +191,6 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     selectionOverlayOpen = false;
     /** Whether the sub-collections list (start page) currently feeds the bottom bar. */
     private collectionsListDrivesBar = false;
-    /** Open the selection overlay upward (its bottom edge aligned to the bar's top edge). */
-    readonly overlayPositions: ConnectedPosition[] = [
-        {
-            originX: 'start',
-            originY: 'top',
-            overlayX: 'start',
-            overlayY: 'bottom',
-            offsetY: 0,
-        },
-    ];
 
     private mainNavUpdateTrigger = new Subject<void>();
     sortCollectionColumns: ListItemSort[] = [
@@ -720,6 +709,11 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
 
     handleSelection(selection: SelectionChange<Node>) {
         this.selection = selection.source.selected;
+        if (!this.selection.length) {
+            // The page's bottom bar switches to the clipboard (or disappears); a later selection
+            // starts with its panel closed.
+            this.selectionOverlayOpen = false;
+        }
         // While a sidebar-add reload is in flight, swallow the selection-clear so it does not
         // close the sidebar (selectPendingNodes decides the final state afterwards).
         if (this.interactionType === InteractionType.DefaultActionLink && !this.addInProgress) {

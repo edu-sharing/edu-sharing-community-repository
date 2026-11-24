@@ -23,7 +23,6 @@ import {
     TranslationsService,
     UIConstants,
 } from 'ngx-edu-sharing-ui';
-import { ConnectedPosition } from '@angular/cdk/overlay';
 import { combineLatest, Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
 import { ConfigService, Mediacenter, Node } from 'ngx-edu-sharing-api';
@@ -109,17 +108,6 @@ export class CollectionsPageComponent implements OnDestroy {
     @ViewChild('collectionContentComponent') collectionContentRef: CollectionContentComponent;
     readonly selectionActionbar = viewChild<ActionbarComponent>('selectionActionbarRef');
     @ContentChild('collectionContentTemplate') collectionContentTemplateRef: TemplateRef<any>;
-
-    /** Open the selection overlay upward (its bottom edge aligned to the bar's top edge). */
-    readonly overlayPositions: ConnectedPosition[] = [
-        {
-            originX: 'start',
-            originY: 'top',
-            overlayX: 'start',
-            overlayY: 'bottom',
-            offsetY: 0,
-        },
-    ];
 
     dialogTitle: string;
     dialogCancelable = false;
@@ -325,6 +313,18 @@ export class CollectionsPageComponent implements OnDestroy {
 
     removeFromClipboard(node: Node) {
         this.temporaryStorageService.removeFromClipboard(node);
+    }
+
+    /**
+     * Sets the open state of the panel the bottom bar currently shows: the selection's or, without
+     * a selection, the clipboard's.
+     */
+    setBarPanelOpen(open: boolean) {
+        if (this.collectionContentRef?.selection?.length) {
+            this.collectionContentRef.selectionOverlayOpen = open;
+        } else {
+            this.clipboardOverlayOpen = open;
+        }
     }
 
     isAllowedToEditCollection(): boolean {

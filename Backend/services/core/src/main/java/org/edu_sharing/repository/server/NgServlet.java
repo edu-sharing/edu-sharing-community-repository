@@ -6,7 +6,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.service.config.model.Config;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -63,9 +65,10 @@ public class NgServlet extends SpringHttpServlet {
 				html = addLRMI(html,url);
 				html = addEmbed(html,url);
 			}
-			if(url.getPath().contains(COMPONENTS_RENDER) || url.getPath().contains(COMPONENTS_COLLECTIONS)){
+			if(url.getPath().contains(COMPONENTS_RENDER) || (url.getPath().contains(COMPONENTS_COLLECTIONS) && getNodeFromURL(url) != null)){
 				html = addSEO(html,url);
 			}
+			html = addStaticSEO(html, req, url);
 			if(url.getPath().contains(COMPONENTS_ERROR)){
 				resp.setStatus(getErrorCode(url.getPath()));
 			}
@@ -113,6 +116,35 @@ public class NgServlet extends SpringHttpServlet {
 			logger.warn("Could not add any SEO data: "+t.getMessage());
 			return html;
 		}
+	}
+
+	/**
+	 * static head (title, description, canonical, open graph, json-ld) for entry pages like search and collections,
+	 * texts from the client.config.xml (SEO.<PAGE>.TITLE / SEO.<PAGE>.DESCRIPTION), see {@link StaticSeoHead}
+	 */
+	private static String addStaticSEO(String html, HttpServletRequest req, URL url) {
+		try {
+			String page = StaticSeoHead.getPage(url.getPath(), req.getQueryString());
+			if (page == null) {
+				return html;
+			}
+			Config config = ConfigServiceFactory.getCurrentConfig(req);
+			Map<String, String> texts = StaticSeoHead.getTexts(config.language,
+					StaticSeoHead.getLanguage(req.getHeader("Accept-Language")));
+			return StaticSeoHead.enrich(html, page, texts, getSeoBaseUrl(req));
+		} catch (Throwable t) {
+			logger.warn("Could not add static SEO data: " + t.getMessage());
+			return html;
+		}
+	}
+
+	/**
+	 * base url with the domain of the request (contexts are bound to domains), protocol and webapp of the home repository
+	 */
+	private static String getSeoBaseUrl(HttpServletRequest req) {
+		ApplicationInfo home = ApplicationInfoList.getHomeRepository();
+		String protocol = StringUtils.defaultIfBlank(home.getClientprotocol(), "https");
+		return protocol + "://" + new RequestHelper(req).getServerName() + "/" + home.getWebappname();
 	}
 
 	private int getErrorCode(String path) {

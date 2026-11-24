@@ -136,14 +136,18 @@ class SearchServiceElasticTest {
         when(authorityService.getAuthorities()).thenReturn(new HashSet<>(Set.of("test_group1", "test_group2")));
         authenticationUtilMockedStatic.when(AuthenticationUtil::getFullyAuthenticatedUser).thenReturn("tester");
 
-
-        BoolQuery.Builder conditions = underTest.getGlobalConditions(Collections.singletonList("scope"), Collections.singletonList("read"), new MetadataQuery());
+        BoolQuery.Builder conditions;
+        try (MockedStatic<AuthorityServiceHelper> authorityServiceHelper = Mockito.mockStatic(AuthorityServiceHelper.class)) {
+            authorityServiceHelper.when(AuthorityServiceHelper::isAdmin).thenReturn(false);
+            conditions = underTest.getGlobalConditions(Collections.singletonList("scope"), Collections.singletonList("read"), new MetadataQuery());
+        }
 
         SearchServiceElasticTestUtils.assertQuery(
                 //language=JSON
                 """
                         {
                           "bool": {
+                            "minimum_should_match": "1",
                             "must": [
                               {
                                 "bool": {
@@ -234,6 +238,20 @@ class SearchServiceElasticTest {
                         }""",
                 conditions
         );
+    }
+
+    @Test
+    void getGlobalConditionsAdminSkipsPermissionsFilter() {
+        BoolQuery.Builder conditions;
+        try (MockedStatic<AuthorityServiceHelper> authorityServiceHelper = Mockito.mockStatic(AuthorityServiceHelper.class)) {
+            authorityServiceHelper.when(AuthorityServiceHelper::isAdmin).thenReturn(true);
+            conditions = underTest.getGlobalConditions(Collections.singletonList("scope"), Collections.singletonList("write"), new MetadataQuery());
+        }
+
+        String json = SearchServiceElasticTestUtils.indentJson(conditions);
+        assertFalse(json.contains("permissions.write"), json);
+        assertFalse(json.contains("\"owner\""), json);
+        assertTrue(json.contains("permissions.read"), json);
     }
 
     @Test

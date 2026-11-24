@@ -1,7 +1,7 @@
 @if (isLoading) {
 <es-global-progress></es-global-progress>
 } @if (!isLoading && !show2FaDialog) {
-<div>
+<div [class.in-app]="bridge.isRunningCordova()">
   <es-card
     role="main"
     esSkipTarget="MAIN_CONTENT"

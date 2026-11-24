@@ -272,6 +272,7 @@
   "LIST_TABLE": {
     "DUMMY_ICON_LABEL": "File type",
     "TOGGLE_ALL": "Select all/none",
+    "COLUMN_SELECT": "Selection",
     "CONFIGURE_COLUMNS": "Configure columns",
     "COLUMN_ACTIONS": "Actions",
     "ENTRY_COUNT": "{{total}} entries",
@@ -731,6 +732,7 @@
   "QR_CODE_SHORTLINK_LABEL": "Short link",
   "QR_CODE_SHORTLINK_COPY": "Copy link",
   "OPTIONS_FOR": "Actions for {{element}}",
+  "OPEN_PREVIEW_FOR": "Open preview: {{element}}",
   "NO_AVAILABLE_OPTIONS": "No actions are available for the selected items",
   "OPTIONS": {
     "SHOW_ALL_OPTIONS": "More actions",
@@ -959,6 +961,7 @@
     "CHANGES_SAVED_SUCCESSFULLY": "Your changes have been saved successfully."
   },
   "SHARE_APP": {
+    "TITLE": "Share",
     "TEXT_SNIPPET": "Note",
     "IMAGE": "Image",
     "WILL_BE_SAVED_AT": "Will be stored at",
@@ -1007,6 +1010,9 @@
     "FULLSCREEN": "Fullscreen",
     "EXIT_FULLSCREEN": "Exit fullscreen",
     "VIDEO_RESOLUTION": "Video resolution",
+    "AUDIO_PLAYER": "Audio player: {{title}}",
+    "VIDEO_PLAYER": "Video player: {{title}}",
+    "PDF_VIEWER": "PDF viewer: {{title}}",
     "LINK_TO_OBJECT": "Link to object",
     "LINK_NAME_TITLE": "{{label}} – {{title}}",
     "LINK_NAME_TITLE_NEW_WINDOW": "{{label}} – {{title}}, opens in a new window",
@@ -1405,6 +1411,7 @@
     "TITLE": "Chat"
   },
   "NAV": {
+    "BREADCRUMBS": "Breadcrumb navigation",
     "MAIN": "main",
     "SKIP": "skip",
     "COLLECTIONS": "collections",

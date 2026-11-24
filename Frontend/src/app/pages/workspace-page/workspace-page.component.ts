@@ -11,7 +11,6 @@ import {
     viewChild,
     ViewChild,
 } from '@angular/core';
-import { ConnectedPosition } from '@angular/cdk/overlay';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import {
@@ -162,16 +161,6 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy,
     selection: Node[] = [];
     /** Whether the selected-nodes overlay above the selection bar is open. */
     selectionOverlayOpen = false;
-    /** Open the selection overlay upward (its bottom edge aligned to the bar's top edge). */
-    readonly overlayPositions: ConnectedPosition[] = [
-        {
-            originX: 'start',
-            originY: 'top',
-            overlayX: 'start',
-            overlayY: 'bottom',
-            offsetY: 0,
-        },
-    ];
 
     cardHasOpenModals$: Observable<boolean>;
     sidebarParent: Node;
@@ -1148,6 +1137,23 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy,
 
     onSelectionChanged(nodes: Node[]) {
         this.selection = nodes;
+        if (!nodes.length) {
+            // The bottom bar switches to the clipboard (or disappears); a later selection starts
+            // with its panel closed.
+            this.selectionOverlayOpen = false;
+        }
+    }
+
+    /**
+     * Sets the open state of the panel the bottom bar currently shows: the selection's or, without
+     * a selection, the clipboard's.
+     */
+    setBarPanelOpen(open: boolean) {
+        if (this.selection.length) {
+            this.selectionOverlayOpen = open;
+        } else {
+            this.clipboardOverlayOpen = open;
+        }
     }
 
     /** The node list backing the current view (explorer or recycle) — source of the selection. */

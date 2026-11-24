@@ -1,5 +1,7 @@
 package org.edu_sharing.repository.server.tools.security;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -14,6 +16,8 @@ import java.security.PrivateKey;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.Signature;
 import java.util.Base64;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * This repository signs with its own private key (the key of its home application, the one that is also published in {@code /metadata}).
@@ -41,6 +45,8 @@ public class HomeRepositorySigner {
             super(message);
         }
     }
+
+    private static final ObjectMapper JSON = new ObjectMapper();
 
     private final String algorithm;
 
@@ -91,6 +97,33 @@ public class HomeRepositorySigner {
             return signature.sign();
         } catch (GeneralSecurityException e) {
             throw new SigningFailedException("could not sign with " + algorithm, e);
+        }
+    }
+
+    /**
+     * A compact JWS (RFC 7515) of the given claims, signed with the key of this repository and the configured algorithm. The JOSE header holds nothing
+     * but {@code alg} (the JWS name of the configured algorithm), {@code typ} and {@code kid} (thumbprint of the public key), in this order: no
+     * {@code jku}, {@code jwk} or app id. The claims are written in the order of the map. Which claims there are belongs to the caller
+     * ({@code RequestUserSigner}, {@code AppAssertionSigner}).
+     *
+     * @param typ the JWS type of the token, e.g. {@code edu-app+jwt}; names what the token is for, so that a receiver does not take it for another one
+     * @throws SigningFailedException when this repository cannot sign
+     */
+    public String signJws(String typ, Map<String, Object> claims) {
+        Map<String, Object> header = new LinkedHashMap<>();
+        header.put("alg", jwsAlgorithm());
+        header.put("typ", typ);
+        header.put("kid", jwkThumbprint());
+        String signingInput = encodeJwsPart(header) + "." + encodeJwsPart(claims);
+        byte[] signature = signBytes(signingInput.getBytes(StandardCharsets.US_ASCII), algorithm);
+        return signingInput + "." + Base64.getUrlEncoder().withoutPadding().encodeToString(signature);
+    }
+
+    private static String encodeJwsPart(Map<String, Object> part) {
+        try {
+            return Base64.getUrlEncoder().withoutPadding().encodeToString(JSON.writeValueAsString(part).getBytes(StandardCharsets.UTF_8));
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException(e);
         }
     }
 

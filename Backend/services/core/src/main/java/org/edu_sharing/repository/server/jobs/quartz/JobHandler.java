@@ -4,6 +4,7 @@
 package org.edu_sharing.repository.server.jobs.quartz;
 
 import com.typesafe.config.Config;
+import com.typesafe.config.ConfigObject;
 import com.typesafe.config.ConfigValue;
 import lombok.Getter;
 import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
@@ -446,7 +447,7 @@ public class JobHandler implements ApplicationListener<RefreshScopeRefreshedEven
             logger.info("primary repository, will register and handle quartz jobs");
 
             ClassLoader classLoader = this.getClass().getClassLoader();
-            List<? extends Config> list = LightbendConfigLoader.get().getConfigList("jobs.entries");
+            List<Config> list = getJobEntries(LightbendConfigLoader.get());
             jobConfigList.clear();
             for (String groupName : quartzScheduler.getJobGroupNames()) {
 
@@ -492,6 +493,52 @@ public class JobHandler implements ApplicationListener<RefreshScopeRefreshedEven
         } catch (Exception e) {
             logger.warn("Could not init scheduled jobs", e);
         }
+    }
+
+    /**
+     * collects the job entries to schedule
+     *
+     * {@code jobs.defaultEntries} is an object (key -> job config) with jobs shipped by default. It is kept separate from
+     * {@code jobs.entries} because projects often replace that list completely, which must not drop the default jobs.
+     * An entry in {@code jobs.entries} with the same name replaces the default one.
+     */
+    static List<Config> getJobEntries(Config config) {
+        Logger logger = Logger.getLogger(JobHandler.class);
+        Map<String, Config> result = new LinkedHashMap<>();
+        if (config.hasPath("jobs.defaultEntries")) {
+            ConfigObject defaults = config.getObject("jobs.defaultEntries");
+            // config objects are unordered, sort by key to keep the scheduling order stable
+            for (Map.Entry<String, ConfigValue> entry : new TreeMap<>(defaults).entrySet()) {
+                if (!(entry.getValue() instanceof ConfigObject)) {
+                    logger.warn("Ignoring invalid default job entry " + entry.getKey());
+                    continue;
+                }
+                Config job = ((ConfigObject) entry.getValue()).toConfig();
+                if (job.hasPath("enabled") && !job.getBoolean("enabled")) {
+                    logger.info("Default job " + entry.getKey() + " is disabled");
+                    continue;
+                }
+                result.put(getJobEntryKey(job, "defaultEntries." + entry.getKey()), job);
+            }
+        }
+        if (config.hasPath("jobs.entries")) {
+            List<? extends Config> entries = config.getConfigList("jobs.entries");
+            for (int i = 0; i < entries.size(); i++) {
+                Config job = entries.get(i);
+                // remove first, so an overridden default is scheduled at the position of the entry
+                String key = getJobEntryKey(job, "entries." + i);
+                result.remove(key);
+                result.put(key, job);
+            }
+        }
+        return new ArrayList<>(result.values());
+    }
+
+    private static String getJobEntryKey(Config job, String fallback) {
+        if (job.hasPath("name") && !job.getString("name").isBlank()) {
+            return job.getString("name");
+        }
+        return fallback;
     }
 
     public Trigger getTriggerFromString(String jobName, String triggerConfig) throws ParseException {

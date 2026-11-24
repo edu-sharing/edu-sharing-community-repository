@@ -7,7 +7,9 @@ import {
     OnInit,
     ViewChild,
     inject,
+    viewChild,
 } from '@angular/core';
+import { NgModel } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
     AuthorityNamePipe,
@@ -156,6 +158,8 @@ export class CollectionNewComponent implements OnInit, OnDestroy {
     private loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed });
 
     @ViewChild('authorFreetextInput') authorFreetextInput: ElementRef<HTMLInputElement>;
+    private readonly titleInput = viewChild<ElementRef<HTMLInputElement>>('titleInput');
+    private readonly titleModel = viewChild<NgModel>('titleModel');
     buttons: DialogButton[];
     authorFreetext = false;
     authorFreetextAllowed = false;
@@ -167,7 +171,7 @@ export class CollectionNewComponent implements OnInit, OnDestroy {
 
     @HostListener('document:keydown', ['$event'])
     handleKeyboardEvent(event: KeyboardEvent) {
-        if (event.code == 'Escape') {
+        if (event.code === 'Escape' && !event.defaultPrevented) {
             event.preventDefault();
             event.stopPropagation();
             void this.goBack();
@@ -634,7 +638,10 @@ export class CollectionNewComponent implements OnInit, OnDestroy {
         this.updatePermissions();
         if (this.newCollectionStep == this.STEP_GENERAL) {
             if (!this.currentCollection.title) {
-                this.toast.error(null, 'COLLECTIONS.ENTER_NAME');
+                // the error is shown persistently below the field (mat-error) and is announced
+                // together with the field once the focus moves there
+                this.titleModel()?.control.markAsTouched();
+                this.titleInput()?.nativeElement.focus();
                 return;
             }
         }

@@ -1107,8 +1107,11 @@ public class SearchServiceElastic implements SearchService {
 
 
         BoolQuery.Builder queryBuilderGlobalConditions = queryGlobalConditionsFactory.apply(QueryBuilders.bool());
-        if (permissions != null) {
-            BoolQuery.Builder permissionsFilter = QueryBuilders.bool().must(must -> must.bool(queryGlobalConditionsFactory::apply));
+        // admins have every permission on every node (same as getWritePermissionsQuery / getCoordinatorPermissionsQuery)
+        // an empty list means "no permission filter" (otherwise only the owner clause would remain)
+        if (permissions != null && !permissions.isEmpty() && !AuthorityServiceHelper.isAdmin() && !AuthenticationUtil.isRunAsUserTheSystemUser()) {
+            // at least one of the permissions (or ownership) must match, otherwise the should clauses only affect scoring
+            BoolQuery.Builder permissionsFilter = QueryBuilders.bool().minimumShouldMatch("1").must(must -> must.bool(queryGlobalConditionsFactory::apply));
             String user = authenticationService.getCurrentUserName();
             permissionsFilter.should(should -> should.match(match -> match.field("owner").query(user)));
             for (String permission : permissions) {

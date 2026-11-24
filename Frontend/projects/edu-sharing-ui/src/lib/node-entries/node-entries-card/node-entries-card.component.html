@@ -78,25 +78,15 @@
     <ng-container *ngTemplateOutlet="meta"></ng-container>
   </es-node-url>
   } @if (entriesService.elementInteractionType === InteractionType.Emitter) {
-  <button
-    class="card-body"
+  <!-- The button only wraps the title (see #meta), so the remaining metadata stays readable for
+       screen readers; its ::after stretches the click area over the whole card body. -->
+  <div
+    class="card-body card-body-stretched"
     matRipple
-    [attr.aria-label]="node | nodeTitle"
-    (click)="
-      entriesService.onClicked({
-        event: $event,
-        element: node,
-        source: ClickSource.Metadata,
-      })
-    "
-    (dblclick)="
-      entriesService.dblClickItem.emit({
-        element: node,
-        source: ClickSource.Metadata,
-      })
-    "
     esFocusState
     #cardFocusState="esFocusState"
+    (click)="onBodyClick($event, 'click')"
+    (dblclick)="onBodyClick($event, 'dblclick')"
   >
     <ng-container
       *ngTemplateOutlet="
@@ -105,7 +95,7 @@
       "
     ></ng-container>
     <ng-container *ngTemplateOutlet="meta"></ng-container>
-  </button>
+  </div>
   } @if (entriesService.elementInteractionType === InteractionType.None) {
   <div esFocusState #cardFocusState="esFocusState">
     <ng-container
@@ -186,7 +176,11 @@
         <es-node-url [node]="node" #link>
           <es-list-base [item]="displayPart" [node]="node" [provideLabel]="false"> </es-list-base>
         </es-node-url>
-        } @if (entriesService.elementInteractionType !== InteractionType.DefaultActionLink) {
+        } @if (entriesService.elementInteractionType === InteractionType.Emitter) {
+        <ng-container
+          *ngTemplateOutlet="cardAction; context: { displayPart: displayPart }"
+        ></ng-container>
+        } @if (entriesService.elementInteractionType === InteractionType.None) {
         <div>
           <es-list-base [item]="displayPart" [node]="node" [provideLabel]="false"> </es-list-base>
         </div>
@@ -197,7 +191,48 @@
         <es-list-base [item]="displayPart" [node]="node" [provideLabel]="false"> </es-list-base>
         }
       </div>
-      }
+      } @empty { @if (entriesService.elementInteractionType === InteractionType.Emitter) {
+      <!-- without visible columns the card still needs its (then text-less) action button -->
+      <ng-container *ngTemplateOutlet="cardAction; context: { displayPart: null }"></ng-container>
+      } }
     </div>
+  </ng-template>
+  <!-- The card's only tab stop in InteractionType.Emitter. Its accessible name always is
+       "<action>: <title>" (or the title), independent of which column is shown first; the visible
+       column value is hidden from assistive technology to avoid reading it twice. -->
+  <ng-template #cardAction let-displayPart="displayPart">
+    <button
+      type="button"
+      class="card-body-action"
+      (click)="
+        entriesService.onClicked({
+          event: $event,
+          element: node,
+          source: ClickSource.Metadata,
+        })
+      "
+      (dblclick)="
+        entriesService.dblClickItem.emit({
+          element: node,
+          source: ClickSource.Metadata,
+        })
+      "
+    >
+      <span class="cdk-visually-hidden">
+        @if (entriesService.getPrimaryActionLabel(node); as actionLabel) {
+        {{ actionLabel | translate : { element: (node | nodeTitle) } }}
+        } @else {
+        {{ node | nodeTitle }}
+        }
+      </span>
+      @if (displayPart) {
+      <es-list-base
+        aria-hidden="true"
+        [item]="displayPart"
+        [node]="node"
+        [provideLabel]="false"
+      ></es-list-base>
+      }
+    </button>
   </ng-template>
 </div>

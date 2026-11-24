@@ -12,7 +12,6 @@ import {
     viewChild,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ConnectedPosition } from '@angular/cdk/overlay';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import {
     Assignment,
@@ -171,16 +170,6 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
     );
     /** Whether the selected-nodes overlay above the selection bar is open. */
     selectionOverlayOpen = false;
-    /** Open the selection overlay upward (its bottom edge aligned to the bar's top edge). */
-    readonly overlayPositions: ConnectedPosition[] = [
-        {
-            originX: 'start',
-            originY: 'top',
-            overlayX: 'start',
-            overlayY: 'bottom',
-            offsetY: 0,
-        },
-    ];
     private destroyed$ = new Subject<void>();
     isMobile$ = this.breakpointObserver
         .observe(['(max-width: 900px)'])

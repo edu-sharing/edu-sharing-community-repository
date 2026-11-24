@@ -63,40 +63,6 @@ mat-sidenav.es-mat-sidenav {
     }
 }
 
-// Full-width selection bar pinned at the bottom of the card (sibling of .collections-body), shown
-// when references are selected. Mirrors the search-page selection layout.
-.selection-action-bar {
-    display: none;
-    flex-shrink: 0;
-    align-items: center;
-    gap: 10px;
-    min-height: vars.$secondaryBarHeight;
-    padding: 0 25px;
-    background-color: var(--roundedContainerBackground);
-    @include mixins.materialShadowTop();
-    // paint the shadow above the scrolled content
-    position: relative;
-    z-index: 1;
-
-    es-actionbar {
-        padding-left: 10px;
-    }
-    &.visible {
-        display: flex;
-    }
-
-    .count {
-        font-weight: 500;
-        white-space: nowrap;
-    }
-    // static label shown instead of the selection count while only the clipboard has content
-    .clipboard-count {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-    }
-}
-
 // The region below the tabs. It fills the card height and clips; the actual scrolling happens
 // further in, inside `.collections-scroll` (and the info-bar column), so the breadcrumb header and
 // the footer stay fixed.

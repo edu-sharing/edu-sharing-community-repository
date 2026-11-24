@@ -79,7 +79,7 @@
       (click)="editorialSidebarService.stepPreview(-1)"
     >
       <i esIcon="arrow_back"></i>
-      <span>{{ 'EDITORIAL.SIDEBAR.PREVIOUS' | translate }}</span>
+      <span class="nav-label">{{ 'EDITORIAL.SIDEBAR.PREVIOUS' | translate }}</span>
     </button>
     <a
       mat-stroked-button
@@ -98,7 +98,7 @@
       [disabled]="!editorialSidebarService.canStepPreview(1)"
       (click)="editorialSidebarService.stepPreview(1)"
     >
-      <span>{{ 'EDITORIAL.SIDEBAR.NEXT' | translate }}</span>
+      <span class="nav-label">{{ 'EDITORIAL.SIDEBAR.NEXT' | translate }}</span>
       <i esIcon="arrow_forward"></i>
     </button>
   </div>
