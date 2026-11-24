@@ -263,6 +263,8 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
 
     // custom names for blacklisted and selected item(s)
     private allRequestedNodes: Node[] = [];
+    // pagination of the latest search, to display the requested nodes again without a new search
+    private lastSearchPagination: Pagination | null = null;
     private blacklistedClassName: string = 'blacklisted';
     private selectedClassName: string = 'selected';
     columns: ColumnType;
@@ -457,27 +459,15 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
         if (!changedMade) {
             return;
         }
-        this.dataSource.isLoading = true;
-        const resetOnFirstLoad: boolean = Object.keys(changes).length > 1;
-        const resetDueToCriteriaChange: boolean =
-            changes.criteria?.previousValue !== changes.criteria?.currentValue;
-        // a different order replaces the whole result set, so the collected nodes are void
-        const resetDueToSortChange: boolean =
-            JSON.stringify(changes.sort?.previousValue ?? null) !==
-            JSON.stringify(changes.sort?.currentValue ?? null);
-        // a requested new search may find other or reordered nodes, so it starts over as well
-        const resetDueToSearchUpdate: boolean =
-            !!changes.lastSearchUpdate && !changes.lastSearchUpdate.firstChange;
-        // update the criteria if a custom type instance exists
-        if (this.customTypeInstance && changes.criteria) {
-            this.customTypeInstance.criteria = changes.criteria.currentValue;
+        // a changed hide list only changes which of the loaded nodes are shown, not the search
+        const onlyHiddenNodesChanged: boolean =
+            Object.keys(changes).every((key: string) => key === 'blacklistedNodeIds') &&
+            !!this.lastSearchPagination;
+        if (onlyHiddenNodesChanged) {
+            this.displayRequestedNodes(this.lastSearchPagination);
+        } else {
+            await this.searchForChanges(changes);
         }
-        await this.setDataSource(
-            resetOnFirstLoad ||
-                resetDueToCriteriaChange ||
-                resetDueToSortChange ||
-                resetDueToSearchUpdate,
-        );
         // workaround for updating showAlways options: override customOptions variable
         this.customOptions = this.retrieveCustomOptions();
         await this.nodeEntries?.initOptionsGenerator({
@@ -522,6 +512,33 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
                     this.allRequestedNodes.find((n) => n.ref.id === this.selectedNodeIds[0]),
                 );
         }
+    }
+
+    /**
+     * Searches again for the changed inputs, starting over if the result set is replaced.
+     */
+    private async searchForChanges(changes: SimpleChanges): Promise<void> {
+        this.dataSource.isLoading = true;
+        const resetOnFirstLoad: boolean = Object.keys(changes).length > 1;
+        const resetDueToCriteriaChange: boolean =
+            changes.criteria?.previousValue !== changes.criteria?.currentValue;
+        // a different order replaces the whole result set, so the collected nodes are void
+        const resetDueToSortChange: boolean =
+            JSON.stringify(changes.sort?.previousValue ?? null) !==
+            JSON.stringify(changes.sort?.currentValue ?? null);
+        // a requested new search may find other or reordered nodes, so it starts over as well
+        const resetDueToSearchUpdate: boolean =
+            !!changes.lastSearchUpdate && !changes.lastSearchUpdate.firstChange;
+        // update the criteria if a custom type instance exists
+        if (this.customTypeInstance && changes.criteria) {
+            this.customTypeInstance.criteria = changes.criteria.currentValue;
+        }
+        await this.setDataSource(
+            resetOnFirstLoad ||
+                resetDueToCriteriaChange ||
+                resetDueToSortChange ||
+                resetDueToSearchUpdate,
+        );
     }
 
     /**
@@ -594,22 +611,28 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
                 existingNodeIds.push(node.ref.id);
             }
         });
+        this.lastSearchPagination = searchResult.pagination;
+        this.displayRequestedNodes(searchResult.pagination);
+    }
 
+    /**
+     * Displays the requested nodes: all of them in edit mode, only those not hidden in view mode,
+     * and reports the resulting counts.
+     */
+    private displayRequestedNodes(pagination: Pagination): void {
         // count the number of currently blacklisted nodes
         const numberOfBlacklistedVisibleNodes =
             this.allRequestedNodes.filter(
                 (n: Node) => n?.ref?.id && this.blacklistedNodeIds.includes(n.ref.id),
             )?.length || 0;
         // emit the total pagination number with removed blacklisted nodes
-        this.totalSearchResultCountChanged.emit(
-            searchResult.pagination.total - numberOfBlacklistedVisibleNodes,
-        );
+        this.totalSearchResultCountChanged.emit(pagination.total - numberOfBlacklistedVisibleNodes);
 
         let customCardsCount: number;
         // in edit mode, display all requested nodes; the data source gets its own array, as the
         // custom cards injected into it must not shift the node indices used to address the cards
         if (this.hasEditRightsAndIsEditMode) {
-            this.dataSource.setData([...this.allRequestedNodes], searchResult.pagination);
+            this.dataSource.setData([...this.allRequestedNodes], pagination);
             customCardsCount = this.allRequestedNodes.length;
         }
         // in view mode, display the filtered nodes
@@ -618,9 +641,7 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
                 (node: Node) => !this.blacklistedNodeIds.includes(node.ref.id),
             );
             // note: as the requests are cached, do not change the original result object, otherwise, it is changed permanently
-            const updatedPagination: Pagination = JSON.parse(
-                JSON.stringify(searchResult.pagination),
-            );
+            const updatedPagination: Pagination = JSON.parse(JSON.stringify(pagination));
             updatedPagination.total -= this.allRequestedNodes.length - filteredNodes.length;
             this.dataSource.setData(filteredNodes, updatedPagination);
             customCardsCount = filteredNodes.length;
