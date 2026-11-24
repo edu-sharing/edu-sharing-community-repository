@@ -178,8 +178,8 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     headlineLoading: WritableSignal<boolean> = signal(false);
     // the AI config whose texts the widget shows; results of another config are dropped
     private appliedAiConfig: BapiConfigObject = null;
-    // settles once the AI texts of the current config are applied; saves wait for it, as a
-    // headline or description only counts as a prompt after its result has arrived
+    // settles once the AI texts of the current config are applied; saves outside the editor wait
+    // for it, as there a headline or description only holds its prompt after the result arrived
     private aiTextsApplied: Promise<void> = Promise.resolve();
     initialized: WritableSignal<boolean> = signal(false);
     private readonly persistConfigTrigger$: Subject<void> = new Subject<void>();
@@ -315,16 +315,22 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     async persistConfig(): Promise<void> {
         this.updateInProgress.set(true);
         this.widgetInstance.updateInProgress.set(true);
-        await this.aiTextsApplied;
+        // outside the editor an AI text is empty until its result arrives, so it has to be awaited
+        if (!this.editMode()) {
+            await this.aiTextsApplied;
+        }
         // retrieve the individual widget config
         let baseConfig: BaseWidgetConfig = this.retrieveBaseWidgetConfig();
         let specificWidgetConfig: WidgetConfig = this.widgetInstance.retrieveWidgetConfig
             ? this.widgetInstance.retrieveWidgetConfig()
             : {};
         let widgetConfig: WidgetConfig = { ...baseConfig, ...specificWidgetConfig };
-        // retrieve an AI config object if either the description or the headline contains AI tags
-        const aiDescription: string = this.descriptionAiGenerated() ? this.description : '';
-        const aiHeadline: string = this.headlineAiGenerated() ? this.headline : '';
+        // retrieve an AI config object if either the description or the headline contains AI tags;
+        // in the editor a text still being generated already holds its prompt
+        const aiDescription: string =
+            this.descriptionAiGenerated() || this.descriptionLoading() ? this.description : '';
+        const aiHeadline: string =
+            this.headlineAiGenerated() || this.headlineLoading() ? this.headline : '';
         let keyValue;
         if (this.widgetInstance.retrieveCustomAiKeyValuePairs) {
             keyValue = this.widgetInstance.retrieveCustomAiKeyValuePairs();
@@ -361,10 +367,20 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
                     await result;
                 }
             }
-            await this.updateCommonProperties(widgetConfig, aiConfig);
+            // unchanged prompts keep their generated texts instead of being generated again
+            if (!this.isAppliedAiConfig(aiConfig)) {
+                await this.updateCommonProperties(widgetConfig, aiConfig);
+            }
         }
         this.updateInProgress.set(false);
         this.widgetInstance.updateInProgress.set(false);
+    }
+
+    /**
+     * Whether the given AI config matches the one whose texts are currently applied.
+     */
+    private isAppliedAiConfig(aiConfig: BapiConfigObject): boolean {
+        return JSON.stringify(aiConfig ?? {}) === JSON.stringify(this.appliedAiConfig ?? {});
     }
 
     /**
