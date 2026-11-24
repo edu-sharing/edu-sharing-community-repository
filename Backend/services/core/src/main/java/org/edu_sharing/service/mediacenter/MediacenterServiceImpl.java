@@ -672,9 +672,7 @@ public class MediacenterServiceImpl implements MediacenterService {
                 log.info("process remove changes for {}", mediacenter);
                 for (NodeRef nodeRef : entry.getValue()) {
                     policyBehaviourFilter.disableBehaviour(nodeRef);
-                    alfPermissionService.deletePermission(nodeRef, mediacenter, CCConstants.PERMISSION_CONSUMER);
-                    alfPermissionService.deletePermission(nodeRef, mediacenter, CCConstants.PERMISSION_CC_PUBLISH);
-                    removeTimedPermissions(nodeRef, mediacenter);
+                    removeConsumerAndPublishPermission(nodeRef, mediacenter);
                     policyBehaviourFilter.enableBehaviour(nodeRef);
                 }
             }
@@ -759,35 +757,18 @@ public class MediacenterServiceImpl implements MediacenterService {
                     log.warn("no node found in repo for:" + replicationsourceId);
                     continue;
                 }
-                boolean hasPublishPermission = hasPermissionSet(nodeRef, mediacenterProxyName,
-                        CCConstants.PERMISSION_CC_PUBLISH);
-                boolean hasConsumerPermission = hasPermissionSet(nodeRef, mediacenterProxyName,
-                        CCConstants.PERMISSION_CONSUMER);
-
                 boolean hasPublishPermissionAdmin = hasPermissionSet(nodeRef, mediacenterAdminGroup,
                         CCConstants.PERMISSION_CC_PUBLISH);
                 boolean hasConsumerPermissionAdmin = hasPermissionSet(nodeRef, mediacenterAdminGroup,
                         CCConstants.PERMISSION_CONSUMER);
 
-                if (hasPublishPermission) {
-                    retryingTransactionHelper.doInTransaction(() -> {
-                        policyBehaviourFilter.disableBehaviour(nodeRef);
-                        log.info(mediacenterProxyName + " remove publish permission for " + nodeRef);
-                        alfPermissionService.deletePermission(nodeRef, mediacenterProxyName, CCConstants.PERMISSION_CC_PUBLISH);
-                        policyBehaviourFilter.enableBehaviour(nodeRef);
-                        return null;
-                    });
-                }
-                if (hasConsumerPermission) {
-                    retryingTransactionHelper.doInTransaction(() -> {
-                        policyBehaviourFilter.disableBehaviour(nodeRef);
-                        log.info(mediacenterProxyName + " remove consumer permission for " + nodeRef);
-                        alfPermissionService.deletePermission(nodeRef, mediacenterProxyName, CCConstants.PERMISSION_CONSUMER);
-                        policyBehaviourFilter.enableBehaviour(nodeRef);
-                        return null;
-                    });
-                }
-                removeTimedPermissions(nodeRef, mediacenterProxyName);
+                retryingTransactionHelper.doInTransaction(() -> {
+                    policyBehaviourFilter.disableBehaviour(nodeRef);
+                    log.info(mediacenterProxyName + " remove consumer and publish permission for " + nodeRef);
+                    removeConsumerAndPublishPermission(nodeRef, mediacenterProxyName);
+                    policyBehaviourFilter.enableBehaviour(nodeRef);
+                    return null;
+                });
 
                 if (!hasPublishPermissionAdmin) {
                     log.info(mediacenterAdminGroup + " add publish permission for " + nodeRef);
@@ -804,21 +785,18 @@ public class MediacenterServiceImpl implements MediacenterService {
     }
 
     /**
-     * Removes the timed permissions (stored in the timed permission table) of the authority on the node.
-     * The permissions are removed directly in alfresco, so a leftover table row would otherwise be shown as an
-     * active permission although alfresco no longer grants it.
+     * Removes the consumer and publish permission of the authority on the node using the core permission service.
+     * In contrast to removing them directly in alfresco, this also removes the timed permissions (stored in the timed
+     * permission table), which would otherwise be shown as active although alfresco no longer grants them.
      */
-    private void removeTimedPermissions(NodeRef nodeRef, String authority) {
-        try {
-            List<ACE> timedAces = Arrays.stream(permissionService.getPermissions(nodeRef.getId()).getAces())
-                    .filter(ace -> authority.equals(ace.getAuthority()) && (ace.getFrom() != null || ace.getTo() != null))
-                    .toList();
-            if (!timedAces.isEmpty()) {
-                log.info("remove {} timed permission(s) of {} for {}", timedAces.size(), authority, nodeRef);
-                permissionService.removePermissions(nodeRef.getId(), timedAces);
-            }
-        } catch (Exception e) {
-            log.error("could not remove timed permissions of {} for {}: {}", authority, nodeRef, e.getMessage(), e);
+    private void removeConsumerAndPublishPermission(NodeRef nodeRef, String authority) throws Exception {
+        List<ACE> toRemove = Arrays.stream(permissionService.getPermissions(nodeRef.getId()).getAces())
+                .filter(ace -> authority.equals(ace.getAuthority()) && !ace.isInherited()
+                        && (CCConstants.PERMISSION_CONSUMER.equals(ace.getPermission())
+                        || CCConstants.PERMISSION_CC_PUBLISH.equals(ace.getPermission())))
+                .toList();
+        if (!toRemove.isEmpty()) {
+            permissionService.removePermissions(nodeRef.getId(), toRemove);
         }
     }
 
