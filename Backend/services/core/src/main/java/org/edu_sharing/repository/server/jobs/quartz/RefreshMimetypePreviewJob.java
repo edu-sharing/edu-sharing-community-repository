@@ -27,6 +27,8 @@
  */
 package org.edu_sharing.repository.server.jobs.quartz;
 
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import jakarta.transaction.UserTransaction;
 import org.alfresco.model.ContentModel;
@@ -45,6 +47,7 @@ import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.cmr.version.VersionService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -56,6 +59,7 @@ import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescript
 import org.edu_sharing.repository.server.tools.ActionObserver;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
+import org.edu_sharing.service.search.model.SortDefinition;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.context.ApplicationContext;
@@ -73,7 +77,7 @@ public class RefreshMimetypePreviewJob extends AbstractJobMapAnnotationParams {
 	@JobFieldDescription(description = "define a filter for files that will be refreshed for mimetype and preview", sampleValue = "{\"term\": {\"properties.cclom:format\":\"text/xml\"}}")
 	private String filter;
 
-	@JobFieldDescription(description = "if true only thumbail generation will be don's. mimetype fix will be skipped. default is false.")
+	@JobFieldDescription(description = "if true only thumbail generation will be done. mimetype fix will be skipped. default is false.")
 	Boolean skipMimeTypeFix;
 
 	@JobFieldDescription(description = "thumbnailservice checks if thumbnail already exists and skips process when exists. when cleanUpExistingThumbnail is true the thumbnail node with name imagepreview will be deleted. default is false.")
@@ -90,6 +94,19 @@ public class RefreshMimetypePreviewJob extends AbstractJobMapAnnotationParams {
 
 	@JobFieldDescription(description = "if true the filter is applied to the archive store (trash) instead of the workspace. Archived nodes only get their mimetype metadata fixed (no content rewrite, no preview generation). default is false.")
 	Boolean archive;
+
+	@JobFieldDescription(description = "number of nodes fetched per elastic search page (max 10000). default is 500.")
+	Integer pageSize;
+
+	@JobFieldDescription(description = "optional node id (uuid) to continue an aborted run: only nodes with a greater uuid are processed. The last node id of each page is logged.")
+	String startAfterNodeId;
+
+	private static final int DEFAULT_PAGE_SIZE = 500;
+
+	/** fixes of the whole run, only committed nodes are added */
+	private FixCounter fixed = new FixCounter();
+	/** fixes of the node currently processed, added to {@link #fixed} after the commit */
+	private FixCounter nodeFixed = new FixCounter();
 
 	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 	ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
@@ -140,67 +157,136 @@ public class RefreshMimetypePreviewJob extends AbstractJobMapAnnotationParams {
 			logger.info("using archive:" + archive);
 
 
+			if (pageSize == null || pageSize <= 0) pageSize = DEFAULT_PAGE_SIZE;
+			// stay below the elastic max_result_window, larger pages would switch to a full scroll search
+			pageSize = Math.min(pageSize, 10000);
+			logger.info("using pageSize:" + pageSize);
+
+			logger.info("using startAfterNodeId:" + startAfterNodeId);
+
+			processPages();
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+	}
+
+	/**
+	 * keyset paging over the node uuid: every page searches the nodes after the last processed uuid
+	 * (sorted by uuid). Unlike offset paging this is stable when already fixed nodes drop out of the filter
+	 * while the job is running, and it is not limited by the elastic max_result_window.
+	 */
+	private void processPages() {
+		org.edu_sharing.service.search.SearchService localService = SearchServiceFactory.getLocalService();
+		Query userFilter = QueryBuilders.wrapper().query(new String(Base64.getEncoder().encode(filter.getBytes()))).build()._toQuery();
+		String lastNodeId = StringUtils.isBlank(startAfterNodeId) ? null : startAfterNodeId.trim();
+		long total = -1;
+		long processed = 0;
+		int page = 0;
+		fixed = new FixCounter();
+		while (true) {
+			final String after = lastNodeId;
+			BoolQuery.Builder query = QueryBuilders.bool()
+					.must(userFilter)
+					// SortDefinition always sorts by type first, so restrict to one type to keep the uuid order stable
+					.must(m -> m.term(t -> t.field("type").value(CCConstants.getValidLocalName(CCConstants.CCM_TYPE_IO))));
+			if (after != null) {
+				query.must(m -> m.range(r -> r.term(t -> t.field("properties.sys:node-uuid").gt(after))));
+			}
+
 			SearchToken searchToken = new SearchToken();
-			searchToken.setElasticQuery(QueryBuilders.wrapper().query(new String(Base64.getEncoder().encode(filter.getBytes()))).build());
+			searchToken.setElasticQuery(query.build());
 			searchToken.setFrom(0);
-			searchToken.setMaxResult(Integer.MAX_VALUE);
+			searchToken.setMaxResult(pageSize);
+			SortDefinition sort = new SortDefinition();
+			sort.addSortDefinitionEntry(new SortDefinition.SortDefinitionEntry("sys:node-uuid", true));
+			searchToken.setSortDefinition(sort);
 			if (archive) {
 				searchToken.setStoreProtocol(MCAlfrescoAPIClient.archiveStoreRef.getProtocol());
 				searchToken.setStoreName(MCAlfrescoAPIClient.archiveStoreRef.getIdentifier());
 			}
-			org.edu_sharing.service.search.SearchService localService = SearchServiceFactory.getLocalService();
+
 			SearchResultNodeRef search = localService.search(searchToken);
-			logger.info("found:" + search.getNodeCount());
-			search.getData().forEach(n -> {
-				NodeRef nodeRef = new NodeRef(new StoreRef(n.getStoreProtocol(),n.getStoreId()),n.getNodeId());
-				QName typeQName = nodeService.getType(nodeRef);
-				String type = typeQName.getLocalName();
-				String name = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
+			List<org.edu_sharing.service.model.NodeRef> hits = search.getData();
+			if (total < 0) {
+				total = search.getNodeCount();
+				logger.info("found:" + total);
+			}
+			if (hits == null || hits.isEmpty()) {
+				break;
+			}
+			// every page starts at from=0, the range filter on the uuid moves the window. If the first hit is not
+			// behind the last processed uuid, the range/sort did not work and the same page would be returned forever
+			String firstNodeId = hits.get(0).getNodeId();
+			if (after != null && firstNodeId.compareTo(after) <= 0) {
+				logger.error("paging did not advance (first node id " + firstNodeId + " is not after " + after
+						+ "), stopping to prevent an endless loop");
+				break;
+			}
+			for (org.edu_sharing.service.model.NodeRef hit : hits) {
+				processNode(new NodeRef(new StoreRef(hit.getStoreProtocol(), hit.getStoreId()), hit.getNodeId()));
+				lastNodeId = hit.getNodeId();
+			}
+			processed += hits.size();
+			logger.info("page " + page + ": " + hits.size() + " nodes, processed " + processed + " of " + total
+					+ ", " + fixed + ", last node id: " + lastNodeId + " (use as startAfterNodeId to continue)");
+			page++;
+			// no break on a page smaller than pageSize: only an empty page ends the run, so a search
+			// returning fewer hits than requested can not stop the job too early
+		}
+		logger.info("finished, processed " + processed + " nodes, " + fixed);
+	}
 
-				logger.info("name:" + name + " type:" + type);
+	/**
+	 * processes a single node in its own transaction
+	 */
+	private void processNode(NodeRef nodeRef) {
+		QName typeQName = nodeService.getType(nodeRef);
+		String type = typeQName.getLocalName();
+		String name = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
 
-				if (typeQName.equals(QName.createQName(CCConstants.CCM_TYPE_IO))) {
+		logger.debug("name:" + name + " type:" + type);
 
-					if(nodeService.getAspects(nodeRef).contains(QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))){
-						logger.warn("ignoring collection_io_reference:" + nodeRef);
-						return;
-					}
+		if (!typeQName.equals(QName.createQName(CCConstants.CCM_TYPE_IO))) {
+			return;
+		}
+		if (nodeService.getAspects(nodeRef).contains(QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))) {
+			logger.debug("ignoring collection_io_reference:" + nodeRef);
+			return;
+		}
 
-					UserTransaction nonPropagatingUserTransaction = serviceRegistry.getTransactionService().getNonPropagatingUserTransaction();
-					try {
-						nonPropagatingUserTransaction.begin();
-						try {
-							policyBehaviourFilter.disableBehaviour(nodeRef);
-							if (onlyInvalidMimetype && isValidMimetype(getMimetype(nodeRef))) {
-								logger.info("skipping node with valid mimetype:" + nodeRef);
-							} else if (archive) {
-								// previews are only generated for the workspace store
-								if (skipMimeTypeFix) logger.info("skipping preview generation for archived node:" + nodeRef);
-								else refreshOriginalMimetype(nodeRef, name, "archived node " + nodeRef);
-							} else if (skipMimeTypeFix) {
-								if (execute) triggerThumbnailAction(nodeRef);
-								else logger.info("protocol mode: would regenerate preview for " + nodeRef);
-							} else {
-								refreshMimetype(nodeRef, name);
-							}
-							if (fixVersionHistory) refreshVersionHistoryMimetypes(nodeRef);
-						}  finally {
-							policyBehaviourFilter.enableBehaviour(nodeRef);
-						}
-						nonPropagatingUserTransaction.commit();
-					}catch (Throwable e) {
-						logger.error(e.getMessage(),e);
-						try {
-							nonPropagatingUserTransaction.rollback();
-						}catch (Exception e1) {
-							logger.error("error rolling back transaction", e1);
-						}
-					}
-
+		nodeFixed = new FixCounter();
+		UserTransaction nonPropagatingUserTransaction = serviceRegistry.getTransactionService().getNonPropagatingUserTransaction();
+		try {
+			nonPropagatingUserTransaction.begin();
+			try {
+				policyBehaviourFilter.disableBehaviour(nodeRef);
+				if (onlyInvalidMimetype && isValidMimetype(getMimetype(nodeRef))) {
+					logger.debug("skipping node with valid mimetype:" + nodeRef);
+				} else if (archive) {
+					// previews are only generated for the workspace store
+					if (skipMimeTypeFix) logger.info("skipping preview generation for archived node:" + nodeRef);
+					else refreshOriginalMimetype(nodeRef, name, "archived node " + nodeRef);
+				} else if (skipMimeTypeFix) {
+					if (execute) triggerThumbnailAction(nodeRef);
+					else logger.info("protocol mode: would regenerate preview for " + nodeRef);
+					nodeFixed.previews++;
+				} else {
+					refreshMimetype(nodeRef, name);
 				}
-			});
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
+				if (fixVersionHistory) refreshVersionHistoryMimetypes(nodeRef);
+			} finally {
+				policyBehaviourFilter.enableBehaviour(nodeRef);
+			}
+			nonPropagatingUserTransaction.commit();
+			// only count changes that were committed
+			fixed.add(nodeFixed);
+		} catch (Throwable e) {
+			logger.error("error processing " + nodeRef + ": " + e.getMessage(), e);
+			try {
+				nonPropagatingUserTransaction.rollback();
+			} catch (Exception e1) {
+				logger.error("error rolling back transaction", e1);
+			}
 		}
 	}
 
@@ -219,6 +305,7 @@ public class RefreshMimetypePreviewJob extends AbstractJobMapAnnotationParams {
 		} else {
 			logger.info("protocol mode: would regenerate preview for " + nodeRef);
 		}
+		nodeFixed.previews++;
 	}
 
 	/**
@@ -240,8 +327,10 @@ public class RefreshMimetypePreviewJob extends AbstractJobMapAnnotationParams {
 			// the version node is not covered by the behaviour lock of the main node
 			try {
 				policyBehaviourFilter.disableBehaviour(versionNodeRef);
-				refreshMimetypeMetadataOnly(frozenRef, versionNodeRef, name,
-						"version " + version.getVersionLabel() + " of " + nodeRef);
+				if (refreshMimetypeMetadataOnly(frozenRef, versionNodeRef, name,
+						"version " + version.getVersionLabel() + " of " + nodeRef) != null) {
+					nodeFixed.versions++;
+				}
 			} finally {
 				policyBehaviourFilter.enableBehaviour(versionNodeRef);
 			}
@@ -303,6 +392,7 @@ public class RefreshMimetypePreviewJob extends AbstractJobMapAnnotationParams {
 		Serializable oldFormat = nodeService.getProperty(nodeRef, QName.createQName(CCConstants.LOM_PROP_TECHNICAL_FORMAT));
 		String newMimetype = refreshMimetypeMetadataOnly(nodeRef, nodeRef, name, label);
 		if (newMimetype != null) {
+			nodeFixed.originals++;
 			syncCollectionRefs(nodeRef, oldFormat, newMimetype, label);
 		}
 		return newMimetype;
@@ -322,6 +412,7 @@ public class RefreshMimetypePreviewJob extends AbstractJobMapAnnotationParams {
 			}
 			if (!execute) {
 				logger.info("protocol mode: would sync cclom:format " + newMimetype + " (was: " + refFormat + ") to collection ref " + ref + " of " + label);
+				nodeFixed.collectionRefs++;
 				continue;
 			}
 			Map<QName, Serializable> before = new HashMap<>();
@@ -332,6 +423,7 @@ public class RefreshMimetypePreviewJob extends AbstractJobMapAnnotationParams {
 				policyBehaviourFilter.disableBehaviour(ref);
 				logger.info("execute mode: sync cclom:format " + newMimetype + " (was: " + refFormat + ") to collection ref " + ref + " of " + label);
 				NodeCustomizationPolicies.syncCollectionRefProps(original, ref, before, after, true, nodeService);
+				nodeFixed.collectionRefs++;
 			} catch (Exception e) {
 				logger.error("error while syncing collection ref " + ref + " of " + label + ": " + e.getMessage(), e);
 			} finally {
@@ -389,6 +481,29 @@ public class RefreshMimetypePreviewJob extends AbstractJobMapAnnotationParams {
 			nodeService.setProperty(nodeRef,ContentModel.PROP_NAME,name);
 		}else{
 			logger.error("action status." + thumbnailAction.getExecutionStatus() +" will not trigger update on io. tracker will not retrack preview");
+		}
+	}
+
+	/**
+	 * counts the fixed nodes. In protocol mode it counts the nodes that would be fixed.
+	 */
+	private class FixCounter {
+		long originals;
+		long collectionRefs;
+		long versions;
+		long previews;
+
+		void add(FixCounter other) {
+			originals += other.originals;
+			collectionRefs += other.collectionRefs;
+			versions += other.versions;
+			previews += other.previews;
+		}
+
+		@Override
+		public String toString() {
+			return (execute ? "fixed" : "would be fixed (protocol mode)") + " originals: " + originals
+					+ ", collection refs: " + collectionRefs + ", versions: " + versions + ", previews: " + previews;
 		}
 	}
 }
