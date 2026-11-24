@@ -878,7 +878,7 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
     /**
      * Fetches further data in response to es-node-entries-wrapper's fetchData output.
      */
-    async fetchData(currentPagination: any): Promise<void> {
+    async fetchData(): Promise<void> {
         // Infinite scroll keeps firing while a page is in flight, and the offset it reports is
         // only correct once the previous page has been appended.
         if (this.dataSource.isLoading) {
@@ -888,15 +888,9 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
         // "load more" fallback inline as the trailing tile instead of below the list.
         this.dataSource.isLoading = 'page';
         try {
-            // in edit mode, all requested nodes are shown, while in view mode, some requested nodes might be omitted, which has to be taken into account
-            // TODO: an alternative solution might be replacing the offset calculation by this.allRequestedNodes.length
-            const offsetToTakeIntoAccount: number = this.hasEditRightsAndIsEditMode
-                ? currentPagination.offset
-                : currentPagination.offset +
-                  this.allRequestedNodes.filter((node: Node) =>
-                      this.blacklistedNodeIds.includes(node.ref.id),
-                  ).length;
-            await this.setDataSource(false, offsetToTakeIntoAccount);
+            // the next page starts after all search results loaded so far; the displayed items
+            // differ from them by the hidden nodes and the injected custom cards
+            await this.setDataSource(false, this.allRequestedNodes.length);
             if (this.hasEditRightsAndIsEditMode) {
                 this.dynamicallyAddCssClasses(
                     this.allRequestedNodes,
