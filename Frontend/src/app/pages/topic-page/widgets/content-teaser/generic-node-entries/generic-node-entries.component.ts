@@ -326,7 +326,7 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
                 else if (
                     this.sidebarOpen() &&
                     this.nodeEntries.getSelection().selected?.length > 0 &&
-                    this.nodeEntries.getSelection().selected[0].ref.id !== this.selectedNodeIds[0]
+                    this.nodeEntries.getSelection().selected[0]?.ref?.id !== this.selectedNodeIds[0]
                 ) {
                     this.nodeEntries.getSelection().setSelection(selectedNode);
                 }
@@ -504,13 +504,15 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
         // sidebar is opened, but the selection does not match
         else if (
             this.sidebarOpen() &&
-            this.nodeEntries.getSelection().selected?.[0].ref.id !== this.selectedNodeIds[0]
+            this.nodeEntries.getSelection().selected?.[0]?.ref?.id !== this.selectedNodeIds[0]
         ) {
-            this.nodeEntries
-                .getSelection()
-                .setSelection(
-                    this.allRequestedNodes.find((n) => n.ref.id === this.selectedNodeIds[0]),
-                );
+            // a teaser not containing the previewed node keeps its selection untouched
+            const previewedNode: Node | undefined = this.allRequestedNodes.find(
+                (n) => n.ref.id === this.selectedNodeIds[0],
+            );
+            if (previewedNode) {
+                this.nodeEntries.getSelection().setSelection(previewedNode);
+            }
         }
     }
 
