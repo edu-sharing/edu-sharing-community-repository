@@ -183,6 +183,9 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     private aiTextsApplied: Promise<void> = Promise.resolve();
     initialized: WritableSignal<boolean> = signal(false);
     private readonly persistConfigTrigger$: Subject<void> = new Subject<void>();
+    // the save currently running and whether another one was requested meanwhile
+    private persistRun: Promise<void> | null = null;
+    private persistRequested: boolean = false;
     rendering2Supported: WritableSignal<boolean> = signal(false);
     // whether embedding widgets as web components is enabled in the repository backend config
     private webComponentsEnabled: boolean = false;
@@ -310,11 +313,40 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     }
 
     /**
-     * Persists the currently defined config.
+     * Persists the currently defined config. Saves run one after another; requests arriving while
+     * one runs are merged into a single follow-up save of the then current state.
      */
-    async persistConfig(): Promise<void> {
+    persistConfig(): Promise<void> {
+        this.persistRequested = true;
+        if (!this.persistRun) {
+            this.persistRun = this.runRequestedPersists();
+        }
+        return this.persistRun;
+    }
+
+    /**
+     * Saves the config until no further save was requested in the meantime.
+     */
+    private async runRequestedPersists(): Promise<void> {
         this.updateInProgress.set(true);
         this.widgetInstance.updateInProgress.set(true);
+        try {
+            while (this.persistRequested) {
+                this.persistRequested = false;
+                await this.writeConfig();
+            }
+        } finally {
+            this.persistRun = null;
+            this.updateInProgress.set(false);
+            this.widgetInstance.updateInProgress.set(false);
+        }
+    }
+
+    /**
+     * Writes the current config to the widget node and applies the stored state, unless a newer
+     * local change is about to be saved.
+     */
+    private async writeConfig(): Promise<void> {
         // outside the editor an AI text is empty until its result arrives, so it has to be awaited
         if (!this.editMode()) {
             await this.aiTextsApplied;
@@ -354,7 +386,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
         );
         // this is the case for updated nodes
         // as those do already exist, the properties need to be synchronized
-        if (this.widgetNode) {
+        if (this.widgetNode && !this.persistRequested) {
             // retrieve both the widget and the AI config from the node and update the values in the widget
             widgetConfig = retrieveWidgetConfigFromNode(this.widgetNode);
             aiConfig = retrieveAiConfigFromNode(this.widgetNode);
@@ -367,13 +399,12 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
                     await result;
                 }
             }
-            // unchanged prompts keep their generated texts instead of being generated again
+            // unchanged prompts keep their generated texts instead of being generated again; the
+            // generation is not awaited, so it does not hold back the next save
             if (!this.isAppliedAiConfig(aiConfig)) {
-                await this.updateCommonProperties(widgetConfig, aiConfig);
+                void this.updateCommonProperties(widgetConfig, aiConfig);
             }
         }
-        this.updateInProgress.set(false);
-        this.widgetInstance.updateInProgress.set(false);
     }
 
     /**
