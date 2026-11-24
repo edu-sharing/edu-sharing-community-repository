@@ -167,7 +167,7 @@ export class CollectionNewComponent implements OnInit, OnDestroy {
 
     @HostListener('document:keydown', ['$event'])
     handleKeyboardEvent(event: KeyboardEvent) {
-        if (event.code == 'Escape') {
+        if (event.code === 'Escape' && !event.defaultPrevented) {
             event.preventDefault();
             event.stopPropagation();
             void this.goBack();
