@@ -74,6 +74,12 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
     isSafeLogin = false;
     filteredProviders: any;
     isLoading = true;
+    /**
+     * true while a login request is running
+     * kept separate from isLoading so the login card is not destroyed and re-created,
+     * which would move the focus and interrupt screen reader announcements of the error toast
+     */
+    isLoggingIn = false;
     loginUrl: any;
     password = '';
     providerControl = new UntypedFormControl();
@@ -250,6 +256,8 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     ngOnDestroy(): void {
+        // the spinner is an overlay and would survive the navigation after a successful login
+        this.toast.closeProgressSpinner();
         this.destroyed.next();
         this.destroyed.complete();
     }
@@ -292,7 +300,13 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     async login(password = this.password, code2Fa?: string) {
-        this.isLoading = true;
+        if (this.isLoggingIn) {
+            return;
+        }
+        this.isLoggingIn = true;
+        // reset so the error detail is re-inserted (and announced again) on repeated failures
+        this.loginSafeFailed = false;
+        this.toast.showProgressSpinner();
         if (this.scope) {
             // before we're converting to a safe session, we need to make sure all previous requests are finished
             // otherwise, we're may getting HTTP_FORBIDDEN/401
@@ -332,14 +346,19 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
                         this.toast.error(null, 'LOGIN.ERROR' + (this.isSafeLogin ? '_SAFE' : ''));
                     }
                     this.password = '';
-                    this.isLoading = false;
+                    this.setLoggingInFinished();
                 }
             },
             (error: any) => {
                 this.toast.error(error);
-                this.isLoading = false;
+                this.setLoggingInFinished();
             },
         );
+    }
+
+    private setLoggingInFinished() {
+        this.isLoggingIn = false;
+        this.toast.closeProgressSpinner();
     }
 
     ngOnInit() {
@@ -484,7 +503,6 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
         this.show2FaDialog = null;
         if (result === 'NEXT' && this.faConfirm.status === 'VALID') {
             // do login
-            this.isLoading = true;
             void this.login(password, this.faConfirm.get('code').value);
         }
     }

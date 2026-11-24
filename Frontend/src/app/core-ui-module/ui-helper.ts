@@ -219,33 +219,24 @@ export class UIHelper {
     }
 
     /**
-     * Navigate to the search in reurl (apply) mode
-     * when done, the app will redirect to the current location
+     * Open the search in reurl (apply) mode in a new window
+     * the selected node will be sent back via frame communication (EVENT_APPLY_NODE)
      */
     public static openSearchWithReurl(
         platformLocation: PlatformLocation,
         router: Router,
-        mode: 'REDIRECT' | 'WINDOW',
         extras: NavigationExtras = {},
     ) {
         if (!extras.queryParams) {
             extras.queryParams = {};
         }
-        if (mode === 'REDIRECT') {
-            extras.queryParams.reurl = window.location.href;
-        } else {
-            extras.queryParams.reurl = 'WINDOW';
-        }
-        if (mode === 'REDIRECT') {
-            return router.navigate([UIConstants.ROUTER_PREFIX + 'search'], extras);
-        } else {
-            return window.open(
-                platformLocation.getBaseHrefFromDOM() +
-                    router.createUrlTree([UIConstants.ROUTER_PREFIX + 'search'], extras).toString(),
-                '_blank',
-                'toolbar=no,scrollbars=yes,resizable=yes',
-            );
-        }
+        extras.queryParams.reurl = 'WINDOW';
+        return window.open(
+            platformLocation.getBaseHrefFromDOM() +
+                router.createUrlTree([UIConstants.ROUTER_PREFIX + 'search'], extras).toString(),
+            '_blank',
+            'toolbar=no,scrollbars=yes,resizable=yes',
+        );
     }
 
     /**

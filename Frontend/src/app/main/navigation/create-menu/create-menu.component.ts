@@ -516,7 +516,8 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         parameters: { [key in string]: string[] } = null,
         connectorType: Connector = null,
     ) {
-        this.uiService.openConnector(node, type, win, connectorType, true, parameters);
+        // quota was already checked in showCreateConnector
+        this.uiService.openConnector(node, type, win, connectorType, true, parameters, true);
     }
 
     pickMaterialFromSearch() {
