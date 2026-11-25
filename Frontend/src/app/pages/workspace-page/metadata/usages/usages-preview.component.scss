@@ -57,6 +57,29 @@
     flex-direction: column;
 }
 
+// variant rows carry a larger round icon, so they use less vertical padding
+.usages__variants .usage-row {
+    padding: 8px 16px;
+}
+
+// round frame around the mediatype icon of a variant row
+.usage-row__node-icon {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--borderGray);
+
+    img {
+        width: 22px;
+        height: 22px;
+        object-fit: contain;
+    }
+}
+
 // hint shown when the embeddings/usage metric is selected but the node has no usages at all
 .usages__hint {
     @extend %usages-surface;

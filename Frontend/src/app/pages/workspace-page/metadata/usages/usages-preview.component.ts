@@ -9,9 +9,17 @@ import {
     untracked,
 } from '@angular/core';
 import { Router } from '@angular/router';
-import { Node, StatisticV1Service, Usage, UsageV1Service } from 'ngx-edu-sharing-api';
+import {
+    Node,
+    NodeService,
+    NodeTools,
+    StatisticV1Service,
+    Usage,
+    UsageV1Service,
+} from 'ngx-edu-sharing-api';
 import { UIConstants } from 'ngx-edu-sharing-ui';
-import { forkJoin } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { RestConnectorService, RestConstants } from '../../../../core-module/core.module';
 import { NodeHelperService } from '../../../../services/node-helper.service';
 import { SharedModule } from '../../../../shared/shared.module';
@@ -125,6 +133,7 @@ export interface UsageDetailRow {
 export class UsagesPreviewComponent {
     private connector = inject(RestConnectorService);
     private nodeHelper = inject(NodeHelperService);
+    private nodeService = inject(NodeService);
     private router = inject(Router);
     private statisticApi = inject(StatisticV1Service);
     private usageApi = inject(UsageV1Service);
@@ -183,6 +192,15 @@ export class UsagesPreviewComponent {
     /** Embedding / usage count */
     private readonly embeddingCount = computed(
         () => this.embeddingUsages().length + this.collectionUsages().length,
+    );
+
+    /** Node this material was forked from (null if it is no variant or not readable) */
+    protected readonly forkedParent = signal<Node | null>(null);
+    /** Variants forked from this material */
+    protected readonly forkedChildren = signal<Node[]>([]);
+    /** Whether the variants card has any relation to show */
+    protected readonly hasVariants = computed(
+        () => this.forkedParent() != null || this.forkedChildren().length > 0,
     );
 
     /** Node selection key the statistics currently reflect */
@@ -374,6 +392,16 @@ export class UsagesPreviewComponent {
             }
         });
 
+        // variant relations are per node and only shown for a single selection
+        effect(() => {
+            const nodes = this.nodes() ?? [];
+            this.forkedParent.set(null);
+            this.forkedChildren.set([]);
+            if (nodes.length === 1 && this.showStatisticsPreview()) {
+                this.loadVariants(nodes[0]);
+            }
+        });
+
         // keep the auto-selected card in sync with the selection: embeddings is the only
         // metric with a detail view, so it stays selected for a single node. It is disabled
         // for a multi-selection – in that case fall back to the first card (whose detail
@@ -505,6 +533,34 @@ export class UsagesPreviewComponent {
             },
             error: () => this.collectionUsages.set([]),
         });
+    }
+
+    /** Load the node the given node was forked from and the variants forked from it. */
+    private loadVariants(node: Node): void {
+        const key = node.ref.id;
+        const origin = node.properties?.[RestConstants.CCM_PROP_FORKED_ORIGIN]?.[0];
+        if (origin) {
+            // the origin may have been deleted or be unreadable for the current user
+            this.nodeService
+                .getNode(NodeTools.removeSpacesStoreRef(origin))
+                .pipe(catchError(() => of(null)))
+                .subscribe((parent) => {
+                    if (this.isCurrentSelection(key)) {
+                        this.forkedParent.set(parent);
+                    }
+                });
+        }
+        this.nodeService
+            .getForkedChilds(node)
+            .pipe(
+                map((result) => result.nodes ?? []),
+                catchError(() => of([] as Node[])),
+            )
+            .subscribe((children) => {
+                if (this.isCurrentSelection(key)) {
+                    this.forkedChildren.set(children);
+                }
+            });
     }
 
     /** Guard against out-of-order responses when the selection changes quickly. */
