@@ -138,6 +138,15 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
             .subscribe((elementsLoadedTranslation) => {
                 void this.announcer.announce(elementsLoadedTranslation);
             });
+        // a changed query (search string, filters, sort) replaces the list instead of extending it
+        results.resultsUpdated
+            .pipe(
+                takeUntil(this.destroyed),
+                switchMap((count) => this.translate.get('SEARCH.RESULTS_UPDATED', { count })),
+            )
+            .subscribe((resultsUpdatedTranslation) => {
+                void this.announcer.announce(resultsUpdatedTranslation);
+            });
     }
 
     async ngOnInit() {

@@ -59,6 +59,7 @@
     "REPOSITORY_FILTER": "Fonti di contenuto:",
     "LOADING_RESULTS": "caricamento dei risultati, l'avanzamento è {{ progress }}%",
     "LOADED_RESULTS": "ha caricato {{ count }} nuovi risultati",
+    "RESULTS_UPDATED": "Risultati della ricerca aggiornati: {{ count }} risultati",
     "RENDER": {
       "BACK_TO_SEARCH": "Torna alla ricerca"
     },

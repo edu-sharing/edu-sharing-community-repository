@@ -61,6 +61,7 @@
     "REPOSITORY_FILTER": "Zu durchsuchende Quellen",
     "LOADING_RESULTS": "lade Ergebnisse, Fortschritt: {{ progress }}%",
     "LOADED_RESULTS": "{{ count }} weitere Ergebnisse geladen",
+    "RESULTS_UPDATED": "Suchergebnisse aktualisiert: {{ count }} Treffer",
     "RENDER": {
       "BACK_TO_SEARCH": "Zurück zur Suche"
     },
