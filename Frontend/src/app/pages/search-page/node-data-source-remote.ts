@@ -360,7 +360,9 @@ class PaginationHandler<P extends MatPaginator = MatPaginator> {
     }
     set length(value) {
         this._length = value;
-        if (this.paginator) {
+        // `null` (unknown while a new query loads) keeps the last length, so the live range label
+        // is not announced as "page 1 of 0" before the response arrives
+        if (this.paginator && value !== null) {
             this.paginator.length = value;
         }
     }

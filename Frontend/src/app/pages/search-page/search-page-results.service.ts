@@ -488,13 +488,13 @@ export class SearchPageResultsService extends SearchPageResults implements OnDes
     }
 
     private _registerResultDiffCount(): void {
-        // a 'reset' load replaces the results of a changed query, a 'page' load appends to them
+        // 'initial' and 'reset' loads show the results of a new query, a 'page' load appends to them
         let queryChangeLoading = false;
         this.resultsDataSource.isLoadingSubject
             .pipe(takeUntil(this._destroyed))
             .subscribe((loading) => {
                 if (loading) {
-                    queryChangeLoading = loading === 'reset';
+                    queryChangeLoading = loading === 'initial' || loading === 'reset';
                 }
             });
         this.resultsDataSource
