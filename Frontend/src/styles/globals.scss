@@ -41,6 +41,11 @@ body:has(es-create-menu .drop-zone) .es-edge-toggle-pane,
 body:has(es-create-menu .drop-zone) es-edge-toggle.inline {
     display: none;
 }
+// Hide the sidebar edge toggles while the main menu is open, since its backdrop renders below them.
+body:has(es-main-menu-sidebar .sidebar) .es-edge-toggle-pane,
+body:has(es-main-menu-sidebar .sidebar) es-edge-toggle.inline {
+    display: none;
+}
 
 .cdk-visually-hidden {
     margin: unset; // Causes scroll bars on surrounding `overflow: auto` containers
