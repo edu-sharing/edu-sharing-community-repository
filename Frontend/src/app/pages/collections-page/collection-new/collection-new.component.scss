@@ -51,7 +51,7 @@ $imagePath: '../../../../assets/images/collections/';
             .circle {
                 background-image: url($imagePath + 'finish.svg');
             }
-            color: $colorStatusPositive;
+            color: var(--colorStatusPositiveText);
             .label {
                 font-weight: bold;
                 text-transform: uppercase;
