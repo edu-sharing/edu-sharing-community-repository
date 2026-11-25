@@ -244,10 +244,10 @@ $imagePath: '../../../../assets/images/collections/';
             cursor: pointer;
         }
         .color-selected {
-            border: 2px solid var(--borderDark);
-            // ring outside the swatch, so the selection does not depend on the swatch color
+            // ring reaching outside the swatch, independent of its color
+            border: 2px solid var(--textBlack);
             outline: 2px solid var(--textBlack);
-            outline-offset: 1px;
+            outline-offset: 0;
         }
     }
 }
