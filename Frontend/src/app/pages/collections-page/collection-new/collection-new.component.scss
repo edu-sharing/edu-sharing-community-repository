@@ -245,6 +245,9 @@ $imagePath: '../../../../assets/images/collections/';
         }
         .color-selected {
             border: 2px solid var(--borderDark);
+            // ring outside the swatch, so the selection does not depend on the swatch color
+            outline: 2px solid var(--textBlack);
+            outline-offset: 1px;
         }
     }
 }
