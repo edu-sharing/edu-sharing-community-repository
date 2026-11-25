@@ -837,6 +837,25 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         return options;
     }
 
+    /**
+     * Translated media type of the download (several nodes are zipped), else the file
+     * extension, else null.
+     */
+    private getDownloadFormat(nodes: Node[] | undefined): string | null {
+        if (!nodes?.length) {
+            return null;
+        }
+        const mediatype = nodes.length > 1 ? 'file-zip' : nodes[0].mediatype;
+        if (mediatype && mediatype !== 'file') {
+            const key = 'MEDIATYPE.' + mediatype;
+            const translated = this.translate.instant(key);
+            if (translated !== key) {
+                return translated;
+            }
+        }
+        return nodes[0].name?.match(/\.([a-z0-9]{1,5})$/i)?.[1]?.toUpperCase() ?? null;
+    }
+
     getDownloadOption(data: OptionData, safe = false) {
         const downloadNode = new OptionItem(
             'OPTIONS.DOWNLOAD' + (safe ? '_SAFE' : ''),
@@ -858,6 +877,13 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         // downloadNode.key = 'D';
         downloadNode.priority = 40;
         downloadNode.customShowCallback = async (nodes) => {
+            if (!safe && !data.customDownloadUrl) {
+                // name the file type of the download
+                const format = this.getDownloadFormat(nodes as Node[]);
+                downloadNode.ariaLabel = format
+                    ? `${this.translate.instant(downloadNode.name)} (${format})`
+                    : '';
+            }
             return (
                 (!!data.customDownloadUrl && !safe) ||
                 nodes.some((n) =>

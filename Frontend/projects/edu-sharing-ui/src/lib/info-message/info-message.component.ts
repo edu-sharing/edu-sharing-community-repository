@@ -25,6 +25,12 @@ export class InfoMessageComponent {
         warning: 'warning',
         error: 'error',
     };
+    /** close button label per message type */
+    protected readonly CLOSE_LABELS = {
+        info: 'CLOSE_MESSAGE',
+        warning: 'CLOSE_WARNING_MESSAGE',
+        error: 'CLOSE_ERROR_MESSAGE',
+    };
     constructor() {}
     getIcon() {
         return this.ICONS[this.mode];

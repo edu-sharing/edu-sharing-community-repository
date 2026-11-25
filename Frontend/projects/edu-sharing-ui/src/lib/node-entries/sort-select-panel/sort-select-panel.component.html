@@ -8,6 +8,8 @@
 } @if (columns?.length) { @if (sortDropdown.menu) {
 <button [matMenuTriggerFor]="sortDropdown.menu" mat-button color="primary">
   @if (active) {
+  <!-- purpose for screen readers, the button only shows the value -->
+  <span class="cdk-visually-hidden">{{ 'SORT_BY' | translate }}: </span>
   <span>{{
     'NODE_SORT.' + active | translate : { fallback: ('NODE.' + active | translate) }
   }}</span>
