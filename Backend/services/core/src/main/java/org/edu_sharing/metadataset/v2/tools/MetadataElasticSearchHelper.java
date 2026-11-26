@@ -39,7 +39,7 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
     private static MetadataQueryPreprocessor preprocessor = new MetadataQueryPreprocessor(MetadataReader.QUERY_SYNTAX_DSL);
 
     //@TODO make more generic or fix in elastic model
-    public static final List<String> nonKeywordFacets = List.of("cclom:format");
+    public static final List<String> nonKeywordFacets = List.of("ccm:original", "sys:node-uuid", "cclom:format", "cclom:location", "cm:versionLabel");
 
     public static BoolQuery.Builder getElasticSearchQuery(SearchToken searchToken, MetadataQueries queries, MetadataQuery query, Map<String, String[]> parameters) throws IllegalArgumentException {
         return getElasticSearchQuery(searchToken, queries, query, parameters, true);
