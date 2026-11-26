@@ -18,18 +18,7 @@ public class PropertiesGetInterceptorAuthors extends PropertiesGetInterceptorDef
     @Override
     public Map<String, Object> beforeDeliverProperties(PropertiesContext context) {
         try {
-            Object author = context.getProperties().get(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUTHOR);
-            if(author == null) {
-                author = Collections.emptyList();
-            }
-            Object freetext = context.getProperties().get(CCConstants.CCM_PROP_AUTHOR_FREETEXT);
-            if(freetext == null) {
-                freetext = Collections.emptyList();
-            }
-            List<String> result = Stream.concat(
-                    ((freetext instanceof List) ? ((List<String>)freetext) : Arrays.asList(ValueTool.getMultivalue(freetext.toString()))).stream(),
-                    ((author instanceof List) ? ((List<String>)author) : Arrays.asList(ValueTool.getMultivalue(author.toString()))).stream().map(VCardConverter::getNameForVCardString)
-            ).filter(StringUtils::isNotBlank).collect(Collectors.toList());
+            List<String> result = getAllAuthors(context.getProperties());
 
             // fix after DESP-738
             context.getProperties().put("{virtualproperty}all_authors",
@@ -39,5 +28,25 @@ public class PropertiesGetInterceptorAuthors extends PropertiesGetInterceptorDef
             log.warn(t.getMessage(), t);
         }
         return context.getProperties();
+    }
+
+    /**
+     * all authors of a node: author freetext + display names of all author vcards
+     * @param properties native node properties (global names)
+     * @return list of author names, never null
+     */
+    public static List<String> getAllAuthors(Map<String, Object> properties) {
+        Object author = properties.get(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUTHOR);
+        if(author == null) {
+            author = Collections.emptyList();
+        }
+        Object freetext = properties.get(CCConstants.CCM_PROP_AUTHOR_FREETEXT);
+        if(freetext == null) {
+            freetext = Collections.emptyList();
+        }
+        return Stream.concat(
+                ((freetext instanceof List) ? ((List<String>)freetext) : Arrays.asList(ValueTool.getMultivalue(freetext.toString()))).stream(),
+                ((author instanceof List) ? ((List<String>)author) : Arrays.asList(ValueTool.getMultivalue(author.toString()))).stream().map(VCardConverter::getNameForVCardString)
+        ).filter(StringUtils::isNotBlank).collect(Collectors.toList());
     }
 }
