@@ -524,10 +524,12 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
             if (!currentId) {
                 return;
             }
+            // collection references live inside their collection, never in a workspace folder
             const filtered = nodes.filter(
                 (n) =>
-                    [RestConstants.USERHOME, RestConstants.SHARED_FILES].includes(currentId) ||
-                    n.parent?.id === currentId,
+                    !n.aspects?.includes(RestConstants.CCM_ASPECT_IO_REFERENCE) &&
+                    ([RestConstants.USERHOME, RestConstants.SHARED_FILES].includes(currentId) ||
+                        n.parent?.id === currentId),
             );
             if (filtered.length) {
                 this.nodeEntries?.addVirtualNodes(filtered, { select: true });
