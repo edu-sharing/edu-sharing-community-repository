@@ -39,7 +39,6 @@
             display: inline;
             &:not(:last-child):after {
                 content: ', ';
-                padding-right: 0.3em;
                 display: inline;
                 align-items: flex-end;
             }
