@@ -161,7 +161,7 @@
       <div class="external-embed-overlay" [class.contrast-mode]="isContrastMode">
         @if (isGdprGeneric()) {
         <div class="external-embed-content">
-          <h3>{{ 'RENDERING.GDPR.EXTERNAL_SITE' | translate }}</h3>
+          <h2>{{ 'RENDERING.GDPR.EXTERNAL_SITE' | translate }}</h2>
           <span>{{ gdprInfoText }}</span>
           <a
             mat-button="outlined"
@@ -179,7 +179,7 @@
         </div>
         } @if (!isGdprGeneric()) {
         <div class="external-embed-content">
-          <h3>{{ 'RENDERING.GDPR.EXTERNAL_CONTENT' | translate }}</h3>
+          <h2>{{ 'RENDERING.GDPR.EXTERNAL_CONTENT' | translate }}</h2>
           <span>{{ gdprInfoText }}</span>
           <span>{{ 'RENDERING.GDPR.FURTHER_INFORMATION' | translate }}</span>
           <a
