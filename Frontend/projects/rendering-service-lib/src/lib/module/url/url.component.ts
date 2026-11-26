@@ -1,12 +1,15 @@
 import {
     Component,
+    ElementRef,
     EventEmitter,
+    Injector,
     Input,
     OnChanges,
     OnDestroy,
     OnInit,
     Output,
     SimpleChanges,
+    afterNextRender,
     inject,
 } from '@angular/core';
 import { RenderingModule } from '../../rendering.module';
@@ -45,6 +48,8 @@ export class UrlComponent implements RenderModule, OnInit, OnChanges, OnDestroy 
     private translate = inject(TranslateService);
     private accessibilityService = inject(AccessibilityService);
     private globalStateService = inject(GlobalStateService);
+    private elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+    private injector = inject(Injector);
 
     @Input() data: RenderData | undefined;
     @Input() node: Node | undefined;
@@ -158,6 +163,20 @@ export class UrlComponent implements RenderModule, OnInit, OnChanges, OnDestroy 
         if (this.node?.ref.id && this.node?.ref.repo) {
             this.trackingService.trackGdprConsent(this.node.ref.id, this.node.ref.repo);
         }
+        this.focusContentAfterConsent();
+    }
+
+    /** Moves focus to the content replacing the consent overlay, so it does not fall back to body. */
+    private focusContentAfterConsent() {
+        afterNextRender(
+            () => {
+                const target = this.elementRef.nativeElement.querySelector<HTMLElement>(
+                    'iframe, video, a[href], button:not([disabled])',
+                );
+                target?.focus();
+            },
+            { injector: this.injector },
+        );
     }
 
     getYoutubeUrl(): SafeResourceUrl {

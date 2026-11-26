@@ -1,7 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { DomSanitizer } from '@angular/platform-browser';
 import { Node } from 'ngx-edu-sharing-api';
+import { UrlEmbeddings } from '../../dto/FrontendModuleConfig';
+import { GdprConfig } from '../../dto/GdprConfig';
 
 import { UrlComponent } from './url.component';
 
@@ -12,6 +16,8 @@ describe('UrlComponent', () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [UrlComponent, TranslateModule.forRoot()],
+            // The link and consent views use icon and config services that issue http requests.
+            providers: [provideHttpClient(), provideHttpClientTesting()],
         }).compileComponents();
 
         fixture = TestBed.createComponent(UrlComponent);
@@ -77,5 +83,28 @@ describe('UrlComponent', () => {
         component.node = { ref: { id: 'abc' }, properties: {} } as unknown as Node;
 
         expect(component.getConnectorRenderUrl()).toBeNull();
+    });
+
+    it('moves focus to the link button after consenting to the gdpr notice', async () => {
+        spyOn(window, 'open').and.returnValue(null);
+        component.embedding = UrlEmbeddings.LINK;
+        component.url = 'https://example.org';
+        component.gdpr = {
+            name: 'EXTERNAL_SOURCES',
+            ref: 'https://example.org/privacy',
+        } as GdprConfig;
+        fixture.detectChanges();
+        const consentButton = fixture.nativeElement.querySelector(
+            '.external-embed-content button',
+        ) as HTMLButtonElement;
+        consentButton.focus();
+
+        consentButton.click();
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const link = fixture.nativeElement.querySelector('.link-wrapper a');
+        expect(link).toBeTruthy();
+        expect(document.activeElement).toBe(link);
     });
 });
