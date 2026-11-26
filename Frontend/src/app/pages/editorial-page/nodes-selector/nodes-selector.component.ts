@@ -436,11 +436,12 @@ export class NodesSelectorComponent implements OnInit {
                 }
                 return null;
             } else {
-                if (
-                    this.onlyOneSelected() &&
-                    (this.selectedNodes()[0].mediatype === 'folder' ||
-                        this.selectedNodes()[0].mediatype === 'collection')
-                ) {
+                const selected = this.selectedNodes();
+                if (this.onlyOneSelected() && selected[0].mediatype === 'folder') {
+                    return null;
+                }
+                // the nodes can be sorted into several collections at once
+                if (selected.length && selected.every((node) => node.mediatype === 'collection')) {
                     return null;
                 }
                 return InvalidSelectionReason.INVALID_SELECTION;
@@ -1162,19 +1163,11 @@ export class NodesSelectorComponent implements OnInit {
      * Insert into the selected target.
      */
     async insertSelectedNodes(): Promise<void> {
-        const target = this.selectedNodes()[0] as Node;
+        const targets = this.selectedNodes() as Node[];
+        const target = targets[0];
         const source = this.selectedSourceNodes();
-        if (target.mediatype === 'collection') {
-            // without write access the nodes can only be proposed to the collection
-            const asProposal = !target.access?.includes(RestConstants.ACCESS_WRITE);
-            if (asProposal && !(await this.confirmProposal(target))) {
-                return;
-            }
-            this.editorialSidebarService.sidebarLoading.set(true);
-            this.uiService.addToCollection(target, source, asProposal, () => {
-                this.editorialSidebarService.sidebarLoading.set(false);
-                this.editorialSidebarService.sidebarOpened.set(false);
-            });
+        if (targets.every((node) => node.mediatype === 'collection')) {
+            await this.insertIntoCollections(targets, source);
         } else if (target.mediatype === 'folder') {
             this.editorialSidebarService.sidebarLoading.set(true);
             try {
@@ -1186,10 +1179,43 @@ export class NodesSelectorComponent implements OnInit {
     }
 
     /**
-     * Asks whether the nodes should be submitted as a proposal for the given collection.
+     * Adds the nodes to each collection, as a proposal where the user lacks write access.
+     * The collections are processed one after another, so their dialogs never overlap.
+     */
+    private async insertIntoCollections(targets: Node[], source: Node[]): Promise<void> {
+        // the tree can list a collection in several branches, e.g. recent and my collections
+        const collections = targets.filter(
+            (target, index) => targets.findIndex((t) => t.ref.id === target.ref.id) === index,
+        );
+        const proposalOnly = collections.filter(
+            (collection) => !collection.access?.includes(RestConstants.ACCESS_WRITE),
+        );
+        if (proposalOnly.length && !(await this.confirmProposal(proposalOnly))) {
+            return;
+        }
+        // with several targets, nodes already in a collection are skipped instead of asked for
+        const allowDuplicate = collections.length > 1 ? 'ignore' : false;
+        this.editorialSidebarService.sidebarLoading.set(true);
+        for (const collection of collections) {
+            await new Promise<void>((resolve) =>
+                this.uiService.addToCollection(
+                    collection,
+                    source,
+                    proposalOnly.includes(collection),
+                    () => resolve(),
+                    allowDuplicate,
+                ),
+            );
+        }
+        this.editorialSidebarService.sidebarLoading.set(false);
+        this.editorialSidebarService.sidebarOpened.set(false);
+    }
+
+    /**
+     * Asks whether the nodes should be submitted as a proposal for the given collections.
      * Resolves to false if the user declines or lacks the proposal tool permission.
      */
-    private async confirmProposal(collection: Node): Promise<boolean> {
+    private async confirmProposal(collections: Node[]): Promise<boolean> {
         const mayPropose = await this.authenticationService.hasToolpermission(
             RestConstants.TOOLPERMISSION_COLLECTION_PROPOSAL,
         );
@@ -1197,10 +1223,12 @@ export class NodesSelectorComponent implements OnInit {
             this.toast.error(null, 'NO_WRITE_PERMISSIONS');
             return false;
         }
+        const titles = collections.map((collection) => RestHelper.getTitle(collection));
         const dialogRef = await this.dialogs.openGenericDialog({
             title: 'DIALOG.COLLECTION_PROPSE',
             message: 'DIALOG.COLLECTION_PROPSE_INFO',
-            messageParameters: { collection: RestHelper.getTitle(collection) },
+            // the message quotes the parameter, so each title ends up in its own quotes
+            messageParameters: { collection: titles.join('", "') },
             buttons: OK_OR_CANCEL,
         });
         return (await firstValueFrom(dialogRef.afterClosed())) === 'OK';
