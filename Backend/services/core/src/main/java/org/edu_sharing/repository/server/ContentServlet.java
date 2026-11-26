@@ -116,7 +116,11 @@ public class ContentServlet extends HttpServlet{
 						// when original node is deleted public nodeService would deliver null for CCM_PROP_IO_PUBLISHED_ORIGINAL.
 						// so we use alfrescoDefaultDbNodeService to do the isPublishedMaterial check
 						NodeService nodeServiceAlfresco = (NodeService) appContext.getBean("alfrescoDefaultDbNodeService");
-						boolean isPublishedMaterial = nodeServiceAlfresco.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL)) != null;
+						boolean isPublishedMaterial = nodeServiceAlfresco.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL)) != null
+								// published copies that lost CCM_PROP_IO_PUBLISHED_ORIGINAL (e.g. full property write via public nodeService after the original was deleted).
+								// published_mode is only set on the original, published_date only on the copy (or migrated originals, which have published_mode=copy)
+								|| (nodeServiceAlfresco.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_PUBLISHED_DATE)) != null
+								&& nodeServiceAlfresco.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_PUBLISHED_MODE)) == null);
 						// we only fetch a specific version if it's not a ref
 						// and it's not a remote node
 						if (!isCollectionRef && !isPublishedMaterial && version != null && !version.trim().equals("") && homeAppInfo.getAppId().equals(repId)) {

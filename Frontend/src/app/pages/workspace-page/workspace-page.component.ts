@@ -2,6 +2,7 @@ import { trigger } from '@angular/animations';
 import {
     ApplicationRef,
     Component,
+    ElementRef,
     HostListener,
     NgZone,
     OnDestroy,
@@ -197,6 +198,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
         private connector: RestConnectorService,
         private connectors: RestConnectorsService,
         private dialogs: DialogsService,
+        private elementRef: ElementRef<HTMLElement>,
         private event: FrameEventsService,
         private iam: RestIamService,
         private loadingScreen: LoadingScreenService,
@@ -254,6 +256,14 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
         }
     }
 
+    /** banner height for the workspace layout (`--bannerHeight`) */
+    @HostListener('window:resize')
+    updateBannerHeight(): void {
+        const bannerHeight =
+            document.querySelector('es-banner')?.getBoundingClientRect().height ?? 0;
+        this.elementRef.nativeElement.style.setProperty('--bannerHeight', bannerHeight + 'px');
+    }
+
     private handleScroll(event: Event) {
         const scroll = this.appContainer.getScrollContainer().scrollTop;
         if (scroll > 0) {
@@ -287,6 +297,8 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
             onCreateNotAllowed: () => this.createNotAllowed(),
             canOpen: this.mainnav,
         });
+        // banner of the new scope only after the next change detection
+        setTimeout(() => this.updateBannerHeight());
         if (!this.isBlocked) {
             const searchFieldInstance = this.searchField.enable(
                 {

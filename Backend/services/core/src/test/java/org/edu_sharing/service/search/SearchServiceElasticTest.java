@@ -16,6 +16,7 @@ import org.alfresco.service.namespace.QName;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataQuery;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
+import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
@@ -31,6 +32,7 @@ import org.springframework.context.ApplicationContext;
 
 import java.util.*;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 class SearchServiceElasticTest {
@@ -103,11 +105,16 @@ class SearchServiceElasticTest {
 
     @Test
     void getGlobalConditions() {
-        BoolQuery.Builder conditions = underTest.getGlobalConditions(Collections.singletonList("scope"), Collections.singletonList("read"), new MetadataQuery());
+        BoolQuery.Builder conditions;
+        try (MockedStatic<AuthorityServiceHelper> authorityServiceHelper = Mockito.mockStatic(AuthorityServiceHelper.class)) {
+            authorityServiceHelper.when(AuthorityServiceHelper::isAdmin).thenReturn(false);
+            conditions = underTest.getGlobalConditions(Collections.singletonList("scope"), Collections.singletonList("read"), new MetadataQuery());
+        }
 
         SearchServiceElasticTestUtils.assertQuery(
                 "{\n" +
                         "  \"bool\": {\n" +
+                        "    \"minimum_should_match\": \"1\",\n" +
                         "    \"must\": [\n" +
                         "      {\n" +
                         "        \"bool\": {\n" +
@@ -198,6 +205,20 @@ class SearchServiceElasticTest {
                         "}",
                 conditions
         );
+    }
+
+    @Test
+    void getGlobalConditionsAdminSkipsPermissionsFilter() {
+        BoolQuery.Builder conditions;
+        try (MockedStatic<AuthorityServiceHelper> authorityServiceHelper = Mockito.mockStatic(AuthorityServiceHelper.class)) {
+            authorityServiceHelper.when(AuthorityServiceHelper::isAdmin).thenReturn(true);
+            conditions = underTest.getGlobalConditions(Collections.singletonList("scope"), Collections.singletonList("write"), new MetadataQuery());
+        }
+
+        String json = SearchServiceElasticTestUtils.indentJson(conditions);
+        assertFalse(json.contains("permissions.write"), json);
+        assertFalse(json.contains("\"owner\""), json);
+        assertTrue(json.contains("permissions.read"), json);
     }
 
     @Test

@@ -47,6 +47,11 @@
 
 .workspace-container {
     display: flex;
+    align-items: flex-start;
+    // viewport height below banner, main nav and breadcrumbs
+    min-height: calc(
+        100vh - var(--bannerHeight, 0px) - var(--mainnavHeight) - #{$workspaceBreadcrumbsHeight}
+    );
 }
 
 .isBlocked {
@@ -67,26 +72,27 @@
 }
 
 $quotaHeight: 60px;
+// sticky below the breadcrumbs while the banner scrolls away
 .tree {
     min-width: $workspaceTreeWidth;
     max-width: $workspaceTreeWidth;
+    position: sticky;
     top: calc(#{$workspaceBreadcrumbsHeight} + var(--mainnavHeight));
-    position: fixed;
-    height: calc(100% - #{$workspaceBreadcrumbsHeight} - var(--mainnavHeight));
+    // container height, capped at the viewport; folder list ignored for sizing
+    align-self: stretch;
+    max-height: calc(100vh - #{$workspaceBreadcrumbsHeight} - var(--mainnavHeight));
+    contain: size;
     z-index: 2;
     background: $workspaceTreeBackground;
     es-workspace-tree {
+        display: block;
         min-width: $workspaceTreeWidth;
         max-width: $workspaceTreeWidth;
-        top: calc(#{$workspaceBreadcrumbsHeight} + var(--mainnavHeight));
-        position: fixed;
-        height: calc(100% - #{$workspaceBreadcrumbsHeight} - var(--mainnavHeight));
+        height: 100%;
         overflow-y: auto;
     }
     .tree-quota {
-        height: calc(
-            100% - #{$workspaceBreadcrumbsHeight} - var(--mainnavHeight) - #{$quotaHeight}
-        );
+        height: calc(100% - #{$quotaHeight});
     }
 }
 
@@ -145,7 +151,6 @@ es-user-quota {
 .explorer {
     position: relative;
     display: block;
-    left: 300px;
     width: calc(100% - 300px);
     transition: all $transitionNormal;
 }
@@ -184,6 +189,9 @@ es-user-quota {
 }
 
 @media screen and (max-width: ($mobileTabSwitchWidth)) {
+    .workspace-container {
+        min-height: 0;
+    }
     .tree {
         display: none;
     }

@@ -280,10 +280,23 @@ public class Usage2Service {
 	}
 
 
+	/**
+	 * The usages of a node, if the user may read it.
+	 *
+	 * @param user whose Read is checked; null for the current user. Code that runs as System
+	 *             ({@link AuthenticationUtil#runAsSystem}, e.g. {@link org.edu_sharing.restservices.UsageDao#deleteUsage}
+	 *             for an LMS, whose app-signed request has no user, or a job) is checked as System.
+	 */
 	public List<Usage> getUsageByParentNodeId(String repoId, String user, String parentNodeId) throws UsageException {
 		logger.info("starting");
 
-		List<String> perm = NodeDao.getNode(RepositoryDao.getHomeRepository(), parentNodeId).getPermissions(user);
+		// getPermissions(null) checks the fully authenticated user of the request, which runAsSystem
+		// does not change: without this, every usage deletion by an LMS failed for missing Read.
+		String authority = user;
+		if (authority == null && AuthenticationUtil.isRunAsUserTheSystemUser()) {
+			authority = AuthenticationUtil.getSystemUserName();
+		}
+		List<String> perm = NodeDao.getNode(RepositoryDao.getHomeRepository(), parentNodeId).getPermissions(authority);
 		boolean hasPerm = perm != null && perm.contains(CCConstants.PERMISSION_READ);
 		if(!hasPerm){
 			throw new UsageException("no permissions on node " + parentNodeId + " to list usages", new PermissionException(parentNodeId, PermissionService.READ));

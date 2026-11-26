@@ -5,6 +5,7 @@ import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.service.nodeservice.PropertiesGetInterceptorAuthors;
 import org.edu_sharing.repository.tools.URLHelper;
 import org.edu_sharing.restservices.DAOException;
 import org.edu_sharing.restservices.DAOSecurityException;
@@ -24,6 +25,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class oEmbedServlet extends HttpServlet {
@@ -151,9 +153,22 @@ public class oEmbedServlet extends HttpServlet {
 
     private void fillBaseData(oEmbedBase embed, NodeDao nodeDao) throws DAOException {
         Node node=nodeDao.asNode();
-        embed.setAuthor_name(node.getCreatedBy().getFirstName()+" "+node.getCreatedBy().getLastName());
+        embed.setAuthor_name(getAuthorName(nodeDao.getNativeProperties()));
         embed.setTitle(node.getTitle()!=null && !node.getTitle().isEmpty() ? node.getTitle() : node.getName());
         embed.setType(node.getMediatype().equals("file-image") ? "photo" : node.getMediatype().equals("file-video") ? "video" : "rich");
         embed.setProvider_url(URLTool.getBaseUrl());
+    }
+
+    /**
+     * Authors from the metadata (author freetext + author vcards), same logic as virtual:all_authors.
+     * The uploader (cm:creator) is intentionally not used, since it is not the author of the content.
+     * Returns null if no author is known (author_name is optional in oEmbed).
+     */
+    static String getAuthorName(Map<String, Object> props) {
+        if (props == null) {
+            return null;
+        }
+        List<String> authors = PropertiesGetInterceptorAuthors.getAllAuthors(props);
+        return authors.isEmpty() ? null : String.join(", ", authors);
     }
 }

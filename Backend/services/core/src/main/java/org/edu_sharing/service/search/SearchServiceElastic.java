@@ -864,8 +864,11 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
 
         BoolQuery.Builder queryBuilderGlobalConditions = queryGlobalConditionsFactory.apply(QueryBuilders.bool());
-        if (permissions != null) {
-            BoolQuery.Builder permissionsFilter = QueryBuilders.bool().must(must -> must.bool(queryGlobalConditionsFactory::apply));
+        // admins have every permission on every node (same as getWritePermissionsQuery / getCoordinatorPermissionsQuery)
+        // an empty list means "no permission filter" (otherwise only the owner clause would remain)
+        if (permissions != null && !permissions.isEmpty() && !AuthorityServiceHelper.isAdmin() && !AuthenticationUtil.isRunAsUserTheSystemUser()) {
+            // at least one of the permissions (or ownership) must match, otherwise the should clauses only affect scoring
+            BoolQuery.Builder permissionsFilter = QueryBuilders.bool().minimumShouldMatch("1").must(must -> must.bool(queryGlobalConditionsFactory::apply));
             String user = serviceRegistry.getAuthenticationService().getCurrentUserName();
             permissionsFilter.should(should -> should.match(match -> match.field("owner").query(user)));
             for (String permission : permissions) {
@@ -2413,7 +2416,12 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 query = r.build();
             }else{
                 TermQuery.Builder t = QueryBuilders.term();
-                t.field("properties." + properties.get(finalI)).value(value.get(finalI));
+                String field = "properties." + properties.get(finalI);
+                if (!MetadataElasticSearchHelper.nonKeywordFacets.contains(properties.get(finalI))) {
+                    // exact match: the plain property field is analyzed text, its .keyword sub-field is not
+                    field += ".keyword";
+                }
+                t.field(field).value(value.get(finalI));
                 query = t.build();
             }
 
