@@ -2416,7 +2416,12 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 query = r.build();
             }else{
                 TermQuery.Builder t = QueryBuilders.term();
-                t.field("properties." + properties.get(finalI)).value(value.get(finalI));
+                String field = "properties." + properties.get(finalI);
+                if (!MetadataElasticSearchHelper.nonKeywordFacets.contains(properties.get(finalI))) {
+                    // exact match: the plain property field is analyzed text, its .keyword sub-field is not
+                    field += ".keyword";
+                }
+                t.field(field).value(value.get(finalI));
                 query = t.build();
             }
 
