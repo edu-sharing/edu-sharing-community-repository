@@ -51,6 +51,8 @@ import { Sort } from '@angular/material/sort';
 
 export abstract class SearchPageResults {
     diffCount?: Observable<number>;
+    /** Total hit count, emitted once the results of a changed search query are shown. */
+    resultsUpdated?: Observable<number>;
     totalResults?: Observable<number>;
     loadingProgress: Observable<number>;
     abstract addNodes(nodes: Node[]): void;
@@ -101,6 +103,7 @@ export class SearchPageResultsService extends SearchPageResults implements OnDes
     readonly loadingCollections = new BehaviorSubject<boolean>(true);
     readonly loadingProgress = new BehaviorSubject<number>(0);
     readonly diffCount = new BehaviorSubject<number>(0);
+    readonly resultsUpdated = new Subject<number>();
     /** Emits whenever a new search query is issued (search string / filters / sort changed). */
     readonly searchQueryChanged = new Subject<void>();
     // stores the state of the primary, configurable node entries component
@@ -485,6 +488,15 @@ export class SearchPageResultsService extends SearchPageResults implements OnDes
     }
 
     private _registerResultDiffCount(): void {
+        // 'initial' and 'reset' loads show the results of a new query, a 'page' load appends to them
+        let queryChangeLoading = false;
+        this.resultsDataSource.isLoadingSubject
+            .pipe(takeUntil(this._destroyed))
+            .subscribe((loading) => {
+                if (loading) {
+                    queryChangeLoading = loading === 'initial' || loading === 'reset';
+                }
+            });
         this.resultsDataSource
             .connect()
             .pipe(
@@ -495,6 +507,15 @@ export class SearchPageResultsService extends SearchPageResults implements OnDes
                 pairwise(),
             )
             .subscribe(([previousCount, currentCount]) => {
+                // intermediate data while a request is running
+                if (this.resultsDataSource.isLoading) {
+                    return;
+                }
+                if (queryChangeLoading) {
+                    queryChangeLoading = false;
+                    this.resultsUpdated.next(this.resultsDataSource.getTotal());
+                    return;
+                }
                 this.diffCount.next(currentCount - previousCount);
             });
     }

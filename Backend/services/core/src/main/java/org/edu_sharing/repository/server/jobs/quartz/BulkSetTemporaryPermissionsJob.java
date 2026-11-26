@@ -108,9 +108,10 @@ public class BulkSetTemporaryPermissionsJob extends AbstractJobMapAnnotationPara
 
 				try {
 					logger.debug("processing node:" + ref.getId());
-					ACE[] aces = permissionService.getPermissions(ref.getId()).getAces();
 					if(!overridePermissions) {
-						if(Arrays.stream(aces).anyMatch(ace -> ace.getAuthority().equals(authorityName))) {
+						// getPermissions also lists the rows of the timed permission table, so a node whose permission
+						// is only stored there would count as invited. Check what is really set in alfresco instead.
+						if(!permissionService.getExplicitPermissionsForAuthority(ref.getId(), authorityName).isEmpty()) {
 							logger.info("Authority " + authorityName + " is already invited for node " + ref.getId());
 							return;
 						}

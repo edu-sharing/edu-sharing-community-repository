@@ -11,7 +11,7 @@
   <button
     class="close-button"
     mat-icon-button
-    [attr.aria-label]="'CLOSE' | translate"
+    [attr.aria-label]="CLOSE_LABELS[mode] | translate"
     (click)="dismissed.set(true)"
   >
     <i esIcon="close"></i>

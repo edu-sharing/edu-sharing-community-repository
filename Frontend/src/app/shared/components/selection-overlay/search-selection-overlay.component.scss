@@ -11,6 +11,9 @@
     background-color: var(--roundedContainerBackground, #{vars.$backgroundColor});
     // match the selection bar below: shadow instead of borders
     @include mixins.materialShadowTop();
+    // only visible with forced colors, where the shadow is dropped
+    border: 1px solid transparent;
+    border-bottom: none;
     // Gradient color used by the horizontal scroll-helper arrows of the card grid.
     --es-node-entries-scroll-gradient-color: #{vars.$backgroundColor};
 }
