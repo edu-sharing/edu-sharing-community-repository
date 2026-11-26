@@ -87,6 +87,7 @@ import {
     CollectionSubcollections,
 } from '../../../core-module/rest/data-object';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
+import { RestHelper } from '../../../core-module/rest/rest-helper';
 import { RestCollectionService } from '../../../core-module/rest/services/rest-collection.service';
 import { RestConnectorService } from '../../../core-module/rest/services/rest-connector.service';
 import { RestNodeService } from '../../../core-module/rest/services/rest-node.service';
@@ -98,6 +99,7 @@ import {
 import { OptionsHelperService } from '../../../services/options-helper.service';
 import { UIService } from '../../../core-module/rest/services/ui.service';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
+import { OK_OR_CANCEL } from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import {
     AddWithConnectorDialogData,
     AddWithConnectorDialogResult,
@@ -1163,8 +1165,13 @@ export class NodesSelectorComponent implements OnInit {
         const target = this.selectedNodes()[0] as Node;
         const source = this.selectedSourceNodes();
         if (target.mediatype === 'collection') {
+            // without write access the nodes can only be proposed to the collection
+            const asProposal = !target.access?.includes(RestConstants.ACCESS_WRITE);
+            if (asProposal && !(await this.confirmProposal(target))) {
+                return;
+            }
             this.editorialSidebarService.sidebarLoading.set(true);
-            this.uiService.addToCollection(target, source, false, () => {
+            this.uiService.addToCollection(target, source, asProposal, () => {
                 this.editorialSidebarService.sidebarLoading.set(false);
                 this.editorialSidebarService.sidebarOpened.set(false);
             });
@@ -1176,6 +1183,27 @@ export class NodesSelectorComponent implements OnInit {
             } catch (e) {}
             this.editorialSidebarService.sidebarLoading.set(false);
         }
+    }
+
+    /**
+     * Asks whether the nodes should be submitted as a proposal for the given collection.
+     * Resolves to false if the user declines or lacks the proposal tool permission.
+     */
+    private async confirmProposal(collection: Node): Promise<boolean> {
+        const mayPropose = await this.authenticationService.hasToolpermission(
+            RestConstants.TOOLPERMISSION_COLLECTION_PROPOSAL,
+        );
+        if (!mayPropose) {
+            this.toast.error(null, 'NO_WRITE_PERMISSIONS');
+            return false;
+        }
+        const dialogRef = await this.dialogs.openGenericDialog({
+            title: 'DIALOG.COLLECTION_PROPSE',
+            message: 'DIALOG.COLLECTION_PROPSE_INFO',
+            messageParameters: { collection: RestHelper.getTitle(collection) },
+            buttons: OK_OR_CANCEL,
+        });
+        return (await firstValueFrom(dialogRef.afterClosed())) === 'OK';
     }
 
     /**
