@@ -35,6 +35,8 @@ import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
+import org.edu_sharing.service.remote.RemoteObjectService;
+import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
 
 @Slf4j
@@ -43,6 +45,7 @@ public class Usage2Service {
 
 	public static final String MISSING_PARAM = "MISSING_PARAM";
 	public static final String NO_CCPUBLISH_PERMISSION = "NO_CCPUBLISH_PERMISSION";
+	public static final String NO_REMOTE_REPOSITORY_TOOLPERMISSION = "NO_REMOTE_REPOSITORY_TOOLPERMISSION";
 	private final RepositoryCache repositoryCache;
 	private final NodeService nodeService;
 	private final org.edu_sharing.service.permission.PermissionService permissionService;
@@ -157,6 +160,10 @@ public class Usage2Service {
 		}
 		// if the user is admin, map it for the requesting repo
 		final String user=SSOAuthorityMapper.mapAdminAuthority(userIn,lmsId);
+		// toolpermissions are not checked for the system user, so check the remote repository toolpermission for the calling user before the run as
+		final String remoteRepositoryToolPermission = RemoteObjectService.getRemoteRepositoryToolPermission(parentNodeId);
+		final boolean hasRemoteRepositoryToolPermission = remoteRepositoryToolPermission == null
+				|| ToolPermissionServiceFactory.getInstance().hasToolPermission(remoteRepositoryToolPermission);
         RunAsWork<Usage> runAs = () -> {
 				try{
                 log.info("before alfServicesWrapper.hasPermissions");
@@ -165,6 +172,10 @@ public class Usage2Service {
 
 					//only check publish permission for new content so that an teacher who modifies the course/wysiwyg can safe changes of permission
 					if(usage == null){
+						if(!hasRemoteRepositoryToolPermission){
+							log.info("User {} is missing {} to create a usage for remote object {}", user, remoteRepositoryToolPermission, parentNodeId);
+							throw new UsageException(NO_REMOTE_REPOSITORY_TOOLPERMISSION, null);
+						}
 						String usageNodeId=parentNodeId;
 						// for collection references, we always rely on the main object permissions
 						if(nodeService.hasAspect(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),usageNodeId, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)){

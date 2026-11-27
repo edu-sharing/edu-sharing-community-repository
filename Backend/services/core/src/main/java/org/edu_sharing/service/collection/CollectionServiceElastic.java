@@ -411,10 +411,16 @@ public class CollectionServiceElastic implements CollectionService {
     public String mapNodeId(String originalNodeId, String sourceRepositoryId) throws Throwable {
         if (sourceRepositoryId != null) {
             ApplicationInfo rep = ApplicationInfoList.getRepositoryInfoById(sourceRepositoryId);
-            if (rep.ishomeNode() || ApplicationInfo.REPOSITORY_TYPE_LOCAL.equals(rep.getRepositoryType())) {
-                return originalNodeId;
+            if (!rep.ishomeNode() && !ApplicationInfo.REPOSITORY_TYPE_LOCAL.equals(rep.getRepositoryType())) {
+                // getOrCreateRemoteMetadataObject runs as system, so check the toolpermission for the calling user first
+                ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_REPOSITORY_PREFIX + sourceRepositoryId);
+                return RemoteObjectService.getOrCreateRemoteMetadataObject(sourceRepositoryId, originalNodeId);
             }
-            return RemoteObjectService.getOrCreateRemoteMetadataObject(sourceRepositoryId, originalNodeId);
+        }
+        // an already existing local remote object (e.g. from app:company_home/ccm:remote_ios) may be passed directly by its local id
+        String remoteRepositoryToolPermission = RemoteObjectService.getRemoteRepositoryToolPermission(originalNodeId);
+        if (remoteRepositoryToolPermission != null) {
+            ToolPermissionHelper.throwIfToolpermissionMissing(remoteRepositoryToolPermission);
         }
         return originalNodeId;
     }

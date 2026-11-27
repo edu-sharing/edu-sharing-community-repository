@@ -5,6 +5,7 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -153,8 +154,44 @@ public class RemoteObjectService {
         } else {
             remoteObjectFolderId = (String) defaultRemoteFolderProps.get(CCConstants.SYS_PROP_NODE_UID);
         }
+        if (remoteObjectFolderId != null) {
+            // allow everyone to cc publish from this folder (same as for app:company_home/ccm:remote_ios)
+            PermissionServiceFactory.getInstance().getLocalService().setPermissions(remoteObjectFolderId, CCConstants.AUTHORITY_GROUP_EVERYONE,
+                    new String[]{CCConstants.PERMISSION_CONSUMER, CCConstants.PERMISSION_CC_PUBLISH}, false);
+        }
         return remoteObjectFolderId;
 
+    }
+
+    /**
+     * Returns the toolpermission (TOOLPERMISSION_REPOSITORY_&lt;appId&gt;) required to use the given local node,
+     * or null if the node (or, for a collection reference, its original) is no remote object.
+     * Only reads the node (as system), the toolpermission itself must be checked in the context of the calling user
+     */
+    public static String getRemoteRepositoryToolPermission(String nodeId) {
+        return AuthenticationUtil.runAsSystem(() -> {
+            org.alfresco.service.cmr.repository.NodeService nodeService = ((ServiceRegistry) AlfAppContextGate.getApplicationContext()
+                    .getBean(ServiceRegistry.SERVICE_REGISTRY)).getNodeService();
+            NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
+            if (!nodeService.exists(nodeRef)) {
+                return null;
+            }
+            if (nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))) {
+                String originalId = (String) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL));
+                if (originalId == null) {
+                    return null;
+                }
+                nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, originalId);
+                if (!nodeService.exists(nodeRef)) {
+                    return null;
+                }
+            }
+            if (!nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_REMOTEREPOSITORY))) {
+                return null;
+            }
+            String remoteRepositoryId = (String) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID));
+            return remoteRepositoryId == null ? null : CCConstants.CCM_VALUE_TOOLPERMISSION_REPOSITORY_PREFIX + remoteRepositoryId;
+        });
     }
 
     private boolean is3dPartyRepository(ApplicationInfo repInfo) {
