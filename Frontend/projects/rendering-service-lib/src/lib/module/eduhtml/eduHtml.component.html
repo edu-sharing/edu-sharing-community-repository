@@ -7,6 +7,7 @@
     color="primary"
     [href]="url"
     target="_blank"
+    (click)="onLinkClick($event)"
     [attr.aria-label]="
       node?.title || node?.name
         ? ('RENDERING.LINK_NAME_TITLE'

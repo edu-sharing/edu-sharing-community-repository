@@ -14,6 +14,7 @@ export * from './lib/dto/RenderData';
 export * from './lib/generic/revoked/revoked.component';
 export * from './lib/services/abstract/dialogs.service';
 export * from './lib/services/abstract/rendering-connector.service';
+export * from './lib/services/abstract/rendering-link.service';
 export * from './lib/asset-link.pipe';
 export * from './module-info.service';
 export * from './rendering-service-lib.module';

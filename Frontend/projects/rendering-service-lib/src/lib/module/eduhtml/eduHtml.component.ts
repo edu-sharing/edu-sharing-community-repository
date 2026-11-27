@@ -8,6 +8,10 @@ import { RenderData } from '../../dto/RenderData';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { TranslateModule } from '@ngx-translate/core';
 import { EduSharingUiModule } from 'ngx-edu-sharing-ui';
+import {
+    handleNewTabLinkClick,
+    RenderingLinkService,
+} from '../../services/abstract/rendering-link.service';
 
 @Component({
     selector: 'rs-module-edu-html',
@@ -17,6 +21,7 @@ import { EduSharingUiModule } from 'ngx-edu-sharing-ui';
 })
 export class EduHtmlComponent implements RenderModule, OnInit {
     private sanitizer = inject(DomSanitizer);
+    private linkService = inject(RenderingLinkService, { optional: true });
 
     @Input() data: RenderData | undefined;
     @Input() node: Node | undefined;
@@ -28,6 +33,11 @@ export class EduHtmlComponent implements RenderModule, OnInit {
             this.sanitizedUrl = this.getSafeUri();
             this.url = this.data.items[0].link;
         }
+    }
+
+    /** opens the link through the host if it handles new tabs (e.g. the mobile app) */
+    onLinkClick(event: MouseEvent) {
+        handleNewTabLinkClick(event, this.url, this.linkService);
     }
 
     getSafeUri() {

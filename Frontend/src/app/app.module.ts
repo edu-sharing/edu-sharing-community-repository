@@ -46,7 +46,11 @@ import { CordovaService } from './services/cordova.service';
 import { KeyboardShortcutsService } from './services/keyboard-shortcuts.service';
 import { OptionsHelperService } from './services/options-helper.service';
 import { RenderingConnectorService } from './services/rendering-connector.service';
-import { RenderingConnectorService as RenderingConnectorServiceAbstract } from 'ngx-rendering-service-lib';
+import { RenderingLinkService } from './services/rendering-link.service';
+import {
+    RenderingConnectorService as RenderingConnectorServiceAbstract,
+    RenderingLinkService as RenderingLinkServiceAbstract,
+} from 'ngx-rendering-service-lib';
 import { Toast } from './services/toast';
 import { SharedModule } from './shared/shared.module';
 import { BApiModule } from 'ngx-edu-sharing-b-api';
@@ -97,6 +101,7 @@ export const Providers = [
     { provide: KeyboardShortcutsServiceAbstract, useClass: KeyboardShortcutsService },
     { provide: AppServiceAbstract, useClass: AppService },
     { provide: RenderingConnectorServiceAbstract, useExisting: RenderingConnectorService },
+    { provide: RenderingLinkServiceAbstract, useExisting: RenderingLinkService },
     {
         provide: EDU_SHARING_API_CONFIG,
         deps: [ErrorHandlerService],
