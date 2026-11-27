@@ -12,16 +12,11 @@
       }
     </div>
   </div>
-  <div class="save-to-inbox">
-    <div class="location">
-      {{ 'SHARE_APP.WILL_BE_SAVED_AT' | translate }}: @if (inbox) {
-      <div class="breadcrumbs">
-        <i class="material-icons">home</i>
-        <div>&rsaquo;</div>
-        <div>{{ inbox.name }}</div>
-      </div>
-      }
-    </div>
+  <div class="save-to-folder">
+    <es-location-picker
+      [parent]="parent"
+      (parentChange)="parentSelected($event)"
+    ></es-location-picker>
     <button mat-flat-button color="primary" (click)="saveFile()">
       <i esIcon="folder"></i><span>{{ 'SAVE' | translate }}</span>
     </button>

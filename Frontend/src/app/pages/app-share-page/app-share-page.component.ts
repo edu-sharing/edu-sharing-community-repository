@@ -14,7 +14,6 @@ import { Toast } from '../../services/toast';
 import {
     Connector,
     FrameEventsService,
-    ParentList,
     RestCollectionService,
     RestConnectorService,
     RestConstants,
@@ -40,6 +39,7 @@ import { Helper } from '../../core-module/rest/helper';
 import { CordovaService, OnBackBehaviour } from '../../services/cordova.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { UploadDialogService } from '../../services/upload-dialog.service';
+import { NodeHelperService } from '../../services/node-helper.service';
 
 @Component({
     selector: 'es-app-share-page',
@@ -67,6 +67,7 @@ export class AppSharePageComponent {
     private mainNav = inject(MainNavService);
     private searchService = inject(SearchService);
     private uploadDialog = inject(UploadDialogService);
+    private nodeHelper = inject(NodeHelperService);
 
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
@@ -76,8 +77,8 @@ export class AppSharePageComponent {
     title: string;
     description: string;
     previewUrl: any;
-    private inboxPath: Node[];
-    inbox: Node;
+    /** folder the shared content is saved to; the inbox while none is resolved yet */
+    parent: Node;
     columns: ColumnType;
     collections = new NodeDataSource<Node>();
     private cordovaType: string;
@@ -161,7 +162,7 @@ export class AppSharePageComponent {
             prop[RestConstants.CCM_PROP_IO_WWWURL] = [this.getUri()];
             this.node
                 .createNode(
-                    this.inbox?.ref?.id || RestConstants.INBOX,
+                    this.parent?.ref?.id || RestConstants.INBOX,
                     RestConstants.CCM_TYPE_IO,
                     [],
                     prop,
@@ -187,7 +188,7 @@ export class AppSharePageComponent {
             }
             this.node
                 .createNode(
-                    this.inbox?.ref?.id || RestConstants.INBOX,
+                    this.parent?.ref?.id || RestConstants.INBOX,
                     RestConstants.CCM_TYPE_IO,
                     [],
                     prop,
@@ -235,7 +236,7 @@ export class AppSharePageComponent {
     }
     saveFile() {
         this.saveInternal((node: Node) => {
-            this.goToInbox(node);
+            this.goToFolder(node);
             this.events.broadcastEvent(FrameEventsService.EVENT_SHARED, node);
         });
     }
@@ -251,8 +252,8 @@ export class AppSharePageComponent {
                 if (added.length > 0) {
                     this.uiService.goToCollection(collection, null, { replaceUrl: true });
                 } else {
-                    // the upload stays in the inbox when the collection does not take it
-                    this.goToInbox(node);
+                    // the upload stays in its folder when the collection does not take it
+                    this.goToFolder(node);
                 }
             });
         });
@@ -276,9 +277,12 @@ export class AppSharePageComponent {
         if (!this.uri) return false;
         return !this.uri.startsWith('content://') && !this.uri.startsWith('file://');
     }
-    /** Opens the inbox, or the folder the shared node was saved to while the inbox is not loaded. */
-    private goToInbox(node: Node) {
-        const folder = this.inbox?.ref?.id ?? node?.parent?.id;
+    parentSelected(parent: Node) {
+        this.parent = parent;
+    }
+    /** Opens the chosen folder, or the one the shared node was saved to while none is known. */
+    private goToFolder(node: Node) {
+        const folder = this.parent?.ref?.id ?? node?.parent?.id;
         UIHelper.goToWorkspaceFolder(this.router, null, folder, {
             replaceUrl: true,
         });
@@ -336,10 +340,12 @@ export class AppSharePageComponent {
                             this.collections.isLoading = false;
                         },
                     );
-                this.node.getNodeParents(RestConstants.INBOX, false).subscribe(
-                    (data: ParentList) => {
-                        this.inboxPath = data.nodes;
-                        this.inbox = data.nodes[0];
+                this.nodeHelper.getDefaultInboxFolder().subscribe(
+                    (folder) => {
+                        // a folder picked while the default was resolving is kept
+                        if (!this.parent) {
+                            this.parent = folder;
+                        }
                     },
                     // saving falls back to the inbox id, which the server resolves itself
                     () => {},

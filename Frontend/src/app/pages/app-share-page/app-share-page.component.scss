@@ -7,16 +7,6 @@
     margin: auto;
     display: flex;
     flex-direction: column;
-    .breadcrumbs {
-        color: var(--primary);
-        display: flex;
-        flex-grow: 1;
-        align-items: center;
-        margin-left: 5px;
-        > * {
-            margin: 0 2px;
-        }
-    }
     .preview {
         display: flex;
         padding-bottom: 10px;
@@ -50,27 +40,13 @@
             }
         }
     }
-    .location {
+    .save-to-folder {
         display: flex;
-        align-items: center;
-        font-size: 90%;
-        color: $textLight;
-        es-breadcrumbs {
-            margin-top: 2px;
-        }
-    }
-    // the save button keeps its row; on narrow screens the location wraps beside it
-    .save-to-inbox {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        .location {
-            flex: 1;
-            min-width: 0;
-            flex-wrap: wrap;
-        }
+        flex-direction: column;
+        // the picker's highlighted row spans the page's horizontal padding
+        --addMaterialHPadding: 30px;
         button {
-            flex-shrink: 0;
+            align-self: flex-end;
         }
     }
     .collections {
