@@ -26,7 +26,6 @@ import {
     BreadcrumbsService,
 } from '../../../shared/components/breadcrumbs/breadcrumbs.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { PlatformLocation } from '@angular/common';
 import { TranslateService } from '@ngx-translate/core';
 import {
     AuthenticationService,
@@ -159,7 +158,6 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         this.injector,
         () => new OptionsHelperDataService(),
     );
-    private platformLocation = inject(PlatformLocation);
     private route = inject(ActivatedRoute);
     private router = inject(Router);
     private toast = inject(Toast);
@@ -1149,18 +1147,13 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     }
     private clickElementEvent(event: NodeClickEvent<CollectionReference | ProposalNode>) {
         if (this.interactionType === InteractionType.DefaultActionLink) {
-            if (event.ctrlKey) {
-                window.open(
-                    this.platformLocation.getBaseHrefFromDOM() +
-                        this.router.serializeUrl(
-                            this.router.createUrlTree([
-                                UIConstants.ROUTER_PREFIX + 'render',
-                                event.element.ref.id,
-                            ]),
-                        ),
-                    '_blank',
-                );
-                return;
+            // the materials report the control and the shift key instead of handling them
+            // themselves, so a range can reach from the sub-collections into the materials
+            if (!this.isProposal(event.element) && this.viewState.viewType() !== 'tree') {
+                if (this.handleModifierClick(event, this.listReferences)) {
+                    return;
+                }
+                this.selectionAnchor = event.element as Node;
             }
             this.selectClickedNode(event);
         } else {
@@ -2000,6 +1993,14 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             this.clickItem.emit(event);
             return;
         }
+        if (this.viewState.viewType() !== 'tree') {
+            // the small tiles report the shift key instead of handling it themselves; it selects
+            // the range from the anchor, and together with the control key adds it
+            if (this.handleModifierClick(event, this.listCollections)) {
+                return;
+            }
+        }
+        this.selectionAnchor = event.element as Node;
         this.selectClickedNode(event);
     }
 
@@ -2017,13 +2018,78 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             ? this.listCollections
             : this.listReferences;
         const selection = list?.getSelection();
-        if (selection?.selected.length === 1 && selection.selected[0] === event.element) {
+        // the other lists may hold a part of the selection as well
+        const selectedAnywhere = [
+            ...this.collectSelection(),
+            ...(this.proposals?.listProposals?.getSelection()?.selected ?? []),
+        ];
+        if (selectedAnywhere.length === 1 && selectedAnywhere[0] === event.element) {
             return;
         }
         this.clearAllSelections();
         selection?.select(event.element as Node & CollectionReference & ProposalNode);
         this.editorialSidebarService.scope.set(Scope.CollectionsReferences);
         this.editorialSidebarService.showEntryList([event.element]);
+    }
+
+    /** The sub-collection or material a range selected with the shift key starts from. */
+    private selectionAnchor: Node | null = null;
+
+    /**
+     * Handles a click with the shift or the control key on a sub-collection or a material: the
+     * shift key selects the range from the anchor, together with the control key it adds the
+     * range; the control key alone adds the node to the selection or removes it.
+     *
+     * @param list the list the clicked node belongs to
+     * @returns whether the click was handled, otherwise it is a regular one
+     */
+    private handleModifierClick(
+        event: NodeClickEvent<Node | CollectionReference | ProposalNode>,
+        list: ListEventInterface<any>,
+    ): boolean {
+        if (event.shiftKey && this.selectRange(event.element as Node, event.ctrlKey)) {
+            return true;
+        }
+        if (event.ctrlKey) {
+            list?.getSelection()?.toggle(event.element);
+            this.selectionAnchor = event.element as Node;
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Selects everything from the anchor to the given node, in the order the page shows them:
+     * the sub-collections first, then the materials. The range replaces the selection, unless it
+     * is added to it. Without an anchor among the shown nodes nothing is selected and the click
+     * is handled like a regular one.
+     *
+     * @returns whether the range was selected
+     */
+    private selectRange(target: Node, add: boolean): boolean {
+        const collections = this.dataSourceCollections.getData() ?? [];
+        const shown: Node[] = [...collections, ...(this.dataSourceReferences.getData() ?? [])];
+        const indexOf = (node: Node) => shown.findIndex((entry) => entry.ref.id === node.ref.id);
+        const anchorIndex = this.selectionAnchor ? indexOf(this.selectionAnchor) : -1;
+        const targetIndex = indexOf(target);
+        if (anchorIndex < 0 || targetIndex < 0) {
+            return false;
+        }
+        if (!add) {
+            this.clearAllSelections();
+        }
+        const from = Math.min(anchorIndex, targetIndex);
+        const to = Math.max(anchorIndex, targetIndex) + 1;
+        const range = shown.slice(from, to);
+        const inCollections = range.filter((_, i) => from + i < collections.length);
+        const inReferences = range.filter((_, i) => from + i >= collections.length);
+        if (inCollections.length) {
+            this.listCollections?.getSelection()?.select(...inCollections);
+        }
+        if (inReferences.length) {
+            this.listReferences?.getSelection()?.select(...(inReferences as CollectionReference[]));
+        }
+        return true;
     }
 
     /** Empties the selection of every list that is currently rendered. */

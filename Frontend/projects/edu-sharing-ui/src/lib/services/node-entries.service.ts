@@ -195,7 +195,11 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
         } else if (event.shiftKey && this.ctrlClickBehavior === 'multiselect') {
             this.expandSelectionTo(data.element);
         } else {
-            this.clickItem.emit({ ...data, ctrlKey: event.ctrlKey || event.metaKey });
+            this.clickItem.emit({
+                ...data,
+                ctrlKey: event.ctrlKey || event.metaKey,
+                shiftKey: event.shiftKey,
+            });
         }
     }
 

@@ -207,3 +207,113 @@ describe('CollectionContentComponent proposals', () => {
         expect(selected(host, 'proposals')).toEqual([]);
     });
 });
+
+describe('CollectionContentComponent range selection of sub-collections and materials', () => {
+    const shown = ['a', 'b', 'c', 'd', 'e'].map((id) => collection(id));
+    const materials = ['m1', 'm2', 'm3'].map((id) => material(id));
+
+    /**
+     * The tile view with the shown sub-collections and materials, and a sidebar that records what
+     * it shows.
+     */
+    function createHost() {
+        const host = Object.create(CollectionContentComponent.prototype);
+        const selection = new SelectionModel<Node>(true);
+        const referencesSelection = new SelectionModel<Node>(true);
+        Object.assign(host, {
+            interactionType: 0,
+            listCollections: { getSelection: () => selection },
+            listReferences: { getSelection: () => referencesSelection },
+            listTree: undefined,
+            proposals: undefined,
+            selectionAnchor: null,
+            dataSourceCollections: { getData: () => shown },
+            dataSourceReferences: { getData: () => materials },
+            viewState: { viewType: () => 'grid' },
+            nodeHelper: {
+                isNodeCollection: (node: Node) =>
+                    !!node.aspects?.includes(RestConstants.CCM_ASPECT_COLLECTION),
+            },
+            editorialSidebarService: {
+                scope: signal(null),
+                showEntryList: jasmine.createSpy('showEntryList'),
+            },
+        });
+        return host;
+    }
+
+    const click = (host: any, id: string, keys: { shiftKey?: boolean; ctrlKey?: boolean } = {}) =>
+        host.onCollectionClick({ element: shown.find((node) => node.ref.id === id), ...keys });
+    const clickMaterial = (
+        host: any,
+        id: string,
+        keys: { shiftKey?: boolean; ctrlKey?: boolean } = {},
+    ) => host.clickElementEvent({ element: materials.find((node) => node.ref.id === id), ...keys });
+    const selected = (host: any): string[] =>
+        host.listCollections.getSelection().selected.map((node: Node) => node.ref.id);
+    const selectedMaterials = (host: any): string[] =>
+        host.listReferences.getSelection().selected.map((node: Node) => node.ref.id);
+
+    it('selects the range from the clicked anchor, in the order the tiles are shown', () => {
+        const host = createHost();
+        click(host, 'a');
+        click(host, 'd', { shiftKey: true });
+        expect(selected(host)).toEqual(['a', 'b', 'c', 'd']);
+    });
+
+    it('moves only the end of the range on further shift clicks', () => {
+        const host = createHost();
+        click(host, 'a');
+        click(host, 'd', { shiftKey: true });
+        click(host, 'c', { shiftKey: true });
+        expect(selected(host)).toEqual(['a', 'b', 'c']);
+    });
+
+    it('ends the range with a regular click, which becomes the new anchor', () => {
+        const host = createHost();
+        click(host, 'a');
+        click(host, 'd', { shiftKey: true });
+        click(host, 'e');
+        expect(selected(host)).toEqual(['e']);
+        click(host, 'c', { shiftKey: true });
+        expect(selected(host)).toEqual(['c', 'd', 'e']);
+    });
+
+    it('selects like a regular click while there is no anchor', () => {
+        const host = createHost();
+        click(host, 'c', { shiftKey: true });
+        expect(selected(host)).toEqual(['c']);
+    });
+
+    it('adds the range to the selection together with the control key', () => {
+        const host = createHost();
+        click(host, 'e');
+        click(host, 'a', { ctrlKey: true });
+        click(host, 'b', { ctrlKey: true, shiftKey: true });
+        expect(selected(host).sort()).toEqual(['a', 'b', 'e']);
+    });
+
+    it('reaches from an anchor among the sub-collections into the materials', () => {
+        const host = createHost();
+        click(host, 'd');
+        clickMaterial(host, 'm2', { shiftKey: true });
+        expect(selected(host)).toEqual(['d', 'e']);
+        expect(selectedMaterials(host)).toEqual(['m1', 'm2']);
+    });
+
+    it('reaches from an anchor among the materials back into the sub-collections', () => {
+        const host = createHost();
+        clickMaterial(host, 'm1');
+        click(host, 'e', { shiftKey: true });
+        expect(selected(host)).toEqual(['e']);
+        expect(selectedMaterials(host)).toEqual(['m1']);
+    });
+
+    it('adds a material to the selection with the control key', () => {
+        const host = createHost();
+        click(host, 'a');
+        clickMaterial(host, 'm3', { ctrlKey: true });
+        expect(selected(host)).toEqual(['a']);
+        expect(selectedMaterials(host)).toEqual(['m3']);
+    });
+});

@@ -92,6 +92,8 @@ export type NodeClickEvent<T extends NodeEntriesDataType> = {
     source: ClickSource;
     attribute?: ListItem; // only when source === Metadata
     ctrlKey?: boolean;
+    /** whether the shift key was held, reported by lists that leave range selections to the host */
+    shiftKey?: boolean;
 };
 export type FetchEvent = {
     offset: number;

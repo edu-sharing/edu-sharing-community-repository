@@ -126,8 +126,8 @@
             hideCustomSortToggle: true,
             allowed: canOrderReferences(),
           }"
-        ctrlClickBehavior="emit"
         (selectionChange)="handleSelection($event)"
+        ctrlClickBehavior="emit"
         (clickItem)="onContentClick($event)"
         (dblClickItem)="openItem($event)"
         [globalOptions]="

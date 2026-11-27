@@ -78,6 +78,8 @@
       entriesService.clickItem.emit({
         element: node,
         source: ClickSource.Preview,
+        ctrlKey: $event.ctrlKey || $event.metaKey,
+        shiftKey: $event.shiftKey,
       })
     "
     (dblclick)="
@@ -108,6 +110,8 @@
       entriesService.clickItem.emit({
         element: node,
         source: ClickSource.Metadata,
+        ctrlKey: $event.ctrlKey || $event.metaKey,
+        shiftKey: $event.shiftKey,
       })
     "
     (dblclick)="
