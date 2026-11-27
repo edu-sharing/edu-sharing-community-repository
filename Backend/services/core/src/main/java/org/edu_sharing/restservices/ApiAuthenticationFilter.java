@@ -1,11 +1,15 @@
 package org.edu_sharing.restservices;
 
 import com.typesafe.config.Config;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.alfresco.repo.security.authentication.AuthenticationException;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.authentication.subsystems.SubsystemChainingAuthenticationService;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
@@ -13,6 +17,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.authentication.AuthenticationFilter;
 import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
+import org.edu_sharing.repository.server.tools.security.JwtTokenUtil;
 import org.edu_sharing.service.authentication.oauth2.TokenService;
 import org.edu_sharing.service.authentication.oauth2.TokenService.Token;
 import org.edu_sharing.service.authority.AuthorityService;
@@ -25,10 +30,12 @@ import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public class ApiAuthenticationFilter implements jakarta.servlet.Filter {
 
@@ -39,6 +46,28 @@ public class ApiAuthenticationFilter implements jakarta.servlet.Filter {
      * subset of data) so the HTTP status alone does not reveal the auth state.
      */
     public static final String HEADER_AUTHENTICATED = "X-Edu-Authenticated";
+
+    /**
+     * Header carrying the rendering token ({@link NodeDao#getJWT}) of the rendering web component.
+     * <p>
+     * The token is handed to the web component together with the signed node, i.e. when a material
+     * is embedded in a foreign context (lms, ...). There is no repository session, so without the
+     * token the {@link #RENDER_TOKEN_ENDPOINTS} would only work with an activated guest.
+     * <p>
+     * A separate header (instead of {@code Authorization: Bearer}) keeps it apart from the oauth2
+     * handling: the web component may send it with every request, it is only evaluated on the
+     * {@link #RENDER_TOKEN_ENDPOINTS} and ignored everywhere else, so the endpoint list only exists here.
+     */
+    public static final String HEADER_RENDER_TOKEN = "X-Edu-Render-Token";
+
+    /**
+     * The only endpoints that accept the {@link #HEADER_RENDER_TOKEN}. Since the token is part of the
+     * embedding page it is restricted to GET requests on read-only endpoints which do not return
+     * user specific data.
+     */
+    private static final List<Pattern> RENDER_TOKEN_ENDPOINTS = List.of(
+            // metadataset definition, required by the inline metadata viewer of the web component
+            Pattern.compile("^/mds/v1/metadatasets/[^/]+/[^/]+$"));
 
     Logger logger = Logger.getLogger(ApiAuthenticationFilter.class);
 
@@ -53,6 +82,10 @@ public class ApiAuthenticationFilter implements jakarta.servlet.Filter {
 
         if ("OPTIONS".equals(httpReq.getMethod())) {
             chain.doFilter(req, resp);
+            return;
+        }
+
+        if (handleRenderTokenRequest(httpReq, httpResp, chain)) {
             return;
         }
 
@@ -238,6 +271,54 @@ public class ApiAuthenticationFilter implements jakarta.servlet.Filter {
         }
         // Chain other filters
         chain.doFilter(req, resp);
+    }
+
+    /**
+     * Handles a GET request on one of the {@link #RENDER_TOKEN_ENDPOINTS} which carries a valid
+     * {@link #HEADER_RENDER_TOKEN}: the request is executed as the {@link CCConstants#PROXY_USER}
+     * (like signed lms usage requests, see {@link ContextManagementFilter}), without creating or
+     * touching a session. Never as the user of the token: the endpoints are not user specific and the
+     * token of an admin / privileged user must not grant its rights. The token only proves a valid
+     * embedding of this repository. Requests with an {@code Authorization} header are always handled
+     * regularly.
+     *
+     * @return true if the request was handled, false if the regular handling applies
+     */
+    private boolean handleRenderTokenRequest(HttpServletRequest httpReq, HttpServletResponse httpResp, FilterChain chain) throws IOException, ServletException {
+        String renderToken = httpReq.getHeader(HEADER_RENDER_TOKEN);
+        String pathInfo = httpReq.getPathInfo();
+        if (StringUtils.isBlank(renderToken) || httpReq.getHeader("Authorization") != null
+                || !"GET".equals(httpReq.getMethod()) || pathInfo == null
+                || RENDER_TOKEN_ENDPOINTS.stream().noneMatch(p -> p.matcher(pathInfo).matches())) {
+            return false;
+        }
+        Claims claims;
+        try {
+            claims = JwtTokenUtil.validateToken(renderToken.trim());
+        } catch (JwtException | GeneralSecurityException | IllegalArgumentException e) {
+            // invalid / expired: ignore the token, the regular handling applies (guest or 401)
+            logger.debug("invalid rendering token: " + e.getMessage());
+            return false;
+        }
+        logger.debug("rendering token request for " + pathInfo + " (token of " + claims.getIssuer() + ")");
+        httpResp.addHeader("Access-Control-Expose-Headers", HEADER_AUTHENTICATED);
+        httpResp.setHeader(HEADER_AUTHENTICATED, "false");
+        try {
+            AuthenticationUtil.runAs(() -> {
+                chain.doFilter(httpReq, httpResp);
+                return null;
+            }, CCConstants.PROXY_USER);
+        } catch (RuntimeException e) {
+            // runAs wraps checked exceptions of the work
+            if (e.getCause() instanceof IOException ioException) {
+                throw ioException;
+            }
+            if (e.getCause() instanceof ServletException servletException) {
+                throw servletException;
+            }
+            throw e;
+        }
+        return true;
     }
 
     public static Map<String, String> httpBasicAuth(HttpServletRequest httpReq, String authHdr) {

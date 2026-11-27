@@ -1,7 +1,10 @@
 package org.edu_sharing.repository.server.tools.security;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -11,6 +14,7 @@ import org.edu_sharing.restservices.shared.UserProfile;
 
 import java.security.GeneralSecurityException;
 import java.security.Key;
+import java.security.PublicKey;
 import java.util.Collection;
 import java.util.Date;
 import java.util.UUID;
@@ -18,6 +22,30 @@ import java.util.UUID;
 
 @Slf4j
 public class JwtTokenUtil {
+
+    /** subject of the rendering tokens created by {@link #generateToken} */
+    public static final String SUBJECT_NODE_PERMISSIONS = "node permissions";
+
+    /**
+     * Validates a rendering token created by {@link #generateToken} of this (home) repository:
+     * signature (home repository key pair), expiration / not before, subject and repository.
+     *
+     * @return the claims of the valid token, the user is available as {@link Claims#getIssuer()}
+     * @throws JwtException if the token is invalid or expired
+     */
+    public static Claims validateToken(String jwt) throws GeneralSecurityException {
+        PublicKey publicKey = new Signing().getPemPublicKey(ApplicationInfoList.getHomeRepository().getPublicKey(), CCConstants.SECURITY_KEY_ALGORITHM);
+        Claims claims = Jwts.parser()
+                .setSigningKey(publicKey)
+                .requireSubject(SUBJECT_NODE_PERMISSIONS)
+                .require("repoId", ApplicationInfoList.getHomeRepository().getAppId())
+                .parseClaimsJws(jwt)
+                .getBody();
+        if (StringUtils.isBlank(claims.getIssuer())) {
+            throw new JwtException("rendering token has no user");
+        }
+        return claims;
+    }
 
     public static String generateToken(String username, String nodeId, Collection<String> permissions, String mimeType, String mediaType, String replicationSource, String resourceType, UserProfile userProfile) throws GeneralSecurityException {
         Key privateKey = new Signing().getPemPrivateKey(ApplicationInfoList.getHomeRepository().getPrivateKey(), CCConstants.SECURITY_KEY_ALGORITHM);
@@ -32,7 +60,7 @@ public class JwtTokenUtil {
                 .setIssuedAt(date) // for example, now
                 .setIssuer(username)
                 .setId(UUID.randomUUID().toString())
-                .setSubject("node permissions")
+                .setSubject(SUBJECT_NODE_PERMISSIONS)
                 .claim("repoId", ApplicationInfoList.getHomeRepository().getAppId())
                 .claim("node", nodeId)
                 .claim("permissions", permissions)

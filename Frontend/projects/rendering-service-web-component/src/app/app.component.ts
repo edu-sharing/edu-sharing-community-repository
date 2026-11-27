@@ -1,4 +1,4 @@
-import { Node } from 'ngx-edu-sharing-api';
+import { MdsService, Node, RestConstants } from 'ngx-edu-sharing-api';
 import {
     AfterViewInit,
     Component,
@@ -12,6 +12,8 @@ import {
 import { RenderHelperService, TranslationsService } from 'ngx-edu-sharing-ui';
 import { RenderDataRequestWithToken } from 'ngx-rendering-service-api';
 import { PdfComponent } from 'ngx-rendering-service-lib';
+import { firstValueFrom } from 'rxjs';
+import { RenderTokenService } from './render-token.interceptor';
 
 @Component({
     selector: 'edu-sharing-render',
@@ -46,6 +48,8 @@ export class AppComponent implements OnChanges, AfterViewInit, OnInit {
     constructor(
         private renderHelperService: RenderHelperService,
         private translations: TranslationsService,
+        private renderTokenService: RenderTokenService,
+        private mdsService: MdsService,
     ) {
         this.translations.initialize().subscribe(() => {});
     }
@@ -69,6 +73,10 @@ export class AppComponent implements OnChanges, AfterViewInit, OnInit {
     }
 
     async ngOnChanges(changes: SimpleChanges) {
+        if (changes.jwt) {
+            // authenticates the metadata requests of this embedding, see render-token.interceptor
+            this.renderTokenService.setToken(this.jwt);
+        }
         if (changes.encoded_node) {
             const data = await this.renderHelperService.getRenderDataForLms(
                 this.encoded_node,
@@ -82,7 +90,26 @@ export class AppComponent implements OnChanges, AfterViewInit, OnInit {
             }
             this.node.set(data.node);
             this.request.set(data.request);
+            if (this.display_mode === 'inline') {
+                this.preloadMds(data.node);
+            }
         }
+    }
+
+    /**
+     * Loads the metadataset of the inline metadata viewer right away, while the rendering token is
+     * still valid (it expires after one hour, the page may stay open much longer).
+     *
+     * `MdsService.getMetadataSet` caches its result per arguments, so they must be exactly the ones
+     * `es-mds-viewer` uses (see `MdsViewerComponent.ngOnChanges`) to be reused when the viewer opens.
+     * A failed request is not cached, the viewer just tries again.
+     */
+    private preloadMds(node: Node): void {
+        const metadataSet =
+            node.properties?.[RestConstants.CM_PROP_METADATASET_EDU_METADATASET]?.[0];
+        firstValueFrom(
+            this.mdsService.getMetadataSet(metadataSet != null ? { metadataSet } : {}),
+        ).catch((e) => console.warn('could not preload the metadataset', e));
     }
 
     getAuthors(): string {
