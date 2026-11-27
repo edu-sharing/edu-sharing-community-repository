@@ -39,6 +39,7 @@ import { Component, inject } from '@angular/core';
 import { Helper } from '../../core-module/rest/helper';
 import { CordovaService, OnBackBehaviour } from '../../services/cordova.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
+import { UploadDialogService } from '../../services/upload-dialog.service';
 
 @Component({
     selector: 'es-app-share-page',
@@ -65,6 +66,7 @@ export class AppSharePageComponent {
     private connector = inject(RestConnectorService);
     private mainNav = inject(MainNavService);
     private searchService = inject(SearchService);
+    private uploadDialog = inject(UploadDialogService);
 
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
@@ -168,7 +170,7 @@ export class AppSharePageComponent {
                 )
                 .subscribe(
                     (data) => {
-                        callback(data.node);
+                        void this.editAfterSave(data.node, callback);
                     },
                     (error) => {
                         this.toast.error(error);
@@ -203,7 +205,7 @@ export class AppSharePageComponent {
                             )
                             .subscribe(
                                 () => {
-                                    callback(data.node);
+                                    void this.editAfterSave(data.node, callback);
                                 },
                                 (error) => {
                                     this.toast.error(error);
@@ -216,6 +218,19 @@ export class AppSharePageComponent {
                         this.globalProgress = false;
                     },
                 );
+        }
+    }
+    /** Opens the dialogs configured for new uploads; a cancel removes the node and stays here. */
+    private async editAfterSave(node: Node, callback: Function) {
+        // the progress overlay sits above dialogs
+        this.globalProgress = false;
+        const nodes = await this.uploadDialog.editCreatedNodes(
+            [node],
+            this.isLink() ? 'link' : 'file',
+        );
+        if (Array.isArray(nodes) && nodes.length > 0) {
+            this.globalProgress = true;
+            callback(nodes[0]);
         }
     }
     saveFile() {

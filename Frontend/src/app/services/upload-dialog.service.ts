@@ -127,6 +127,16 @@ export class UploadDialogService {
         }
     }
 
+    /**
+     * Shows the post-upload dialogs (license, `upload.postDialog`) for nodes created elsewhere.
+     * @returns the edited nodes, or no array when the user cancelled and new nodes were removed
+     */
+    async editCreatedNodes(nodes: Node[], kind: 'file' | 'link'): Promise<Node[] | null> {
+        return kind === 'file'
+            ? this._onFilesUploaded(nodes)
+            : this._showMetadataAfterUpload(nodes);
+    }
+
     private async _onFilesUploaded(nodes: Node[]): Promise<Node[] | null> {
         const shouldShowLicenseDialog = await this.config
             .get('licenseDialogOnUpload', false)
