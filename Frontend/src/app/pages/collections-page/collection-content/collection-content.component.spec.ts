@@ -317,3 +317,134 @@ describe('CollectionContentComponent range selection of sub-collections and mate
         expect(selectedMaterials(host)).toEqual(['m3']);
     });
 });
+
+describe('CollectionContentComponent sidebar following the selection', () => {
+    function createHost(selection: Node[], shownInSidebar: Node[] = null) {
+        const host = Object.create(CollectionContentComponent.prototype);
+        Object.assign(host, {
+            interactionType: 0,
+            addInProgress: false,
+            selection,
+            editorialSidebarService: {
+                scope: signal(null),
+                nodes: signal<Node[]>(shownInSidebar),
+                sidebarOpened: signal(false),
+                handleSelection: jasmine.createSpy('handleSelection'),
+                close: jasmine.createSpy('close'),
+            },
+        });
+        return host;
+    }
+
+    it('opens the sidebar for several selected nodes and hands them over', () => {
+        const host = createHost([collection('a'), material('b')]);
+        host.syncSidebarWithSelection();
+        expect(host.editorialSidebarService.sidebarOpened()).toBeTrue();
+        const [change] = host.editorialSidebarService.handleSelection.calls.mostRecent().args;
+        expect(change.source.selected.map((node: Node) => node.ref.id)).toEqual(['a', 'b']);
+    });
+
+    it('closes the sidebar once nothing is selected', () => {
+        const host = createHost([], [material('b')]);
+        host.syncSidebarWithSelection();
+        expect(host.editorialSidebarService.close).toHaveBeenCalled();
+    });
+
+    it('keeps the sidebar of the selected proposals', () => {
+        const proposal = { ref: { id: 'p' }, proposal: { ref: { id: 'x' } } } as unknown as Node;
+        const host = createHost([], [proposal]);
+        host.syncSidebarWithSelection();
+        expect(host.editorialSidebarService.close).not.toHaveBeenCalled();
+    });
+
+    it('leaves the sidebar alone while nodes added from it are reloaded', () => {
+        const host = createHost([material('b')]);
+        host.addInProgress = true;
+        host.syncSidebarWithSelection();
+        expect(host.editorialSidebarService.handleSelection).not.toHaveBeenCalled();
+        expect(host.editorialSidebarService.sidebarOpened()).toBeFalse();
+    });
+});
+
+describe('CollectionContentComponent selection across views', () => {
+    const shown = [collection('a'), collection('b')];
+    const materials = [material('m1'), material('m2')];
+    const copy = (node: Node) => ({ ...node } as Node);
+    const treeNodes = [{ ref: { id: '-root-' } } as Node, ...shown, ...materials].map(copy);
+
+    /**
+     * A view of the shown sub-collections and materials, whose lists report every change of their
+     * selection like the rendered lists do.
+     */
+    function createHost(viewType: 'grid' | 'list' | 'tree') {
+        const host = Object.create(CollectionContentComponent.prototype);
+        const lists = {
+            collections: new SelectionModel<Node>(true),
+            references: new SelectionModel<Node>(true),
+            tree: new SelectionModel<Node>(true),
+        };
+        Object.values(lists).forEach((list) =>
+            list.changed.subscribe(() => host.syncSidebarWithSelection()),
+        );
+        Object.assign(host, {
+            interactionType: 0,
+            addInProgress: false,
+            restoringSelection: false,
+            selection: [],
+            shownViewType: viewType,
+            listCollections: { getSelection: () => lists.collections },
+            listReferences: { getSelection: () => lists.references },
+            listTree: { getSelection: () => lists.tree },
+            dataSourceCollections: { getData: () => shown },
+            dataSourceReferences: { getData: () => materials },
+            dataSourceTree: { getData: () => treeNodes },
+            viewState: { viewType: () => viewType },
+            updateSelection: jasmine.createSpy('updateSelection'),
+            editorialSidebarService: {
+                scope: signal(null),
+                nodes: signal<Node[]>(null),
+                sidebarOpened: signal(false),
+                handleSelection: jasmine.createSpy('handleSelection'),
+                close: jasmine.createSpy('close'),
+            },
+        });
+        return { host, lists };
+    }
+
+    const ids = (list: SelectionModel<Node>) => list.selected.map((node) => node.ref.id);
+
+    it('keeps the selection when switching between tiles and list', () => {
+        const { host, lists } = createHost('list');
+        lists.collections.select(shown[0]);
+        lists.references.select(materials[1]);
+        host.selection = [shown[0], materials[1]];
+        host.editorialSidebarService.close.calls.reset();
+        host.onViewTypeChange('grid');
+        expect(ids(lists.collections)).toEqual(['a']);
+        expect(ids(lists.references)).toEqual(['m2']);
+        expect(host.editorialSidebarService.close).not.toHaveBeenCalled();
+    });
+
+    it('selects the same nodes in the tree by their ids', () => {
+        const { host, lists } = createHost('tree');
+        host.restoreSelection(['b', 'm1', '-root-', 'unknown']);
+        expect(ids(lists.tree)).toEqual(['b', 'm1']);
+        expect(host.updateSelection).toHaveBeenCalled();
+    });
+
+    it('splits the selection of the tree into sub-collections and materials', () => {
+        const { host, lists } = createHost('grid');
+        host.restoreSelection(['a', 'm2']);
+        expect(ids(lists.collections)).toEqual(['a']);
+        expect(ids(lists.references)).toEqual(['m2']);
+        expect(ids(lists.tree)).toEqual([]);
+    });
+
+    it('leaves the sidebar as it is while the selection is carried over', () => {
+        const { host } = createHost('tree');
+        host.restoreSelection(['a', 'm1']);
+        expect(host.editorialSidebarService.handleSelection).not.toHaveBeenCalled();
+        expect(host.editorialSidebarService.sidebarOpened()).toBeFalse();
+        expect(host.restoringSelection).toBeFalse();
+    });
+});

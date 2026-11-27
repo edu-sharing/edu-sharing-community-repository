@@ -947,11 +947,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     handleSelection(selection: SelectionChange<Node>) {
         this.clearProposalsWhenContentSelected();
         this.updateSelection();
-        // While a sidebar-add reload is in flight, swallow the selection-clear so it does not
-        // close the sidebar (selectPendingNodes decides the final state afterwards).
-        if (this.interactionType === InteractionType.DefaultActionLink && !this.addInProgress) {
-            this.editorialSidebarService.handleSelection(selection);
-        }
+        this.syncSidebarWithSelection();
     }
 
     /**
@@ -1105,35 +1101,40 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     onCollectionsSelectionChange() {
         this.clearProposalsWhenContentSelected();
         this.updateSelection();
-        this.syncSidebarWithCollectionSelection();
+        this.syncSidebarWithSelection();
     }
 
     /**
-     * Lets the sidebar follow a selection that contains collections: a single collection shows its
-     * actions & options, anything else closes the sidebar, as the actions of several nodes are
-     * offered by the selection bar. A selection of materials only is handled by the list of the
-     * materials.
+     * Lets the sidebar follow the selection of the sub-collections and materials. Every change of
+     * the selection shows it with its actions & options, so the sidebar opens again after it was
+     * closed by hand; an option that is open stays as long as it fits the selection, e.g. the
+     * preview stepping through the materials. Without a selection the sidebar closes, unless it
+     * describes the selected proposals.
      */
-    private syncSidebarWithCollectionSelection() {
-        if (this.interactionType !== InteractionType.DefaultActionLink) {
-            return;
-        }
-        const selected = this.selection;
+    private syncSidebarWithSelection() {
+        // While a sidebar-add reload is in flight, the selection is cleared and restored
+        // (selectPendingNodes decides the final state afterwards), which must not close it.
         if (
-            selected.length > 0 &&
-            !selected.some((node) => this.nodeHelper.isNodeCollection(node))
+            this.interactionType !== InteractionType.DefaultActionLink ||
+            this.addInProgress ||
+            this.restoringSelection
         ) {
             return;
         }
-        if (selected.length === 1) {
-            this.editorialSidebarService.showEntryList(selected);
-        } else {
-            this.editorialSidebarService.close();
-            // closing forgets the nodes, but a sidebar opened later has to describe the selection
-            if (selected.length > 0) {
-                this.editorialSidebarService.nodes.set(selected);
+        const selected = this.selection;
+        if (!selected.length) {
+            if (
+                !this.editorialSidebarService.nodes()?.some((node) => this.isProposal(node as Node))
+            ) {
+                this.editorialSidebarService.close();
             }
+            return;
         }
+        this.editorialSidebarService.scope.set(Scope.CollectionsReferences);
+        this.editorialSidebarService.handleSelection({
+            source: { selected },
+        } as SelectionChange<Node>);
+        this.editorialSidebarService.sidebarOpened.set(true);
     }
 
     /**
@@ -1549,25 +1550,68 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     }
 
     /**
-     * The lists are destroyed and re-created when the tree is entered or left, so the selection
-     * is dropped and the options are wired to whatever is rendered afterwards.
+     * The selection belongs to the content, not to its presentation, so it survives a change of
+     * the view. Tiles and list share the same lists and keep it as it is; the tree replaces those
+     * lists, so the selection is carried over by the ids of the selected nodes once the lists of
+     * the new view are rendered. The sidebar keeps its state meanwhile.
      */
     private onViewTypeChange(viewType: CollectionViewType) {
         if (viewType === this.shownViewType) {
             return;
         }
+        const replacesLists = viewType === 'tree' || this.shownViewType === 'tree';
         this.shownViewType = viewType;
-        this.clearSelection();
+        if (!replacesLists) {
+            return;
+        }
+        const selectedIds = this.selection.map((node) => node.ref.id);
+        this.selectionOverlayOpen = false;
         if (viewType === 'tree') {
-            void this.buildTree();
+            void this.buildTree(selectedIds);
         } else {
             this.treeReady.set(false);
-            setTimeout(() => this.wireListOptions());
+            setTimeout(() => {
+                this.wireListOptions();
+                this.restoreSelection(selectedIds);
+            });
         }
     }
 
+    /** Whether a selection carried over from another view is put into the rendered lists. */
+    private restoringSelection = false;
+
+    /** Selects the nodes with the given ids in the lists that are currently rendered. */
+    private restoreSelection(ids: string[]) {
+        const wanted = new Set(ids);
+        const pick = <T extends Node>(data: T[] | undefined) =>
+            (data ?? []).filter((node) => wanted.has(node.ref.id));
+        this.restoringSelection = true;
+        try {
+            if (this.viewState.viewType() === 'tree') {
+                const nodes = pick(this.dataSourceTree.getData()).filter(
+                    (node) => node.ref.id !== ROOT,
+                );
+                if (nodes.length) {
+                    this.listTree?.getSelection()?.select(...nodes);
+                }
+            } else {
+                const collections = pick(this.dataSourceCollections.getData());
+                const references = pick(this.dataSourceReferences.getData());
+                if (collections.length) {
+                    this.listCollections?.getSelection()?.select(...collections);
+                }
+                if (references.length) {
+                    this.listReferences?.getSelection()?.select(...references);
+                }
+            }
+        } finally {
+            this.restoringSelection = false;
+        }
+        this.updateSelection();
+    }
+
     /** (Re-)creates the tree from the sub-collections and materials that are currently loaded. */
-    private async buildTree() {
+    private async buildTree(selectedIds: string[] = []) {
         this.treeReady.set(false);
         if (this.isRootLevel && !this.searchState.active()) {
             // the tree cannot page, so it needs every collection of the scope
@@ -1608,7 +1652,12 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         );
         setTimeout(() => {
             this.treeReady.set(true);
-            setTimeout(() => void this.listTree?.initOptionsGenerator({ parent: this.collection }));
+            setTimeout(() => {
+                void this.listTree?.initOptionsGenerator({ parent: this.collection });
+                if (selectedIds.length) {
+                    this.restoreSelection(selectedIds);
+                }
+            });
         });
     }
 
@@ -1663,7 +1712,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     onTreeSelectionChange() {
         this.clearProposalsWhenContentSelected();
         this.updateSelection();
-        this.syncSidebarWithCollectionSelection();
+        this.syncSidebarWithSelection();
     }
 
     /**
