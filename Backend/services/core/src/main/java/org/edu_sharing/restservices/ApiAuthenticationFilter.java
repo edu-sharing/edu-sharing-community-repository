@@ -310,11 +310,11 @@ public class ApiAuthenticationFilter implements jakarta.servlet.Filter {
             }, CCConstants.PROXY_USER);
         } catch (RuntimeException e) {
             // runAs wraps checked exceptions of the work
-            if (e.getCause() instanceof IOException ioException) {
-                throw ioException;
+            if (e.getCause() instanceof IOException) {
+                throw (IOException) e.getCause();
             }
-            if (e.getCause() instanceof ServletException servletException) {
-                throw servletException;
+            if (e.getCause() instanceof ServletException) {
+                throw (ServletException) e.getCause();
             }
             throw e;
         }
