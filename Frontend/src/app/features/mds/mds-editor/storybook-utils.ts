@@ -1,11 +1,14 @@
 import {
     ApplicationConfig,
+    computed,
     EventEmitter,
     importProvidersFrom,
     inject,
     Injectable,
     NgModule,
+    Signal,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
@@ -135,6 +138,22 @@ export class translateProvider {
         // same contract as ngx-translate: an unknown (or not yet loaded) key resolves to itself,
         // otherwise callers that render the result show nothing at all
         return str ?? v;
+    }
+
+    /** the loaded translations, so a translation read as a signal follows their loading */
+    private readonly translations = toSignal(this.cache$);
+
+    /**
+     * The translation as a signal, which the `translate` pipe and directive read. Key and
+     * parameters may be signals themselves.
+     */
+    translate(key: string | Signal<string>, params?: any): Signal<any> {
+        return computed(() => {
+            this.translations();
+            const currentKey = typeof key === 'function' ? key() : key;
+            const currentParams = typeof params === 'function' ? params() : params;
+            return this.instant(currentKey, currentParams ?? {});
+        });
     }
 
     get(v: string, args: any = {}): Observable<any> {

@@ -16,6 +16,7 @@ import {
     InteractionType,
     ListEventInterface,
     ListItem,
+    NodeClickEvent,
     NodeDataSource,
     NodeEntriesDisplayType,
     OptionsHelperDataService,
@@ -53,14 +54,30 @@ export class CollectionProposalsComponent implements OnChanges {
             new ListItem('NODE_PROPOSAL', RestConstants.CM_PROP_C_CREATED, { showLabel: false }),
         ],
     } as ColumnType;
-    @ViewChild('listProposals') listProposals: ListEventInterface<ProposalNode>;
+    // declared before the list, so it is known when the list appears
     @ViewChild(ActionbarComponent) actionbar: ActionbarComponent;
+    listProposals: ListEventInterface<ProposalNode>;
+    /**
+     * The list is only rendered while there are proposals, so its options are set up whenever it
+     * appears.
+     */
+    @ViewChild('listProposals') set listProposalsRef(list: ListEventInterface<ProposalNode>) {
+        if (list && list !== this.listProposals) {
+            void list.initOptionsGenerator({ actionbar: this.actionbar });
+        }
+        this.listProposals = list;
+    }
     dataSourceCollectionProposals = new NodeDataSource<ProposalNode>();
 
     @Input() collection: Node;
     @Input() canEdit: boolean;
+    /** how the proposals are listed, following the view of the collection content */
+    @Input() displayType = NodeEntriesDisplayType.Grid;
 
-    @Output() contentClick = new EventEmitter<ProposalNode>();
+    @Output() contentClick = new EventEmitter<NodeClickEvent<ProposalNode>>();
+    @Output() contentDblClick = new EventEmitter<NodeClickEvent<ProposalNode>>();
+    /** the proposals that are selected after each change of the selection */
+    @Output() selectionChange = new EventEmitter<ProposalNode[]>();
 
     constructor() {
         this.mainNavService.getDialogs().eventTriggered.subscribe((event: ManagementEvent) => {
@@ -85,11 +102,6 @@ export class CollectionProposalsComponent implements OnChanges {
                         proposals.pagination,
                     );
                     this.dataSourceCollectionProposals.isLoading = false;
-                    setTimeout(() => {
-                        void this.listProposals?.initOptionsGenerator({
-                            actionbar: this.actionbar,
-                        });
-                    });
                 });
         }
     }

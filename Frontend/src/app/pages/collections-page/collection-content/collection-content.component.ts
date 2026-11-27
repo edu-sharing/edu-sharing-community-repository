@@ -102,6 +102,7 @@ import { CollectionSearchService } from '../collection-search.service';
 import { sameSearchFilters } from '../../../features/topic-page/shared/utils/search-hit-util';
 import { CollectionSearchStateService } from '../collection-search-state.service';
 import { InfobarService } from '../infobar/infobar.service';
+import { CollectionProposalsComponent } from '../collection-proposals/collection-proposals.component';
 import { SelectionChange } from '@angular/cdk/collections';
 import { ConnectedPosition } from '@angular/cdk/overlay';
 import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
@@ -232,6 +233,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     @ViewChild('listReferences') listReferences: NodeEntriesWrapperComponent<CollectionReference>;
     @ViewChild('listTree') listTree: NodeEntriesWrapperComponent<Node>;
     @ViewChild('listCollections') listCollections: ListEventInterface<Node>;
+    @ViewChild(CollectionProposalsComponent) proposals: CollectionProposalsComponent;
 
     /** Currently selected references, mirrored from the references list for the selection bar/overlay. */
     selection: Node[] = [];
@@ -916,7 +918,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
 
     async onContentClick(event: NodeClickEvent<CollectionReference | ProposalNode>): Promise<void> {
         this.contentNode = event.element;
-        if (event.element.type === RestConstants.CCM_TYPE_COLLECTION_PROPOSAL) {
+        if (this.isProposal(event.element)) {
             this.clickElementEvent(event);
         } else if ((event.element as CollectionReference).accessEffective === null) {
             // no metadata available
@@ -945,6 +947,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     }
 
     handleSelection(selection: SelectionChange<Node>) {
+        this.clearProposalsWhenContentSelected();
         this.updateSelection();
         // While a sidebar-add reload is in flight, swallow the selection-clear so it does not
         // close the sidebar (selectPendingNodes decides the final state afterwards).
@@ -1102,6 +1105,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     }
 
     onCollectionsSelectionChange() {
+        this.clearProposalsWhenContentSelected();
         this.updateSelection();
         this.syncSidebarWithCollectionSelection();
     }
@@ -1664,6 +1668,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     private keepTreeOnRefresh = false;
 
     onTreeSelectionChange() {
+        this.clearProposalsWhenContentSelected();
         this.updateSelection();
         this.syncSidebarWithCollectionSelection();
     }
@@ -2004,18 +2009,19 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
      * changes nothing.
      */
     private selectClickedNode(event: NodeClickEvent<Node | CollectionReference | ProposalNode>) {
-        const list =
-            this.viewState.viewType() === 'tree'
-                ? this.listTree
-                : this.nodeHelper.isNodeCollection(event.element as Node)
-                ? this.listCollections
-                : this.listReferences;
+        const list = this.isProposal(event.element)
+            ? this.proposals?.listProposals
+            : this.viewState.viewType() === 'tree'
+            ? this.listTree
+            : this.nodeHelper.isNodeCollection(event.element as Node)
+            ? this.listCollections
+            : this.listReferences;
         const selection = list?.getSelection();
         if (selection?.selected.length === 1 && selection.selected[0] === event.element) {
             return;
         }
         this.clearAllSelections();
-        selection?.select(event.element as Node & CollectionReference);
+        selection?.select(event.element as Node & CollectionReference & ProposalNode);
         this.editorialSidebarService.scope.set(Scope.CollectionsReferences);
         this.editorialSidebarService.showEntryList([event.element]);
     }
@@ -2025,6 +2031,45 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         this.listReferences?.getSelection()?.clear();
         this.listCollections?.getSelection()?.clear();
         this.listTree?.getSelection()?.clear();
+        this.proposals?.listProposals?.getSelection()?.clear();
+    }
+
+    /** A proposal is listed as the proposed material, which carries the proposal itself. */
+    private isProposal(node: Node | CollectionReference | ProposalNode): node is ProposalNode {
+        return (
+            !!(node as ProposalNode)?.proposal ||
+            node?.type === RestConstants.CCM_TYPE_COLLECTION_PROPOSAL
+        );
+    }
+
+    /**
+     * Proposals offer other actions than the content of the collection, so the two are never
+     * selected together: selecting content drops the selected proposals.
+     */
+    private clearProposalsWhenContentSelected() {
+        if (this.collectSelection().length) {
+            this.proposals?.listProposals?.getSelection()?.clear();
+        }
+    }
+
+    /**
+     * Selecting proposals drops the selected content; a single proposal shows its actions &
+     * options, and the sidebar no longer describes proposals once they are deselected.
+     */
+    onProposalsSelectionChange(selected: ProposalNode[]) {
+        if (selected.length) {
+            this.listReferences?.getSelection()?.clear();
+            this.listCollections?.getSelection()?.clear();
+            this.listTree?.getSelection()?.clear();
+        }
+        if (selected.length === 1) {
+            this.editorialSidebarService.scope.set(Scope.CollectionsReferences);
+            this.editorialSidebarService.showEntryList(selected);
+        } else if (
+            this.editorialSidebarService.nodes()?.some((node) => this.isProposal(node as Node))
+        ) {
+            this.editorialSidebarService.close();
+        }
     }
 
     openCollection(event: NodeClickEvent<Node | CollectionReference>) {

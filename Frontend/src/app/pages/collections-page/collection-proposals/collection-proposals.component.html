@@ -7,14 +7,16 @@
     <es-actionbar></es-actionbar>
   </div>
   <es-node-entries-wrapper
-    [elementInteractionType]="InteractionType.DefaultActionLink"
+    [elementInteractionType]="InteractionType.Emitter"
     #listProposals
     [dataSource]="dataSourceCollectionProposals"
     [scope]="Scope.CollectionsProposals"
-    [displayType]="NodeEntriesDisplayType.Grid"
+    [displayType]="displayType"
     [columns]="proposalColumns"
     [globalOptions]=""
-    (clickItem)="contentClick.emit($event.element)"
+    (clickItem)="contentClick.emit($event)"
+    (dblClickItem)="contentDblClick.emit($event)"
+    (selectionChange)="selectionChange.emit($event.source.selected)"
     class="no-padding"
   ></es-node-entries-wrapper>
 </section>

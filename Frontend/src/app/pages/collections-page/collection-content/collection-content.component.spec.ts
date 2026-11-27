@@ -1,6 +1,7 @@
-import { Injector } from '@angular/core';
+import { SelectionModel } from '@angular/cdk/collections';
+import { Injector, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { Node } from 'ngx-edu-sharing-api';
+import { Node, ProposalNode } from 'ngx-edu-sharing-api';
 import { OptionItem } from 'ngx-edu-sharing-ui';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { CollectionContentComponent } from './collection-content.component';
@@ -84,5 +85,125 @@ describe('CollectionContentComponent created collections', () => {
         const [nodes, options] = addVirtualNodes.calls.mostRecent().args;
         expect(nodes.map((node: Node) => node.ref.id)).toEqual(['created']);
         expect(options).toEqual({ select: true });
+    });
+});
+
+describe('CollectionContentComponent proposals', () => {
+    function proposal(id: string): ProposalNode {
+        return {
+            ref: { id },
+            type: 'ccm:io',
+            aspects: [],
+            proposal: { ref: { id: 'proposal-' + id } },
+        } as unknown as ProposalNode;
+    }
+
+    /** a list as the page sees it, backed by a real selection model */
+    function list<T>(): { getSelection: () => SelectionModel<T> } {
+        const selection = new SelectionModel<T>(true);
+        return { getSelection: () => selection };
+    }
+
+    /**
+     * The page with its lists of sub-collections, materials and proposals in the tile view, and a
+     * sidebar that records what it is asked to show.
+     */
+    function createHost() {
+        const host = Object.create(CollectionContentComponent.prototype);
+        Object.assign(host, {
+            listCollections: list<Node>(),
+            listReferences: list<Node>(),
+            listTree: undefined,
+            proposals: { listProposals: list<ProposalNode>() },
+            viewState: { viewType: () => 'grid' },
+            nodeHelper: {
+                isNodeCollection: (node: Node) =>
+                    !!node.aspects?.includes(RestConstants.CCM_ASPECT_COLLECTION),
+            },
+            editorialSidebarService: {
+                scope: signal(null),
+                nodes: signal<Node[]>(null),
+                showEntryList: jasmine.createSpy('showEntryList'),
+                close: jasmine.createSpy('close'),
+            },
+        });
+        return host;
+    }
+
+    const selected = (host: any, name: string): string[] => {
+        const target = name === 'proposals' ? host.proposals.listProposals : host[name];
+        return target.getSelection().selected.map((node: Node) => node.ref.id);
+    };
+
+    it('recognizes a proposal by the proposal it carries or by its type', () => {
+        const host = createHost();
+        expect(host.isProposal(proposal('p'))).toBeTrue();
+        expect(
+            host.isProposal({ type: RestConstants.CCM_TYPE_COLLECTION_PROPOSAL } as Node),
+        ).toBeTrue();
+        expect(host.isProposal(material('m'))).toBeFalse();
+    });
+
+    it('selects a clicked proposal alone and shows its actions & options', () => {
+        const host = createHost();
+        host.listCollections.getSelection().select(collection('c'));
+        const p = proposal('p');
+        host.selectClickedNode({ element: p });
+        expect(selected(host, 'proposals')).toEqual(['p']);
+        expect(selected(host, 'listCollections')).toEqual([]);
+        expect(host.editorialSidebarService.showEntryList).toHaveBeenCalledWith([p]);
+    });
+
+    it('keeps the selection when the only selected proposal is clicked again', () => {
+        const host = createHost();
+        const p = proposal('p');
+        host.selectClickedNode({ element: p });
+        host.editorialSidebarService.showEntryList.calls.reset();
+        host.selectClickedNode({ element: p });
+        expect(selected(host, 'proposals')).toEqual(['p']);
+        expect(host.editorialSidebarService.showEntryList).not.toHaveBeenCalled();
+    });
+
+    it('drops the selected proposals when a material is clicked', () => {
+        const host = createHost();
+        host.selectClickedNode({ element: proposal('p') });
+        host.selectClickedNode({ element: material('m') });
+        expect(selected(host, 'listReferences')).toEqual(['m']);
+        expect(selected(host, 'proposals')).toEqual([]);
+    });
+
+    it('drops the selected content when proposals are selected', () => {
+        const host = createHost();
+        host.listCollections.getSelection().select(collection('c'));
+        host.listReferences.getSelection().select(material('m'));
+        const p = proposal('p');
+        host.onProposalsSelectionChange([p]);
+        expect(selected(host, 'listCollections')).toEqual([]);
+        expect(selected(host, 'listReferences')).toEqual([]);
+        expect(host.editorialSidebarService.showEntryList).toHaveBeenCalledWith([p]);
+    });
+
+    it('closes the sidebar when the proposals it describes are deselected', () => {
+        const host = createHost();
+        host.editorialSidebarService.nodes.set([proposal('p')]);
+        host.onProposalsSelectionChange([]);
+        expect(host.editorialSidebarService.close).toHaveBeenCalled();
+    });
+
+    it('keeps the sidebar of other nodes when no proposal is selected', () => {
+        const host = createHost();
+        host.editorialSidebarService.nodes.set([collection('c')]);
+        host.onProposalsSelectionChange([]);
+        expect(host.editorialSidebarService.close).not.toHaveBeenCalled();
+    });
+
+    it('drops the selected proposals once content is selected, but not without', () => {
+        const host = createHost();
+        host.proposals.listProposals.getSelection().select(proposal('p'));
+        host.clearProposalsWhenContentSelected();
+        expect(selected(host, 'proposals')).toEqual(['p']);
+        host.listReferences.getSelection().select(material('m'));
+        host.clearProposalsWhenContentSelected();
+        expect(selected(host, 'proposals')).toEqual([]);
     });
 });

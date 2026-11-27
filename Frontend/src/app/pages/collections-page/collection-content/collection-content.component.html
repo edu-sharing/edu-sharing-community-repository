@@ -86,7 +86,14 @@
   <es-collection-proposals
     [collection]="collection"
     [canEdit]="isAllowedToEditCollection()"
-    (contentClick)="onContentClick($any($event))"
+    [displayType]="
+      viewState.viewType() === 'tree'
+        ? NodeEntriesDisplayType.Table
+        : viewState.referencesDisplayType()
+    "
+    (contentClick)="onContentClick($event)"
+    (contentDblClick)="openItem($any($event))"
+    (selectionChange)="onProposalsSelectionChange($event)"
   ></es-collection-proposals>
   @if (viewState.viewType() !== 'tree') {
   <section class="collections-cards-div" data-test="collection-content-materials">
