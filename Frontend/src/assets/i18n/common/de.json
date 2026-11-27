@@ -1105,7 +1105,12 @@
     "TITLE": "Teilen",
     "TEXT_SNIPPET": "Notiz",
     "IMAGE": "Bild",
-    "ADD_TO_COLLECTION": "In welche Sammlung einsortieren?"
+    "ADD_TO_COLLECTION": "In welche Sammlung einsortieren?",
+    "ADD_TO_ASSIGNMENT": "Bei welcher Aufgabe abgeben?",
+    "ASSIGNMENT_TARGET_TITLE": "Wie soll das Element abgegeben werden?",
+    "ASSIGNMENT_TARGET_TEMPLATE": "Als Arbeitsmaterial „{{title}}“ einreichen",
+    "ASSIGNMENT_TARGET_ADDITIONAL": "Als eigene Datei abgeben",
+    "ASSIGNMENT_TARGET_NOTES": "In die Bemerkung zur Abgabe übernehmen"
   },
   "LICENSE_INFORMATION": "Über edu-sharing",
   "LICENSE_AGREEMENT": {

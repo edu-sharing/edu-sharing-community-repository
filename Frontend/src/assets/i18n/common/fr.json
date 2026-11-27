@@ -897,7 +897,12 @@
     "TITLE": "Partager",
     "TEXT_SNIPPET": "Note",
     "IMAGE": "Image",
-    "ADD_TO_COLLECTION": "Souhaitez-vous ajouter l'objet à une collection ?"
+    "ADD_TO_COLLECTION": "Souhaitez-vous ajouter l'objet à une collection ?",
+    "ADD_TO_ASSIGNMENT": "Souhaitez-vous remettre l'objet pour un devoir ?",
+    "ASSIGNMENT_TARGET_TITLE": "Comment souhaitez-vous remettre l'objet ?",
+    "ASSIGNMENT_TARGET_TEMPLATE": "Remettre comme matériel de travail « {{title}} »",
+    "ASSIGNMENT_TARGET_ADDITIONAL": "Remettre comme fichier personnel",
+    "ASSIGNMENT_TARGET_NOTES": "Ajouter à la remarque sur la remise"
   },
   "LICENSE_INFORMATION": "À propos d'edu-sharing",
   "LICENSE_AGREEMENT": {

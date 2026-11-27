@@ -967,7 +967,12 @@
     "TITLE": "Share",
     "TEXT_SNIPPET": "Note",
     "IMAGE": "Image",
-    "ADD_TO_COLLECTION": "Would you like to add the object to a collection?"
+    "ADD_TO_COLLECTION": "Would you like to add the object to a collection?",
+    "ADD_TO_ASSIGNMENT": "Would you like to hand the object in to an assignment?",
+    "ASSIGNMENT_TARGET_TITLE": "How would you like to hand in the object?",
+    "ASSIGNMENT_TARGET_TEMPLATE": "Hand in as working material \"{{title}}\"",
+    "ASSIGNMENT_TARGET_ADDITIONAL": "Hand in as own file",
+    "ASSIGNMENT_TARGET_NOTES": "Add to the note on the submission"
   },
   "LICENSE_INFORMATION": "About edu-sharing",
   "LICENSE_AGREEMENT": {

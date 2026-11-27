@@ -290,6 +290,10 @@ export class SubmitAssignmentComponent implements OnDestroy {
             )
             .subscribe(() => void this.saveUserNotes());
 
+        // `tab=submission` opens the view on the user's own submission
+        if (this.route.snapshot.queryParams.tab === 'submission') {
+            this.selectedTabIndex.set(1);
+        }
         this.route.queryParams
             .pipe(
                 map((p) => p.assignment),

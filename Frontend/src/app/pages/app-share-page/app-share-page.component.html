@@ -1,6 +1,19 @@
 @if (globalProgress) {
 <es-global-progress></es-global-progress>
-} @if (!globalProgress) {
+} @if (!globalProgress && chosenAssignment) {
+<div class="content">
+  <div class="assignment-targets">
+    <div class="title">{{ chosenAssignment.assignment.title }}</div>
+    <div class="hint">{{ 'SHARE_APP.ASSIGNMENT_TARGET_TITLE' | translate }}</div>
+    @for (target of chosenAssignment.targets; track $index) {
+    <button mat-stroked-button (click)="submitToAssignment(chosenAssignment, target)">
+      {{ getTargetLabel(target) }}
+    </button>
+    }
+    <button mat-button (click)="chosenAssignment = null">{{ 'CANCEL' | translate }}</button>
+  </div>
+</div>
+} @if (!globalProgress && !chosenAssignment) {
 <div class="content">
   <div class="preview">
     <img [src]="previewUrl" />
@@ -21,6 +34,21 @@
       <i esIcon="folder"></i><span>{{ 'SAVE' | translate }}</span>
     </button>
   </div>
+  @if (assignments.isLoading || assignments.getData()?.length) {
+  <div class="assignments">
+    <div class="addToAssignment">
+      {{ 'SHARE_APP.ADD_TO_ASSIGNMENT' | translate }}
+    </div>
+    <es-node-entries-wrapper
+      [dataSource]="assignments"
+      [columns]="assignmentColumns"
+      [checkbox]="false"
+      [displayType]="NodeEntriesDisplayType.SmallGrid"
+      [elementInteractionType]="InteractionType.Emitter"
+      (clickItem)="onAssignmentClick($event.element)"
+    ></es-node-entries-wrapper>
+  </div>
+  }
   <div class="collections">
     <div class="addToCollection">
       {{ 'SHARE_APP.ADD_TO_COLLECTION' | translate }}

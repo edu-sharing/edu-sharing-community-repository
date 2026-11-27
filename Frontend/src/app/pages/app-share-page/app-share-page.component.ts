@@ -4,6 +4,7 @@ import {
     InteractionType,
     ListItem,
     NodeDataSource,
+    NodeTitlePipe,
     NodeEntriesDisplayType,
     TranslationsService,
     UIConstants,
@@ -25,21 +26,40 @@ import {
 import { DomSanitizer } from '@angular/platform-browser';
 import { TranslateService } from '@ngx-translate/core';
 import {
+    Assignment,
+    AssignmentFile,
+    AssignmentV1Service,
     ConnectorService,
     DEFAULT,
     HOME_REPOSITORY,
+    ME,
     Node,
     NodeService,
     PROPERTY_FILTER_ALL,
     SearchService,
+    Submission,
 } from 'ngx-edu-sharing-api';
 import { take } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 import { Component, inject } from '@angular/core';
 import { Helper } from '../../core-module/rest/helper';
 import { CordovaService, OnBackBehaviour } from '../../services/cordova.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { UploadDialogService } from '../../services/upload-dialog.service';
 import { NodeHelperService } from '../../services/node-helper.service';
+
+/** A place in the user's submission that can take the shared content. */
+type SubmissionTarget =
+    | { kind: 'template'; file: AssignmentFile }
+    | { kind: 'additional' }
+    | { kind: 'notes' };
+
+/** An assignment the shared content can be handed in to, with the user's submission so far. */
+interface ShareAssignment {
+    assignment: Assignment;
+    submission: Submission;
+    targets: SubmissionTarget[];
+}
 
 @Component({
     selector: 'es-app-share-page',
@@ -68,6 +88,8 @@ export class AppSharePageComponent {
     private searchService = inject(SearchService);
     private uploadDialog = inject(UploadDialogService);
     private nodeHelper = inject(NodeHelperService);
+    private assignmentService = inject(AssignmentV1Service);
+    private nodeTitle = new NodeTitlePipe();
 
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
@@ -81,6 +103,12 @@ export class AppSharePageComponent {
     parent: Node;
     columns: ColumnType;
     collections = new NodeDataSource<Node>();
+    readonly assignmentColumns: ColumnType = { Default: UIHelper.getDefaultAssignmentColumns() };
+    /** assignments the user can still hand the shared content in to */
+    assignments = new NodeDataSource<Assignment>();
+    private assignmentEntries: ShareAssignment[] = [];
+    /** assignment whose submission targets are offered for choice */
+    chosenAssignment: ShareAssignment = null;
     private cordovaType: string;
     private mimetype: string;
     private editorType: string;
@@ -157,69 +185,54 @@ export class AppSharePageComponent {
     }
     saveInternal(callback: Function) {
         this.globalProgress = true;
+        this.createSharedNode().then(
+            (node) => {
+                void this.editAfterSave(node, callback);
+            },
+            (error) => {
+                this.toast.error(error);
+                this.globalProgress = false;
+            },
+        );
+    }
+    /** Stores the shared content as a new node in the chosen folder. */
+    private async createSharedNode(): Promise<Node> {
+        const parent = this.parent?.ref?.id || RestConstants.INBOX;
         if (this.isLink()) {
-            let prop: any = {};
+            const prop: any = {};
             prop[RestConstants.CCM_PROP_IO_WWWURL] = [this.getUri()];
-            this.node
-                .createNode(
-                    this.parent?.ref?.id || RestConstants.INBOX,
+            const data = await firstValueFrom(
+                this.node.createNode(
+                    parent,
                     RestConstants.CCM_TYPE_IO,
                     [],
                     prop,
                     true,
                     RestConstants.COMMENT_MAIN_FILE_UPLOAD,
-                )
-                .subscribe(
-                    (data) => {
-                        void this.editAfterSave(data.node, callback);
-                    },
-                    (error) => {
-                        this.toast.error(error);
-                        this.globalProgress = false;
-                    },
-                );
-        } else {
-            let prop: any = RestHelper.createNameProperty(this.title);
-            if (this.editorType) {
-                prop[RestConstants.CCM_PROP_EDITOR_TYPE] = [this.editorType];
-            }
-            if (this.text && !this.isTextSnippet()) {
-                prop[RestConstants.LOM_PROP_GENERAL_DESCRIPTION] = [this.text];
-            }
-            this.node
-                .createNode(
-                    this.parent?.ref?.id || RestConstants.INBOX,
-                    RestConstants.CCM_TYPE_IO,
-                    [],
-                    prop,
-                    true,
-                )
-                .subscribe(
-                    (data) => {
-                        this.nodeService
-                            .changeContent(
-                                data.node.ref.repo,
-                                data.node.ref.id,
-                                this.mimetype || 'auto',
-                                RestConstants.COMMENT_MAIN_FILE_UPLOAD,
-                                { file: this.file },
-                            )
-                            .subscribe(
-                                () => {
-                                    void this.editAfterSave(data.node, callback);
-                                },
-                                (error) => {
-                                    this.toast.error(error);
-                                    this.globalProgress = false;
-                                },
-                            );
-                    },
-                    (error) => {
-                        this.toast.error(error);
-                        this.globalProgress = false;
-                    },
-                );
+                ),
+            );
+            return data.node;
         }
+        const prop: any = RestHelper.createNameProperty(this.title);
+        if (this.editorType) {
+            prop[RestConstants.CCM_PROP_EDITOR_TYPE] = [this.editorType];
+        }
+        if (this.text && !this.isTextSnippet()) {
+            prop[RestConstants.LOM_PROP_GENERAL_DESCRIPTION] = [this.text];
+        }
+        const data = await firstValueFrom(
+            this.node.createNode(parent, RestConstants.CCM_TYPE_IO, [], prop, true),
+        );
+        await firstValueFrom(
+            this.nodeService.changeContent(
+                data.node.ref.repo,
+                data.node.ref.id,
+                this.mimetype || 'auto',
+                RestConstants.COMMENT_MAIN_FILE_UPLOAD,
+                { file: this.file },
+            ),
+        );
+        return data.node;
     }
     /** Opens the dialogs configured for new uploads; a cancel removes the node and stays here. */
     private async editAfterSave(node: Node, callback: Function) {
@@ -257,6 +270,168 @@ export class AppSharePageComponent {
                 }
             });
         });
+    }
+    saveToAssignment(entry: ShareAssignment) {
+        if (entry.targets.length === 1) {
+            void this.submitToAssignment(entry, entry.targets[0]);
+        } else {
+            this.chosenAssignment = entry;
+        }
+    }
+    /**
+     * Hands the shared content in to the user's submission of the assignment.
+     * Files are handed in without the upload dialogs, the submission takes a copy of them.
+     */
+    async submitToAssignment(entry: ShareAssignment, target: SubmissionTarget) {
+        this.chosenAssignment = null;
+        this.globalProgress = true;
+        let node: Node = null;
+        try {
+            if (target.kind === 'notes') {
+                await this.appendToUserNotes(entry);
+            } else {
+                node = await this.createSharedNode();
+                await firstValueFrom(
+                    this.assignmentService.createSubmissionFile({
+                        assignmentId: entry.assignment.ref.id,
+                        submissionId: ME,
+                        body: {
+                            metadata: {
+                                originalFile: node.ref.id,
+                                assignmentFile:
+                                    target.kind === 'template' ? target.file.ref.id : undefined,
+                                properties: {},
+                            },
+                        },
+                    }),
+                );
+            }
+        } catch (error) {
+            this.toast.error(error);
+            if (node) {
+                // the node only exists to be handed in
+                this.node.deleteNode(node.ref.id).subscribe({ error: () => {} });
+            }
+            this.globalProgress = false;
+            return;
+        }
+        this.events.broadcastEvent(FrameEventsService.EVENT_SHARED, node);
+        void this.router.navigate([UIConstants.ROUTER_PREFIX, 'editorial', 'assignment'], {
+            queryParams: {
+                mainComponent: 'submitAssignment',
+                assignment: entry.assignment.ref.id,
+                tab: 'submission',
+            },
+            replaceUrl: true,
+        });
+    }
+    /** Appends the shared text or link as a paragraph to the user's notes of the submission. */
+    private async appendToUserNotes(entry: ShareAssignment) {
+        const content = this.isLink() ? this.getUri() : this.getTextContent();
+        const paragraph = document.createElement('p');
+        paragraph.innerText = content ?? '';
+        const notes = [entry.submission?.userNotes, paragraph.outerHTML].filter((n) => !!n);
+        await firstValueFrom(
+            this.assignmentService.editSubmissionInfo({
+                assignmentId: entry.assignment.ref.id,
+                submissionId: ME,
+                body: { status: 'PENDING', userNotes: notes.join('') },
+            }),
+        );
+    }
+    getTargetLabel(target: SubmissionTarget) {
+        switch (target.kind) {
+            case 'template':
+                return this.translate.instant('SHARE_APP.ASSIGNMENT_TARGET_TEMPLATE', {
+                    title: this.nodeTitle.transform(target.file.referNode),
+                });
+            case 'additional':
+                return this.translate.instant('SHARE_APP.ASSIGNMENT_TARGET_ADDITIONAL');
+            case 'notes':
+                return this.translate.instant('SHARE_APP.ASSIGNMENT_TARGET_NOTES');
+        }
+    }
+    /**
+     * Where the shared content can go in the user's submission, mirroring what the submission
+     * view offers: templates still open, own files if allowed, and notes for text and links.
+     */
+    private async getSubmissionTargets(assignment: Assignment): Promise<ShareAssignment> {
+        const endTime = Date.parse(assignment.endTime) || (assignment.endTime as unknown as number);
+        if (
+            assignment.type !== 'SUBMISSION' ||
+            assignment.isCoordinator ||
+            assignment.status !== 'INPROGRESS' ||
+            (endTime && endTime <= Date.now())
+        ) {
+            return null;
+        }
+        const id = assignment.ref.id;
+        const [submission, files, submissionFiles] = await Promise.all([
+            firstValueFrom(
+                this.assignmentService.getSubmission({ assignmentId: id, submissionId: ME }),
+            ),
+            firstValueFrom(this.assignmentService.getAssignmentFiles({ assignmentId: id })),
+            firstValueFrom(
+                this.assignmentService.getSubmissionFiles({ assignmentId: id, submissionId: ME }),
+            ),
+        ]);
+        if (submission?.submissionStatus === 'FINISHED') {
+            return null;
+        }
+        const targets: SubmissionTarget[] = (files ?? [])
+            .filter(
+                (file) =>
+                    file.documentRole === 'SUBMITTABLE' &&
+                    !submissionFiles?.some((s) => s.assignmentFile?.ref?.id === file.ref.id),
+            )
+            .map((file) => ({ kind: 'template', file }));
+        if (assignment.allowAdditionalDocumentSubmissions) {
+            targets.push({ kind: 'additional' });
+        }
+        if (this.isLink() || this.isTextSnippet()) {
+            targets.push({ kind: 'notes' });
+        }
+        return targets.length ? { assignment, submission, targets } : null;
+    }
+    private loadAssignments() {
+        this.assignments.reset();
+        this.assignments.isLoading = true;
+        this.assignmentService
+            .searchAssignments({
+                body: {
+                    criteria: [{ property: 'virtual:assignmentType', values: ['assigned'] }],
+                },
+                sortProperties: [RestConstants.CM_PROP_C_CREATED],
+                sortAscending: [false],
+                maxItems: 50,
+            })
+            .subscribe(
+                async (data) => {
+                    try {
+                        const entries = await Promise.all(
+                            data.nodes.map((a) => this.getSubmissionTargets(a)),
+                        );
+                        this.assignmentEntries = entries.filter((e) => !!e);
+                        this.assignments.setData(
+                            this.assignmentEntries.map((e) => e.assignment),
+                            data.pagination,
+                        );
+                    } catch (error) {
+                        this.toast.error(error);
+                    }
+                    this.assignments.isLoading = false;
+                },
+                (error) => {
+                    this.toast.error(error);
+                    this.assignments.isLoading = false;
+                },
+            );
+    }
+    onAssignmentClick(assignment: Assignment) {
+        const entry = this.assignmentEntries.find((e) => e.assignment.ref.id === assignment.ref.id);
+        if (entry) {
+            this.saveToAssignment(entry);
+        }
     }
     private isLink() {
         if (this.cordovaType == 'public.url')
@@ -340,6 +515,7 @@ export class AppSharePageComponent {
                             this.collections.isLoading = false;
                         },
                     );
+                this.loadAssignments();
                 this.nodeHelper.getDefaultInboxFolder().subscribe(
                     (folder) => {
                         // a folder picked while the default was resolving is kept

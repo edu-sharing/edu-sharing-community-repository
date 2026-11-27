@@ -897,7 +897,12 @@
     "TITLE": "Condividi",
     "TEXT_SNIPPET": "Nota",
     "IMAGE": "Immagine",
-    "ADD_TO_COLLECTION": "Si desidera aggiungere l'oggetto a una collezione?"
+    "ADD_TO_COLLECTION": "Si desidera aggiungere l'oggetto a una collezione?",
+    "ADD_TO_ASSIGNMENT": "Si desidera consegnare l'oggetto per un compito?",
+    "ASSIGNMENT_TARGET_TITLE": "Come si desidera consegnare l'oggetto?",
+    "ASSIGNMENT_TARGET_TEMPLATE": "Consegnare come materiale di lavoro \"{{title}}\"",
+    "ASSIGNMENT_TARGET_ADDITIONAL": "Consegnare come file proprio",
+    "ASSIGNMENT_TARGET_NOTES": "Aggiungere alla nota sulla consegna"
   },
   "LICENSE_INFORMATION": "Informazioni su edu-sharing",
   "LICENSE_AGREEMENT": {
