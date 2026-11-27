@@ -8,9 +8,9 @@
     &.warn:not(:disabled) > span {
         color: var(--warn);
     }
-    // highlighted (hover / keyboard) entries sit on --listItemSelectedBackground, on which the
-    // primary text color can fall below 4.5:1
-    &:not(:disabled):not(.warn):is(:hover, .cdk-focused) > span {
+    // on the highlight background (hover / keyboard) the primary color can fall below 4.5:1;
+    // `:where` adds no specificity, so warn entries and menus with own colors (main menu) still win
+    &:not(:disabled):where(:hover, .cdk-focused) > span {
         color: var(--itemSelectedTextColor);
     }
     display: flex;
