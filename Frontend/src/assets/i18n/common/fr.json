@@ -1566,14 +1566,13 @@
     "EMAIL_REQUIRED": "S'il vous plaît, mettez une adresse email valide."
   },
   "RENDERING": {
-    "REVOKED": {
-      "DETAILS": "L'éditeur/l'équipe éditoriale a retiré cet article. Seules les métadonnées de l'article original restent disponibles.\n\nVous trouverez plus de détails dans l'explication ci-dessous.",
-      "DATE": "Date de suppression",
-      "REASON": "Motif de la suppression",
-      "FEEDBACK": "Contactez l'équipe éditoriale",
-      "DETAILS_EMPTY": "L'éditeur ou l'équipe éditoriale a retiré cet objet. Seules les métadonnées de l'élément d'origine restent disponibles.\n\nVous trouverez plus de détails dans la justification ci-dessous."
-    },
+    "DEFAULT_MODULE_INFO_TEXT": "Ce matériel ne peut pas être affiché dans le navigateur.",
+    "DEFAULT_MODULE_DOWNLOAD": "Téléchargez le matériel pour l'utiliser.",
+    "DEFAULT_MODULE_OPEN": "Ouvrez le matériel pour l'utiliser.",
+    "DEFAULT_MODULE_OPEN_OR_DOWNLOAD": "Ouvrez ou téléchargez le matériel pour l'utiliser.",
+    "DOWNLOAD": "Télécharger",
     "GO_TO_COURSE": "Aller au cours",
+    "OPEN": "Ouvrir",
     "AUTHORED_BY": "par",
     "CONVERTING": "Conversion",
     "PREPARING": "Préparation en cours",
@@ -1591,6 +1590,13 @@
     "LINK_NAME_TITLE": "{{label}} – {{title}}",
     "LINK_NAME_TITLE_NEW_WINDOW": "{{label}} – {{title}}, s'ouvre dans une nouvelle fenêtre",
     "LINK_NAME_NEW_WINDOW": "{{label}}, s'ouvre dans une nouvelle fenêtre",
+    "REVOKED": {
+      "DETAILS_EMPTY": "L'éditeur ou l'équipe éditoriale a retiré cet objet. Seules les métadonnées de l'élément d'origine restent disponibles.\n\nVous trouverez plus de détails dans la justification ci-dessous.",
+      "DETAILS": "L'éditeur/l'équipe éditoriale a retiré cet article. Seules les métadonnées de l'article original restent disponibles.\n\nVous trouverez plus de détails dans l'explication ci-dessous.",
+      "DATE": "Date de suppression",
+      "REASON": "Motif de la suppression",
+      "FEEDBACK": "Contactez l'équipe éditoriale"
+    },
     "ERROR": {
       "GENERIC_ERROR_MESSAGE": "Une erreur est survenue.",
       "RS2_NOT_CONFIGURED": "Le service de rendu 2 n'est actuellement pas connecté à ce référentiel.",
@@ -1600,8 +1606,12 @@
       "GENERIC_BAD_REQUEST": "Requête invalide",
       "GENERIC_MODULE_NOT_AVAILABLE": "Le module de rendu nécessaire à l'affichage de l'objet n'est pas disponible.",
       "GENERIC_OBJECT_NOT_SUPPORTED": "Cet objet n'est pas pris en charge par le service de rendu.",
+      "GENERIC_INTERNAL_SERVER_ERROR": "La requête n'a pas pu être traitée par le serveur",
       "GENERIC_ACCESS_DENIED": "Aucune autorisation n'est disponible pour l'élément demandé.",
-      "GENERIC_INTERNAL_SERVER_ERROR": "La requête n'a pas pu être traitée par le serveur"
+      "H5P_PACKAGE_TOO_LARGE": "Le paquet H5P est trop volumineux et ne peut pas être affiché.",
+      "H5P_PACKAGE_INVALID": "Le paquet H5P n'est pas valide ou contient des fichiers non autorisés et ne peut pas être affiché.",
+      "CONVERTER_DOCUMENT_INVALID": "Le document n'est pas valide ou est endommagé et ne peut pas être affiché.",
+      "CONVERTER_DOCUMENT_TOO_LARGE": "Le document est trop volumineux et ne peut pas être affiché."
     },
     "GDPR": {
       "EXTERNAL_SITE": "Site externe",

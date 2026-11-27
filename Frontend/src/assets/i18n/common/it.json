@@ -1566,14 +1566,13 @@
     "EMAIL_REQUIRED": "Si prega di inserire un indirizzo email valido."
   },
   "RENDERING": {
-    "REVOKED": {
-      "DETAILS": "L'editore/redazione ha ritirato questo articolo. Sono ancora disponibili solo i metadati dell'articolo originale. Ulteriori dettagli sono disponibili nella spiegazione seguente.",
-      "DATE": "Data di cancellazione",
-      "REASON": "Motivo dell'eliminazione",
-      "FEEDBACK": "Contatta la redazione",
-      "DETAILS_EMPTY": "L'editore o la redazione ha ritirato questo oggetto. Sono disponibili soltanto i metadati dell'elemento originale.\n\nUlteriori dettagli si trovano nella motivazione qui sotto."
-    },
+    "DEFAULT_MODULE_INFO_TEXT": "Non è possibile visualizzare questo materiale nel browser.",
+    "DEFAULT_MODULE_DOWNLOAD": "Scarica il materiale per utilizzarlo.",
+    "DEFAULT_MODULE_OPEN": "Apri il materiale per utilizzarlo.",
+    "DEFAULT_MODULE_OPEN_OR_DOWNLOAD": "Apri o scarica il materiale per utilizzarlo.",
+    "DOWNLOAD": "Scarica",
     "GO_TO_COURSE": "Vai al corso",
+    "OPEN": "Apri",
     "AUTHORED_BY": "di",
     "CONVERTING": "Conversione",
     "PREPARING": "In preparazione",
@@ -1591,6 +1590,13 @@
     "LINK_NAME_TITLE": "{{label}} – {{title}}",
     "LINK_NAME_TITLE_NEW_WINDOW": "{{label}} – {{title}}, si apre in una nuova finestra",
     "LINK_NAME_NEW_WINDOW": "{{label}}, si apre in una nuova finestra",
+    "REVOKED": {
+      "DETAILS_EMPTY": "L'editore o la redazione ha ritirato questo oggetto. Sono disponibili soltanto i metadati dell'elemento originale.\n\nUlteriori dettagli si trovano nella motivazione qui sotto.",
+      "DETAILS": "L'editore/redazione ha ritirato questo articolo. Sono ancora disponibili solo i metadati dell'articolo originale. Ulteriori dettagli sono disponibili nella spiegazione seguente.",
+      "DATE": "Data di cancellazione",
+      "REASON": "Motivo dell'eliminazione",
+      "FEEDBACK": "Contatta la redazione"
+    },
     "ERROR": {
       "GENERIC_ERROR_MESSAGE": "Si è verificato un errore.",
       "RS2_NOT_CONFIGURED": "Il rendering service 2 attualmente non è collegato a questo repository.",
@@ -1600,8 +1606,12 @@
       "GENERIC_BAD_REQUEST": "Richiesta non valida",
       "GENERIC_MODULE_NOT_AVAILABLE": "Il modulo di rendering necessario per visualizzare l'oggetto non è disponibile.",
       "GENERIC_OBJECT_NOT_SUPPORTED": "Questo oggetto non è supportato dal rendering service.",
+      "GENERIC_INTERNAL_SERVER_ERROR": "Il server non ha potuto elaborare la richiesta",
       "GENERIC_ACCESS_DENIED": "Non sono disponibili autorizzazioni per l'elemento richiesto.",
-      "GENERIC_INTERNAL_SERVER_ERROR": "Il server non ha potuto elaborare la richiesta"
+      "H5P_PACKAGE_TOO_LARGE": "Il pacchetto H5P è troppo grande e non può essere visualizzato.",
+      "H5P_PACKAGE_INVALID": "Il pacchetto H5P non è valido o contiene file non consentiti e non può essere visualizzato.",
+      "CONVERTER_DOCUMENT_INVALID": "Il documento non è valido o è danneggiato e non può essere visualizzato.",
+      "CONVERTER_DOCUMENT_TOO_LARGE": "Il documento è troppo grande e non può essere visualizzato."
     },
     "GDPR": {
       "EXTERNAL_SITE": "Sito esterno",

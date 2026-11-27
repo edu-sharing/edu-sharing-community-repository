@@ -1,13 +1,35 @@
-<div class="rs-default-wrapper" [class.has-download]="downloadUrl">
+<div class="rs-default-wrapper" [class.has-actions]="downloadUrl || canOpen()">
   <!-- Decorative: the material's title is the page heading and the text below explains the state. -->
   <img [src]="previewUrl" alt="" />
   <p class="info-text">{{ 'RENDERING.DEFAULT_MODULE_INFO_TEXT' | translate }}</p>
-  @if (downloadUrl) {
-  <p class="download-text">{{ 'RENDERING.DEFAULT_MODULE_DOWNLOAD' | translate }}</p>
-  <a mat-flat-button color="primary" [href]="downloadUrl">
-    <div class="link-label">
-      {{ 'RENDERING.DOWNLOAD' | translate }}<i esIcon="cloud_download"></i>
-    </div>
-  </a>
+  @if (canOpen()) {
+  <p class="action-text">
+    {{
+      (downloadUrl ? 'RENDERING.DEFAULT_MODULE_OPEN_OR_DOWNLOAD' : 'RENDERING.DEFAULT_MODULE_OPEN')
+        | translate
+    }}
+  </p>
+  } @else if (downloadUrl) {
+  <p class="action-text">{{ 'RENDERING.DEFAULT_MODULE_DOWNLOAD' | translate }}</p>
+  } @if (canOpen() || downloadUrl) {
+  <div class="actions">
+    @if (canOpen()) {
+    <button mat-flat-button color="primary" (click)="openConnector()">
+      <div class="link-label">{{ 'RENDERING.OPEN' | translate }}<i esIcon="launch"></i></div>
+    </button>
+    } @if (downloadUrl) { @if (canOpen()) {
+    <a mat-stroked-button color="primary" [href]="downloadUrl">
+      <div class="link-label">
+        {{ 'RENDERING.DOWNLOAD' | translate }}<i esIcon="cloud_download"></i>
+      </div>
+    </a>
+    } @else {
+    <a mat-flat-button color="primary" [href]="downloadUrl">
+      <div class="link-label">
+        {{ 'RENDERING.DOWNLOAD' | translate }}<i esIcon="cloud_download"></i>
+      </div>
+    </a>
+    } }
+  </div>
   }
 </div>

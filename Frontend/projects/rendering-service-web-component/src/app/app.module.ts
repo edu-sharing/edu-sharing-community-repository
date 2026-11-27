@@ -22,6 +22,7 @@ import {
 import {
     PdfComponent,
     RenderComponent,
+    RenderingConnectorService,
     RenderingServiceLibModule,
 } from 'ngx-rendering-service-lib';
 import { environment } from '../environments/environment';
@@ -30,6 +31,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { RenderingServiceApiModule } from 'ngx-rendering-service-api';
 import { Toast as ToastAbstract } from 'ngx-edu-sharing-ui';
 import { renderTokenInterceptor } from './render-token.interceptor';
+import { WebComponentConnectorService } from './web-component-connector.service';
 
 @Injectable({ providedIn: 'root' })
 export abstract class Toast extends ToastAbstract {
@@ -67,6 +69,8 @@ export abstract class Toast extends ToastAbstract {
         // we do not read the user profile since we don't have a repository user present in lms contexts
         { provide: I18N_CONFIG, useValue: { readUserProfile: false } as I18nConfig },
         { provide: ToastAbstract, useClass: Toast },
+        // offers opening material with a connector (e.g. ONLYOFFICE) in the default module
+        { provide: RenderingConnectorService, useExisting: WebComponentConnectorService },
         RenderHelperService,
     ] as Provider[],
 })

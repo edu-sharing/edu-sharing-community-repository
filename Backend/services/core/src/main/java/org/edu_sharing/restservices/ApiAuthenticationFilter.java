@@ -76,7 +76,10 @@ public class ApiAuthenticationFilter implements jakarta.servlet.Filter {
      */
     private static final List<Pattern> RENDER_TOKEN_ENDPOINTS = List.of(
             // metadataset definition, required by the inline metadata viewer of the web component
-            Pattern.compile("^/mds/v1/metadatasets/[^/]+/[^/]+$"));
+            Pattern.compile("^/mds/v1/metadatasets/[^/]+/[^/]+$"),
+            // connector list (configuration only), to offer opening material with a connector
+            // (the connector itself is opened via the ConnectorServlet, which requires a login)
+            Pattern.compile("^/connector/v1/connectors/[^/]+/list$"));
 
     Logger logger = Logger.getLogger(ApiAuthenticationFilter.class);
 

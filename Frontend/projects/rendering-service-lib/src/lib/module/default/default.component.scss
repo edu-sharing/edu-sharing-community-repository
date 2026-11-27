@@ -13,14 +13,21 @@
         position: relative;
     }
 
-    &.has-download img {
-        // ... and for the download hint plus its button
+    &.has-actions img {
+        // ... and for the action hint plus its buttons
         max-height: calc(var(--containerHeight) - 140px);
     }
 
     p {
         margin: 0;
         text-align: center;
+    }
+
+    .actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
     }
 
     .link-label {

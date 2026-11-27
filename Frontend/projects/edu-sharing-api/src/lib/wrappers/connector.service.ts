@@ -23,6 +23,75 @@ export class ConnectorService {
     private authentication = inject(AuthenticationService);
     private connectorV1 = inject(ConnectorV1Service);
 
+    /**
+     * The filetype of the connector the node matches (by mimetype), or null.
+     *
+     * Zip based formats (h5p, ...) are identified by the resource type/subtype/version, filetypes
+     * declaring an editor type only match nodes of that editor type. Does not consider any
+     * permissions of the node.
+     */
+    static getFiletype(node: Node, connector: Connector): ConnectorFileType | null {
+        const properties = node?.properties ?? {};
+        for (const filetype of connector?.filetypes ?? []) {
+            if (filetype.mimetype !== node?.mimetype) {
+                continue;
+            }
+            if (filetype.mimetype === 'application/zip') {
+                if (
+                    (!filetype.ccressourceversion ||
+                        filetype.ccressourceversion ===
+                            properties[RestConstants.CCM_PROP_CCRESSOURCEVERSION]?.[0]) &&
+                    filetype.ccressourcetype ===
+                        properties[RestConstants.CCM_PROP_CCRESSOURCETYPE]?.[0] &&
+                    (!filetype.ccresourcesubtype ||
+                        filetype.ccresourcesubtype ===
+                            properties[RestConstants.CCM_PROP_CCRESSOURCESUBTYPE]?.[0])
+                ) {
+                    return filetype;
+                }
+                continue;
+            }
+            if (
+                filetype.editorType &&
+                filetype.editorType !== properties[RestConstants.CCM_PROP_EDITOR_TYPE]?.[0]
+            ) {
+                continue;
+            }
+            return filetype;
+        }
+        return null;
+    }
+
+    /**
+     * Url of the repository's connector servlet, which opens the node with the given connector
+     * (it requires a repository login and checks the permissions of the user).
+     *
+     * @param apiUrl absolute url of the repository's rest api (e.g. `https://host/edu-sharing/rest`)
+     * @param parameters additional request parameters (e.g. `preferEdit`), empty values are skipped
+     */
+    static getConnectorUrl(
+        apiUrl: string,
+        connectorId: string,
+        nodeId: string,
+        parameters: { [key: string]: string[] | null | undefined } = {},
+    ): string {
+        const url = new URL(
+            '../eduservlet/connector',
+            apiUrl.endsWith('/') ? apiUrl : apiUrl + '/',
+        );
+        const send: { [key: string]: string[] | null | undefined } = {
+            ...parameters,
+            connectorId: [connectorId],
+            nodeId: [nodeId],
+        };
+        for (const [key, values] of Object.entries(send)) {
+            for (const value of values ?? []) {
+                url.searchParams.append(key, value);
+            }
+        }
+        return url.toString();
+    }
+
     @shareReplayReturnValue()
     observeConnectorList({ repository = HOME_REPOSITORY } = {}): Observable<ConnectorList | null> {
         return this.authentication.observeLoginInfo().pipe(

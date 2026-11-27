@@ -1001,8 +1001,11 @@
   "RENDERING": {
     "DEFAULT_MODULE_INFO_TEXT": "This material cannot be displayed in the browser.",
     "DEFAULT_MODULE_DOWNLOAD": "Download material",
+    "DEFAULT_MODULE_OPEN": "Open the material to use it.",
+    "DEFAULT_MODULE_OPEN_OR_DOWNLOAD": "Open or download the material to use it.",
     "DOWNLOAD": "Download",
     "GO_TO_COURSE": "Go to course",
+    "OPEN": "Open",
     "AUTHORED_BY": "by",
     "CONVERTING": "Converting",
     "PREPARING": "Preparing",

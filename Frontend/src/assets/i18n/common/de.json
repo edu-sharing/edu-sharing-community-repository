@@ -1139,8 +1139,11 @@
   "RENDERING": {
     "DEFAULT_MODULE_INFO_TEXT": "Das Anzeigen dieses Materials im Browser ist nicht möglich.",
     "DEFAULT_MODULE_DOWNLOAD": "Laden Sie das Material herunter, um es zu benutzen.",
+    "DEFAULT_MODULE_OPEN": "Öffnen Sie das Material, um es zu benutzen.",
+    "DEFAULT_MODULE_OPEN_OR_DOWNLOAD": "Öffnen Sie das Material oder laden Sie es herunter, um es zu benutzen.",
     "DOWNLOAD": "Herunterladen",
     "GO_TO_COURSE": "Zum Kurs springen",
+    "OPEN": "Öffnen",
     "AUTHORED_BY": "von",
     "CONVERTING": "Konvertierung",
     "PREPARING": "Wird vorbereitet",
