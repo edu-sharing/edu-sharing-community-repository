@@ -105,6 +105,11 @@ const PROXY_CONFIG = [
         secure: false,
         ws: true,
         changeOrigin: true,
+        // changeOrigin sends the backend's host, so its redirects (e.g. the oauth2server's
+        // login / consent redirects) point to the backend origin; rewrite them back to the dev
+        // server, otherwise the browser leaves localhost:4200 (and an app WebView with
+        // `adb reverse` cannot reach the backend host at all).
+        autoRewrite: true,
         bypass(req, res, proxyOptions) {
             if (req.method !== 'POST' && req.url.startsWith('/edu-sharing/share')) {
                 // proxy only the post request to the backend, not any other paths
@@ -118,6 +123,7 @@ const PROXY_CONFIG = [
         target: process.env.BACKEND_URL + '/edu-sharing',
         secure: false,
         changeOrigin: true,
+        autoRewrite: true,
         configure: repoConfigure,
     },
     {
