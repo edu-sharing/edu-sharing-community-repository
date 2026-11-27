@@ -215,19 +215,13 @@
               <!-- Only this region scrolls, including the collection header; the breadcrumb above stays fixed. -->
               <div class="collections-scroll">
                 @if (collection && !isRootLevelCollection()) {
-                <es-collection-header-bar [collection]="collection"></es-collection-header-bar>
-                @if (collectionContentRef?.canEdit()) {
-                <div class="edit-mode-row">
-                  <mat-slide-toggle
-                    labelPosition="before"
-                    data-test="collection-edit-mode-toggle"
-                    [checked]="!!collectionContentRef?.editMode()"
-                    (change)="collectionContentRef?.onOrderModeToggle($event)"
-                  >
-                    {{ 'COLLECTIONS.EDIT_MODE' | translate }}
-                  </mat-slide-toggle>
-                </div>
-                } }
+                <es-collection-header-bar
+                  [collection]="collection"
+                  [orderModeAvailable]="!!collectionContentRef?.canOrder()"
+                  [orderModeActive]="!!collectionContentRef?.isOrderModeActive()"
+                  (orderModeToggle)="collectionContentRef?.onOrderModeToggle($event)"
+                ></es-collection-header-bar>
+                }
                 <es-collection-content
                   #collectionContentComponent
                   [collection]="collection"

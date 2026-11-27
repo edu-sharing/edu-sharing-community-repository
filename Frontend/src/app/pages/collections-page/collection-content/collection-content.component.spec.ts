@@ -70,17 +70,12 @@ describe('CollectionContentComponent selection options', () => {
 });
 
 describe('CollectionContentComponent created collections', () => {
-    /**
-     * Shows the created collection the way the list does after a reload, with the collection
-     * checkboxes visible or not, and returns the options passed to the list.
-     */
-    function showCreated(checkboxesVisible: boolean): { select: boolean } {
+    it('shows the created collections selected', () => {
         const addVirtualNodes = jasmine.createSpy('addVirtualNodes');
         const host = {
             createdCollections: [collection('created')],
             createdCollectionsUntil: Date.now() + 5000,
             listCollections: { addVirtualNodes },
-            showCollectionCheckboxes: () => checkboxesVisible,
             elementRef: { nativeElement: document.createElement('div') },
             injector: TestBed.inject(Injector),
         };
@@ -88,14 +83,6 @@ describe('CollectionContentComponent created collections', () => {
         expect(addVirtualNodes).toHaveBeenCalledTimes(1);
         const [nodes, options] = addVirtualNodes.calls.mostRecent().args;
         expect(nodes.map((node: Node) => node.ref.id)).toEqual(['created']);
-        return options;
-    }
-
-    it('selects the created collections while the checkboxes are visible', () => {
-        expect(showCreated(true)).toEqual({ select: true });
-    });
-
-    it('only shows the created collections while the tiles have no checkboxes', () => {
-        expect(showCreated(false)).toEqual({ select: false });
+        expect(options).toEqual({ select: true });
     });
 });

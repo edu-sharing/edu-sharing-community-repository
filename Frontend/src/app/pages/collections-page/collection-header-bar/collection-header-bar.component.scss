@@ -51,6 +51,10 @@ es-collection-thumbnail {
     white-space: nowrap;
 }
 
+.order-mode {
+    flex-shrink: 0;
+}
+
 .scope {
     color: var(--textMediumLight);
 }
