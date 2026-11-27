@@ -1158,18 +1158,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 );
                 return;
             }
-            // a click replaces the selection of the tree by the clicked material
-            const inTree = this.viewState.viewType() === 'tree';
-            if (!inTree) {
-                this.listCollections?.getSelection()?.clear();
-            }
-            this.editorialSidebarService.handleSelect(
-                inTree ? this.listTree : this.listReferences,
-                event,
-                Scope.CollectionsReferences,
-                undefined,
-                !inTree,
-            );
+            this.selectClickedNode(event);
         } else {
             this.clickItem.emit(event);
         }
@@ -2006,16 +1995,28 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             this.clickItem.emit(event);
             return;
         }
-        const list = this.viewState.viewType() === 'tree' ? this.listTree : this.listCollections;
+        this.selectClickedNode(event);
+    }
+
+    /**
+     * A click replaces the selection by the clicked sub-collection or material and shows its
+     * actions & options. A further click on the node that is already the only selected one
+     * changes nothing.
+     */
+    private selectClickedNode(event: NodeClickEvent<Node | CollectionReference | ProposalNode>) {
+        const list =
+            this.viewState.viewType() === 'tree'
+                ? this.listTree
+                : this.nodeHelper.isNodeCollection(event.element as Node)
+                ? this.listCollections
+                : this.listReferences;
         const selection = list?.getSelection();
-        const isSoleSelection =
-            selection?.selected.length === 1 && selection.selected[0] === event.element;
-        this.clearAllSelections();
-        if (isSoleSelection) {
-            this.editorialSidebarService.close();
+        if (selection?.selected.length === 1 && selection.selected[0] === event.element) {
             return;
         }
-        selection?.select(event.element as Node);
+        this.clearAllSelections();
+        selection?.select(event.element as Node & CollectionReference);
+        this.editorialSidebarService.scope.set(Scope.CollectionsReferences);
         this.editorialSidebarService.showEntryList([event.element]);
     }
 
