@@ -24,6 +24,7 @@ import org.edu_sharing.spring.ApplicationContextFactory;
 import org.springframework.context.ApplicationContext;
 
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -50,8 +51,6 @@ public class RemoteObjectService {
 
                     MCAlfrescoBaseClient mcAlfrescoBaseClient = new MCAlfrescoAPIClient();
 
-                    org.edu_sharing.service.permission.PermissionService permissionService = PermissionServiceFactory
-                            .getInstance().getService(ApplicationInfoList.getHomeRepository().getAppId());
                     String remoteObjectFolderId = getRemoteObjectsFolder();
 
 
@@ -97,7 +96,7 @@ public class RemoteObjectService {
 
                     String userName = (String) Context.getCurrentInstance().getRequest().getSession()
                             .getAttribute(CCConstants.AUTH_USERNAME);
-                    permissionService.setPermissions(remoteObjectNodeId, userName,
+                    setPermissionsIfMissing(remoteObjectNodeId, userName,
                             new String[]{CCConstants.PERMISSION_ALL, CCConstants.PERMISSION_CC_PUBLISH}, true);
 
                     return remoteObjectNodeId;
@@ -156,11 +155,23 @@ public class RemoteObjectService {
         }
         if (remoteObjectFolderId != null) {
             // allow everyone to cc publish from this folder (same as for app:company_home/ccm:remote_ios)
-            PermissionServiceFactory.getInstance().getLocalService().setPermissions(remoteObjectFolderId, CCConstants.AUTHORITY_GROUP_EVERYONE,
+            setPermissionsIfMissing(remoteObjectFolderId, CCConstants.AUTHORITY_GROUP_EVERYONE,
                     new String[]{CCConstants.PERMISSION_CONSUMER, CCConstants.PERMISSION_CC_PUBLISH}, false);
         }
         return remoteObjectFolderId;
 
+    }
+
+    /**
+     * Only writes the permissions if they are not yet set directly on the node (or the inheritance differs).
+     */
+    private static void setPermissionsIfMissing(String nodeId, String authority, String[] permissions, boolean inheritPermissions) throws InsufficientPermissionException {
+        org.edu_sharing.service.permission.PermissionService permissionService = PermissionServiceFactory.getInstance().getLocalService();
+        if (inheritPermissions == permissionService.isInherited(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId)
+                && permissionService.getExplicitPermissionsForAuthority(nodeId, authority).containsAll(Arrays.asList(permissions))) {
+            return;
+        }
+        permissionService.setPermissions(nodeId, authority, permissions, inheritPermissions);
     }
 
     /**
@@ -243,7 +254,7 @@ public class RemoteObjectService {
                 NodeService nodeService = NodeServiceFactory.getInstance().getLocalService();
                 String root = NodeServiceHelper.getContainerRootPath(ROOT_PATH);
                 // allow everyone to cc publish from this folder
-                PermissionServiceFactory.getInstance().getLocalService().setPermissions(root, CCConstants.AUTHORITY_GROUP_EVERYONE,
+                setPermissionsIfMissing(root, CCConstants.AUTHORITY_GROUP_EVERYONE,
                         new String[]{CCConstants.PERMISSION_CONSUMER, CCConstants.PERMISSION_CC_PUBLISH}, false);
                 PersistentHandlerEdusharing phe = new PersistentHandlerEdusharing(null, null, false);
                 phe.setImportFolderId(root);
